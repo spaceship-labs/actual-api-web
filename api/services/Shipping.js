@@ -42,6 +42,7 @@ function productShipping(product, storeWarehouse, options) {
     })
     .spread(function(stockItems, deliveries){
       if(deliveries.length > 0 && stockItems.length > 0){
+
         var shippingPromises = stockItems.map(function(stockItem){
           return buildShippingItem(
             stockItem, 
@@ -49,6 +50,20 @@ function productShipping(product, storeWarehouse, options) {
             storeWarehouse.id
           );
         });
+
+        var immediateStockItem = getImmediateStockItem(stockItems, deliveries);
+        if(immediateStockItem){
+          var immediateShippingItem =  buildShippingItem(
+            immediateStockItem, 
+            deliveries, 
+            storeWarehouse.id,
+            {
+              applyImmediateDeliveryCalculation: true
+            }
+          );
+          shippingPromises.push(immediateShippingItem);          
+        }
+
         return Promise.all(shippingPromises);
       }
       else if( StockService.isFreeSaleProduct(product) && deliveries){
@@ -77,7 +92,9 @@ function productShipping(product, storeWarehouse, options) {
 
 }
 
-function buildShippingItem(stockItem, deliveries, storeWarehouseId){
+function buildShippingItem(stockItem, deliveries, storeWarehouseId, options){
+  options = options || {};
+
   var delivery = _.find(deliveries, function(delivery) {
     return delivery.FromCode == stockItem.whsCode;
   });
@@ -93,7 +110,7 @@ function buildShippingItem(stockItem, deliveries, storeWarehouseId){
       var days = productDays + seasonDays + deliveryDays;
       
       //Product in same store/warehouse
-      if(stockItem.whsCode === delivery.ToCode){
+      if(stockItem.whsCode === delivery.ToCode && options.applyImmediateDeliveryCalculation){
         days = productDays;
       }
       
@@ -111,6 +128,17 @@ function buildShippingItem(stockItem, deliveries, storeWarehouseId){
     });
 }
 
+function getImmediateStockItem(stockItems, deliveries){
+
+  return _.find(stockItems, function(stockItem){
+  
+    var delivery = _.find(deliveries, function(delivery) {
+      return delivery.FromCode == stockItem.whsCode;
+    });
+    return stockItem.whsCode === delivery.ToCode;
+
+  });
+}
 
 function getQueryDateRange(query, date) {
   var date = new Date(date);
