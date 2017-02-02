@@ -23,6 +23,10 @@ module.exports = {
       .then(function(created){
         createdId = created.id;
         var calculator = QuotationService.Calculator();
+        if(!form.Details || form.Details.length === 0){
+          opts.isEmptyQuotation = true;
+        }
+
         return calculator.updateQuotationTotals(created.id, opts);
       })
       .then(function(updatedQuotation){
@@ -184,7 +188,6 @@ module.exports = {
 
 
   addDetail: function(req, res){
-    sails.log.info('adding quotation detail');
     var form = req.params.all();
     var id = form.id;
     form.Quotation = id;

@@ -160,7 +160,8 @@ module.exports = {
 
         if(promises.length > 0){
           return promises;
-        }else{
+        }
+        else{
           //Returning empty promise
           return new Promise(function(resolve, reject){
             resolve();

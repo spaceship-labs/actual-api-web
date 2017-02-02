@@ -402,8 +402,6 @@ function checkIfSapOrderHasPayments(sapOrder, paymentsToCreate){
 }
 
 function saveSapReferences(sapResult, order, orderDetails){
-  sails.log.info('sapResult', sapResult);
-
   var clientBalance = parseFloat(extractBalanceFromSapResult(sapResult));
   var clientId = order.Client.id || order.Client;
 

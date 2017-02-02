@@ -58,7 +58,7 @@ module.exports = {
         var sortValue = Search.getDiscountPriceKeyByStoreCode(activeStore.code) + ' ASC';
 
         if(populateImgs){
-          find = find.populate('files');
+          //find = find.populate('files');
         }
 
         return [
@@ -148,7 +148,7 @@ module.exports = {
           Product.find(searchQuery)
             .paginate(paginate)
             .sort(sortValue)
-            .populate('files')
+            //.populate('files')
         ];
       })
       .spread(function(total, products) {
@@ -260,7 +260,7 @@ module.exports = {
           products = products.populate('Promotions',queryPromos)
         }
         if(populateImgs){
-          products.populate('files')
+          //products.populate('files')
         }
         products = products
           .paginate(paginate)

@@ -36,6 +36,16 @@ var EWALLET_TYPES_KEYS = [
   'ewalletTypePg5'
 ];
 
+var defaultQuotationTotals = {
+    subtotal :0,
+    subtotal2:0,
+    total:0,
+    discount:0,
+    totalProducts: 0,
+    paymentGroup: 1,
+    immediateDelivery: false
+};
+
 module.exports = {
   Calculator     : Calculator,
   updateQuotationToLatestData: updateQuotationToLatestData,
@@ -47,10 +57,16 @@ function updateQuotationToLatestData(quotationId, userId, options){
   var params = {
     paymentGroup:1,
     updateDetails: true,
-    currentStore: options.currentStore
+    currentStore: options.currentStore,
+    isEmptyQuotation: options.isEmptyQuotation
   };
+
+  if(options.isEmptyQuotation){
+    return nativeQuotationUpdate(quotationId, defaultQuotationTotals);
+  }
     
-  return Quotation.findOne({id:quotationId,select:['paymentGroup']})
+  //return Quotation.findOne({id:quotationId,select:['paymentGroup']})
+  return nativeQuotationFindOne(quotationId)
     .then(function(quotation){
       if(!quotation){
         return Promise.reject(new Error('Cotización no encontrada'));
@@ -195,9 +211,6 @@ function getCountByUser(options){
     queryByDateRange.isClosed  = isClosed;
   }
 
-  //sails.log.info('queryUntilToday', queryUntilToday);
-  //sails.log.info('queryByDateRange', queryByDateRange);
-
   return Promise.props({
     countUntilToday: Quotation.count(queryUntilToday),
     countByDateRange: Quotation.count(queryByDateRange),
@@ -219,38 +232,19 @@ function Calculator(){
 
   function updateQuotationTotals(quotationId, options){
     options = options || {paymentGroup:1 , updateDetails: true};
+
+    if(options.isEmptyQuotation){
+      return nativeQuotationUpdate(quotationId, defaultQuotationTotals);
+    }
+
     return getQuotationTotals(quotationId, options)
       .then(function(totals){
         
         if(options && options.updateParams){
           totals = _.extend(totals, options.updateParams);
         }
-
-        //return Quotation.update({id:quotationId}, totals);
         return nativeQuotationUpdate(quotationId, totals);
       });
-  }
-
-  function nativeQuotationUpdate(quotationId,params){
-    return new Promise(function(resolve, reject){
-      Quotation.native(function(err, collection){
-        if(err){
-          console.log('err updating product',err);
-          reject(err);
-        }
-        var findCrieria = {_id: new ObjectId(quotationId)};
-        var updateParams = {
-          $set: _.omit(params, ['id'])
-        };
-        collection.updateOne(findCrieria, updateParams, function(errUpdate, result){
-          if(errUpdate){
-            console.log('errUpdate updating product',errUpdate);
-            reject(errUpdate);
-          }
-          resolve(result);
-        });
-      });
-    });
   }
 
 
@@ -266,6 +260,7 @@ function Calculator(){
       .then(function(detailsResult){
         details = detailsResult; 
         var packagesIds = getQuotationPackagesIds(details);
+
         if(packagesIds.length > 0){
           return [
             getPackagesByStore(options.currentStore),
@@ -273,6 +268,7 @@ function Calculator(){
               .populate('PackageRules')
           ];
         }
+
         return [ [], false ];
       })
       .spread(function(storePackagesFound, promotionPackages){
@@ -445,6 +441,7 @@ function Calculator(){
     var quantity    = detail.quantity;
     var currentDate = new Date();
     var queryPromos = Search.getPromotionsQuery();
+    
     return Product.findOne({id:productId})
       .populate('Promotions', queryPromos)
       .then(function(product){
@@ -462,12 +459,17 @@ function Calculator(){
         //var total                 = quantity * unitPriceWithDiscount;
         var subtotalWithPromotions    = total;
         var discount                  = total - subtotal;
-        
+
+        //TODO: Reactivate ewallet 
+        var ewallet                   = 0;
+
+        /*
         var ewallet = getEwalletEntryByDetail({
           Promotion: mainPromo,
           paymentGroup: options.paymentGroup,
           total: total
         });
+        */
 
         var detailTotals = {
           discount                    : discount,
@@ -629,3 +631,68 @@ function Calculator(){
   };
 }
 
+
+function nativeQuotationFindOne(quotationId){
+  return new Promise(function(resolve, reject){
+    
+    Quotation.native(function(err, collection){
+      if(err){
+        console.log('err finding quotation',err);
+        reject(err);
+      }
+      var findCrieria = {_id: new ObjectId(quotationId)};
+      collection.findOne(findCrieria, function(errFind, quotationFound){
+        if(errFind){
+          console.log('err findOne',errFind);
+          reject(errFind);
+        }
+        resolve(quotationFound);
+      });
+    });
+
+  });
+}
+
+function nativeQuotationUpdate(quotationId,params){
+  return new Promise(function(resolve, reject){
+    Quotation.native(function(err, collection){
+      if(err){
+        console.log('err updating quotation',err);
+        reject(err);
+      }
+      var findCrieria = {_id: new ObjectId(quotationId)};
+      var updateParams = {
+        $set: _.omit(params, ['id'])
+      };
+      collection.updateOne(findCrieria, updateParams, function(errUpdate, result){
+        if(errUpdate){
+          console.log('errUpdate updating product',errUpdate);
+          reject(errUpdate);
+        }
+        resolve(result);
+      });
+    });
+  });
+}
+
+function nativeQuotationDetailsFind(findCriteria){
+  return new Promise(function(resolve, reject){
+    QuotationDetail.native(function(err, collection){
+      if(err){
+        console.log('err updating quotation',err);
+        reject(err);
+      }
+      collection.find(findCriteria).toArray(function(effFind, details){
+        if(effFind){
+          console.log('effFind updating product',effFind);
+          reject(effFind);
+        }
+        details = details.map(function(d){
+          d.id = d._id;
+          return d;
+        });
+        resolve(details);
+      });
+    });
+  });
+}
