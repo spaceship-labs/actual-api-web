@@ -59,6 +59,7 @@ function createClient(params){
   var clientContacts = params.clientContacts || [];
 
   client.LicTradNum  = client.LicTradNum || 'XAXX010101000';
+  delete client.Currency;
 
   return User.findOne({id:client.User}).populate('Seller')
     .then(function(user){
@@ -90,6 +91,7 @@ function updateClient(cardcode, form){
   form = _.omit(form, _.isUndefined);
   //Important: DONT UPDATE BALANCE IN SAP
   delete form.Balance;
+  delete form.Currency;
 
   var path = 'Contact';
   var params = {
