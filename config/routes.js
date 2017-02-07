@@ -78,6 +78,11 @@ module.exports.routes = {
     action: 'find'
   },
 
+  '/product/multiplefindbyids':{
+    controller: 'product',
+    action: 'multipleFindByIds'
+  },
+
   '/product/search':{
     controller: 'product',
     action: 'search'
@@ -107,6 +112,11 @@ module.exports.routes = {
   '/product/findbyid/:id':{
     controller: 'product',
     action: 'findById'
+  },
+
+  '/product/syncproductbyitemcode/:id':{
+    controller: 'sync',
+    action: 'syncProductByItemCode'
   },
 
   '/product/update/:id':{
@@ -414,6 +424,12 @@ module.exports.routes = {
     action:'findById'
   },
 
+  '/quotation/findbyidquickread/:id':{
+    controller: 'quotation',
+    action:'findByIdQuickRead'
+  },
+
+
   '/quotation/findbyclient/:page':{
     controller: 'quotation',
     action:'findByClient'
@@ -449,6 +465,12 @@ module.exports.routes = {
     controller:'quotation',
     action:'addDetail'
   },
+
+  '/quotation/addmultipledetails/:id':{
+    controller:'quotation',
+    action:'addMultipleDetails'
+  },
+
 
   '/quotation/removedetailsgroup/:quotation':{
     controller:'quotation',
@@ -619,11 +641,6 @@ module.exports.routes = {
   '/sites':{
     controller: 'site',
     action: 'getAll'
-  },
-
-  '/sync/products':{
-    controller:'sync',
-    action:'syncProducts'
   },
 
   '/store/find':{

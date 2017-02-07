@@ -24,6 +24,9 @@ module.exports = {
     whsCode: {
       type: 'string',
       required: true
+    },
+    ImmediateDelivery:{
+      type: 'boolean'
     }
   }
 };

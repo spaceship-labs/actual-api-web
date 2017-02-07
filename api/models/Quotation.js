@@ -88,15 +88,19 @@ module.exports = {
       type:'string',
     },
     tracing: {
-      type:'datetime',
-      defaultsTo: moment().add(3,'days').toDate()
+      type:'datetime'
     }
   },
 
   beforeCreate: function(val,cb){
+    val.tracing = addDefaultTracingDate();
     Common.orderCustomAI(val, 'quotationFolio',function(val){
       cb();
     });
   },
 
 };
+
+function addDefaultTracingDate(){
+  return moment().add(72,'hours').toDate();
+}

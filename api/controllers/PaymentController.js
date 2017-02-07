@@ -15,8 +15,10 @@ module.exports = {
     var totalDiscount = form.totalDiscount || 0;
     var paymentGroup  = form.group || 1;
     var client        = false;
+    var quotationPayments = [];
     var exchangeRate;
     var quotation;
+    var quotationUpdateParams;
     form.Quotation    = quotationId;
     form.Store = req.user.activeStore.id;
     form.User = req.user.id;    
@@ -27,17 +29,23 @@ module.exports = {
 
     StockService.validateQuotationStockById(quotationId, req.user.id)
       .then(function(isValidStock){
+
         if(!isValidStock){
           return Promise.reject(new Error('Inventario no suficiente'));
-        }else{
-        	sails.log.info('Inventario valido');
         }
-        return Quotation.findOne(form.Quotation).populate('Client');
+
+        var findQuotation = Quotation.findOne(form.Quotation).populate('Payments');
+
+        if(form.type === EWALLET_TYPE || form.type === CLIENT_BALANCE_TYPE){
+          findQuotation.populate('Client');
+        }
+
+        return findQuotation;
       })
       .then(function(quotationFound){
         quotation = quotationFound;
         client = quotation.Client;
-        form.Client = client.id;
+        form.Client = client.id || client;
 
         if(form.type === EWALLET_TYPE){
           if( !EwalletService.isValidEwalletPayment(form, client) ){
@@ -55,12 +63,14 @@ module.exports = {
       })
       .then(function(exchangeRateFound){
         exchangeRate = exchangeRateFound;
-        //return calculateQuotationAmountPaid(quotationId, exchangeRate);
+
         return Payment.create(form);
       })
       .then(function(paymentCreated){
+        quotationPayments = quotation.Payments.concat([paymentCreated]);
+
         var promises = [
-          calculateQuotationAmountPaid(quotationId, exchangeRate)
+          PaymentService.calculateQuotationAmountPaid(quotationPayments, exchangeRate)
         ];
 
         if(form.type === EWALLET_TYPE){
@@ -88,17 +98,22 @@ module.exports = {
         return promises;
       })
       .spread(function(ammountPaid){
-        var params = {
+        quotationUpdateParams = {
           ammountPaid: ammountPaid,
           paymentGroup: paymentGroup
         };
-        return Quotation.update({id:quotationId}, params);
+        return QuotationService.nativeQuotationUpdate(quotationId, quotationUpdateParams);
+        //return Quotation.update({id:quotationId}, params);
       })
-      .then(function(updatedQuotation){
-        return Quotation.findOne({id:quotationId}).populate('Client');
-      })
-      .then(function(populatedQuotation){
-        res.json(populatedQuotation);
+      .then(function(resultUpdate){
+        delete quotation.Payments;
+        quotation.ammountPaid = quotationUpdateParams.ammountPaid;
+        quotation.paymentGroup = quotationUpdateParams.paymentGroup;
+
+        res.json(quotation);
+
+        //var updatedQuotation = resultUpdate[0];
+        //res.json(updatedQuotation);
       })
       .catch(function(err){
         console.log(err);
@@ -135,7 +150,7 @@ module.exports = {
         return Payment.create(negativePayment);
       })
       .then(function(negativePaymentCreated){
-        return calculateQuotationAmountPaid(quotationId);
+        return PaymentService.calculateQuotationAmountPaid(quotationId);
       })
       .then(function(ammountPaid){
         var params = {
@@ -163,29 +178,6 @@ module.exports = {
   }	
 };
 
-function calculateQuotationAmountPaid(quotationId, exchangeRate){
-  return Quotation.findOne({id: quotationId}).populate('Payments')
-    .then(function(quotation){
-      var payments  = quotation.Payments || [];
-
-      var ammounts = payments.map(function(payment){
-        if(payment.type === 'cash-usd'){
-         return calculateUSDPayment(payment, exchangeRate);
-        }
-        return payment.ammount;
-      });
-
-      var ammountPaid = ammounts.reduce(function(paymentA, paymentB){
-        return paymentA + paymentB;
-      });
-
-      return ammountPaid;
-    });  
-}
-
-function calculateUSDPayment(payment, exchangeRate){
-  return payment.ammount * exchangeRate;
-}
 
 function formatProductsIds(details){
   var result = [];

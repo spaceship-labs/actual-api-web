@@ -3,8 +3,63 @@ var q = require('q');
 var Promise = require('bluebird');
 var moment = require('moment');
 var assign = require('object-assign');
+var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
 
 module.exports = {
+
+  nativeFindOne: function(findCrieria, model){
+    return new Promise(function(resolve, reject){
+      
+      model.native(function(err, collection){
+        if(err){
+          console.log('err finding one',err);
+          reject(err);
+        }
+        collection.findOne(findCrieria, function(errFind, recordFound){
+          if(errFind){
+            console.log('err findOne',errFind);
+            reject(errFind);
+          }
+          resolve(recordFound);
+        });
+      });
+
+    });
+  },
+
+  nativeFind: function(findCriteria, model){
+    return new Promise(function(resolve, reject){
+      model.native(function(err, collection){
+        if(err){
+          console.log('err updating quotation',err);
+          reject(err);
+        }
+        collection.find(findCriteria).toArray(function(effFind, records){
+          if(effFind){
+            console.log('effFind updating product',effFind);
+            reject(effFind);
+          }
+          records = records.map(function(r){
+            r.id = r._id;
+            for(var key in r){
+              if( r[key] instanceof ObjectId){
+                r[key] = r[key].toString();
+              }
+
+              /*
+              if( r[key] instanceof Date ){
+                r[key] = r[key].toLocaleString()
+              }
+              */
+            }
+            return r;
+          });
+          resolve(records);
+        });
+      });
+    });
+  },  
+
   reassignOrdersDates: function() {
     console.log('started find reassignOrdersDates');
     Order.find({}).populate('Quotation')

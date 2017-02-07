@@ -11,7 +11,6 @@ module.exports = {
     var form = req.params.all();
     var createdId;
     form.Details = formatProductsIds(form.Details);
-    form.Details = tagImmediateDeliveriesDetails(form.Details);    
     form.Store = req.user.activeStore.id;
     var opts = {
       paymentGroup:1,
@@ -61,12 +60,32 @@ module.exports = {
       });
   },
 
+  findByIdQuickRead: function(req, res){
+    var form = req.params.all();
+    var id = form.id;
+    var userId = req.user.id;
+
+    Quotation.findOne({id: id})
+      .populate('Details')
+      .then(function(quotation){
+        if(!quotation){
+          return Promise.reject(new Error('Cotización no encontrada'));
+        }        
+        res.json(quotation);
+      })
+      .catch(function(err){
+        console.log('err', err);
+        res.negotiate(err);
+      });
+  },
+
   findById: function(req, res){
     var form = req.params.all();
     var id = form.id;
-    var baseQuotation = false;
     var userId = req.user.id;
     var getPayments = form.payments;
+    var forceLatestData  = true;
+    //var forceLatestData = !_.isUndefined(form.forceLatestData) ? form.forceLatestData : true;
     if( !isNaN(id) ){
       id = parseInt(id);
     }
@@ -84,11 +103,18 @@ module.exports = {
       quotationQuery.populate('Payments');
     }
 
-    QuotationService.updateQuotationToLatestData(id, userId, {
+    var updateToLatest = QuotationService.updateQuotationToLatestData(id, userId, {
       update:true,
       currentStore: req.user.activeStore.id
-    })
-      .then(function(){
+    });
+
+    if(!forceLatestData){
+      updateToLatest = new Promise(function(resolve, reject){
+        resolve();
+      });
+    }
+
+    updateToLatest.then(function(){
         return quotationQuery;
       })
       .then(function(quotation){
@@ -161,7 +187,7 @@ module.exports = {
 
           var options = {
             dir : 'records/gallery',
-            profile: 'gallery'            
+            profile: 'record'            
           };
 
           return createdRecord.addFiles(req, options)
@@ -192,7 +218,6 @@ module.exports = {
     var id = form.id;
     form.Quotation = id;
     form.Details = formatProductsIds(form.Details);
-    form.Details = tagImmediateDeliveriesDetails(form.Details);
     form.shipDate = moment(form.shipDate).startOf('day').toDate();
 
     delete form.id;
@@ -219,6 +244,44 @@ module.exports = {
       });
 
   },
+
+  addMultipleDetails: function(req, res){
+    var form = req.params.all();
+    var id = form.id;
+    form.Quotation = id;
+    form.Details = formatProductsIds(form.Details);
+    
+    if(form.Details && form.Details.length > 0 && _.isArray(form.Details) ){
+      form.Details = form.Details.map(function(d){
+        d.shipDate = moment(d.shipDate).startOf('day').toDate();
+        return d;
+      });
+    }
+
+    delete form.id;
+    var opts = {
+      paymentGroup:1,
+      updateDetails: true,
+      currentStore: req.user.activeStore.id
+    };
+    
+    QuotationDetail.create(form.Details)
+      .then(function(created){
+         var calculator = QuotationService.Calculator();
+         return calculator.updateQuotationTotals(id, opts);
+      })
+      .then(function(updatedQuotation){
+        return Quotation.findOne({id: id});
+      })
+      .then(function(quotation){
+        res.json(quotation);
+      })
+      .catch(function(err){
+        console.log('err addDetail quotation', err);
+        res.negotiate(err);
+      });
+
+  },  
 
   removeDetailsGroup: function(req, res){
     var form = req.params.all();
@@ -423,17 +486,14 @@ module.exports = {
     var form = req.allParams();
     var quotationId = form.quotationId;
     var warehouse;
-    Quotation.findOne({id: quotationId}).populate('Details')
-      .then(function(quotation){
+    var details;
+    QuotationDetail.find({Quotation: quotationId}).populate('Product')
+      .then(function(detailsFound){
+        details = detailsFound;
         var whsId = req.user.activeStore.Warehouse;
-        details = quotation.Details;
-        var detailsIds = details.map(function(d){ return d.id; });
-        return [
-          Company.findOne({id: whsId}),
-          QuotationDetail.find({id: detailsIds}).populate('Product')
-        ];
+        return Company.findOne({id: whsId});
       })
-      .spread(function(warehouse,details){
+      .then(function(warehouse){
         return StockService.getDetailsStock(details, warehouse);    
       })
       .then(function(results){

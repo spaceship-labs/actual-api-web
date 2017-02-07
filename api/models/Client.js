@@ -19,6 +19,7 @@ module.exports = {
     Gender:{type:'string'},
     LicTradNum:{type:'string'},
     Balance: {type:'float'},
+    Currency:{type:'string'},
 
     /*
     */
@@ -66,5 +67,7 @@ module.exports = {
       collection:'EwalletRecord',
       via: 'Client',
     }
+
+
   }
 };

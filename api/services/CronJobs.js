@@ -49,7 +49,7 @@ function getPromos(){
     .then(function(promos){
       if(promos){
         Promise.each(promos,updatePromo).then(function(){
-          sails.log.info('Termino update de todas las promos');
+          //sails.log.info('Termino update de todas las promos');
         });
       }else{
         console.log('No habia promos por actualizar');

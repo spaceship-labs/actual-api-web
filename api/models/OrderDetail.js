@@ -14,6 +14,7 @@ module.exports = {
       type: 'integer',
       enum:[0,1,2,3,4,5]
     },    
+    discountName: 'string',    
     paymentGroup: 'integer',
     unitPrice: 'float',
     ewallet: 'float',

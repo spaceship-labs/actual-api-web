@@ -17,7 +17,7 @@ function cacheCategoriesProducts(){
     Price: price,
     Active: 'Y'
   };
-  sails.log.info('cache categories stock start : ' + new Date());
+  //sails.log.info('cache categories stock start : ' + new Date());
   return getAllStoresCodes().then(function(codes){
       storesCodes = codes;
       return ProductCategory.find({select:['Name']}).populate('Products', productsQuery);
@@ -26,7 +26,7 @@ function cacheCategoriesProducts(){
       return Promise.each(categories, updateCategory);
     })
     .then(function(){
-      sails.log.info('cache categories stock end: ' + new Date());
+      //sails.log.info('cache categories stock end: ' + new Date());
       return true;
     })
     .catch(function(err){

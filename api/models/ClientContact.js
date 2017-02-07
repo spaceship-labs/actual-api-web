@@ -31,5 +31,16 @@ module.exports = {
     U_Latitud: {type:'string'},  
     U_Longitud: {type:'string'},  
 
+    //RELATIONS (AUXILIAR)
+    //Important: This is an auxiliar Relation, all ContactCodes in a client, must be searched by a 
+    //an or query: {$or: [
+    //  {Client: clientId},
+    //  {CardCode: clientCardCode}
+    //  ]}
+    Client:{
+        model:'Client'
+    }
+
+
   }
 };

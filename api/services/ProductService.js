@@ -72,12 +72,12 @@ function cacheProductDiscountPrices(){
       });      
     })
     .then(function(mappedProducts){
-      console.log('mappedProducts ' + new Date(), mappedProducts.length);
+      //console.log('mappedProducts ' + new Date(), mappedProducts.length);
       return updateMappedProducts(mappedProducts);
     })
     .then(function(updatedProducts){
-      console.log('updatedProducts ' + new Date(), updatedProducts.length);
-      console.log('finish updateMappedProducts ' + new Date());
+      console.log('updatedProducts cache prices' + new Date(), updatedProducts.length);
+      //console.log('finish updateMappedProducts ' + new Date());
     })
     .catch(function(err){
       console.log('err on cacheProductDiscountPrices', err);

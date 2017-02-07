@@ -162,8 +162,11 @@ function getDetailsStock(details, warehouse){
 function mapDetailsWithDeliveryDates(details, deliveryDates){
 	for(var i = 0; i<details.length; i++){
 		var detailDelivery = findValidDelivery(details[i], deliveryDates);
+		//sails.log.info('detailDelivery', detailDelivery);
+		//sails.log.info('details[i]', details[i]);
 
-		if(detailDelivery){
+
+		if(detailDelivery && details[i].Product.Available > 0){
 			detailDelivery.available -= details[i].quantity;
 			//details[i].delivery = detailDelivery;
 			details[i].validStock = true;

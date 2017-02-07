@@ -95,6 +95,7 @@ module.exports = {
     });
   },
 
+  /*
   afterCreate: function(val, cb) {
     Commissions
       .calculate()
@@ -105,4 +106,5 @@ module.exports = {
         cb(err);
       });
   }
+  */
 }

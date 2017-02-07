@@ -88,10 +88,9 @@ module.exports = {
           var token = tokenAux;
           //var token = tokenAux.replace(/\//g, "-");
 
-          //TODO change it to config env var.
-          var frontendURL =  process.env.baseURLADMIN || 'http://admin.miactual.com';
+          var frontendURL =  process.env.baseURLFRONT || 'http://ventas.miactual.com';
 
-          var recoverURL =  frontendURL + '/auth/reset-password?';
+          var recoverURL =  frontendURL + '/reset-password?';
           recoverURL += 'token='+token;
           recoverURL += '&email='+email;
           Email.sendPasswordRecovery(

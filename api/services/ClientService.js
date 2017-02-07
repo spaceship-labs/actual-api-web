@@ -28,6 +28,7 @@ module.exports = {
 
 };
 
+
 function mapClientFields(fields){
   fields.CardName = fields.FirstName || fields.CardName;
   if(fields.FirstName && fields.LastName){

@@ -1,5 +1,7 @@
 var Promise = require('bluebird');
 var numeral = require('numeral');
+var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
+
 var EWALLET_TYPE = 'ewallet';
 var CASH_USD_TYPE = 'cash-usd';
 var EWALLET_GROUP_INDEX = 0;
@@ -7,14 +9,37 @@ var DEFAULT_EXCHANGE_RATE   = 18.78;
 
 
 module.exports = {
+  calculateQuotationAmountPaid: calculateQuotationAmountPaid,
+  calculateUSDPayment: calculateUSDPayment,
   getPaymentGroupsForEmail: getPaymentGroupsForEmail,
   getMethodGroupsWithTotals: getMethodGroupsWithTotals,
   getPaymentGroups: getPaymentGroups,
   getExchangeRate: getExchangeRate
 };
 
+function calculateQuotationAmountPaid(quotationPayments, exchangeRate){
+  var payments  = quotationPayments || [];
+
+  var ammounts = payments.map(function(payment){
+    if(payment.type === 'cash-usd'){
+     return calculateUSDPayment(payment, exchangeRate);
+    }
+    return payment.ammount;
+  });
+
+  var ammountPaid = ammounts.reduce(function(paymentA, paymentB){
+    return paymentA + paymentB;
+  });
+
+  return ammountPaid;
+}
+
+function calculateUSDPayment(payment, exchangeRate){
+  return payment.ammount * exchangeRate;
+}
+
 function getExchangeRate(){
-  return Site.findOne({handle:'actual-group'})
+  return Common.nativeFindOne({handle:'actual-group'}, Site)
     .then(function(site){
       return site.exchangeRate || DEFAULT_EXCHANGE_RATE;
     });

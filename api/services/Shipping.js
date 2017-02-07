@@ -43,6 +43,7 @@ function productShipping(product, storeWarehouse, options) {
     .spread(function(stockItems, deliveries){
       if(deliveries.length > 0 && stockItems.length > 0){
 
+        stockItems = filterStockItems(stockItems, deliveries);
         var shippingPromises = stockItems.map(function(stockItem){
           return buildShippingItem(
             stockItem, 
@@ -50,19 +51,6 @@ function productShipping(product, storeWarehouse, options) {
             storeWarehouse.id
           );
         });
-
-        var immediateStockItem = getImmediateStockItem(stockItems, deliveries);
-        if(immediateStockItem){
-          var immediateShippingItem =  buildShippingItem(
-            immediateStockItem, 
-            deliveries, 
-            storeWarehouse.id,
-            {
-              applyImmediateDeliveryCalculation: true
-            }
-          );
-          shippingPromises.push(immediateShippingItem);          
-        }
 
         return Promise.all(shippingPromises);
       }
@@ -110,7 +98,7 @@ function buildShippingItem(stockItem, deliveries, storeWarehouseId, options){
       var days = productDays + seasonDays + deliveryDays;
       
       //Product in same store/warehouse
-      if(stockItem.whsCode === delivery.ToCode && options.applyImmediateDeliveryCalculation){
+      if(stockItem.whsCode === delivery.ToCode && stockItem.ImmediateDelivery){
         days = productDays;
       }
       
@@ -128,6 +116,25 @@ function buildShippingItem(stockItem, deliveries, storeWarehouseId, options){
     });
 }
 
+function filterStockItems(stockItems, deliveries){
+
+  return stockItems.filter(function(stockItem){
+  
+    var delivery = _.find(deliveries, function(delivery) {
+      return delivery.FromCode == stockItem.whsCode;
+    });
+
+    //Only use immediate delivery stock items, when from and to warehouses
+    //are the same
+    if(stockItem.ImmediateDelivery){
+      return stockItem.whsCode === delivery.ToCode;
+    }
+
+    return true;
+  });
+}
+
+
 function getImmediateStockItem(stockItems, deliveries){
 
   return _.find(stockItems, function(stockItem){
@@ -135,8 +142,8 @@ function getImmediateStockItem(stockItems, deliveries){
     var delivery = _.find(deliveries, function(delivery) {
       return delivery.FromCode == stockItem.whsCode;
     });
-    return stockItem.whsCode === delivery.ToCode;
 
+    return stockItem.whsCode === delivery.ToCode; //&& stockItem.ImmediateDelivery;
   });
 }
 

@@ -93,6 +93,13 @@ module.exports = {
       return res.negotiate(new Error('Email requerido'));
     }
 
+    if(form.LicTradNum){
+      if(!ClientService.isValidRFC(form.LicTradNum)){
+        var err = new Error('RFC no valido');
+        return res.negotiate(err);
+      }
+    }
+    
     if(form.fiscalAddress && ClientService.isValidFiscalAddress(form.fiscalAddress)){
       fiscalAddress  = _.clone(form.fiscalAddress);
       fiscalAddress  = ClientService.mapFiscalFields(fiscalAddress);
@@ -291,7 +298,7 @@ module.exports = {
         var isValidSapResponse = ClientService.isValidSapContactUpdate(sapData);
 
         if( !sapData || isValidSapResponse.error  ) {
-          var defualtErrMsg = 'Error al crear contacto en SAP';
+          var defualtErrMsg = 'Error al actualizar contacto en SAP';
           var err = isValidSapResponse.error || defualtErrMsg;
           if(err === true){
             err = defualtErrMsg;

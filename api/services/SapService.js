@@ -41,8 +41,10 @@ module.exports = {
 };
 
 function syncProduct(itemCode){
-  var path;
-  var requestParams;
+  var path = 'Syncswsws';
+  var requestParams = {
+    ItemCode: itemCode
+  };
   var endPoint = buildUrl(baseUrl,{
     path: path,
     queryParams: requestParams
@@ -57,9 +59,9 @@ function createClient(params){
   var client         = params.client;
   var fiscalAddress  = params.fiscalAddress || {};
   var clientContacts = params.clientContacts || [];
+  delete client.Currency;
 
   client.LicTradNum  = client.LicTradNum || 'XAXX010101000';
-  delete client.Currency;
 
   return User.findOne({id:client.User}).populate('Seller')
     .then(function(user){
@@ -72,15 +74,16 @@ function createClient(params){
     .then(function(seriesNum){
       client.Series = seriesNum; //Assigns seriesNum number depending on activeStore
       var requestParams = {
-        Client: JSON.stringify(client),
-        address: JSON.stringify(fiscalAddress),
-        person: JSON.stringify(clientContacts)
+        Client: encodeURIComponent(JSON.stringify(client)),
+        address: encodeURIComponent(JSON.stringify(fiscalAddress)),
+        person: encodeURIComponent(JSON.stringify(clientContacts))
       };
       var endPoint = buildUrl(baseUrl,{
         path: path,
         queryParams: requestParams
       });
-      sails.log.info('endPoint', endPoint);
+      sails.log.info('createClient');
+      sails.log.info(decodeURIComponent(endPoint));
       reqOptions.uri = endPoint;
       return request(reqOptions);
     });
@@ -89,20 +92,21 @@ function createClient(params){
 
 function updateClient(cardcode, form){
   form = _.omit(form, _.isUndefined);
+
   //Important: DONT UPDATE BALANCE IN SAP
   delete form.Balance;
   delete form.Currency;
 
   var path = 'Contact';
   var params = {
-    Client: JSON.stringify(form)
+    Client: encodeURIComponent(JSON.stringify(form))
   };
   var endPoint = buildUrl(baseUrl, {
     path: path,
     queryParams: params
   });
   sails.log.info('updateClient');
-  sails.log.info(endPoint);
+  sails.log.info(decodeURIComponent(endPoint));
   reqOptions.uri = endPoint;
   return request(reqOptions);
 }
@@ -114,15 +118,15 @@ function createContact(cardCode, form){
   form.CardCode = cardCode;
   form.action   = CREATE_CONTACT_ACTION;
   var params = {
-    contact: JSON.stringify({CardCode: cardCode}),
-    person: JSON.stringify([form])
+    contact: encodeURIComponent(JSON.stringify({CardCode: cardCode})),
+    person: encodeURIComponent(JSON.stringify([form]))
   };
   var endPoint = buildUrl(baseUrl,{
     path: path,
     queryParams: params
   });
   sails.log.info('createContact');
-  sails.log.info(endPoint);
+  sails.log.info(decodeURIComponent(endPoint));
   reqOptions.uri = endPoint;
   return request(reqOptions);
 }
@@ -134,15 +138,15 @@ function updateContact(cardCode, contactIndex, form){
   form.Line = contactIndex;
   form.action = UPDATE_CONTACT_ACTION;
   var params = {
-    contact: JSON.stringify({CardCode: cardCode}),
-    person: JSON.stringify([form])
+    contact: encodeURIComponent(JSON.stringify({CardCode: cardCode})),
+    person: encodeURIComponent(JSON.stringify([form]))
   };
   var endPoint = buildUrl(baseUrl,{
     path: path,
     queryParams: params
   });
   sails.log.info('updateContact');
-  sails.log.info(endPoint);
+  sails.log.info(decodeURIComponent(endPoint));
   reqOptions.uri = endPoint;
   return request(reqOptions);
 }
@@ -151,7 +155,8 @@ function updateContact(cardCode, contactIndex, form){
 function updateFiscalAddress(cardcode, form){
   form.Address = form.companyName;
   var endPoint = buildAddressContactEndpoint(form, cardcode);
-  sails.log.info('updateFiscalAddress', endPoint);
+  sails.log.info('updateFiscalAddress');
+  sails.log.info(decodeURIComponent(endPoint));  
   reqOptions.uri = endPoint;
   return request(reqOptions);
 }
@@ -169,13 +174,20 @@ function updateFiscalAddress(cardcode, form){
     currentStore
 */
 function createSaleOrder(params){
+  var endPoint;
   return buildSaleOrderRequestParams(params)
     .then(function(requestParams){
-      var endPoint = baseUrl + requestParams;
+      endPoint = baseUrl + requestParams;
       sails.log.info('createSaleOrder');
-      sails.log.info(endPoint);
+      sails.log.info(decodeURIComponent(endPoint));
       reqOptions.uri = endPoint;
       return request(reqOptions);
+    })
+    .then(function(response){
+      return {
+        endPoint: endPoint,
+        response: response
+      };
     });
 }
 
@@ -220,9 +232,9 @@ function buildSaleOrderRequestParams(params){
       });
 
       saleOrderRequest.WhsCode = getWhsCodeById(params.currentStore.Warehouse, warehouses);
-      requestParams += JSON.stringify(saleOrderRequest);
-      requestParams += '&products=' + JSON.stringify(products);
-      requestParams += '&payments=' + JSON.stringify(mapPaymentsToSap(params.payments, params.exchangeRate));
+      requestParams += encodeURIComponent(JSON.stringify(saleOrderRequest));
+      requestParams += '&products=' + encodeURIComponent(JSON.stringify(products));
+      requestParams += '&payments=' + encodeURIComponent(JSON.stringify(mapPaymentsToSap(params.payments, params.exchangeRate)));
 
       return requestParams;
     });
@@ -386,8 +398,8 @@ function buildAddressContactEndpoint(fields, cardcode){
     LicTradNum: fields.LicTradNum
   };
   field = _.omit(fields, _.isUndefined);
-  path += '?address=' + JSON.stringify(fields);
-  path += '&contact='+ JSON.stringify(contact);
+  path += '?address=' + encodeURIComponent(JSON.stringify(fields));
+  path += '&contact='+ encodeURIComponent(JSON.stringify(contact));
   return baseUrl + path;
 }
 

@@ -56,6 +56,28 @@ module.exports = {
       });
 
   },
+
+  multipleFindByIds: function(req, res){
+    var form = req.params.all();
+    var ids = form.ids;
+    var populateFields = form.populate_fields;
+    var read = Product.find({id: ids});
+
+    if(populateFields.length > 0){
+      populateFields.forEach(function(populateF){
+        read = read.populate(populateF);
+      });
+    }        
+
+    read.then(function(products){
+      res.json(products);
+    })
+    .catch(function(err){
+      console.log(err);
+      res.negotiate(err);
+    });
+  },
+
   search: function(req, res){
     var form = req.params.all();
     var items = form.items || 10;

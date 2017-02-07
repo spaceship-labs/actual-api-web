@@ -27,7 +27,7 @@ function saveFiles(req,opts,cb){
 
   return new Promise(function(resolve, reject){
 
-    sails.log.info('saving files');
+    sails.log.info('saving files', $files);
 
     if(req._fileparser.upstreams.length && $files.length > 0){
 
@@ -131,7 +131,7 @@ function makeCropsStreams(uploadOptions, opts, cb){
   var adapter = adapterPkgCloud(uploadOptions);
   opts.dirSave = '/uploads/'+opts.dir+'/';
 
-  if(!sizes) return cb();
+  if(!sizes || sizes.length === 0) return cb();
 
   var individualCropStream = function(size, next){
     var wh = size.split('x');

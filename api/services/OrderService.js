@@ -231,10 +231,11 @@ function createFromQuotation(form, currentUser){
       });
     })
     .then(function(sapResponseAux){
-      sapResponse = sapResponseAux;
+      sapResponse = sapResponseAux.response;
+      var sapEndpoint = decodeURIComponent(sapResponseAux.endPoint);
       sails.log.info('createSaleOrder response', sapResponse);
       var log = {
-        content: JSON.stringify(sapResponse),
+        content: sapEndpoint + '\n' +  JSON.stringify(sapResponse),
         User   : currentUser.id,
         Store  : opts.currentStore,
         Quotation: quotationId
