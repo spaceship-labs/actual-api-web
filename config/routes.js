@@ -48,16 +48,6 @@ module.exports.routes = {
     action: 'signin'
   },
 
-  '/auth/manager':{
-    controller:'auth',
-    action:'authorizeManager'
-  },
-
-  '/user/create':{
-    controller: 'user',
-    action: 'create'
-  },
-
   '/user/findbyid/:id':{
     controller: 'user',
     action: 'findById'
@@ -72,6 +62,7 @@ module.exports.routes = {
     controller: 'user',
     action: 'update'
   },
+
 
   '/product/find/:page':{
     controller: 'product',
@@ -88,45 +79,9 @@ module.exports.routes = {
     action: 'search'
   },
 
-  '/product/addfiles':{
-    controller: 'product',
-    action: 'addFiles'
-  },
-
-  '/product/removefiles':{
-    controller: 'product',
-    action: 'removeFiles'
-  },
-
-  '/product/updateicon':{
-    controller: 'product',
-    action: 'updateIcon'
-  },
-
-  '/product/removeicon':{
-    controller: 'product',
-    action: 'removeIcon'
-  },
-
-
   '/product/findbyid/:id':{
     controller: 'product',
     action: 'findById'
-  },
-
-  '/product/syncproductbyitemcode/:id':{
-    controller: 'sync',
-    action: 'syncProductByItemCode'
-  },
-
-  '/product/update/:id':{
-    controller: 'product',
-    action: 'update'
-  },
-
-  '/product/getproductsbysuppcatnum/:id':{
-    controller: 'product',
-    action: 'getProductsbySuppCatNum'
   },
 
   '/product/addseen/:ItemCode':{
@@ -134,42 +89,9 @@ module.exports.routes = {
     action:'addSeenTime'
   },
 
-  /*
-  '/product/sync/:ItemCode':{
-    controller:'product',
-    action:'syncProduct'
-  },
-  */
-
-  '/invoice/find/:page':{
-    controller: 'invoice',
-    action: 'find'
-  },
-
-
   '/productcategory/find/:page':{
     controller: 'productcategory',
     action: 'find'
-  },
-
-  '/productcategory/create':{
-    controller: 'productcategory',
-    action: 'create'
-  },
-
-  '/productcategory/getallcategories':{
-    controller: 'productcategory',
-    action: 'getAllCategories'
-  },
-
-  '/productcategory/getcategoriesgroups':{
-    controller: 'productcategory',
-    action: 'getCategoriesGroups'
-  },
-
-  '/productcategory/getmaincategories':{
-    controller: 'productcategory',
-    action: 'getMainCategories'
   },
 
   '/productcategory/findbyid/:id':{
@@ -180,16 +102,6 @@ module.exports.routes = {
   '/productcategory/findbyhandle/:handle':{
     controller: 'productcategory',
     action: 'findByHandle'
-  },
-
-  '/productcategory/destroy/:id':{
-    controller: 'productcategory',
-    action: 'destroy'
-  },
-
-  '/productcategory/update/:id':{
-    controller: 'productcategory',
-    action: 'update'
   },
 
   '/productcategory/getcategoriestree':{
@@ -207,34 +119,9 @@ module.exports.routes = {
     action: 'list'
   },
 
-  '/productfilter/create':{
-    controller: 'productfilter',
-    action: 'create'
-  },
-
   '/productfilter/findbyid/:id':{
     controller: 'productfilter',
     action: 'findById'
-  },
-
-  '/productfilter/destroy/:id':{
-    controller: 'productfilter',
-    action: 'destroy'
-  },
-
-  '/productfiltervalue/create':{
-    controller: 'productfiltervalue',
-    action:'create'
-  },
-
-  '/productfiltervalue/update/:id':{
-    controller: 'productfiltervalue',
-    action:'update'
-  },
-
-  '/productfiltervalue/destroy/:id':{
-    controller: 'productfiltervalue',
-    action:'destroy'
   },
 
 
@@ -253,40 +140,9 @@ module.exports.routes = {
     action:'getAll'
   },
 
-  '/custombrand/create':{
-    controller: 'custombrand',
-    action:'create'
-  },
-
-  '/custombrand/update/:id':{
-    controller: 'custombrand',
-    action:'update'
-  },
-
   '/custombrand/findbyid/:id':{
     controller: 'custombrand',
     action:'findById'
-  },
-
-  '/custombrand/destroy/:id':{
-    controller: 'custombrand',
-    action:'destroy'
-  },
-
-
-  '/productsize/create':{
-    controller: 'productsize',
-    action:'create'
-  },
-
-  '/productsize/update/:id':{
-    controller: 'productsize',
-    action:'update'
-  },
-
-  '/productsize/destroy/:id':{
-    controller: 'productsize',
-    action:'destroy'
   },
 
   '/productgroup/find/:page':{
@@ -299,105 +155,11 @@ module.exports.routes = {
     action: 'findById'
   },
 
-  '/productgroup/findbyid/:id':{
-    controller: 'productGroup',
-    action: 'findById'
-  },
-
-  '/productgroup/create':{
-    controller: 'productgroup',
-    action:'create'
-  },
-
-  '/productgroup/update/:id':{
-    controller: 'productgroup',
-    action:'update'
-  },
-
-  '/productgroup/destroy/:id':{
-    controller: 'productgroup',
-    action:'destroy'
-  },
-
-  '/productgroup/addproducttogroup':{
-    controller: 'productgroup',
-    action:'addProductToGroup'
-  },
-
-
-  '/productgroup/removeproductfromgroup':{
-    controller: 'productgroup',
-    action:'removeProductFromGroup'
-  },
-
   '/productgroup/search':{
     controller: 'productgroup',
     action: 'search'
   },
 
-  '/productgroup/updateicon':{
-    controller: 'productgroup',
-    action: 'updateIcon'
-  },
-
-  '/productgroup/removeicon':{
-    controller: 'productgroup',
-    action: 'removeIcon'
-  },
-
-  /*
-  '/import/importimagessap': {
-    controller: 'import',
-    action: 'importImagesSap'
-  },
-
-  '/import/importbrokers': {
-    controller: 'import',
-    action: 'importBrokersToUsers'
-  },
-  */
-
-  '/seller/getall':{
-    controller: 'seller',
-    action:'getAll'
-  },
-
-  '/client/find':{
-    controller: 'client',
-    action:'find'
-  },
-
-  '/client/findbyid/:id':{
-    controller: 'client',
-    action:'findById'
-  },
-
-  '/client/:CardCode/contacts':{
-    controller:'client',
-    action:'getContactsByClient'
-  },
-
-  '/client/:CardCode/update/contact/:CntctCode':{
-    controller:'client',
-    action:'updateContact'
-  },
-
-  '/client/:CardCode/contact/create':{
-    controller:'client',
-    action:'createContact'
-  },
-
-  /*
-  '/client/:CardCode/fiscaladdress/create':{
-    controller:'client',
-    action:'createFiscalAddress'
-  },
-  */
-
-  '/client/update/fiscaladdress/:id/:CardCode':{
-    controller:'client',
-    action:'updateFiscalAddress'
-  },
 
   '/client/:id/ewallet':{
     controller:'client',
@@ -450,17 +212,6 @@ module.exports.routes = {
     action:'getCountByUser'
   },
 
-  '/quotation/:id/records':{
-    controller:'quotation',
-    action:'getRecords'
-  },
-
-
-  '/quotation/addrecord/:id':{
-    controller:'quotation',
-    action:'addRecord'
-  },
-
   '/quotation/adddetail/:id':{
     controller:'quotation',
     action:'addDetail'
@@ -470,7 +221,6 @@ module.exports.routes = {
     controller:'quotation',
     action:'addMultipleDetails'
   },
-
 
   '/quotation/removedetailsgroup/:quotation':{
     controller:'quotation',
@@ -501,11 +251,6 @@ module.exports.routes = {
     controller:'quotation',
     action: 'validateStock'
   },  
-
-  '/quotation/:id/close':{
-    controller: 'quotation',
-    action: 'closeQuotation'
-  },
 
   '/quotation/:id/paymentoptions':{
     controller: 'quotation',
@@ -583,11 +328,6 @@ module.exports.routes = {
     action:'generateCashReport'
   },
 
-  '/promotion/create':{
-    controller: 'promotion',
-    action:'create'
-  },
-
   '/promotion/find/:page':{
     controller: 'promotion',
     action:'find'
@@ -600,16 +340,6 @@ module.exports.routes = {
 
   '/promotion/update/:id':{
     controller: 'promotion',
-    action:'update'
-  },
-
-  '/pmperiod/create':{
-    controller: 'pmperiod',
-    action:'create'
-  },
-
-  '/pmperiod/update/:id':{
-    controller: 'pmperiod',
     action:'update'
   },
 
@@ -676,11 +406,6 @@ module.exports.routes = {
   '/packages/:id/products':{
     controller:'package',
     action:'getProducts'
-  },
-
-  '/packages/update/:id':{
-    controller:'package',
-    action:'update'
   },
 
   '/packages/details/:id':{
