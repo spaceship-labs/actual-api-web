@@ -5,6 +5,9 @@ module.exports = {
     migrate:'alter',
     schema: true,
     attributes: {
+        webUser:{
+          type:'boolean'
+        },
         password: {
             type: 'string'
         },

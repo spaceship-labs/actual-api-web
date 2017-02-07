@@ -18,6 +18,7 @@ module.exports = {
         'phone'
       ]
     };
+    
     Common.find(model, form, extraParams)
       .then(function(result){
         res.ok(result);
