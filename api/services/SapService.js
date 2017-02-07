@@ -1,5 +1,6 @@
-var baseUrl = process.env.SAP_URL; //'http://sapnueve.homedns.org:8080'
+//var baseUrl = process.env.SAP_URL; //'http://sapnueve.homedns.org:8080'
 //var baseUrl = 'http://189.149.131.100:8080';
+var baseUrl = 'http://sapnueve.homedns.org:8080';
 var request = require('request-promise');
 var Promise = require('bluebird');
 var buildUrl = require('build-url');

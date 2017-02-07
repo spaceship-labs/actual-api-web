@@ -40,6 +40,13 @@ function _onLocalStrategyAuth(email, password, next){
         });        
       }        
 
+      if(!user.webUser){
+        return next(null, false, {
+          code: 'ONLY_WEB_USERS AUTHORIZED',          
+          message: 'ONLY_WEB_USERS AUTHORIZED'
+        });        
+      }      
+
       //TODO: replace with new cipher service type
       if( !CipherService.comparePassword(password, user) ){
         return next(null, false, {
@@ -62,7 +69,7 @@ function _onLocalStrategyAuth(email, password, next){
 //Triggers when user authenticates via JWT strategy
 
 function _onJwtStrategyAuth(payload, next){
-  var payloadUser = payload.user || {};
+    var payloadUser = payload.user || {};
   var userId = payloadUser.id || false;
   if(!userId){
     return next(null, false, {
@@ -83,6 +90,13 @@ function _onJwtStrategyAuth(payload, next){
         return next(null, false, {
           code: 'USER_NOT_ACTIVE',
           message: 'USER NOT ACTIVE'
+        });        
+      }
+
+      if(!user.webUser){
+        return next(null, false, {
+          code: 'ONLY_WEB_USERS AUTHORIZED',          
+          message: 'ONLY_WEB_USERS AUTHORIZED'
         });        
       }
 

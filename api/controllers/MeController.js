@@ -4,6 +4,7 @@
  * @description :: Server-side logic for managing us
  * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
  */
+var Promise = require('bluebird');
 
 module.exports = {
   update: function(req, res) {
@@ -22,11 +23,33 @@ module.exports = {
   
   activeStore: function(req, res) {
     var user = req.user;
-    User.findOne(user.id).populate('activeStore')
-      .then(function(user){
-        res.json(user.activeStore);
+    var storeQuery = Store.findOne({
+      id: SiteService.getDefaultActiveStoreId(req)
+    });
+    
+    if(user){
+      User.findOne(user.id).populate('activeStore');
+    }
+
+      storeQuery.then(function(result){
+        var store;
+        if(user && result){
+          store = user.activeStore;
+        }
+        else if(result && !user){
+          store = result;
+        }
+
+        if(store){
+          res.json(store);
+        }
+        else{
+          return Promise.reject(new Error('Store not found'));
+        }
+
       })
       .catch(function(err){
+        console.log('err')
         res.negotiate(err);
       });
   },

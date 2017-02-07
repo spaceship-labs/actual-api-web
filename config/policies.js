@@ -19,10 +19,12 @@
 
 module.exports.policies = {
 
-
-  '*': ['isAuthenticated'],
+  '*': ['setupDefaultData'],
   AuthController:{
     '*': true
+  },
+  QuotationController:{
+    '*': ['isAuthenticated']
   },
   UserController:{
     '*': ['isAuthenticated'],
@@ -31,62 +33,11 @@ module.exports.policies = {
     update: ['isAuthenticated', 'isAllowed'],
     send_password_recovery: true,
     update_password: true,
-    stores: true
   },
   MeController: {
     '*': ['isAuthenticated'],
+    activeStore: true
   },
-  ProductController:{
-    find: ['isAuthenticated', 'isAllowed'],
-    update: ['isAuthenticated', 'isAllowed'],
-    findById: true,
-    search: true,
-  },
-  ProductCategoryController:{
-    getCategoriesGroups: true,
-    getCategoriesTree: true,
-    findByHandle: true
-  },
-  ProductFilterController:{
-    list: true
-  },
-  ProductGroupController:{
-    getGroupVariants: true,
-    getVariantGroupProducts: true
-  },
-  ImportController:{
-    importImagesSap: ['isAdmin']
-  },
-  ProductFilterValueController:{
-    getProducts: true
-  },
-  ProductSearchController:{
-    /*
-    advancedSearch: true,
-    searchByFilters: true,
-    searchByCategory: true,
-    searchByFilterValues: true
-    */
-  },
-  LoggingController: {
-    find: true,
-    create: true
-  },
-  PermissionController: {
-    find: true
-  },
-  ShippingController: {
-    product: true
-  },
-  /*
-  LocalController:{
-    '*':true
-  }
-  */
-
-
-  //Por ahora
-  //SyncController:{'*':true}
 
   /***************************************************************************
   *                                                                          *

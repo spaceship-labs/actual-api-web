@@ -11,10 +11,14 @@ module.exports = {
     var productCode = form.productCode;
     var storeId = form.storeId;
     var store = false;
+    if(!storeId || storeId === 'null'){
+      storeId = SiteService.getDefaultActiveStoreId(req);
+    }
+
     Store.findOne({id:storeId}).populate('Warehouse')
       .then(function(storeResult){
         store = storeResult;
-        return Product.findOne({ItemCode: productCode});
+        return Common.nativeFindOne({ItemCode: productCode}, Product);
       })
       .then(function(product){
         return Shipping.product(product, store.Warehouse);        

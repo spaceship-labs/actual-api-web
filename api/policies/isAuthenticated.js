@@ -12,6 +12,7 @@ module.exports = function (req, res, next) {
         return res.unauthorized(null, info && info.code, info && info.message);
       }
       req.user = user;
+      req.activeStore = req.user.activeStore;
       //sails.log.info('user', user);
 
       sails.config.timezone = getTimezone(user.activeStore);

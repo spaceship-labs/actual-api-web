@@ -10,13 +10,13 @@ module.exports = {
     var minPrice       = form.minPrice;
     var maxPrice       = form.maxPrice;
     var queryPromos    = Search.getPromotionsQuery();
-    var activeStoreId  = req.user.activeStore.id || false;
+    var activeStoreId  = req.activeStore.id || false;
     var populateImgs   = !_.isUndefined(form.populateImgs) ? form.populateImgs : true;    
     var filterByStore  = !_.isUndefined(form.filterByStore) ? form.filterByStore : true;    
     var warehouses     = [];
     var productsIds    = [];
     var promotions     = [];
-    var activeStore    = req.user.activeStore;
+    var activeStore    = req.activeStore;
     var paginate     = {
       page:  form.page  || 1,
       limit: form.items || 10
@@ -80,12 +80,13 @@ module.exports = {
     var handle         = [].concat(form.category);
     var filtervalues   = [].concat(form.filtervalues);
     var queryPromos    = Search.getPromotionsQuery();
-    var activeStoreId  = req.user.activeStore.id || false;
+    var activeStoreId  = req.activeStore.id || false;
     var filterByStore  = !_.isUndefined(form.filterByStore) ? form.filterByStore : true;    
     var query          = {};
     var productsIds    = [];
     var promotions     = [];
-    var activeStore    = req.user.activeStore;
+    var activeStore    = req.activeStore;
+    sails.log.info('activeStore', activeStore);
     var priceField     = activeStore ? Search.getDiscountPriceKeyByStoreCode(activeStore.code) : 'Price';
     var minPrice       = form.minPrice;
     var maxPrice       = form.maxPrice;

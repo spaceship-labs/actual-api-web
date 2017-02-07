@@ -18,6 +18,13 @@ module.exports = {
       startDate: {'<=': currentDate},
       endDate: {'>=': currentDate},
     };
+
+    if(!id || id === 'null'){
+      id = SiteService.getDefaultActiveStoreId(req);
+    }
+
+    sails.log.info('id', id);
+
     Store.findOne({id:id}).populate('Promotions', queryPromo)
       .then(function(company){
         res.json(company.Promotions);

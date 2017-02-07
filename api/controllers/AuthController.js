@@ -13,15 +13,12 @@ function _onPassportAuth(req, res, error, user, info){
   
   /*Active store*/
   var form          = req.allParams();
-  var activeStore   = form.activeStore || false;
+  var activeStoreId = SiteService.getDefaultActiveStoreId(req);
   var updateParams = {
-    lastLogin : new Date()
+    lastLogin : new Date(),
+    activeStore: activeStoreId
   };
   
-  if(activeStore){
-    updateParams.activeStore = activeStore;
-  }
-
   User.update(user.id, updateParams)
     .then(function(users) {
       return users[0];
@@ -30,15 +27,10 @@ function _onPassportAuth(req, res, error, user, info){
       /*Logging stuff*/
       var message    = userUpdated.firstName + ' ingresó al sistema';
       var action     = 'login';
-      return [
-          Logger.log(userUpdated.id, message, action),
-          Store.findOne({id: activeStore})
-        ];
+      return Logger.log(userUpdated.id, message, action);
     })
-    .spread(function(log, store){
-      if(store){
-        user.activeStore = store.id;
-      }
+    .then(function(log){
+      user.activeStore = activeStoreId;
       return res.ok({
         token: CipherService.createToken(user),
         user: user
