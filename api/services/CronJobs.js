@@ -14,13 +14,13 @@ module.exports.init = function(){
     },
     {
       fn: function(d){
-        CategoryService.cacheCategoriesProducts();
+        //CategoryService.cacheCategoriesProducts();
       },
       time:'0 0 */1 * * *'
     },
     {
       fn: function(d){
-        ProductService.cacheProductDiscountPrices();
+        //ProductService.cacheProductDiscountPrices();
       },
       time:'0 0 */1 * * *'
     }

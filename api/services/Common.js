@@ -60,33 +60,6 @@ module.exports = {
     });
   },  
 
-  reassignOrdersDates: function() {
-    console.log('started find reassignOrdersDates');
-    Order.find({}).populate('Quotation')
-      .then(function(orders){
-        console.log('orders', orders.length);
-        //var ordersIds = orders.map(function(o){return o.id;});
-        return Promise.each(orders,function(order){
-          if(order.Quotation){
-            var updateParams = {
-              createdAt: order.Quotation.createdAt,
-              updatedAt: order.Quotation.updatedAt
-            };
-            console.log('updating order:' + order.id + ' with:' + updateParams.createdAt);
-            return Order.update({id:order.id}, updateParams);
-          }else{
-            return false;
-          }
-        });
-      })
-      .then(function(){
-        console.log('FINISHED reassignOrdersDates');
-      })
-      .catch(function(err){
-        console.log('err',err);
-      });
-  },
-
   isInteger: function(n){
     if(!isNaN(n)){
       return Number(n) === n && n % 1 === 0;
