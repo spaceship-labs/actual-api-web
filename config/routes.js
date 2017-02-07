@@ -242,11 +242,6 @@ module.exports.routes = {
     action: 'updateSource'
   },
 
-  '/quotation/:id/broker':{
-    controller:'quotation',
-    action: 'updateBroker'
-  },
-
   '/quotation/:id/validatestock':{
     controller:'quotation',
     action: 'validateStock'
@@ -266,11 +261,6 @@ module.exports.routes = {
     controller: 'payment',
     action:'add'
   }, 
-
-  '/payment/cancel/:quotationId/:paymentId':{
-    controller: 'payment',
-    action:'cancel'
-  },
 
   '/client/update/:CardCode':{
     controller: 'client',
@@ -366,11 +356,6 @@ module.exports.routes = {
   '/site/findbyhandle/:handle':{
     controller:'site',
     action:'findByHandle'
-  },
-
-  '/sites':{
-    controller: 'site',
-    action: 'getAll'
   },
 
   '/store/find':{

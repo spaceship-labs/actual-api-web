@@ -44,25 +44,6 @@ module.exports = {
       });
   },
 
-  update: function(req, res){
-    var form = req.params.all();
-    var id = form.id;
-    var packageRules = form.packageRules || [];
-    var updatedPackage = false;
-
-    ProductGroup.update({id:id, Type:'packages'}, form)
-      .then(function(updated){
-        updatedPackage = updated;
-        return Promise.each(packageRules, updatePackageRule);
-      })
-      .then(function(){
-        res.json(updatedPackage);
-      })
-      .catch(function(err){
-        res.negotiate(err);
-      });
-  },
-
   getDetailedPackage: function(req, res){
     var form = req.params.all();
     var id = form.id;
@@ -79,36 +60,3 @@ module.exports = {
   }
 
 };
-
-function updatePackageRule(product){
-  var q = {
-    Product         : product.productId,
-    PromotionPackage: product.packageId
-  };
-  return PackageRule.findOne(q)
-    .then(function(productPackage){
-      var params = {
-        quantity: product.packageRule.quantity,
-        discountPg1: product.packageRule.discountPg1,
-        discountPg2: product.packageRule.discountPg2,
-        discountPg3: product.packageRule.discountPg3,
-        discountPg4: product.packageRule.discountPg4,
-        discountPg5: product.packageRule.discountPg5,
-        discountType: product.packageRule.discountType,
-        Product: product.productId,
-        PromotionPackage: product.packageId
-      };
-      if(!productPackage){
-        return PackageRule.create(params);
-      }else{
-        return PackageRule.update({id:productPackage.id}, params);
-      }
-    })
-    .then(function(createdOrUpdated){
-      return createdOrUpdated;
-    })
-    .catch(function(err){
-      console.log(err);
-      return err;
-    });
-}

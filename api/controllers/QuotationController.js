@@ -164,54 +164,6 @@ module.exports = {
       });
   },
 
-  addRecord: function(req, res){
-    var form = req.params.all();
-    var id = form.id;
-    var createdRecord = false;
-    var addedFile = false;
-    if( !isNaN(id) ){
-      id = parseInt(id);
-    }
-    delete form.id;
-    form.Quotation = id;
-
-    QuotationRecord.create(form)
-      .then(function(createdRecordResult){
-        createdRecord = createdRecordResult;
-        return QuotationRecord.findOne({id:createdRecord.id}).populate('User');
-      })
-      .then(function(foundRecord){
-        createdRecord = foundRecord;
-        //if(req.file('file')._files[0]){
-        if(req._fileparser.upstreams.length){
-
-          var options = {
-            dir : 'records/gallery',
-            profile: 'record'            
-          };
-
-          return createdRecord.addFiles(req, options)
-            .then(function(recordWithFiles){
-              return QuotationRecord.findOne({id:createdRecord.id})
-                .populate('User')
-                .populate('files');
-            });
-
-        }else{
-          sails.log.info('not adding file');
-        }
-        return createdRecord;
-      })
-      .then(function(record){
-        res.json(record);
-      })
-      .catch(function(err){
-        console.log(err);
-        res.negotiate(err);
-      });
-
-  },
-
 
   addDetail: function(req, res){
     var form = req.params.all();
@@ -390,21 +342,6 @@ module.exports = {
       });
   },
 
-  getRecords: function(req, res){
-    var form = req.params.all();
-    var id = form.id;
-    QuotationRecord.find({Quotation:id})
-      .populate('User')
-      .populate('files')
-      .then(function(records){
-        res.json(records);
-      })
-      .catch(function(err){
-        console.log(err);
-        res.negotiate(err);
-      });
-  },
-
 
   getCountByUser: function(req, res){
     var form    = req.params.all();
@@ -454,24 +391,6 @@ module.exports = {
       Broker: null,
       source: source
     };    
-    Quotation.update({id:id}, params)
-      .then(function(updated){
-        res.json(updated);
-      })
-      .catch(function(err){
-        console.log(err);
-        res.negotiate(err);
-      });
-  },
-
-  updateBroker: function(req, res){
-    var form = req.params.all();
-    var id = form.id;
-    var brokerId = form.brokerId;
-    var params = {
-      Broker: brokerId,
-      source: null
-    };
     Quotation.update({id:id}, params)
       .then(function(updated){
         res.json(updated);

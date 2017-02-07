@@ -89,25 +89,6 @@ module.exports = {
 
   },
 
-  //TODO: Check why .add() doesnt work for ProductCategory.Parents
-  create: function(req, res){
-    var form = req.params.all();
-    var parents = form.Parents;
-    var relationRecords = [];
-    ProductCategory.create(form).then(function(result){
-      if(result){
-        res.json(result);
-      }
-      else{
-        res.json(false);
-      }
-    })
-    .catch(function(err){
-      console.log(err);
-      res.negotiate(err);
-    });
-  },
-
   destroy: function(req, res){
     var form = req.params.all();
     var id = form.id;
@@ -120,18 +101,6 @@ module.exports = {
     });    
   },
 
-  //TODO: Check better way to add/remove ProductCategory.Parent relation
-  update: function(req, res){
-    var form = req.params.all();
-    var id = form.id;
-    ProductCategory.update({id:id},form).then(function(updatedCategory){
-      res.json(updatedCategory);
-    })
-    .catch(function(err){
-      console.log(err);
-      res.negotiate(err);
-    });    
-  },
 
   getCategory: function(req, res){
     var form = req.params.all();

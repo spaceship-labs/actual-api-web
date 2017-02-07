@@ -59,24 +59,6 @@ module.exports = {
       });
   },
 
-  getCommissionables: function(req, res) {
-    var form = req.params.all();
-    var store = form.store;
-    Role.find({name:['seller', 'store manager']})
-      .then(function(commissionables){
-        var commissionables = commissionables.map(function(c){ return c.id; });
-        var query = store? {mainStore: store} : {};
-        query.role = commissionables;
-        return User.find(query).populate('role');
-      })
-      .then(function(sellers){
-        res.json(sellers);
-      })
-      .catch(function(err){
-        res.negotiate(err);
-      });
-  },
-
   getAll: function(req, res) {
     Store.find().then(function(stores) {
       return res.json(stores);

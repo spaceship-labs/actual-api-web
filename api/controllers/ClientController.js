@@ -28,23 +28,6 @@ module.exports = {
       });
   },
 
-  findBySeller: function(req, res){
-    var form = req.params.all();
-    var model = 'client';
-    var extraParams = {
-      searchFields: ['CardCode','CardName'],
-      populateFields: ['Quotations']
-    };
-    form.filters = {SlpCode: form.seller};
-    Common.find(model, form, extraParams)
-      .then(function(result){
-        res.ok(result);
-      },function(err){
-        console.log(err);
-        res.notFound();
-      });
-  },
-
   findById: function(req, res){
     var form        = req.params.all();
     var id          = form.id;

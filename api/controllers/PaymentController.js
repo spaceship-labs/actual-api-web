@@ -121,56 +121,6 @@ module.exports = {
       });
   },
 
-  cancel: function(req, res){
-    var form = req.allParams();
-    var paymentId = form.paymentId;
-    var quotationId = form.quotationId;
-    var negativePayment; 
-    res.negotiate(new Error('Cancelaciones no disponibles'));
-    /* 
-      Payment.findOne({id:paymentId})
-      .then(function(payment){
-        if(payment.isCancellation){
-          return Promise.reject(new Error('No es posible cancelar un pago negativo'));
-        }
-
-        negativePayment = _.omit(payment,[
-          'id',
-          'folio',
-          'createdAt',
-          'updatedAt'
-        ]);
-        negativePayment.ammount = negativePayment.ammount * -1;
-        negativePayment.isCancellation = true;
-
-        return Payment.update({id:paymentId}, {isCancelled: true});
-      })
-      .then(function(paymentUpdated){
-        sails.log.info('payment updated', paymentUpdated);
-        return Payment.create(negativePayment);
-      })
-      .then(function(negativePaymentCreated){
-        return PaymentService.calculateQuotationAmountPaid(quotationId);
-      })
-      .then(function(ammountPaid){
-        var params = {
-          ammountPaid: ammountPaid,
-          paymentGroup: paymentGroup
-        };
-        return Quotation.update({id:quotationId}, params);
-      })
-      .then(function(){
-        return Quotation.findOne({id: quotationId}).populate('Payments');
-      })
-      .then(function(updatedQuotation){
-        res.json(updatedQuotation);
-      })
-      .catch(function(err){
-        console.log(err);
-        res.negotiate(err);
-      });
-    */    
-  },
 
   getPaymentGroups: function(req, res){
     var paymentGroups = PaymentService.getPaymentGroups();

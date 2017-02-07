@@ -143,23 +143,6 @@ module.exports = {
     }
   },
 
-  brokers: function(req, res) {
-    var form  = req.params.all();
-    var page  = form.page  || 1;
-    var limit = form.limit || 10;
-    Role
-      .findOne({name: 'broker'})
-      .populate('owner')
-      .paginate({page: page, limit: limit})
-      .then(function(role){
-        return res.json(role.owner);
-      })
-      .catch(function(err){
-        console.log(err);
-        res.negotiate(err);
-      });
-  },
-
   stores: function(req, res) {
     var form  = req.allParams();
     var email = form.email;
