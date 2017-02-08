@@ -21,22 +21,22 @@ module.exports.policies = {
 
   '*': ['setupDefaultData'],
   AuthController:{
-    '*': true
+    '*': ['setupDefaultData']
   },
   QuotationController:{
-    '*': ['isAuthenticated']
+    '*': ['setupDefaultData','isAuthenticated']
   },
   UserController:{
-    '*': ['isAuthenticated'],
-    find: ['isAuthenticated', 'isAllowed'],
-    create: ['isAuthenticated', 'isAllowed'],
-    update: ['isAuthenticated', 'isAllowed'],
+    '*': ['setupDefaultData','isAuthenticated'],
+    find: ['setupDefaultData','isAuthenticated', 'isAllowed'],
+    create: ['setupDefaultData','isAuthenticated', 'isAllowed'],
+    update: ['setupDefaultData','isAuthenticated', 'isAllowed'],
     send_password_recovery: true,
     update_password: true,
   },
   MeController: {
-    '*': ['isAuthenticated'],
-    activeStore: true
+    '*': ['setupDefaultData','isAuthenticated'],
+    activeStore: ['setupDefaultData']
   },
 
   /***************************************************************************

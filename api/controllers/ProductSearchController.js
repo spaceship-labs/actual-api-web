@@ -86,7 +86,7 @@ module.exports = {
     var productsIds    = [];
     var promotions     = [];
     var activeStore    = req.activeStore;
-    sails.log.info('activeStore', activeStore);
+    
     var priceField     = activeStore ? Search.getDiscountPriceKeyByStoreCode(activeStore.code) : 'Price';
     var minPrice       = form.minPrice;
     var maxPrice       = form.maxPrice;
@@ -175,6 +175,7 @@ module.exports = {
     var populatePromotions = !_.isUndefined(form.populatePromotions) ? form.populatePromotions : true;
     var queryPromos        = Search.getPromotionsQuery();
     var activeStoreId      = req.user.activeStore.id || false;
+    var activeStore        = req.activeStore;
     var filterByStore      = !_.isUndefined(form.filterByStore) ? form.filterByStore : true;
     var query              = {};
     var products           = [];
@@ -218,12 +219,7 @@ module.exports = {
       })
       .then(function(productsIdsResult) {
         productsIds = productsIdsResult;
-        if(filterByStore && activeStoreId){
-          return Store.findOne({id:activeStoreId});
-        }
-        return false;
-      })
-      .then(function(activeStore){
+
         if(filterByStore && activeStore.code){
           filters.push(
             {key:activeStore.code, value: {'>':0} }

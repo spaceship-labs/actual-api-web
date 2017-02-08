@@ -20,7 +20,7 @@ module.exports = {
     var quotation;
     var quotationUpdateParams;
     form.Quotation    = quotationId;
-    form.Store = req.user.activeStore.id;
+    form.Store = req.activeStore.id;
     form.User = req.user.id;    
 
     if (form.Details) {

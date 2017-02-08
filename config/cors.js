@@ -30,7 +30,7 @@ module.exports.cors = {
   allRoutes: true,
   //origin: '*',
   origin: 'http://sandboxweb.miactual.com, http://localhost:9000, http://localhost:3000',
-  headers: 'content-type, Authorization'
+  headers: 'content-type, Authorization, site'
 
   /***************************************************************************
   *                                                                          *

@@ -11,11 +11,11 @@ module.exports = {
     var form = req.params.all();
     var createdId;
     form.Details = formatProductsIds(form.Details);
-    form.Store = req.user.activeStore.id;
+    form.Store = req.activeStore.id;
     var opts = {
       paymentGroup:1,
       updateDetails: true,
-      currentStore: req.user.activeStore.id
+      currentStore: req.activeStore.id
     };
 
     Quotation.create(form)
@@ -44,7 +44,7 @@ module.exports = {
   update: function(req, res){
     var form = req.params.all();
     var id = form.id;
-    form.Store =  req.user.activeStore.id;
+    form.Store =  req.activeStore.id;
 
     Quotation.update({id:id}, form)
       .then(function(updatedQuotation){
@@ -105,7 +105,7 @@ module.exports = {
 
     var updateToLatest = QuotationService.updateQuotationToLatestData(id, userId, {
       update:true,
-      currentStore: req.user.activeStore.id
+      currentStore: req.activeStore.id
     });
 
     if(!forceLatestData){
@@ -176,7 +176,7 @@ module.exports = {
     var opts = {
       paymentGroup:1,
       updateDetails: true,
-      currentStore: req.user.activeStore.id
+      currentStore: req.activeStore.id
     };
     
     QuotationDetail.create(form)
@@ -214,7 +214,7 @@ module.exports = {
     var opts = {
       paymentGroup:1,
       updateDetails: true,
-      currentStore: req.user.activeStore.id
+      currentStore: req.activeStore.id
     };
     
     QuotationDetail.create(form.Details)
@@ -327,7 +327,7 @@ module.exports = {
     var params = {
       update: false,
       paymentGroup: paymentGroup,
-      currentStore: req.user.activeStore.id
+      currentStore: req.activeStore.id
     };
     var calculator = QuotationService.Calculator();
     console.log('params', params);
@@ -409,7 +409,7 @@ module.exports = {
     QuotationDetail.find({Quotation: quotationId}).populate('Product')
       .then(function(detailsFound){
         details = detailsFound;
-        var whsId = req.user.activeStore.Warehouse;
+        var whsId = req.activeStore.Warehouse;
         return Company.findOne({id: whsId});
       })
       .then(function(warehouse){

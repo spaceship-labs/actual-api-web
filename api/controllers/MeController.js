@@ -22,36 +22,8 @@ module.exports = {
   },
   
   activeStore: function(req, res) {
-    var user = req.user;
-    var storeQuery = Store.findOne({
-      id: SiteService.getDefaultActiveStoreId(req)
-    });
-    
-    if(user){
-      User.findOne(user.id).populate('activeStore');
-    }
-
-      storeQuery.then(function(result){
-        var store;
-        if(user && result){
-          store = user.activeStore;
-        }
-        else if(result && !user){
-          store = result;
-        }
-
-        if(store){
-          res.json(store);
-        }
-        else{
-          return Promise.reject(new Error('Store not found'));
-        }
-
-      })
-      .catch(function(err){
-        console.log('err')
-        res.negotiate(err);
-      });
+    sails.log.info('req.activeStore', req.activeStore);
+    res.json(req.activeStore);
   },
 
   generateCashReport: function(req, res){
