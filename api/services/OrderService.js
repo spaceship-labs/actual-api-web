@@ -9,9 +9,9 @@ var CLIENT_BALANCE_TYPE = 'client-balance';
 var BALANCE_SAP_TYPE = 'Balance';
 
 module.exports = {
-	createFromQuotation: createFromQuotation,
-	getCountByUser: getCountByUser,
-	getTotalsByUser: getTotalsByUser
+  createFromQuotation: createFromQuotation,
+  getCountByUser: getCountByUser,
+  getTotalsByUser: getTotalsByUser
 };
 
 
@@ -304,9 +304,9 @@ function createFromQuotation(form, currentUser){
         client: quotation.Client
       };
       return processEwalletBalance(params);
-    })	
+    })  
     .then(function(){
-    	return orderCreated;
+      return orderCreated;
     });
 }
 
@@ -317,13 +317,6 @@ function isValidOrderCreated(sapResponse, sapResult, paymentsToCreate){
     if(sapResult.length <= 0){
       return {
         error: 'No fue posible crear el pedido en SAP'
-      };
-    }
-
-    var clientBalance = extractBalanceFromSapResult(sapResult);
-    if(!clientBalance || isNaN(clientBalance) ){
-      return {
-        error: 'Balance del cliente no definido en la respuesta'
       };
     }
 
@@ -350,6 +343,14 @@ function isValidOrderCreated(sapResponse, sapResult, paymentsToCreate){
         error: false
       };
     }
+
+    var clientBalance = extractBalanceFromSapResult(sapResult);
+    if(!clientBalance || isNaN(clientBalance) ){
+      return {
+        error: 'Balance del cliente no definido en la respuesta'
+      };
+    }
+    
   }
   return {
     error: true
