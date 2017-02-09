@@ -76,10 +76,6 @@ module.exports = {
     User:{
       model:'User'
     },
-    Commissions: {
-      collection: 'commission',
-      via: 'payment'
-    },
     Client:{
       model: 'Client'
     },
@@ -95,16 +91,4 @@ module.exports = {
     });
   },
 
-  /*
-  afterCreate: function(val, cb) {
-    Commissions
-      .calculate()
-      .then(function() {
-        cb();
-      })
-      .catch(function(err) {
-        cb(err);
-      });
-  }
-  */
-}
+};
