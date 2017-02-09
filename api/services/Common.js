@@ -5,6 +5,22 @@ var moment = require('moment');
 var assign = require('object-assign');
 var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
 
+function formatMongoRecord(record){
+  record.id = record._id.toString();
+  for(var key in record){
+    if( record[key] instanceof ObjectId){
+      record[key] = record[key].toString();
+    }
+
+    /*
+    if( record[key] instanceof Date ){
+      record[key] = record[key].toLocaleString()
+    }
+    */
+  }
+  return record;  
+}
+
 module.exports = {
 
   nativeFindOne: function(findCrieria, model){
@@ -20,6 +36,7 @@ module.exports = {
             console.log('err findOne',errFind);
             reject(errFind);
           }
+          recordFound = formatMongoRecord(recordFound);
           resolve(recordFound);
         });
       });
@@ -40,18 +57,7 @@ module.exports = {
             reject(effFind);
           }
           records = records.map(function(r){
-            r.id = r._id;
-            for(var key in r){
-              if( r[key] instanceof ObjectId){
-                r[key] = r[key].toString();
-              }
-
-              /*
-              if( r[key] instanceof Date ){
-                r[key] = r[key].toLocaleString()
-              }
-              */
-            }
+            r = formatMongoRecord(r);
             return r;
           });
           resolve(records);
@@ -59,6 +65,33 @@ module.exports = {
       });
     });
   },  
+
+  reassignOrdersDates: function() {
+    console.log('started find reassignOrdersDates');
+    Order.find({}).populate('Quotation')
+      .then(function(orders){
+        console.log('orders', orders.length);
+        //var ordersIds = orders.map(function(o){return o.id;});
+        return Promise.each(orders,function(order){
+          if(order.Quotation){
+            var updateParams = {
+              createdAt: order.Quotation.createdAt,
+              updatedAt: order.Quotation.updatedAt
+            };
+            console.log('updating order:' + order.id + ' with:' + updateParams.createdAt);
+            return Order.update({id:order.id}, updateParams);
+          }else{
+            return false;
+          }
+        });
+      })
+      .then(function(){
+        console.log('FINISHED reassignOrdersDates');
+      })
+      .catch(function(err){
+        console.log('err',err);
+      });
+  },
 
   isInteger: function(n){
     if(!isNaN(n)){
