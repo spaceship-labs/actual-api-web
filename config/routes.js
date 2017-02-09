@@ -48,11 +48,6 @@ module.exports.routes = {
     action: 'signin'
   },
 
-  '/user/findbyid/:id':{
-    controller: 'user',
-    action: 'findById'
-  },
-
   '/user/find/:page':{
     controller: 'user',
     action: 'find'
@@ -166,11 +161,6 @@ module.exports.routes = {
     action:'getEwalletByClient'
   },
 
-  '/client/:id/balance':{
-    controller:'client',
-    action:'getClientBalance'
-  },
-
   '/quotation/create':{
     controller: 'quotation',
     action: 'create'
@@ -191,26 +181,11 @@ module.exports.routes = {
     action:'findByIdQuickRead'
   },
 
-
-  '/quotation/findbyclient/:page':{
-    controller: 'quotation',
-    action:'findByClient'
-  },
-
   '/quotation/find/:page':{
     controller: 'quotation',
     action:'find'
   },
 
-  '/quotation/user/:userId/totals':{
-    controller: 'quotation',
-    action:'getTotalsByuser'
-  },
-
-  '/quotation/user/:userId/count':{
-    controller: 'quotation',
-    action:'getCountByUser'
-  },
 
   '/quotation/adddetail/:id':{
     controller:'quotation',
@@ -235,11 +210,6 @@ module.exports.routes = {
   '/quotation/sendemail/:id':{
     controller:'quotation',
     action:'sendEmail'
-  },
-
-  '/quotation/:id/source':{
-    controller:'quotation',
-    action: 'updateSource'
   },
 
   '/quotation/:id/validatestock':{

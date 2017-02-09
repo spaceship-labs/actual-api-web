@@ -4,30 +4,6 @@ var Promise = require('bluebird');
 var ADDRESS_TYPE = 'S';
 
 module.exports = {
-  find: function(req, res){
-    var form           = req.params.all();
-    var model          = 'client';
-    var extraParams = {
-      searchFields: [
-        'id',
-        'CardName',
-        'CardCode',
-        'firstName',
-        'lastName',
-        'E_Mail',
-        'phone'
-      ]
-    };
-    
-    Common.find(model, form, extraParams)
-      .then(function(result){
-        res.ok(result);
-      })
-      .catch(function(err){
-        console.log(err);
-        res.negotiate(err);
-      });
-  },
 
   findById: function(req, res){
     var form        = req.params.all();
@@ -356,21 +332,6 @@ module.exports = {
         res.negotiate(err);
       });
   },
-
-  getClientBalance: function(req, res){
-    var form = req.allParams();
-    var id = form.id;
-    Client.findOne({id:id, select:['Balance']})
-      .then(function(client){
-        var balance = client.Balance;
-        res.json(balance);
-      })
-      .catch(function(err){
-        console.log(err);
-        res.negotiate(err);
-      });
-  }  
-
 
 };
 

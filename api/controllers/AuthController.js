@@ -49,26 +49,6 @@ module.exports = {
       _onPassportAuth.bind(this, req, res))(req, res);
   },
 
-  authorizeManager: function(req, res){
-    var form = req.params.all();
-    var email = form.email;
-    var password = form.password;
-    User.findOne({email:email}).populate('role')
-      .then(function(user){
-        if( !user ||
-            !CipherService.comparePassword(password, user) ||
-            user.role.name != 'store manager'
-        ){
-          return res.unauthorized();
-        }
-        delete user.password;
-        return res.json(user);
-      })
-      .catch(function(err){
-        res.negotiate(err);
-      });
-  },
-
   homeStatus: function(req, res){
     res.ok({status:'ok!'});
   }

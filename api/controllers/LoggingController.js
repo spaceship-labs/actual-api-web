@@ -27,7 +27,7 @@ module.exports = {
       limit: form.limit || 5
     };
     if (form.user) {
-      query.user = form.user;
+      query.user = req.user.id;
     }
     Logging.find(query)
       .sort('createdAt DESC')

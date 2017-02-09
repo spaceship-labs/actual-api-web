@@ -4,6 +4,8 @@ var assign            = require('object-assign');
 var moment            = require('moment');
 var EWALLET_TYPE      = 'ewallet';
 var EWALLET_NEGATIVE  = 'negative';
+var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
+
 
 module.exports = {
 
@@ -12,6 +14,7 @@ module.exports = {
     var createdId;
     form.Details = formatProductsIds(form.Details);
     form.Store = req.activeStore.id;
+    form.User = req.user.id;
     var opts = {
       paymentGroup:1,
       updateDetails: true,
@@ -29,7 +32,8 @@ module.exports = {
         return calculator.updateQuotationTotals(created.id, opts);
       })
       .then(function(updatedQuotation){
-        return Quotation.findOne({id:createdId});
+        return Common.nativeFindOne({_id: ObjectId(createdId)}, Quotation);
+        //return Quotation.findOne({id:createdId});
       })
       .then(function(quotation){
         res.json(quotation);
@@ -46,7 +50,13 @@ module.exports = {
     var id = form.id;
     form.Store =  req.activeStore.id;
 
-    Quotation.update({id:id}, form)
+    Common.nativeFindOne({_id: ObjectId(createdId)}, Quotation)
+      .then(function(quotation){
+        if(quotation.User !== req.user.id){
+          return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
+        }
+        return Quotation.update({id:id}, form);
+      })
       .then(function(updatedQuotation){
         if(updatedQuotation && updatedQuotation.length > 0){
           res.json(updatedQuotation[0]);
@@ -64,13 +74,20 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
     var userId = req.user.id;
+    var query = {
+      id: id,
+      User: userId
+    };
 
-    Quotation.findOne({id: id})
+    Quotation.findOne(query)
       .populate('Details')
       .then(function(quotation){
         if(!quotation){
           return Promise.reject(new Error('Cotización no encontrada'));
-        }        
+        }  
+        if(quotation.User !== req.user.id){
+          return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
+        }              
         res.json(quotation);
       })
       .catch(function(err){
@@ -89,8 +106,12 @@ module.exports = {
     if( !isNaN(id) ){
       id = parseInt(id);
     }
-    
-    var quotationQuery =  Quotation.findOne({id: id})
+    var query = {
+      id: id,
+      User: req.user.id
+    };
+
+    var quotationQuery =  Quotation.findOne(query)
       .populate('Details')
       .populate('User')
       .populate('Client')
@@ -121,6 +142,9 @@ module.exports = {
         if(!quotation){
           return Promise.reject(new Error('Cotización no encontrada'));
         }
+        if(quotation.User !== req.user.id){
+          return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
+        }        
         return res.json(quotation);
       })
       .catch(function(err){
@@ -137,6 +161,7 @@ module.exports = {
     form.Quotation = id;
     form.Details = formatProductsIds(form.Details);
     form.shipDate = moment(form.shipDate).startOf('day').toDate();
+    form.User = req.user.id;
 
     delete form.id;
     var opts = {
@@ -145,7 +170,13 @@ module.exports = {
       currentStore: req.activeStore.id
     };
     
-    QuotationDetail.create(form)
+    Common.nativeFindOne({_id: ObjectId(id)}, Quotation)
+      .then(function(quotation){
+        if(quotation.User !== req.user.id){
+          return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
+        }
+        return QuotationDetail.create(form);
+      })
       .then(function(created){
          var calculator = QuotationService.Calculator();
          return calculator.updateQuotationTotals(id, opts);
@@ -172,6 +203,7 @@ module.exports = {
     if(form.Details && form.Details.length > 0 && _.isArray(form.Details) ){
       form.Details = form.Details.map(function(d){
         d.shipDate = moment(d.shipDate).startOf('day').toDate();
+        d.User = req.user.id;
         return d;
       });
     }
@@ -182,8 +214,14 @@ module.exports = {
       updateDetails: true,
       currentStore: req.activeStore.id
     };
-    
-    QuotationDetail.create(form.Details)
+
+    Common.nativeFindOne({_id: ObjectId(id)}, Quotation)
+      .then(function(quotation){
+        if(quotation.User !== req.user.id){
+          return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
+        }
+        return QuotationDetail.create(form.Details);
+      })
       .then(function(created){
          var calculator = QuotationService.Calculator();
          return calculator.updateQuotationTotals(id, opts);
@@ -211,7 +249,15 @@ module.exports = {
       currentStore: req.user.activeStore.id
     };
 
-    QuotationDetail.destroy({id:detailsIds})
+
+    Common.nativeFindOne({_id: ObjectId(id)}, QuotationDetail)
+      .then(function(quotationDetail){
+        if(quotationDetail.User !== req.user.id){
+          return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
+        }
+
+        return QuotationDetail.destroy({id:detailsIds});
+      })
       .then(function(){
         var calculator = QuotationService.Calculator();
         return calculator.updateQuotationTotals(quotationId, opts);
@@ -228,27 +274,11 @@ module.exports = {
       });
   },
 
-  findByClient: function(req, res){
-    var form = req.params.all();
-    var client = form.client;
-    var model = 'quotation';
-    var extraParams = {
-      selectFields: form.fields,
-      populateFields: ['Client']
-    };
-    Common.find(model, form, extraParams)
-      .then(function(result){
-        res.ok(result);
-      })
-      .catch(function(err){
-        console.log(err);
-        res.negotiate(err);
-      });
-  },
 
   find: function(req, res){
     var form = req.params.all();
     form.filters = form.filters || {};
+    form.filters.User = req.user.id;
 
     var client = form.client;
     var model = 'quotation';
@@ -269,14 +299,7 @@ module.exports = {
       populateFields: ['Client']
     };
 
-      preSearch.then(function(preSearchResults){
-        //Search by pre clients search
-        if( preSearchResults && _.isArray(preSearchResults) ){
-          form.filters.Client = preSearchResults;
-        }
-
-        return Common.find(model, form, extraParams);
-      })
+    Common.find(model, form, extraParams)
       .then(function(result){
         res.ok(result);
       })
@@ -298,7 +321,13 @@ module.exports = {
     var calculator = QuotationService.Calculator();
     console.log('params', params);
 
-    calculator.getQuotationTotals(id, params)
+    Common.nativeFindOne({_id: ObjectId(id)}, Quotation)
+      .then(function(quotation){
+        if(quotation.User !== req.user.id){
+          return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
+        }        
+        return calculator.getQuotationTotals(id, params);
+      })
       .then(function(totals){
         res.json(totals);
       })
@@ -309,38 +338,17 @@ module.exports = {
   },
 
 
-  getCountByUser: function(req, res){
-    var form    = req.params.all();
-    var options = form;
-    QuotationService.getCountByUser(options)
-      .then(function(count){
-        res.json(count);
-      })
-      .catch(function(err){
-        console.log(err);
-        res.negotiate(err);
-      });
-  },
-
-
-  getTotalsByUser: function(req, res){
-    var form = req.params.all();
-    var options = form;
-    QuotationService.getTotalsByUser(options)
-      .then(function(totals){
-        res.json(totals);
-      })
-      .catch(function(err){
-        console.log(err);
-        res.negotiate(err);
-      });
-  },
-
   sendEmail: function(req, res){
     var form = req.params.all();
     var id = form.id;
-    Email
-      .sendQuotation(id)
+
+    Common.nativeFindOne({_id: ObjectId(id)}, Quotation)
+      .then(function(quotation){
+        if(quotation.User !== req.user.id){
+          return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
+        }      
+        return Email.sendQuotation(id);
+      })
       .then(function(quotation) {
         return res.json(quotation);
       })
@@ -349,30 +357,17 @@ module.exports = {
       });
   },
 
-  updateSource: function(req, res){
-    var form = req.params.all();
-    var id = form.id;
-    var source = form.source;
-    var params = {
-      Broker: null,
-      source: source
-    };    
-    Quotation.update({id:id}, params)
-      .then(function(updated){
-        res.json(updated);
-      })
-      .catch(function(err){
-        console.log(err);
-        res.negotiate(err);
-      });
-  },
-
   getCurrentStock: function(req, res){
     var form = req.allParams();
     var quotationId = form.quotationId;
     var warehouse;
     var details;
-    QuotationDetail.find({Quotation: quotationId}).populate('Product')
+    var query = {
+      Quotation: quotationId,
+      User: req.user.id
+    };
+
+    QuotationDetail.find(query).populate('Product')
       .then(function(detailsFound){
         details = detailsFound;
         var whsId = req.activeStore.Warehouse;
@@ -407,8 +402,13 @@ module.exports = {
   getQuotationPaymentOptions: function(req, res){
     var form = req.allParams();
     var quotationId = form.id;
-    Quotation.findOne({id:quotationId})
+
+    Common.nativeFindOne({_id: ObjectId(quotationId)}, Quotation)
       .then(function(quotation){
+        if(quotation.User !== req.user.id){
+          return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
+        }   
+
         return PaymentService.getMethodGroupsWithTotals(quotationId, quotation.User);
       })
       .then(function(paymentOptions){
@@ -423,7 +423,12 @@ module.exports = {
   getQuotationSapLogs: function(req, res){
     var form = req.allParams();
     var quotationId = form.id;
-    SapOrderConnectionLog.find({Quotation:quotationId})
+    var query = {
+      Quotation:quotationId,
+      User: req.user.id
+    };
+
+    SapOrderConnectionLog.find(query)
       .then(function(logs){
         res.json(logs);
       })

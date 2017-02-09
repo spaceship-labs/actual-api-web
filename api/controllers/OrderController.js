@@ -22,6 +22,9 @@ module.exports = {
       selectFields: form.fields,
       populateFields: ['Client']
     };
+    form.filters = form.filters || {};
+    form.filters.User = req.user.id;
+
     Common.find(model, form, extraParams)
       .then(function(result){
         res.ok(result);
@@ -40,7 +43,12 @@ module.exports = {
     if( !isNaN(id) ){
       id = parseInt(id);
     }
-    Order.findOne({id: id})
+    var orderQuery = {
+      id: id,
+      User: req.user.id
+    };
+
+    Order.findOne(orderQuery)
       .populate('Details')
       .populate('User')
       .populate('Client')
@@ -48,7 +56,6 @@ module.exports = {
       .populate('Payments')
       .populate('Store')
       .populate('EwalletRecords')
-      .populate('Broker')
       .populate('OrdersSap')
       .populate('SapOrderConnectionLog')
       .then(function(foundOrder){
