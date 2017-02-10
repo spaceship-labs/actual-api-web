@@ -9,11 +9,8 @@ module.exports = {
   product: function(req, res) {
     var form = req.allParams();
     var productCode = form.productCode;
-    var storeId = form.storeId;
     var store = false;
-    if(!storeId || storeId === 'null'){
-      storeId = SiteService.getDefaultActiveStoreId(req);
-    }
+    var storeId = SiteService.getDefaultActiveStoreId(req);
 
     Store.findOne({id:storeId}).populate('Warehouse')
       .then(function(storeResult){
