@@ -18,7 +18,6 @@ module.exports = {
       d.User = req.user.id;
       return d;
     })
-    console.log("form: ",form.Details);
     form.Store = req.activeStore.id;
     form.User = req.user.id;
     form.isWeb = true;
@@ -86,14 +85,12 @@ module.exports = {
       id: id,
       User: userId
     };
-    console.log("Eror", req.user);
     Quotation.findOne(query)
       .populate('Details')
       .then(function(quotation){
         if(!quotation){
           return Promise.reject(new Error('Cotización no encontrada'));
         } 
-        console.log("Quo", quotation); 
         if(quotation.User !== req.user.id){
           return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
         }              
@@ -147,7 +144,7 @@ module.exports = {
     updateToLatest.then(function(){
         return quotationQuery;
       })
-      .then(function(quotation){        console.log("Query", quotation); 
+      .then(function(quotation){
 
         if(!quotation){
           return Promise.reject(new Error('Cotización no encontrada'));
@@ -419,7 +416,7 @@ module.exports = {
           return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
         }   
 
-        return PaymentService.getMethodGroupsWithTotals(quotationId, quotation.User);
+        return PaymentService.getMethodGroupsWithTotals(quotationId, quotation.User, req);
       })
       .then(function(paymentOptions){
         res.json(paymentOptions);

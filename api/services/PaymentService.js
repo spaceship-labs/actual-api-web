@@ -45,7 +45,7 @@ function getExchangeRate(){
     });
 }
 
-function getMethodGroupsWithTotals(quotationId, sellerId){
+function getMethodGroupsWithTotals(quotationId, userId){
   var methodsGroups = paymentGroups;
   var discountKeys = [
     'discountPg1',
@@ -60,12 +60,17 @@ function getMethodGroupsWithTotals(quotationId, sellerId){
     var params = {
       update: false,
       paymentGroup: mG.group,
-      activeStore: req.activeStore.id
     };
-
-    params.currentStore = user.activeStore;
-    var calculator = QuotationService.Calculator();
-    return calculator.getQuotationTotals(id, params);
+    return UserWeb
+      .findOne({
+        select: ['activeStore'],
+        id: userId,
+      })
+      .then(function(user){
+        params.currentStore = user.activeStore;
+        var calculator = QuotationService.Calculator();
+        return calculator.getQuotationTotals(id, params);
+      });
   });
 
   return Promise

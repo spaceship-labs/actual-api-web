@@ -22,7 +22,7 @@ module.exports = {
   },
   
   activeStore: function(req, res) {
-    sails.log.info('req.activeStore', req.activeStore);
+    //sails.log.info('req.activeStore', req.activeStore);
     res.json(req.activeStore);
   },
 };

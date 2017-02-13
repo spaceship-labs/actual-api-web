@@ -23,9 +23,7 @@ var JWT_STRATEGY_CONFIG = {
 };
 
 function _onLocalStrategyAuth(email, password, next){
-  User.findOne({email: email})
-    .populate('role')
-    .populate('Seller')
+  UserWeb.findOne({email: email})
     .exec(function(error, user){
       if (error) return next(error, false, {});
       if (!user) return next(null, false,{
@@ -38,14 +36,7 @@ function _onLocalStrategyAuth(email, password, next){
           code: 'USER_NOT_ACTIVE',          
           message: 'USER NOT ACTIVE'
         });        
-      }        
-
-      if(!user.webUser){
-        return next(null, false, {
-          code: 'ONLY_WEB_USERS AUTHORIZED',          
-          message: 'ONLY_WEB_USERS AUTHORIZED'
-        });        
-      }      
+      }            
 
       //TODO: replace with new cipher service type
       if( !CipherService.comparePassword(password, user) ){
@@ -55,7 +46,7 @@ function _onLocalStrategyAuth(email, password, next){
         });
       }
 
-      User.update({id : user.id},{ lastLogin : new Date() })
+      UserWeb.update({id : user.id},{ lastLogin : new Date() })
         .exec(function(err,ruser){
           if (error) return next(error, false, {});
 
@@ -78,10 +69,8 @@ function _onJwtStrategyAuth(payload, next){
     });
   }
 
-  return User.findOne({id: userId})
+  return UserWeb.findOne({id: userId})
     .populate('activeStore')
-    .populate('role')
-    .populate('Seller')
     //.populate('Stores')
     .then(function(userFound){
       var user = userFound;
