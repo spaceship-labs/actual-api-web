@@ -65,7 +65,7 @@ module.exports = {
 
   },
 
-  getMainCategories: function(res, res){
+  getMainCategories: function(req, res){
     ProductCategory.find({IsMain:true}).then(function(categories){
       res.json(categories);
     })
@@ -88,19 +88,6 @@ module.exports = {
       });
 
   },
-
-  destroy: function(req, res){
-    var form = req.params.all();
-    var id = form.id;
-    ProductCategory.destroy({id:id}).then(function(){
-      return res.json({destroyed: true});
-    })
-    .catch(function(err){
-      console.log(err);
-      res.negotiate(err);
-    });    
-  },
-
 
   getCategory: function(req, res){
     var form = req.params.all();

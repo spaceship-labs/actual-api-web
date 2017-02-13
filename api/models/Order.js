@@ -47,11 +47,9 @@ module.exports = {
       via:'Order'
     },
     User:{
-      model: 'User',
+      model: 'UserWeb',
     },
-    Broker:{
-      model: 'User',
-    },
+
     Address:{
       model:'ClientContact',
     },

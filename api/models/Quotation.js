@@ -10,7 +10,7 @@ module.exports = {
       model:'Client'
     },
     User:{
-      model: 'User',
+      model: 'UserWeb',
     },
     Details: {
       collection:'QuotationDetail',
@@ -44,6 +44,7 @@ module.exports = {
 
     CardName: {type:'string'},
     CardCode:{type:'string'},
+    isWeb:{type:'boolean'},
     isClosed:{type:'boolean'},
     isClosedReason:{type:'string'},
     isClosedNotes:{type:'text'},

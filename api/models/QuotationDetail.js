@@ -30,6 +30,9 @@ module.exports = {
     Product: {
       model:'Product'
     },
+    User:{
+      model: 'UserWeb'
+    },
     //ship
     shipDate: {
       type: 'date',

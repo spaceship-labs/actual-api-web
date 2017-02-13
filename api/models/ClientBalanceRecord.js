@@ -23,7 +23,7 @@ module.exports = {
       model:'QuotationDetail'
     },
     User:{
-      model:'User'
+      model:'UserWeb'
     },
     Client:{
     	model: 'Client'

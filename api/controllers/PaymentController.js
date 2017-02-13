@@ -27,7 +27,7 @@ module.exports = {
       form.Details = formatProductsIds(form.Details);
     }
 
-    StockService.validateQuotationStockById(quotationId, req.user.id)
+    StockService.validateQuotationStockById(quotationId, req)
       .then(function(isValidStock){
 
         if(!isValidStock){

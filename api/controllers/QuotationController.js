@@ -12,9 +12,12 @@ module.exports = {
   create: function(req, res){
     var form = req.params.all();
     var createdId;
+    
     form.Details = formatProductsIds(form.Details);
     form.Store = req.activeStore.id;
     form.User = req.user.id;
+    form.isWeb = true;
+
     var opts = {
       paymentGroup:1,
       updateDetails: true,
@@ -389,7 +392,7 @@ module.exports = {
   validateStock: function(req, res){
     var form = req.allParams();
     var quotationId = form.id;
-    StockService.validateQuotationStockById(quotationId, req.user.id)
+    StockService.validateQuotationStockById(quotationId, req)
       .then(function(isValid){
         return res.json({isValid: isValid});
       })

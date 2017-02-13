@@ -95,32 +95,7 @@ module.exports = {
       collection:'store',
       via:'Warehouse'
     }
-    /*
-    users: {
-      collection: 'user',
-      via: 'companies'
-    },
-    Promotions:{
-      collection: 'promotion',
-      via: 'Companies'
-    },
-    Payments: {
-      collection:'Payment',
-      via:'Store'
-    },
-    Quotations: {
-      collection:'Quotation',
-      via:'Store'
-    },
-    Orders: {
-      collection:'Order',
-      via:'Store'
-    },
-    ProductsPackages:{
-      collection:'ProductGroup',
-      via:'Stores'
-    }
-    */
+
   }
 };
 

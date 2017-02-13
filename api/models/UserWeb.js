@@ -124,22 +124,7 @@ module.exports = {
           values.password = CipherService.hashPassword(values.password);
         }
         next();
-    },
-    beforeDestroy: function(criteria, next){
-      User.find(criteria).populate('Seller')
-        .then(function(users) {
-          return Promise.all(
-            users.map(function(user){
-              return Seller.update(user.Seller.id, {User: null});
-            })
-          );
-        })
-        .then(function(users){
-          next();
-        });
-    },
-
-
+    }
 };
 
 function isArray(o) {

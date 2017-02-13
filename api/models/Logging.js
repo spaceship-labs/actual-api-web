@@ -9,7 +9,7 @@
 module.exports = {
   attributes: {
     user: {
-      model: 'user',
+      model: 'userweb',
       required: true
     },
     message: {

@@ -19,7 +19,7 @@ function _onPassportAuth(req, res, error, user, info){
     activeStore: activeStoreId
   };
   
-  User.update(user.id, updateParams)
+  UserWeb.update(user.id, updateParams)
     .then(function(users) {
       return users[0];
     })

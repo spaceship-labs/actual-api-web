@@ -74,7 +74,7 @@ module.exports = {
       model:'Quotation'
     },
     User:{
-      model:'User'
+      model:'UserWeb'
     },
     Client:{
       model: 'Client'

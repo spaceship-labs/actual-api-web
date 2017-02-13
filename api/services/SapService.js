@@ -64,7 +64,7 @@ function createClient(params){
 
   client.LicTradNum  = client.LicTradNum || 'XAXX010101000';
 
-  return User.findOne({id:client.User}).populate('Seller')
+  return UserWeb.findOne({id:client.User}).populate('Seller')
     .then(function(user){
       client.SlpCode = -1;//Assigns seller code from SAP
       if(user.Seller){

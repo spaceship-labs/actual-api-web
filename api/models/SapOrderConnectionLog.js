@@ -5,7 +5,7 @@ module.exports = {
       model: 'Quotation'
     },
     User:{
-      model: 'User'
+      model: 'UserWeb'
     },
     Order: {
       model:'Order'

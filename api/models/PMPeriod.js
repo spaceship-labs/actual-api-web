@@ -18,4 +18,4 @@ module.exports = {
     startDate: {type:'datetime'},
     endDate: {type:'datetime'},
   }
-}
+};

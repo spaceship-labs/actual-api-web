@@ -12,7 +12,7 @@ module.exports = {
     var form  = req.params.all();
     var email = form.email || false;
     if(email && Common.validateEmail(email) ){
-      User.findOne( {email:email}, {select: ['id', 'password', 'email']} )
+      UserWeb.findOne( {email:email}, {select: ['id', 'password', 'email']} )
         .then(function(user){
           var values = user.id + user.email + user.password;
           var tokenAux = bcrypt.hashSync(values ,bcrypt.genSaltSync(10));
@@ -55,7 +55,7 @@ module.exports = {
     if(token && email && password && confirmPass){
       if(password == confirmPass){
         validateToken(token, email, function(err, result){
-          User.update(
+          UserWeb.update(
             {email: email},
             {new_password: password}
           ).then(function(user){
@@ -77,7 +77,7 @@ module.exports = {
   stores: function(req, res) {
     var form  = req.allParams();
     var email = form.email;
-    User.findOne({email: email})
+    UserWeb.findOne({email: email})
       .populate('Stores')
       .then(function(user) {
         var stores = user && user.Stores || [];
@@ -91,7 +91,7 @@ module.exports = {
 };
 
 function validateToken(token, email, cb){
-  User.findOne(
+  UserWeb.findOne(
     {email:email},
     {select: ['id', 'email', 'password']}
   ).then(function(user){

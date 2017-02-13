@@ -90,12 +90,12 @@ function getTotalsByUser(form){
 
 }
 
-function createFromQuotation(form, currentUser){
+function createFromQuotation(form, req){
   var quotationId  = form.quotationId;
   var opts         = {
     paymentGroup: form.paymentGroup || 1,
     updateDetails: true,
-    currentStore: currentUser.activeStore.id
+    currentStore: req.user.activeStore.id
   };
   var orderCreated = false;
   var SlpCode      = -1;
@@ -116,7 +116,7 @@ function createFromQuotation(form, currentUser){
           new Error('Ya se ha creado un pedido sobre esta cotización : ' + orderUrl)
         );
       }
-      return StockService.validateQuotationStockById(quotationId, currentUser.id);
+      return StockService.validateQuotationStockById(quotationId, req);
     })
     .then(function(isValidStock){
       if(!isValidStock){
@@ -153,7 +153,7 @@ function createFromQuotation(form, currentUser){
         );
       }
 
-      var user = currentUser;
+      var user = req.user;
       if(user.Seller){
         SlpCode = user.Seller.SlpCode;
       }
@@ -236,7 +236,7 @@ function createFromQuotation(form, currentUser){
       sails.log.info('createSaleOrder response', sapResponse);
       var log = {
         content: sapEndpoint + '\n' +  JSON.stringify(sapResponse),
-        User   : currentUser.id,
+        User   : req.user.id,
         Store  : opts.currentStore,
         Quotation: quotationId
       };

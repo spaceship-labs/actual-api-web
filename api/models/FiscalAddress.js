@@ -22,12 +22,6 @@ module.exports = {
     ZipCode:{type:'string'},
     AdresType:{type:'string'},
 
-    //RELATIONS (AUXILIAR)
-    //Important: This is an auxiliar Relation, all FiscalAddress in client, must be searched by a 
-    //an or query: {$or: [
-    //  {Client: clientId},
-    //  {CardCode: clientCardCode}
-    //  ]}
     Client:{
         model:'Client'
     }

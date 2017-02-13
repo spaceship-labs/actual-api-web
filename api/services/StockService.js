@@ -101,15 +101,13 @@ function getStoresWithProduct(ItemCode, whsCode){
 		});
 }
 
-function validateQuotationStockById(quotationId, userId){
+function validateQuotationStockById(quotationId, req){
   var warehouse;
-  return Promise.join(
-    User.findOne({id: userId}).populate('activeStore'),
-    Quotation.findOne({id: quotationId}).populate('Details')
-  ).then(function(results){
-    var user = results[0];
+  return Quotation.findOne({id: quotationId}).populate('Details')
+	.then(function(quotation){
+		var user = req.user;
     var whsId = user.activeStore.Warehouse;
-    details = results[1].Details;
+    details = quotation.Details;
     var detailsIds = details.map(function(d){ return d.id; });
     return [
       Company.findOne({id: whsId}),

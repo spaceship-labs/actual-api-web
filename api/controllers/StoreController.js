@@ -50,22 +50,6 @@ module.exports = {
       });
   },
 
-  getSellersByStore: function(req, res){
-    var form = req.params.all();
-    var id = form.id;
-    Role.findOne({name:'seller'})
-      .then(function(sellerRole){
-        var sellerRoleId = sellerRole.id;
-        return User.find({mainStore: id, role: sellerRoleId});
-      })
-      .then(function(sellers){
-        res.json(sellers);
-      })
-      .catch(function(err){
-        res.negotiate(err);
-      });
-  },
-
   getAll: function(req, res) {
     Store.find().then(function(stores) {
       return res.json(stores);
@@ -75,23 +59,5 @@ module.exports = {
       res.negotiate(err);
     });    
   },
-
-  countSellers: function(req, res) {
-    var form  = req.allParams();
-    var store = form.store;
-    Role
-      .findOne({name: 'seller'})
-      .then(function(role) {
-        return User.count({
-          role: role.id,
-          mainStore: store
-        });
-      })
-      .then(function(sellers) {
-        return res.json(sellers);
-      })
-      .catch(function(err) {
-        return res.negotiate(err);
-      });
-  },
+  
 };

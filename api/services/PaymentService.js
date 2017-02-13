@@ -60,17 +60,12 @@ function getMethodGroupsWithTotals(quotationId, sellerId){
     var params = {
       update: false,
       paymentGroup: mG.group,
+      activeStore: req.activeStore.id
     };
-    return User
-      .findOne({
-        select: ['activeStore'],
-        id: sellerId,
-      })
-      .then(function(user){
-        params.currentStore = user.activeStore;
-        var calculator = QuotationService.Calculator();
-        return calculator.getQuotationTotals(id, params);
-      });
+
+    params.currentStore = user.activeStore;
+    var calculator = QuotationService.Calculator();
+    return calculator.getQuotationTotals(id, params);
   });
 
   return Promise
