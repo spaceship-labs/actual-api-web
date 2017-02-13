@@ -69,7 +69,7 @@ function _onLocalStrategyAuth(email, password, next){
 //Triggers when user authenticates via JWT strategy
 
 function _onJwtStrategyAuth(payload, next){
-    var payloadUser = payload.user || {};
+  var payloadUser = payload.user || {};
   var userId = payloadUser.id || false;
   if(!userId){
     return next(null, false, {

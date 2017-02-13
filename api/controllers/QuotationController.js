@@ -142,7 +142,7 @@ module.exports = {
         if(!quotation){
           return Promise.reject(new Error('Cotización no encontrada'));
         }
-        if(quotation.User !== req.user.id){
+        if(quotation.User.id !== req.user.id){
           return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
         }        
         return res.json(quotation);
@@ -416,6 +416,23 @@ module.exports = {
       })
       .catch(function(err){
         console.log(err);
+        res.negotiate(err);
+      });
+  },
+
+  getQuotationPayments: function(req, res){
+    var form = req.allParams();
+    var quotationId = form.id;
+    var query = {
+      Quotation: quotationId,
+      User: req.user.id
+    };
+    Payment.find(query)
+      .then(function(payments){
+        res.json(payments);
+      })
+      .catch(function(err){
+        console.log('err',err)
         res.negotiate(err);
       });
   },

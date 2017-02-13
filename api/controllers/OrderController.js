@@ -22,9 +22,6 @@ module.exports = {
       selectFields: form.fields,
       populateFields: ['Client']
     };
-    form.filters = form.filters || {};
-    form.filters.User = req.user.id;
-
     Common.find(model, form, extraParams)
       .then(function(result){
         res.ok(result);
@@ -43,12 +40,7 @@ module.exports = {
     if( !isNaN(id) ){
       id = parseInt(id);
     }
-    var orderQuery = {
-      id: id,
-      User: req.user.id
-    };
-
-    Order.findOne(orderQuery)
+    Order.findOne({id: id})
       .populate('Details')
       .populate('User')
       .populate('Client')
@@ -56,6 +48,7 @@ module.exports = {
       .populate('Payments')
       .populate('Store')
       .populate('EwalletRecords')
+      .populate('Broker')
       .populate('OrdersSap')
       .populate('SapOrderConnectionLog')
       .then(function(foundOrder){
@@ -80,11 +73,15 @@ module.exports = {
   createFromQuotation: function(req, res){
     sails.log.warn('LLEGO A accion createFromQuotation');
     var form = req.params.all();
+    var order;
+    var responseSent = false;
 
     OrderService.createFromQuotation(form, req.user)
       .then(function(orderCreated){
         //RESPONSE
         res.json(orderCreated);
+        responseSent = true;
+        order = orderCreated;
 
         //STARTS EMAIL SENDING PROCESS
         return Order.findOne({id:orderCreated.id})
@@ -98,16 +95,26 @@ module.exports = {
         return [
           Email.sendOrderConfirmation(order.id),
           Email.sendFreesale(order.id),
+          //InvoiceService.create(order.id)
         ];
       })
+      //.spread(function(orderSent, freesaleSent, alegraInvoice){
       .spread(function(orderSent, freesaleSent){
-        sails.log.info('Email de orden enviado');
-        //RESPONSE
-        //res.json(orderCreated);        
+        console.log('Email de orden enviado: ' + order.folio);
       })
+      /*
+        sails.log.info('Email de orden enviado');
+        return Invoice.create({ id: alegraInvoice.id, order: order });
+      })
+      .then(function(invoice){
+        console.log('generated invoice', invoice);
+      })
+      */
       .catch(function(err){
         console.log(err);
-        res.negotiate(err);
+        if(!responseSent){
+          res.negotiate(err);
+        }
       });
   },
 

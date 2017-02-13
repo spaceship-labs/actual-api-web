@@ -11,7 +11,7 @@ var RFCPUBLIC = 'XAXX010101000';
 module.exports = {
   create: create,
   send: send,
-}
+};
 
 function create(orderId) {
   return Order
@@ -109,8 +109,9 @@ function createInvoice(data) {
 
 function prepareClient(order, client, address) {
   var generic = !client.LicTradNum || client.LicTradNum == RFCPUBLIC;
+  var data;
   if (!generic) {
-    var data = {
+    data = {
       name: address.companyName,
       identification: client.LicTradNum,
       email: address.E_Mail,
@@ -127,20 +128,22 @@ function prepareClient(order, client, address) {
       }
     };
   } else {
-    var data = {
+    data = {
       name: order.CardName,
       identification: RFCPUBLIC,
       email: order.E_Mail,
       address: {
-        street: 'entre calle ' + order.U_Entrecalle + ' y calle ' + order.U_Ycalle,
-        exteriorNumber: order.U_Noexterior,
-        interiorNumber: order.U_Nointerior,
-        colony: order.U_Colonia,
         country: 'México',
-        state: order.U_Estado,
-        municipality:  order.U_Mpio,
-        localitiy: order.U_Ciudad,
-        zipCode: order.U_CP,
+        state: order.U_Estado || 'Quintana Roo',
+        
+        //TODO; Check default Inovice data for GENERAL PUBLIC 
+        //colony: order.U_Colonia,
+        //street: 'entre calle ' + order.U_Entrecalle + ' y calle ' + order.U_Ycalle,
+        //exteriorNumber: order.U_Noexterior,
+        //interiorNumber: order.U_Nointerior,
+        //municipality:  order.U_Mpio,
+        //localitiy: order.U_Ciudad,
+        //zipCode: order.U_CP,
       }
     };
   }

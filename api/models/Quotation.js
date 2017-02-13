@@ -12,15 +12,8 @@ module.exports = {
     User:{
       model: 'User',
     },
-    Broker:{
-      model: 'User',
-    },
     Details: {
       collection:'QuotationDetail',
-      via:'Quotation'
-    },
-    Records: {
-      collection:'QuotationRecord',
       via:'Quotation'
     },
     Address:{
@@ -43,9 +36,6 @@ module.exports = {
     },
     Store:{
       model:'store'
-    },
-    Manager:{
-      model:'user'
     },
     SapOrderConnectionLogs: {
       collection: 'SapOrderConnectionLog',

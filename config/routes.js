@@ -222,6 +222,13 @@ module.exports.routes = {
     action:'getQuotationPaymentOptions'
   },
 
+
+  '/quotation/:id/payments':{
+    controller: 'quotation',
+    action:'getQuotationPayments'
+  },
+
+
   '/quotation/:id/saporderconnectionlogs':{
     controller:'quotation',
     action:'getQuotationSapLogs'

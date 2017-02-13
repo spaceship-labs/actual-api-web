@@ -31,24 +31,13 @@ module.exports = {
           type:'boolean',
           defaultsTo: true
         },
-
-        Seller: {
-          model: 'Seller',
-        },
         Quotations:{
           collection: 'Quotation',
-          via:'User'
+          via:'UserWeb'
         },
         Orders:{
           collection:'Order',
-          via:'User'
-        },
-        Records: {
-          collection:'QuotationRecord',
-          via:'User'
-        },
-        accessList: {
-          type:'array'
+          via:'UserWeb'
         },
 
         dialCode: {type:'string'},
