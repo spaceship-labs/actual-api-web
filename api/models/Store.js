@@ -23,7 +23,7 @@ module.exports = {
 
     //RELATIONS
     users: {
-      collection: 'user',
+      collection: 'userweb',
       via: 'Stores'
     },
     Warehouse:{

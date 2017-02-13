@@ -290,11 +290,6 @@ module.exports.routes = {
     action:'update'
   },
 
-  '/me/cashreport':{
-    controller:'me',
-    action:'generateCashReport'
-  },
-
   '/promotion/find/:page':{
     controller: 'promotion',
     action:'find'
@@ -348,11 +343,6 @@ module.exports.routes = {
   '/store/:id/packages':{
     controller:'store',
     action:'getPackagesByStore'
-  },
-
-  '/store/:id/sellers':{
-    controller:'store',
-    action:'getSellersByStore'
   },
 
   '/common/states':{

@@ -23,7 +23,7 @@ module.exports = {
 
     //relations
     owners: {
-      collection: 'user',
+      collection: 'userweb',
       via: 'permissions'
     }
   }

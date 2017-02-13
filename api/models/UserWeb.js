@@ -33,11 +33,11 @@ module.exports = {
         },
         Quotations:{
           collection: 'Quotation',
-          via:'UserWeb'
+          via:'User'
         },
         Orders:{
           collection:'Order',
-          via:'UserWeb'
+          via:'User'
         },
 
         dialCode: {type:'string'},
@@ -97,9 +97,6 @@ module.exports = {
         permissions: {
           collection: 'permission',
           via: 'owners'
-        },
-        role: {
-          model: 'role',
         },
         Payments:{
           collection:'payment',
