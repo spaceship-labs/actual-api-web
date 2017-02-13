@@ -26,6 +26,9 @@ module.exports = {
     },
     Quotation:{
       model:'Quotation',
+    },    
+    User:{
+      model:'User',
     },
     Product: {
       model:'Product'
