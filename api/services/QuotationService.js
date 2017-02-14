@@ -90,7 +90,7 @@ function getBigticketMaxPercentage(subtotal2){
 
 
 function Calculator(){
-  var storePromotions = [];
+  var activePromotions = [];
   var storePackages   = [];
   var packagesRules   = [];
 
@@ -116,9 +116,9 @@ function Calculator(){
     var details = [];
     options = options || {paymentGroup:1 , updateDetails: true};
 
-    return getPromosByStore(options.currentStore)
+    return getActivePromos()
       .then(function(promos){
-        storePromotions = promos;
+        activePromotions = promos;
         return Common.nativeFind({Quotation: ObjectId(quotationId)}, QuotationDetail);
         //return QuotationDetail.find({Quotation: quotationId});
       })
@@ -171,6 +171,14 @@ function Calculator(){
     });    
     
     return totals;
+  }
+
+  function getActivePromos(){
+    var queryPromos = Search.getPromotionsQuery();
+    return Promotion.find(queryPromos)
+      .then(function(promos){
+        return promos;
+      });
   }
 
   function getPromosByStore(storeId){
@@ -306,10 +314,8 @@ function Calculator(){
     var productId   = detail.Product;
     var quantity    = detail.quantity;
     var currentDate = new Date();
-    var queryPromos = Search.getPromotionsQuery();
     
     return Product.findOne({id:productId})
-      .populate('Promotions', queryPromos)
       .then(function(product){
         var total;
         var mainPromo                 = getProductMainPromo(product, quantity);
@@ -362,14 +368,16 @@ function Calculator(){
           detailTotals.Promotion = mainPromo.id;
         }
         else if(mainPromo.PromotionPackage){
+          mainPromo.discountApplied = true;
           detailTotals.PromotionPackageApplied = mainPromo.PromotionPackage;
         }
+
         return detailTotals;
       });
   }
 
   function getPromotionOrPackageName(promotionOrPackage){
-    var promotionFound = _.findWhere(storePromotions, {id:promotionOrPackage.id});
+    var promotionFound = _.findWhere(activePromotions, {id:promotionOrPackage.id});
     if(promotionFound){
       return promotionFound.publicName;
     }
@@ -411,25 +419,35 @@ function Calculator(){
   //@params product Object from model Product
   //Populated with promotions
   function getProductMainPromo(product, quantity){
-    var promotions = product.Promotions;
     var packageRule = getDetailPackageRule(product.id, quantity)
-    promotions = matchWithStorePromotions(promotions);
+    promotions = PromotionService.getProductActivePromotions(product, activePromotions);
     //Taking package rule as a promotion
     if(packageRule){
       promotions = promotions.concat([packageRule]);
     }
-    return getPromotionWithHighestDiscount(promotions);
+    return PromotionService.getPromotionWithHighestDiscount(promotions);
   }
 
   function isPackageDiscountApplied(){
     return _.findWhere(packagesRules, {discountApplied:true});
   }
 
-  function matchWithStorePromotions(productPromotions){
-    var promotions = productPromotions.filter(function(promotion){
-      return _.findWhere(storePromotions, {id:promotion.id});
-    });  
-    return promotions;
+  function getProductActivePromotions(product, activePromotions){
+    activePromotions = activePromotions.filter(function(promotion){
+      var isValid = false;
+      if(promotion.sas){
+        var productSA = product.EmpresaName || product.nameSA;
+        if(promotion.sas.indexOf(productSA) > -1 ){
+          isValid = true;
+        } 
+      }
+
+      return isValid;
+    });
+
+    sails.log.info('activePromotions', activePromotions);
+
+    return activePromotions;
   }
 
   function getDetailPackageRule(productId, quantity){
@@ -468,28 +486,6 @@ function Calculator(){
     return QuotationDetail.update({id: detail.id}, detail);
   }
 
-  function getPromotionWithHighestDiscount(productPromotions){
-    if(productPromotions.length <= 0){
-      return false;
-    }
-    var indexMaxPromo = 0;
-    var maxDiscount = 0;
-    productPromotions = productPromotions || [];
-    productPromotions.forEach(function(promo, index){
-      if(promo.discountPg1 >= maxDiscount){
-        maxDiscount   = promo.discountPg1;
-        indexMaxPromo = index;
-      }
-    });
-
-    if(productPromotions[indexMaxPromo] && 
-      productPromotions[indexMaxPromo].PromotionPackage
-    ){
-      productPromotions[indexMaxPromo].discountApplied = true;
-    }
-
-    return productPromotions[indexMaxPromo] || false;
-  }
 
   function getDiscountKey(group){
     return DISCOUNT_KEYS[group-1];

@@ -51,7 +51,7 @@ module.exports = {
     OnHome:{type:'boolean'},
     OnKids:{type:'boolean'},
     OnAmueble:{type:'boolean'},
-    sas: {type:'array'}, //Sociedades
+    sa: {type:'string'}, //Sociedad
     excludedProducts: {type:'array'},
     hasLM:{type:'boolean'},
     pushMoneyUnit:{type:'float'},
