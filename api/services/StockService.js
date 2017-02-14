@@ -1,6 +1,7 @@
 var Promise = require('bluebird');
 var _ = require('underscore');
 var moment = require('moment');
+var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
 //.startOf('day').format('DD-MM-YYYY');		
 
 module.exports = {
@@ -46,7 +47,7 @@ function substractProductStockByDetail(detail){
 		.then(function(stores){
 			var storesCodes = stores.map(function(s){return s.code});
 			if(detail.quantity > detail.Product.Available){
-				return new Promise.reject(new Error('Stock del producto '+ ItemCode + ' no disponible'));
+				return new Promise.reject(new Error('Stock del producto '+ ItemCode + ' no disponible (ERROR: PS)'));
 			}
 			var newAvailable = detail.Product.Available - detail.quantity;
 			var updateValues = {Available: newAvailable};
@@ -72,15 +73,32 @@ function substractDeliveryStockByDetail(detail){
 	return DatesDelivery.findOne({
 		whsCode: detail.shipCompanyFrom.WhsCode,
 		ShipDate: detail.productDate,
-		ItemCode: ItemCode
+		ItemCode: ItemCode,
+		ImmediateDelivery: detail.immediateDelivery
 	})
 	.then(function(dateDelivery){
 		if(detail.quantity > dateDelivery.OpenCreQty){
-			return Promise.reject(new Error('Stock del producto ' + ItemCode + ' no disponible'));
+			return Promise.reject(new Error('Stock del producto ' + ItemCode + ' no disponible (ERROR: DS)'));
 		}
-		var newStock = dateDelivery.OpenCreQty - detail.quantity;
-		return DatesDelivery.update({id: dateDelivery.id}, {OpenCreQty:newStock});
+
+		var query = {
+			whsCode: detail.shipCompanyFrom.WhsCode,
+			ItemCode: ItemCode,
+		};
+		return substractQuantityToDeliveryDates(query, detail.quantity);
 	});
+}
+
+function substractQuantityToDeliveryDates(deliveryQuery, quantity){
+	return DatesDelivery.find(deliveryQuery)
+		.then(function(dateDeliveries){
+			return Promise.each(dateDeliveries, function(dateDelivery){
+				var newStock = dateDelivery.OpenCreQty - quantity;
+				var query = {_id: ObjectId(dateDelivery.id)};
+				var updateParams = {OpenCreQty: newStock};
+				return Common.nativeUpdateOne(query, updateParams, DatesDelivery);
+			});
+		});
 }
 
 function getStoresWithProduct(ItemCode, whsCode){

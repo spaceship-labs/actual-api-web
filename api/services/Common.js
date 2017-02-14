@@ -66,6 +66,28 @@ module.exports = {
     });
   },  
 
+  nativeUpdateOne: function(findCriteria, params, model){
+    return new Promise(function(resolve, reject){
+      model.native(function(err, collection){
+        if(err){
+          console.log('err updating model',err);
+          reject(err);
+        }
+        params.updatedAt = new Date();
+        var updateParams = {
+          $set: _.omit(params, ['id'])
+        };
+        collection.updateOne(findCriteria, updateParams, function(errUpdate, result){
+          if(errUpdate){
+            console.log('errUpdate updating ,model',errUpdate);
+            reject(errUpdate);
+          }
+          resolve(result);
+        });
+      });
+    });
+  },    
+
   reassignOrdersDates: function() {
     console.log('started find reassignOrdersDates');
     Order.find({}).populate('Quotation')
