@@ -89,6 +89,11 @@ module.exports.routes = {
     action:'addSeenTime'
   },
 
+  '/product/mainpromo/:id':{
+    controller:'product',
+    action: 'getProductMainPromo'
+  },
+
   '/productcategory/find/:page':{
     controller: 'productcategory',
     action: 'find'
