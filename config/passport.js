@@ -70,7 +70,6 @@ function _onJwtStrategyAuth(payload, next){
   }
 
   return UserWeb.findOne({id: userId})
-    .populate('activeStore')
     //.populate('Stores')
     .then(function(userFound){
       var user = userFound;
