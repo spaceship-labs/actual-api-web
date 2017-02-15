@@ -184,5 +184,16 @@ module.exports = {
     });
   },
 
-
+    getProductMainPromo: function(req, res){
+    var form = req.allParams();
+    var id = form.id;
+    PromotionService.getProductMainPromo(id)
+      .then(function(mainPromo){
+        res.json(mainPromo);
+      })
+      .catch(function(err){
+        console.log('err', err);
+        res.negotiate(err);
+      });
+  }
 };

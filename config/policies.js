@@ -28,7 +28,6 @@ module.exports.policies = {
   },
   UserController:{
     '*': ['setupDefaultData','isAuthenticated'],
-    find: ['setupDefaultData','isAuthenticated', 'isAllowed'],
     create: ['setupDefaultData','isAuthenticated', 'isAllowed'],
     update: ['setupDefaultData','isAuthenticated', 'isAllowed'],
     send_password_recovery: true,
