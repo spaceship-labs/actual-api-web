@@ -48,6 +48,11 @@ module.exports.routes = {
     action: 'signin'
   },
 
+  '/user/findbyid/:id':{
+    controller: 'user',
+    action: 'findById'
+  },
+
   '/user/find/:page':{
     controller: 'user',
     action: 'find'

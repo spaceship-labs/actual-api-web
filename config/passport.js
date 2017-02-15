@@ -81,12 +81,6 @@ function _onJwtStrategyAuth(payload, next){
         });        
       }
 
-      if(!user.webUser){
-        return next(null, false, {
-          code: 'ONLY_WEB_USERS AUTHORIZED',          
-          message: 'ONLY_WEB_USERS AUTHORIZED'
-        });        
-      }
 
       return next(null, user, {});
     })

@@ -46,6 +46,27 @@ module.exports = {
     }
   },
 
+  findById: function(req, res){
+    var form = req.params.all();
+    var id = form.id;
+    var quickRead = form.quickRead;
+    
+    var userQuery =  UserWeb.findOne({id: id})
+
+    if(!quickRead){
+      userQuery.populate('Stores');
+    }
+
+    userQuery.then(function(result){
+      res.ok({data:result});
+    })
+    .catch(function(err){
+      console.log(err);
+      res.negotiate(err);
+    });      
+  },
+
+
   update_password: function(req, res){
     var form = req.params.all();
     var token = form.token || false;
