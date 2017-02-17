@@ -123,8 +123,7 @@ function validateQuotationStockById(quotationId, req){
   var warehouse;
   return Quotation.findOne({id: quotationId}).populate('Details')
 	.then(function(quotation){
-		var user = req.user;
-    var whsId = user.activeStore.Warehouse;
+    var whsId = req.activeStore.Warehouse;
     details = quotation.Details;
     var detailsIds = details.map(function(d){ return d.id; });
     return [
