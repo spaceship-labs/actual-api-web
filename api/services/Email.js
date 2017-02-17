@@ -240,7 +240,7 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
   });
 }
 
-function quotation(quotationId) {
+function quotation(quotationId, activeStore) {
   return Quotation
     .findOne(quotationId)
     .populate('Client')
@@ -253,7 +253,7 @@ function quotation(quotationId) {
       var store    = quotation.Store;
       var details  = quotation.Details.map(function(detail) { return detail.id; });
       details      = QuotationDetail.find(details).populate('Product').populate('Promotion');
-      var payments = PaymentService.getPaymentGroupsForEmail(quotation.id, user.id);
+      var payments = PaymentService.getPaymentGroupsForEmail(quotation.id, activeStore.id);
       var transfers = TransferService.transfers(store.group);
       return [client, user,  quotation, details, payments, transfers, store];
     })

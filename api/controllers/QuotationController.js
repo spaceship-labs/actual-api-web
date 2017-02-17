@@ -354,7 +354,7 @@ module.exports = {
         if(quotation.User !== req.user.id){
           return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
         }      
-        return Email.sendQuotation(id);
+        return Email.sendQuotation(id, req.activeStore);
       })
       .then(function(quotation) {
         return res.json(quotation);
@@ -416,7 +416,7 @@ module.exports = {
           return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
         }   
 
-        return PaymentService.getMethodGroupsWithTotals(quotationId, quotation.User, req);
+        return PaymentService.getMethodGroupsWithTotals(quotationId, req.activeStore);
       })
       .then(function(paymentOptions){
         res.json(paymentOptions);
