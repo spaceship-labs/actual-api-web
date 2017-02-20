@@ -40,7 +40,13 @@ module.exports = {
       startDate: {'<=': currentDate},
       endDate: {'>=': currentDate},
     };
-    Product.findOne({or: [ {ItemCode:id}, {ItemName:id} ]  })
+    var displayProperty = SiteService.getSiteDisplayProperty(req);
+    var query = {
+      or: [ {ItemCode:id}, {ItemName:id} ]
+    };
+    query[displayProperty] = true;
+
+    Product.findOne(query)
       .populate('files')
       .populate('Categories')
       .populate('FilterValues')

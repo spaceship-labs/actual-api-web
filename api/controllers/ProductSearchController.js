@@ -22,11 +22,13 @@ module.exports = {
       limit: form.items || 10
     };
     var query        = {};
-    var priceField   = activeStore ? Search.getDiscountPriceKeyByStoreCode(activeStore.code) : 'Price';
+    var priceField   = 'DiscountPrice';
+    var displayProperty = SiteService.getSiteDisplayProperty(req);    
 
     query            = Search.queryTerms(query, terms);
     query            = Search.getPriceQuery(query, priceField, minPrice, maxPrice);
     query.Active     = 'Y';
+    query[displayProperty] = true;
     
     Search.getProductsByFilterValue(filtervalues)
       .then(function(result) {
@@ -53,7 +55,6 @@ module.exports = {
           ]
         };
 
-        //sails.log.info('searchQuery', JSON.stringify(searchQuery));
         var find = Product.find(searchQuery);
         var sortValue = Search.getDiscountPriceKeyByStoreCode(activeStore.code) + ' ASC';
 
@@ -87,16 +88,19 @@ module.exports = {
     var promotions     = [];
     var activeStore    = req.activeStore;
     
-    var priceField     = activeStore ? Search.getDiscountPriceKeyByStoreCode(activeStore.code) : 'Price';
+    var priceField     = 'DiscountPrice';
     var minPrice       = form.minPrice;
     var maxPrice       = form.maxPrice;
+    var displayProperty = SiteService.getSiteDisplayProperty(req);    
 
     query = Search.getPriceQuery(query, priceField, minPrice, maxPrice);
+    query[displayProperty] = true;
 
     var paginate       = {
       page:  form.page  || 1,
       limit: form.limit || 10
     };
+
     var productsIdsAux = [];
 
     Search.getProductsByCategory({Handle:handle})
@@ -120,10 +124,10 @@ module.exports = {
       .then(function(productsIdsResult) {
         productsIds = productsIdsResult;
         
-        query = {
+        query = _.extend(query,{
           id: productsIds,
           Active: 'Y'
-        };
+        });
 
         if(filterByStore && activeStore.code){
           query[activeStore.code] = {'>':0};
@@ -180,6 +184,8 @@ module.exports = {
     var query              = {};
     var products           = [];
     var productsIds        = [];
+    var displayProperty    = SiteService.getSiteDisplayProperty(req);    
+
     var price        = {
       '>=': form.minPrice || 0,
       '<=': form.maxPrice || Infinity
@@ -237,6 +243,7 @@ module.exports = {
         }
         query = Search.applyFilters({},filters);
         query = Search.applyOrFilters(query,orFilters);
+        query[displayProperty] = true;
         
         var freeSaleQuery = _.clone(query);
         freeSaleQuery = _.extend(freeSaleQuery, {
