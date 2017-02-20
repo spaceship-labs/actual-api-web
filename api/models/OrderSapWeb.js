@@ -4,14 +4,14 @@ module.exports = {
 		document: 'string',
 
 		Order:{
-			model:'Order'
+			model:'OrderWeb'
 		},
 		PaymentsSap:{
-			collection:'PaymentSap',
+			collection:'PaymentSapWeb',
 			via:'OrderSap'
 		},
 		ProductSeries:{
-			collection:'ProductSerie',
+			collection:'ProductSerieWeb',
 			via:'OrderSap'
 		}
 	}

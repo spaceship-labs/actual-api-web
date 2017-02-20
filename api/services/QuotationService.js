@@ -119,7 +119,7 @@ function Calculator(){
     return getActivePromos()
       .then(function(promos){
         activePromotions = promos;
-        return Common.nativeFind({Quotation: ObjectId(quotationId)}, QuotationDetail);
+        return Common.nativeFind({Quotation: ObjectId(quotationId)}, QuotationDetailWeb);
         //return QuotationDetail.find({Quotation: quotationId});
       })
       .then(function(detailsResult){
@@ -483,7 +483,7 @@ function Calculator(){
   }
 
   function updateDetail(detail){
-    return QuotationDetail.update({id: detail.id}, detail);
+    return QuotationDetailWeb.update({id: detail.id}, detail);
   }
 
 
@@ -513,7 +513,7 @@ function Calculator(){
 function nativeQuotationFindOne(quotationId){
   return new Promise(function(resolve, reject){
     
-    Quotation.native(function(err, collection){
+    QuotationWeb.native(function(err, collection){
       if(err){
         console.log('err finding quotation',err);
         reject(err);
@@ -533,7 +533,7 @@ function nativeQuotationFindOne(quotationId){
 
 function nativeQuotationUpdate(quotationId,params){
   return new Promise(function(resolve, reject){
-    Quotation.native(function(err, collection){
+    QuotationWeb.native(function(err, collection){
       if(err){
         console.log('err updating quotation',err);
         reject(err);
@@ -605,9 +605,9 @@ function getTotalsByUser(options){
   }
 
   var props = {
-    totalUntilToday: Quotation.find(queryUntilToday).sum('total'),
-    totalByDateRange: Quotation.find(queryByDateRange).sum('total'),
-    totalByDateRangeAll: Quotation.find(queryAllByDateRange).sum('total')
+    totalUntilToday: QuotationWeb.find(queryUntilToday).sum('total'),
+    totalByDateRange: QuotationWeb.find(queryByDateRange).sum('total'),
+    totalByDateRangeAll: QuotationWeb.find(queryAllByDateRange).sum('total')
   };
 
   return Promise.props(props)
@@ -679,9 +679,9 @@ function getCountByUser(options){
   }
 
   return Promise.props({
-    countUntilToday: Quotation.count(queryUntilToday),
-    countByDateRange: Quotation.count(queryByDateRange),
-    countAllByDateRange: Quotation.count(queryAllByDateRange)
+    countUntilToday: QuotationWeb.count(queryUntilToday),
+    countByDateRange: QuotationWeb.count(queryByDateRange),
+    countAllByDateRange: QuotationWeb.count(queryAllByDateRange)
   })
     .then(function(result){
       return {

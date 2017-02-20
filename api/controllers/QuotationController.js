@@ -17,7 +17,7 @@ module.exports = {
     form.Details = form.Details.map(function(d){
       d.User = req.user.id;
       return d;
-    })
+    });
     form.Store = req.activeStore.id;
     form.User = req.user.id;
     form.isWeb = true;
@@ -28,7 +28,7 @@ module.exports = {
       currentStore: req.activeStore.id
     };
 
-    Quotation.create(form)
+    QuotationWeb.create(form)
       .then(function(created){
         createdId = created.id;
         var calculator = QuotationService.Calculator();
@@ -39,8 +39,7 @@ module.exports = {
         return calculator.updateQuotationTotals(created.id, opts);
       })
       .then(function(updatedQuotation){
-        return Common.nativeFindOne({_id: ObjectId(createdId)}, Quotation);
-        //return Quotation.findOne({id:createdId});
+        return Common.nativeFindOne({_id: ObjectId(createdId)}, QuotationWeb);
       })
       .then(function(quotation){
         res.json(quotation);
@@ -57,12 +56,12 @@ module.exports = {
     var id = form.id;
     form.Store =  req.activeStore.id;
 
-    Common.nativeFindOne({_id: ObjectId(id)}, Quotation)
+    Common.nativeFindOne({_id: ObjectId(id)}, QuotationWeb)
       .then(function(quotation){
         if(quotation.User !== req.user.id){
           return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
         }
-        return Quotation.update({id:id}, form);
+        return QuotationWeb.update({id:id}, form);
       })
       .then(function(updatedQuotation){
         if(updatedQuotation && updatedQuotation.length > 0){
@@ -85,7 +84,7 @@ module.exports = {
       id: id,
       User: userId
     };
-    Quotation.findOne(query)
+    QuotationWeb.findOne(query)
       .populate('Details')
       .then(function(quotation){
         if(!quotation){
@@ -108,7 +107,6 @@ module.exports = {
     var userId = req.user.id;
     var getPayments = form.payments;
     var forceLatestData  = true;
-    //var forceLatestData = !_.isUndefined(form.forceLatestData) ? form.forceLatestData : true;
     if( !isNaN(id) ){
       id = parseInt(id);
     }
@@ -117,7 +115,7 @@ module.exports = {
       User: req.user.id
     };
 
-    var quotationQuery =  Quotation.findOne(query)
+    var quotationQuery =  QuotationWeb.findOne(query)
       .populate('Details')
       .populate('User')
       .populate('Client')
@@ -134,12 +132,6 @@ module.exports = {
       update:true,
       currentStore: req.activeStore.id
     });
-
-    if(!forceLatestData){
-      updateToLatest = new Promise(function(resolve, reject){
-        resolve();
-      });
-    }
 
     updateToLatest.then(function(){
         return quotationQuery;
@@ -177,19 +169,19 @@ module.exports = {
       currentStore: req.activeStore.id
     };
     
-    Common.nativeFindOne({_id: ObjectId(id)}, Quotation)
+    Common.nativeFindOne({_id: ObjectId(id)}, QuotationWeb)
       .then(function(quotation){
         if(quotation.User !== req.user.id){
           return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
         }
-        return QuotationDetail.create(form);
+        return QuotationDetailWeb.create(form);
       })
       .then(function(created){
          var calculator = QuotationService.Calculator();
          return calculator.updateQuotationTotals(id, opts);
       })
       .then(function(updatedQuotation){
-        return Quotation.findOne({id: id});
+        return QuotationWeb.findOne({id: id});
       })
       .then(function(quotation){
         res.json(quotation);
@@ -222,19 +214,19 @@ module.exports = {
       currentStore: req.activeStore.id
     };
 
-    Common.nativeFindOne({_id: ObjectId(id)}, Quotation)
+    Common.nativeFindOne({_id: ObjectId(id)}, QuotationWeb)
       .then(function(quotation){
         if(quotation.User !== req.user.id){
           return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
         }
-        return QuotationDetail.create(form.Details);
+        return QuotationDetailWeb.create(form.Details);
       })
       .then(function(created){
          var calculator = QuotationService.Calculator();
          return calculator.updateQuotationTotals(id, opts);
       })
       .then(function(updatedQuotation){
-        return Quotation.findOne({id: id});
+        return QuotationWeb.findOne({id: id});
       })
       .then(function(quotation){
         res.json(quotation);
@@ -257,20 +249,20 @@ module.exports = {
     };
 
 
-    Common.nativeFindOne({_id: ObjectId(quotationId)}, QuotationDetail)
+    Common.nativeFindOne({_id: ObjectId(quotationId)}, QuotationDetailWeb)
       .then(function(quotationDetail){
         if(quotationDetail.User !== req.user.id){
           return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
         }
 
-        return QuotationDetail.destroy({id:detailsIds});
+        return QuotationDetailWeb.destroy({id:detailsIds});
       })
       .then(function(){
         var calculator = QuotationService.Calculator();
         return calculator.updateQuotationTotals(quotationId, opts);
       })
       .then(function(updatedQuotationResult){
-        return Quotation.findOne({id: quotationId}).populate('Details');
+        return QuotationDetail.findOne({id: quotationId}).populate('Details');
       })
       .then(function(quotation){
         res.json(quotation);
@@ -288,7 +280,7 @@ module.exports = {
     form.filters.User = req.user.id;
 
     var client = form.client;
-    var model = 'quotation';
+    var model = 'quotationweb';
     var clientSearch = form.clientSearch;
     var clientSearchFields = ['CardName', 'E_Mail'];
     var preSearch = new Promise(function(resolve, reject){
@@ -328,7 +320,7 @@ module.exports = {
     var calculator = QuotationService.Calculator();
     console.log('params', params);
 
-    Common.nativeFindOne({_id: ObjectId(id)}, Quotation)
+    Common.nativeFindOne({_id: ObjectId(id)}, QuotationWeb)
       .then(function(quotation){
         if(quotation.User !== req.user.id){
           return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
@@ -349,7 +341,7 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
 
-    Common.nativeFindOne({_id: ObjectId(id)}, Quotation)
+    Common.nativeFindOne({_id: ObjectId(id)}, QuotationWeb)
       .then(function(quotation){
         if(quotation.User !== req.user.id){
           return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
@@ -374,7 +366,7 @@ module.exports = {
       User: req.user.id
     };
 
-    QuotationDetail.find(query).populate('Product')
+    QuotationDetailWeb.find(query).populate('Product')
       .then(function(detailsFound){
         details = detailsFound;
         var whsId = req.activeStore.Warehouse;
@@ -410,7 +402,7 @@ module.exports = {
     var form = req.allParams();
     var quotationId = form.id;
 
-    Common.nativeFindOne({_id: ObjectId(quotationId)}, Quotation)
+    Common.nativeFindOne({_id: ObjectId(quotationId)}, QuotationWeb)
       .then(function(quotation){
         if(quotation.User !== req.user.id){
           return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
@@ -434,7 +426,7 @@ module.exports = {
       Quotation: quotationId,
       User: req.user.id
     };
-    Payment.find(query)
+    PaymentWeb.find(query)
       .then(function(payments){
         res.json(payments);
       })
@@ -452,7 +444,7 @@ module.exports = {
       User: req.user.id
     };
 
-    SapOrderConnectionLog.find(query)
+    SapOrderConnectionLogWeb.find(query)
       .then(function(logs){
         res.json(logs);
       })

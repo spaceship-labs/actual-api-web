@@ -13,7 +13,7 @@ module.exports = {
       primaryKey: true,
     },
     order: {
-      model: 'order',
+      model: 'orderweb',
       required: true,
     }
   },

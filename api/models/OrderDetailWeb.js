@@ -30,13 +30,13 @@ module.exports = {
       model:'ProductGroup'
     },
     Order:{
-      model:'Order',
+      model:'OrderWeb',
     },
     Product: {
       model:'Product'
     },
     QuotationDetail:{
-      model: 'QuotationDetail'
+      model: 'QuotationDetailWeb'
     },    
 
     //ship

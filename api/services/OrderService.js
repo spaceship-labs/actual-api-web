@@ -1,7 +1,6 @@
 var _ = require('underscore');
 var Promise = require('bluebird');
 
-var EWALLET_POSITIVE = 'positive';
 var INVOICE_SAP_TYPE = 'Invoice';
 var ORDER_SAP_TYPE = 'Order';
 var ERROR_SAP_TYPE = 'Error';
@@ -33,8 +32,8 @@ function getCountByUser(form){
   };
 
   return Promise.join(
-    Order.count(queryfortNightRange),
-    Order.count(queryDateRange)
+    OrderWeb.count(queryfortNightRange),
+    OrderWeb.count(queryDateRange)
   )
     .then(function(results){
       var response = {
@@ -64,10 +63,10 @@ function getTotalsByUser(form){
   };
 
   var props = {
-    totalDateRange: Order.find(queryDateRange).sum('total')
+    totalDateRange: OrderWeb.find(queryDateRange).sum('total')
   };
   if(getFortnightTotals){
-    props.totalFortnight = Order.find(queryfortNightRange).sum('total');
+    props.totalFortnight = OrderWeb.find(queryfortNightRange).sum('total');
   }
 
   //Find all totals
@@ -107,7 +106,7 @@ function createFromQuotation(form, req){
   var sapLog;
 
   //Validating if quotation doesnt have an order assigned
-  return Order.findOne({Quotation: quotationId})
+  return OrderWeb.findOne({Quotation: quotationId})
     .then(function(order){
       if(order){
         var frontUrl = process.env.baseURLFRONT || 'http://ventas.miactual.com';
@@ -128,13 +127,12 @@ function createFromQuotation(form, req){
       return calculator.updateQuotationTotals(quotationId, opts);
     })
     .then(function(updatedQuotationResult){
-      return Quotation.findOne({id: quotationId})
+      return QuotationWeb.findOne({id: quotationId})
         .populate('Payments')
         .populate('Details')
         .populate('Address')
         .populate('User')
-        .populate('Client')
-        .populate('EwalletRecords');
+        .populate('Client');
     })
     .then(function(quotationFound){
       quotation = quotationFound;
@@ -174,11 +172,9 @@ function createFromQuotation(form, req){
         EwalletRecords: quotation.EwalletRecords,
         ClientBalanceRecords: quotation.ClientBalanceRecords,
         User: user.id,
-        Broker: quotation.Broker,
         CardCode: quotation.Client.CardCode,
         SlpCode: SlpCode,
         Store: opts.currentStore,
-        Manager: quotation.Manager
         //Store: user.activeStore
       };
 
@@ -212,7 +208,7 @@ function createFromQuotation(form, req){
       currentStore = user.activeStore;
 
       return [
-        QuotationDetail.find({Quotation: quotation.id})
+        QuotationDetailWeb.find({Quotation: quotation.id})
           .populate('Product'),
         Site.findOne({handle:'actual-group'})
       ];
@@ -240,7 +236,7 @@ function createFromQuotation(form, req){
         Store  : opts.currentStore,
         Quotation: quotationId
       };
-      return SapOrderConnectionLog.create(log);
+      return SapOrderConnectionLogWeb.create(log);
     })  
     .then(function(sapLogCreated){
       sapLog = sapLogCreated;
@@ -258,11 +254,11 @@ function createFromQuotation(form, req){
       orderParams.documents = sapResult;
       orderParams.SapOrderConnectionLog = sapLog.id;
 
-      return Order.create(orderParams);
+      return OrderWeb.create(orderParams);
     })
     .then(function(created){
       orderCreated = created;
-      return Order.findOne({id:created.id}).populate('Details');
+      return OrderWeb.findOne({id:created.id}).populate('Details');
     })
     .then(function(orderFound){
       //Cloning quotation details to order details
@@ -274,7 +270,7 @@ function createFromQuotation(form, req){
       return orderFound.save();
     })
     .then(function(){
-      return OrderDetail.find({Order: orderCreated.id})
+      return OrderDetailWeb.find({Order: orderCreated.id})
         .populate('Product')
         .populate('shipCompanyFrom');
     })
@@ -290,10 +286,11 @@ function createFromQuotation(form, req){
         isClosedReason: 'Order created'
       };
       return [
-        Quotation.update({id:quotation.id} , updateFields),
+        QuotationWeb.update({id:quotation.id} , updateFields),
         saveSapReferences(sapResult, orderCreated, orderDetails)
       ];
     })
+    /*
     .spread(function(quotationUpdated, sapOrdersReference){
       var params = {
         details: quotation.Details,
@@ -304,7 +301,8 @@ function createFromQuotation(form, req){
         client: quotation.Client
       };
       return processEwalletBalance(params);
-    })  
+    })
+    */  
     .then(function(){
       return orderCreated;
     });
@@ -448,7 +446,7 @@ function saveSapReferences(sapResult, order, orderDetails){
   });
   
   return Promise.join(
-    OrderSap.create(ordersSap),
+    OrderSapWeb.create(ordersSap),
     Client.update({id:clientId},{Balance: clientBalance})
   );
 }

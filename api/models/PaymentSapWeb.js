@@ -3,13 +3,13 @@ module.exports = {
 		document: 'string',
 		
 		Order:{
-			model:'Order'
+			model:'OrderWeb'
 		},
 		OrderSap:{
-			model:'OrderSap'
+			model:'OrderSapWeb'
 		},
 		Payment:{
-			model: 'Payment'
+			model: 'PaymentWeb'
 		}
 	}
 };

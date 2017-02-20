@@ -4,7 +4,7 @@ var moment = require('moment');
 module.exports = {
   migrate: 'alter',
   schema:true,
-  tableName: 'Quotation',
+  tableName: 'QuotationWeb',
   attributes: {
     Client:{
       model:'Client'
@@ -13,32 +13,24 @@ module.exports = {
       model: 'UserWeb',
     },
     Details: {
-      collection:'QuotationDetail',
+      collection:'QuotationDetailWeb',
       via:'Quotation'
     },
     Address:{
       model:'ClientContact',
     },
     Order:{
-      model:'Order'
+      model:'OrderWeb'
     },
     Payments:{
-      collection: 'Payment',
-      via:'Quotation'
-    },
-    EwalletRecords:{
-      collection:'EwalletRecord',
-      via:'Quotation'
-    },
-    ClientBalanceRecords:{
-      collection:'ClientBalanceRecord',
+      collection: 'PaymentWeb',
       via:'Quotation'
     },
     Store:{
       model:'store'
     },
     SapOrderConnectionLogs: {
-      collection: 'SapOrderConnectionLog',
+      collection: 'SapOrderConnectionLogWeb',
       via: 'Quotation'
     },
 
@@ -85,7 +77,7 @@ module.exports = {
 
   beforeCreate: function(val,cb){
     val.tracing = addDefaultTracingDate();
-    Common.orderCustomAI(val, 'quotationFolio',function(val){
+    Common.orderCustomAI(val, 'quotationWebFolio',function(val){
       cb();
     });
   },

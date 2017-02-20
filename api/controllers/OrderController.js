@@ -1,6 +1,5 @@
 var _ = require('underscore');
 var Promise = require('bluebird');
-var EWALLET_POSITIVE = 'positive';
 var INVOICE_SAP_TYPE = 'Invoice';
 var ORDER_SAP_TYPE = 'Order';
 var ERROR_SAP_TYPE = 'Error';
@@ -40,15 +39,13 @@ module.exports = {
     if( !isNaN(id) ){
       id = parseInt(id);
     }
-    Order.findOne({id: id})
+    OrderWeb.findOne({id: id})
       .populate('Details')
       .populate('User')
       .populate('Client')
       .populate('Address')
       .populate('Payments')
       .populate('Store')
-      .populate('EwalletRecords')
-      .populate('Broker')
       .populate('OrdersSap')
       .populate('SapOrderConnectionLog')
       .then(function(foundOrder){
@@ -56,7 +53,7 @@ module.exports = {
         var sapReferencesIds = order.OrdersSap.map(function(ref){
           return ref.id;
         });
-        return OrderSap.find(sapReferencesIds)
+        return OrderSapWeb.find(sapReferencesIds)
           .populate('PaymentsSap')
           .populate('ProductSeries');
       })
@@ -71,7 +68,6 @@ module.exports = {
   },
 
   createFromQuotation: function(req, res){
-    sails.log.warn('LLEGO A accion createFromQuotation');
     var form = req.params.all();
     var order;
     var responseSent = false;
@@ -84,11 +80,10 @@ module.exports = {
         order = orderCreated;
 
         //STARTS EMAIL SENDING PROCESS
-        return Order.findOne({id:orderCreated.id})
+        return OrderWeb.findOne({id:orderCreated.id})
           .populate('User')
           .populate('Client')
           .populate('Payments')
-          .populate('EwalletRecords')
           .populate('Address');
       })
       .then(function(order){

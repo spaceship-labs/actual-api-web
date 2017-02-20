@@ -1,13 +1,13 @@
 module.exports = {
 	attributes:{
 		OrderSap:{
-			model:'OrderSap'
+			model:'OrderSapWeb'
 		},
 		QuotationDetail:{
-			model: 'QuotationDetail'
+			model: 'QuotationDetailWeb'
 		},
 		OrderDetail:{
-			model:'OrderDetail'
+			model:'OrderDetailWeb'
 		},
 		seriesNumbers:{
 			type:'array'

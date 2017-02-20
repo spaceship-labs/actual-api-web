@@ -1,7 +1,7 @@
 //APP COLLECTION
 module.exports = {
   schema:true,
-  tableName: 'QuotationDetail',
+  tableName: 'QuotationDetailWeb',
   attributes: {
     quantity: 'integer',
     discount: 'float', //total discount
@@ -25,11 +25,8 @@ module.exports = {
       model:'Promotion'
     },
     Quotation:{
-      model:'Quotation',
+      model:'QuotationWeb',
     },    
-    User:{
-      model:'User',
-    },
     Product: {
       model:'Product'
     },

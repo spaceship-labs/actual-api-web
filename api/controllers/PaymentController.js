@@ -34,7 +34,7 @@ module.exports = {
           return Promise.reject(new Error('Inventario no suficiente'));
         }
 
-        var findQuotation = Quotation.findOne(form.Quotation).populate('Payments');
+        var findQuotation = QuotationWeb.findOne(form.Quotation).populate('Payments');
 
         if(form.type === EWALLET_TYPE || form.type === CLIENT_BALANCE_TYPE){
           findQuotation.populate('Client');
@@ -64,7 +64,7 @@ module.exports = {
       .then(function(exchangeRateFound){
         exchangeRate = exchangeRateFound;
 
-        return Payment.create(form);
+        return PaymentWeb.create(form);
       })
       .then(function(paymentCreated){
         quotationPayments = quotation.Payments.concat([paymentCreated]);

@@ -29,7 +29,7 @@ module.exports = {
     if (form.user) {
       query.user = req.user.id;
     }
-    Logging.find(query)
+    LoggingWeb.find(query)
       .sort('createdAt DESC')
       .paginate(paginate)
       .populate('user').exec(function(err, log) {

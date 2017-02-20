@@ -9,14 +9,14 @@ module.exports = {
   create: function(req, res) {
     var form = req.allParams();
     var order = form.order;
-    Invoice
+    InvoiceWeb
       .findOne({ order: order })
       .then(function(exists) {
         if (exists) throw new Error('invoice already exists');
-        return  InvoiceService.create(order)
+        return  InvoiceService.create(order);
       })
       .then(function(invoice) {
-        return Invoice.create({ id: invoice.id, order: order });
+        return InvoiceWeb.create({ id: invoice.id, order: order });
       })
       .then(function(invoice) {
         return res.json(invoice);
@@ -41,7 +41,7 @@ module.exports = {
   find: function(req, res) {
     var form = req.allParams();
     var order = form.order;
-    Invoice
+    InvoiceWeb
       .find({ order: order })
       .then(function(order) {
         return res.json(order);

@@ -14,7 +14,7 @@ module.exports = {
 };
 
 function create(orderId) {
-  return Order
+  return OrderWeb
     .findOne(orderId)
     .populate('Client')
     .populate('Details')
@@ -26,7 +26,7 @@ function create(orderId) {
       return [
         order,
         payments,
-        OrderDetail.find(details).populate('Product'),
+        OrderDetailWeb.find(details).populate('Product'),
         FiscalAddress.findOne({ CardCode: client.CardCode }),
         client,
       ];
@@ -45,12 +45,12 @@ function create(orderId) {
 }
 
 function send(orderID) {
-  return Order
+  return OrderWeb
     .findOne(orderID)
     .populate('Client')
     .then(function(order) {
       return [
-        Invoice.findOne({ order: orderID }),
+        InvoiceWeb.findOne({ order: orderID }),
         FiscalAddress.findOne({ CardCode: order.Client.CardCode }),
       ];
     })

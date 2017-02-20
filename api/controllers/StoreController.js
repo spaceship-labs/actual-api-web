@@ -23,8 +23,6 @@ module.exports = {
       id = SiteService.getDefaultActiveStoreId(req);
     }
 
-    sails.log.info('id', id);
-
     Store.findOne({id:id}).populate('Promotions', queryPromo)
       .then(function(company){
         res.json(company.Promotions);

@@ -121,14 +121,14 @@ function getStoresWithProduct(ItemCode, whsCode){
 
 function validateQuotationStockById(quotationId, req){
   var warehouse;
-  return Quotation.findOne({id: quotationId}).populate('Details')
+  return QuotationWeb.findOne({id: quotationId}).populate('Details')
 	.then(function(quotation){
     var whsId = req.activeStore.Warehouse;
     details = quotation.Details;
     var detailsIds = details.map(function(d){ return d.id; });
     return [
       Company.findOne({id: whsId}),
-      QuotationDetail.find({id: detailsIds}).populate('Product')
+      QuotationDetailWeb.find({id: detailsIds}).populate('Product')
     ];
   })
   .spread(function(warehouse,details){

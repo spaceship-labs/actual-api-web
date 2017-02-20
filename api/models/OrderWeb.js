@@ -21,35 +21,23 @@ module.exports = {
       enum:['lost','pending','on-delivery','minimum-paid','paid']
     },
     Quotation:{
-      model:'Quotation',
+      model:'QuotationWeb',
       unique:true
-    },
-    Sale: {
-      model:'Sale'
     },
     Client:{
       model: 'Client'
     },
     Details: {
-      collection:'OrderDetail',
+      collection:'OrderDetailWeb',
       via:'Order'
     },
     Payments: {
-      collection:'Payment',
-      via:'Order'
-    },
-    EwalletRecords:{
-      collection:'EwalletRecord',
-      via:'Order'
-    },
-    ClientBalanceRecords:{
-      collection:'ClientBalanceRecord',
+      collection:'PaymentWeb',
       via:'Order'
     },
     User:{
       model: 'UserWeb',
     },
-
     Address:{
       model:'ClientContact',
     },
@@ -59,15 +47,15 @@ module.exports = {
       //required: 'true'
     },
     PaymentsSap:{
-      collection:'PaymentSap',
+      collection:'PaymentSapWeb',
       via:'Order'
     },
     OrdersSap:{
-      collection:'OrderSap',
+      collection:'OrderSapWeb',
       via:'Order'
     },
     SapOrderConnectionLog:{
-      model: 'SapOrderConnectionLog'
+      model: 'SapOrderConnectionLogWeb'
     },
 
     //CONTACT ADDRESS FIELDS SNAPSHOT
@@ -111,12 +99,12 @@ module.exports = {
     },
     invoice: {
       //factura sat
-      model: 'invoice',
+      model: 'invoiceweb',
     }
   },
 
   beforeCreate: function(val,cb){
-    Common.orderCustomAI(val, 'orderFolio',function(val){
+    Common.orderCustomAI(val, 'orderWebFolio',function(val){
       cb();
     });
   },

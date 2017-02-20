@@ -34,15 +34,15 @@ module.exports = {
       via: 'Stores'
     },
     Payments: {
-      collection:'Payment',
+      collection:'PaymentWeb',
       via:'Store'
     },
     Quotations: {
-      collection:'Quotation',
+      collection:'QuotationWeb',
       via:'Store'
     },
     Orders: {
-      collection:'Order',
+      collection:'OrderWeb',
       via:'Store'
     },
     PromotionPackages:{

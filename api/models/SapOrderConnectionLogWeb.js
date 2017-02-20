@@ -2,13 +2,13 @@
 module.exports = {
   attributes: {
     Quotation:{
-      model: 'Quotation'
+      model: 'QuotationWeb'
     },
     User:{
       model: 'UserWeb'
     },
     Order: {
-      model:'Order'
+      model:'OrderWeb'
     },
     Store:{
       model: 'Store'

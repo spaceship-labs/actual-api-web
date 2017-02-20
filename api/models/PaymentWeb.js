@@ -6,15 +6,7 @@ module.exports = {
     type: {
       type:'string',
       enum:[
-        'cash',
-        'cash-usd',
-        'cheque',
-        'deposit',
-        'transfer',
-        'ewallet',
-        'credit-card', //TODO remove
         'single-payment-terminal',
-        'client-balance',
         '3-msi',
         '6-msi',
         '9-msi',
@@ -35,7 +27,6 @@ module.exports = {
     exchangeRate:{type:'float'},
     verificationCode: {type:'string'},
     conektaId: {type:'string'},
-    terminal:{type:'string'},
     isCancelled: {type:'boolean'},
     isCancellation: {type:'boolean'},
     isRecurring: {type:'boolean'},
@@ -68,10 +59,10 @@ module.exports = {
       //model:'company'
     },
     Order:{
-      model:'Order'
+      model:'OrderWeb'
     },
     Quotation:{
-      model:'Quotation'
+      model:'QuotationWeb'
     },
     User:{
       model:'UserWeb'
@@ -80,13 +71,13 @@ module.exports = {
       model: 'Client'
     },
     PaymentSap:{
-      model: 'PaymentSap'
+      model: 'PaymentSapWeb'
     },
 
   },
 
   beforeCreate: function(val,cb){
-    Common.orderCustomAI(val, 'paymentFolio',function(val){
+    Common.orderCustomAI(val, 'paymentWebFolio',function(val){
       cb();
     });
   },

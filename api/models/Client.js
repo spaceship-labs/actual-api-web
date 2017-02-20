@@ -21,14 +21,6 @@ module.exports = {
     Balance: {type:'float'},
     Currency:{type:'string'},
 
-    /*
-    */
-    /*Seller:{
-      model:'User',
-      columnName: 'SlpCode'
-    }
-    */
-
     /*-----/
     FIELDS APP
     /*-----*/
@@ -54,20 +46,13 @@ module.exports = {
       RELATIONS
     /*----------*/
     Quotations: {
-      collection:'Quotation',
+      collection:'QuotationWeb',
       via: 'Client',
     },
 
     Orders: {
-      collection:'Order',
+      collection:'OrderWeb',
       via: 'Client',
     },
-
-    EwalletRecords: {
-      collection:'EwalletRecord',
-      via: 'Client',
-    }
-
-
   }
 };

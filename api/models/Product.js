@@ -173,7 +173,7 @@ module.exports = {
         model: 'CustomBrand'
       },
       QuotationDetails:{
-        collection:'QuotationDetail',
+        collection:'QuotationDetailWeb',
         via:'Product'
       },
       Promotions:{
