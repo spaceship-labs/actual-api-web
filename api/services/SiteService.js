@@ -26,29 +26,31 @@ function getDefaultActiveStoreId(req){
 			break;
 	}
 
-	function getSiteDisplayProperty(req){
-		var site = req.headers.site || 'actual-studio';
-		var siteDisplayProperty;
-		
-		switch(site){
-			case 'actual-studio':
-				siteDisplayProperty = Constants.DISPLAY_PROPERTY_ACTUAL_STUDIO;
-				break;
+	return activeStoreId;
+}
 
-			case 'actual-home':
-				siteDisplayProperty = Constants.DISPLAY_PROPERTY_ACTUAL_HOME;
-				break;
 
-			case 'actual-kids':
-				siteDisplayProperty = Constants.DISPLAY_PROPERTY_ACTUAL_KIDS;
-				break;
+function getSiteDisplayProperty(req){
+	var site = req.headers.site || 'actual-studio';
+	var siteDisplayProperty;
+	
+	switch(site){
+		case 'actual-studio':
+			siteDisplayProperty = Constants.DISPLAY_PROPERTY_ACTUAL_STUDIO;
+			break;
 
-			default: 
-				siteDisplayProperty = Constants.DISPLAY_PROPERTY_ACTUAL_STUDIO;
-				break;
-		}
+		case 'actual-home':
+			siteDisplayProperty = Constants.DISPLAY_PROPERTY_ACTUAL_HOME;
+			break;
 
+		case 'actual-kids':
+			siteDisplayProperty = Constants.DISPLAY_PROPERTY_ACTUAL_KIDS;
+			break;
+
+		default: 
+			siteDisplayProperty = Constants.DISPLAY_PROPERTY_ACTUAL_STUDIO;
+			break;
 	}
 
-	return activeStoreId;
+	return siteDisplayProperty;
 }
