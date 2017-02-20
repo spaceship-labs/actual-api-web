@@ -1,5 +1,6 @@
 module.exports = {
-	getDefaultActiveStoreId: getDefaultActiveStoreId
+	getDefaultActiveStoreId: getDefaultActiveStoreId,
+	getSiteDisplayProperty: getSiteDisplayProperty
 };
 
 function getDefaultActiveStoreId(req){
@@ -17,12 +18,36 @@ function getDefaultActiveStoreId(req){
 			break;
 
 		case 'actual-kids':
-			activeStoreId = Constants.ACTUAL_HOME_WEB_ID;
+			activeStoreId = Constants.ACTUAL_KIDS_WEB_ID;
 			break;
 
 		default: 
-			activeStoreId = Constants.ACTUAL_HOME_WEB_ID;
+			activeStoreId = Constants.ACTUAL_STUDIO_WEB_ID;
 			break;
+	}
+
+	function getSiteDisplayProperty(req){
+		var site = req.headers.site || 'actual-studio';
+		var siteDisplayProperty;
+		
+		switch(site){
+			case 'actual-studio':
+				siteDisplayProperty = Constants.DISPLAY_PROPERTY_ACTUAL_STUDIO;
+				break;
+
+			case 'actual-home':
+				siteDisplayProperty = Constants.DISPLAY_PROPERTY_ACTUAL_HOME;
+				break;
+
+			case 'actual-kids':
+				siteDisplayProperty = Constants.DISPLAY_PROPERTY_ACTUAL_KIDS;
+				break;
+
+			default: 
+				siteDisplayProperty = Constants.DISPLAY_PROPERTY_ACTUAL_STUDIO;
+				break;
+		}
+
 	}
 
 	return activeStoreId;

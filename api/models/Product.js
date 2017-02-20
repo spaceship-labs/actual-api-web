@@ -135,16 +135,6 @@ module.exports = {
       actual_proyect:{type:'integer'},
 
 
-      //CACHE DISCOUNT PRICES BY STORE
-      discountPrice_actual_studio_merida:{type:'float'},
-      discountPrice_actual_studio_malecon:{type:'float'},
-      discountPrice_actual_studio_playa_del_carmen:{type:'float'},
-      discountPrice_actual_studio_cumbres:{type:'float'},
-      discountPrice_actual_home_xcaret:{type:'float'},
-      discountPrice_actual_home_merida:{type:'float'},
-      discountPrice_proyectos:{type:'float'},
-      discountPrice_actual_proyect:{type:'float'},
-
       //RELATIONS
       files: {
         collection: 'productfile',

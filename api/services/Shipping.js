@@ -120,7 +120,12 @@ function buildShippingItem(stockItem, deliveries, storeWarehouseId, options){
 function filterStockItems(stockItems, deliveries){
 
   return stockItems.filter(function(stockItem){
-  
+    
+    if(stockItem.ImmediateDelivery){
+      return false;
+    }
+
+    /*
     var delivery = _.find(deliveries, function(delivery) {
       return delivery.FromCode == stockItem.whsCode;
     });
@@ -130,6 +135,7 @@ function filterStockItems(stockItems, deliveries){
     if(stockItem.ImmediateDelivery){
       return stockItem.whsCode === delivery.ToCode;
     }
+    */
 
     return true;
   });
