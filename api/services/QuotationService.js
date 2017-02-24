@@ -121,7 +121,7 @@ function Calculator(){
     return getActivePromos()
       .then(function(promos){
         activePromotions = promos;
-        return Quotation.findOne({id:quotationId}).populate('Details');
+        return QuotationWeb.findOne({id:quotationId}).populate('Details');
       })
       .then(function(quotationFound){
         quotation = quotationFound;

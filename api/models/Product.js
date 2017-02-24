@@ -40,6 +40,8 @@ module.exports = {
       PriceList:{type:'integer', size: 4},
       Price:{type:'float'},
       Currency:{type:'string',size:3},
+      Discount:{type:'float'},
+      DiscountPrice:{type:'float'},
 
       /*----------------/
           #EXTRA FIELDS
