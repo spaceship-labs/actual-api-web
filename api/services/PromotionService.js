@@ -71,19 +71,23 @@ function filterByHighestRegisteredPromotion(productActivePromotions){
   });
 }
 
-function mapRelatedPromotions(promotions, product){
-  var mappedPromotions = promotions.map(function(promotion){
-    var auxPromotion = {
-      discountPg1: product.Discount,
-      discountPg2: getRelatedPromotionGroupDiscount(2, promotion, product), 
-      discountPg3: getRelatedPromotionGroupDiscount(3, promotion, product), 
-      discountPg4: getRelatedPromotionGroupDiscount(4, promotion, product), 
-      discountPg5: getRelatedPromotionGroupDiscount(5, promotion, product) 
-    };
+function mapRelatedPromotions(promotions, product, quotationId){
+  var mappedPromotions = [];
 
-    promotion = _.extend(promotion, auxPromotion);
-    return promotion;
-  });
+  if(product.Discount){
+    mappedPromotions = promotions.map(function(promotion){
+      var auxPromotion = {
+        discountPg1: product.Discount,
+        discountPg2: getRelatedPromotionGroupDiscount(2, promotion, product), 
+        discountPg3: getRelatedPromotionGroupDiscount(3, promotion, product), 
+        discountPg4: getRelatedPromotionGroupDiscount(4, promotion, product), 
+        discountPg5: getRelatedPromotionGroupDiscount(5, promotion, product) 
+      };
+
+      promotion = _.extend(promotion, auxPromotion);
+      return promotion;
+    });
+  }
 
   return mappedPromotions;
 }
