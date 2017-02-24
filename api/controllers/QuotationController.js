@@ -408,7 +408,11 @@ module.exports = {
           return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
         }   
 
-        return PaymentService.getMethodGroupsWithTotals(quotationId, req.activeStore);
+        var options = {
+          financingTotals: form.financingTotals || false
+        };
+        
+        return PaymentService.getMethodGroupsWithTotals(quotationId, req.activeStore, options);
       })
       .then(function(paymentOptions){
         res.json(paymentOptions);

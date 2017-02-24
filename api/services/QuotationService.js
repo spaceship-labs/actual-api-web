@@ -56,7 +56,7 @@ module.exports = {
 
 function updateQuotationToLatestData(quotationId, userId, options){
   var params = {
-    paymentGroup:1,
+    paymentGroup: options.paymentGroup || 1,
     updateDetails: true,
     currentStore: options.currentStore,
     isEmptyQuotation: options.isEmptyQuotation
@@ -66,13 +66,11 @@ function updateQuotationToLatestData(quotationId, userId, options){
     return nativeQuotationUpdate(quotationId, defaultQuotationTotals);
   }
     
-  //return Quotation.findOne({id:quotationId,select:['paymentGroup']})
   return nativeQuotationFindOne(quotationId)
     .then(function(quotation){
       if(!quotation){
         return Promise.reject(new Error('Cotización no encontrada'));
       }
-      params.paymentGroup = quotation.paymentGroup || 1;
       var calculator = Calculator();
       return calculator.updateQuotationTotals(quotationId, params);
     });
@@ -96,6 +94,9 @@ function Calculator(){
 
   function updateQuotationTotals(quotationId, options){
     options = options || {paymentGroup:1 , updateDetails: true};
+    options = _.extend(options,{
+      financingTotals: true
+    });
 
     if(options.isEmptyQuotation){
       return nativeQuotationUpdate(quotationId, defaultQuotationTotals);
@@ -114,17 +115,17 @@ function Calculator(){
 
   function getQuotationTotals(quotationId, options){
     var details = [];
+    var quotation;
     options = options || {paymentGroup:1 , updateDetails: true};
 
     return getActivePromos()
       .then(function(promos){
         activePromotions = promos;
-        return Common.nativeFind({Quotation: ObjectId(quotationId)}, QuotationDetailWeb);
-        //return QuotationDetail.find({Quotation: quotationId});
+        return Quotation.findOne({id:quotationId}).populate('Details');
       })
-      .then(function(detailsResult){
-        //sails.log.info('detailsResult', detailsResult);
-        details = detailsResult; 
+      .then(function(quotationFound){
+        quotation = quotationFound;
+        details = quotation.Details; 
         var packagesIds = getQuotationPackagesIds(details);
 
         if(packagesIds.length > 0){
@@ -144,9 +145,48 @@ function Calculator(){
       })
       .then(function(processedDetails){
         var totals = sumProcessedDetails(processedDetails, options);
+        var ammountPaidPg1 = quotation.ammountPaidPg1 || 0;
+        var plainTotals = _.clone(totals);
+        var auxPromise = new Promise(function(resolve,reject){resolve();});
+
+        if( ammountPaidPg1 > 0 && options.financingTotals){
+
+          processedDetails = mapDetailsWithFinancingCost(processedDetails, ammountPaidPg1, totals);
+          totals = sumProcessedDetails(processedDetails, options);
+
+          if(options.updateDetails){
+            auxPromise = updateDetails(processedDetails);
+          }
+
+        }
+
+        return [
+          totals,
+          auxPromise
+        ];
+      })
+      .spread(function(totals, resultUpdateIfNeeeded){
         return totals;
       });
 
+  }
+
+  function mapDetailsWithFinancingCost(details, ammountPaidPg1, quotationPlainTotals){
+    return details.map(function(detail){
+      var proportionalPaymentPg1 = (detail.totalPg1 / quotationPlainTotals.totalPg1) * ammountPaidPg1;
+      var proportionalPayment = (detail.total / quotationPlainTotals.total) * ammountPaidPg1;
+      
+      var detailRemainingPg1 = detail.totalPg1 - proportionalPaymentPg1;
+      var detailRemaining = (1+detail.financingCostPercentage) * detailRemainingPg1;
+      
+      detail.originalDiscountPercent = _.clone(detail.discountPercent);
+      detail.total                 = proportionalPayment + detailRemaining;
+      detail.discount              = detail.total - detail.subtotal;
+      detail.discountPercent       = 100 - ((detail.total / detail.subtotal) * 100);
+      detail.unitPriceWithDiscount = calculateAfterDiscount(detail.unitPrice, detail.discountPercent);
+      detail.discountPercentPromos = detail.discountPercentPromos;
+      return detail;
+    });
   }
 
   function sumProcessedDetails(processedDetails, options){
@@ -154,6 +194,7 @@ function Calculator(){
       subtotal :0,
       subtotal2:0,
       total:0,
+      totalPg1: 0,
       discount:0,
       totalProducts: 0,
       paymentGroup: options.paymentGroup,
@@ -164,11 +205,14 @@ function Calculator(){
 
     processedDetails.forEach(function(pd){
       totals.total         += pd.total;
+      totals.totalPg1      += pd.totalPg1;
       totals.subtotal      += pd.subtotal;
       totals.subtotal2     += pd.subtotal2;
       totals.discount      += (pd.subtotal - pd.total);
       totals.totalProducts += pd.quantity;
     });    
+
+    totals.financingCostPercentage = calculateFinancingPercentage(totals.totalPg1, totals.total);
     
     return totals;
   }
@@ -309,15 +353,12 @@ function Calculator(){
   function getDetailTotals(detail, options){
     options = options || {};
     paymentGroup = options.paymentGroup || 1;
-    var subTotal = 0;
-    var total    = 0;
     var productId   = detail.Product;
     var quantity    = detail.quantity;
     var currentDate = new Date();
     
     return Product.findOne({id:productId})
       .then(function(product){
-        var total;
         var mainPromo                 = getProductMainPromo(product, quantity);
         var unitPrice                 = product.Price;
         var discountKey               = getDiscountKey(options.paymentGroup);
@@ -327,6 +368,8 @@ function Calculator(){
         var subtotal                  = quantity * unitPrice;
         var subtotal2                 = quantity * unitPriceWithDiscount;
         var total                     = quantity * unitPriceWithDiscount;
+        var totalPg1                  = total;
+        var financingCostPercentage   = 0;
         var discountName              = mainPromo ? getPromotionOrPackageName(mainPromo) : null;
         
         //var total                 = quantity * unitPriceWithDiscount;
@@ -335,6 +378,15 @@ function Calculator(){
 
         //TODO: Reactivate ewallet 
         var ewallet                   = 0;
+
+        //Calculate financing
+        if(mainPromo){
+          var _discountKey = getDiscountKey(1);
+          var _discountPercent = mainPromo[_discountKey];
+          var _unitPriceWithDiscount = calculateAfterDiscount(unitPrice, _discountPercent);
+          totalPg1 = _unitPriceWithDiscount * quantity;
+          financingCostPercentage = calculateFinancingPercentage(totalPg1, total);
+        }
 
         /*
         var ewallet = getEwalletEntryByDetail({
@@ -359,6 +411,8 @@ function Calculator(){
           subtotal                    : subtotal,
           subtotal2                   : subtotal2,
           total                       : total,
+          totalPg1                    : totalPg1,
+          financingCostPercentage     : financingCostPercentage,
           unitPrice                   : unitPrice,
           unitPriceWithDiscount       : unitPriceWithDiscount,
           immediateDelivery           : isImmediateDelivery(detail.shipDate)
@@ -375,6 +429,10 @@ function Calculator(){
         return detailTotals;
       });
   }
+
+  function calculateFinancingPercentage(totalPg1, total){
+    return (total - totalPg1) / totalPg1;
+  }  
 
   function getPromotionOrPackageName(promotionOrPackage){
     var promotionFound = _.findWhere(activePromotions, {id:promotionOrPackage.id});

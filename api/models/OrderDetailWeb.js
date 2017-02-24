@@ -8,13 +8,17 @@ module.exports = {
     subtotal: 'float',
     subtotal2: 'float', // includes discounts but not big ticket neither family and friends
     total: 'float',
+    totalPg1: 'float',
+    financingCostPercentage: 'float',
     discountPercentPromos: 'float', //by unit (does not include big ticket or FF discount)    
     discountPercent: 'float', //by unit (includes big ticket discount)
+    discountName: 'string',    
+    originalDiscountPercent: 'float',   
+    unitPriceWithDiscount: 'float',
     bigticketDiscountPercentage: {
       type: 'integer',
       enum:[0,1,2,3,4,5]
     },    
-    discountName: 'string',    
     paymentGroup: 'integer',
     unitPrice: 'float',
     ewallet: 'float',

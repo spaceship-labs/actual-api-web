@@ -44,6 +44,9 @@ module.exports = {
     clientName: {type:'string'},
     folio:{type:'integer'},
     total:{type:'float'},
+    totalPg1: {type:'float'},
+    ammountPaidPg1: {type:'float'},
+    financingCostPercentage: 'float',    
     subtotal: {type:'float'},
     subtotal2: {type:'float'}, // includes discounts but not big ticket neither family and friends
     discount: {type:'float'},

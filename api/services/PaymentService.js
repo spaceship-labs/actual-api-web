@@ -11,6 +11,7 @@ var DEFAULT_EXCHANGE_RATE   = 18.78;
 module.exports = {
   calculateQuotationAmountPaid: calculateQuotationAmountPaid,
   calculateUSDPayment: calculateUSDPayment,
+  calculateQuotationAmountPaidGroup1: calculateQuotationAmountPaidGroup1,
   getPaymentGroupsForEmail: getPaymentGroupsForEmail,
   getMethodGroupsWithTotals: getMethodGroupsWithTotals,
   getPaymentGroups: getPaymentGroups,
@@ -31,7 +32,28 @@ function calculateQuotationAmountPaid(quotationPayments, exchangeRate){
     return paymentA + paymentB;
   });
 
-  return ammountPaid;
+  return ammountPaid || 0;
+}
+
+function calculateQuotationAmountPaidGroup1(quotationPayments, exchangeRate){
+  var payments  = _.clone(quotationPayments) || [];
+
+  payments = payments.filter(function(payment){
+    return payment.group === 1;
+  });
+
+  var ammounts = payments.map(function(payment){
+    if(payment.type === 'cash-usd'){
+     return calculateUSDPayment(payment, exchangeRate);
+    }
+    return payment.ammount;
+  });
+
+  var ammountPaidGroup1 = ammounts.reduce(function(paymentA, paymentB){
+    return paymentA + paymentB;
+  });
+
+  return ammountPaidGroup1 || 0;
 }
 
 function calculateUSDPayment(payment, exchangeRate){
@@ -45,7 +67,7 @@ function getExchangeRate(){
     });
 }
 
-function getMethodGroupsWithTotals(quotationId, activeStore){
+function getMethodGroupsWithTotals(quotationId, activeStore, options){
   var methodsGroups = paymentGroups;
   var discountKeys = [
     'discountPg1',
@@ -59,6 +81,7 @@ function getMethodGroupsWithTotals(quotationId, activeStore){
     var id = quotationId;
     var paymentGroup = mG.group || 1;
     var params = {
+      financingTotals: options.financingTotals,
       update: false,
       paymentGroup: mG.group,
     };

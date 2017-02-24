@@ -97,7 +97,8 @@ module.exports = {
         quotationPayments = quotation.Payments.concat([paymentCreated]);
 
         var promises = [
-          PaymentService.calculateQuotationAmountPaid(quotationPayments, exchangeRate)
+          PaymentService.calculateQuotationAmountPaid(quotationPayments, exchangeRate),
+          PaymentService.calculateQuotationAmountPaidGroup1(quotationPayments, exchangeRate)
         ];
 
         if(form.type === EWALLET_TYPE){
@@ -124,9 +125,10 @@ module.exports = {
 
         return promises;
       })
-      .spread(function(ammountPaid){
+      .spread(function(ammountPaid, ammountPaidPg1){
         quotationUpdateParams = {
           ammountPaid: ammountPaid,
+          ammountPaidPg1: ammountPaidPg1,
           paymentGroup: paymentGroup
         };
         return QuotationService.nativeQuotationUpdate(quotationId, quotationUpdateParams);
