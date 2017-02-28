@@ -38,11 +38,16 @@ function calculateQuotationAmountPaid(quotationPayments, exchangeRate){
 function calculateQuotationAmountPaidGroup1(quotationPayments, exchangeRate){
   var payments  = _.clone(quotationPayments) || [];
 
-  payments = payments.filter(function(payment){
+  var paymentsG1 = payments.filter(function(payment){
     return payment.group === 1;
   });
 
-  var ammounts = payments.map(function(payment){
+  if(paymentsG1.length === 0 || !paymentsG1){
+    return 0;
+  }
+
+
+  var ammounts = paymentsG1.map(function(payment){
     if(payment.type === 'cash-usd'){
      return calculateUSDPayment(payment, exchangeRate);
     }
