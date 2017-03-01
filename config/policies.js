@@ -26,6 +26,9 @@ module.exports.policies = {
   QuotationController:{
     '*': ['setupDefaultData','isAuthenticated']
   },
+  PaymentController:{
+    add: ['setupDefaultData','isAuthenticated']
+  },
   UserController:{
     '*': ['setupDefaultData','isAuthenticated'],
     create: ['setupDefaultData','isAuthenticated', 'isAllowed'],

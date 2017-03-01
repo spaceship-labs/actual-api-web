@@ -6,7 +6,6 @@ var CLIENT_BALANCE_TYPE = 'client-balance';
 var EWALLET_NEGATIVE = 'negative';
 var CANCELLED_STATUS = 'cancelled';
 var PAYMENT_CANCEL_TYPE = 'cancellation';
-
 module.exports = {
 
   add: function(req, res){
@@ -21,7 +20,7 @@ module.exports = {
     var quotationUpdateParams;
     form.Quotation    = quotationId;
     form.Store = req.activeStore.id;
-    form.User = req.user.id;    
+    form.User = req.user.id;
 
     if (form.Details) {
       form.Details = formatProductsIds(form.Details);
@@ -45,19 +44,6 @@ module.exports = {
       .then(function(quotationFound){
         quotation = quotationFound;
         client = quotation.Client;
-        form.Client = client.id || client;
-
-        if(form.type === EWALLET_TYPE){
-          if( !EwalletService.isValidEwalletPayment(form, client) ){
-            return Promise.reject(new Error('Fondos insuficientes en monedero electronico'));
-          }
-        }
-
-        if(form.type === CLIENT_BALANCE_TYPE){
-          if(!ClientBalanceService.isValidClientBalancePayment(form, client)){
-            return Promise.reject(new Error('Fondos insuficientes en balance de cliente'));
-          }
-        }
 
         return PaymentService.getExchangeRate();
       })
@@ -84,17 +70,6 @@ module.exports = {
             })
           );
         }
-
-        if(form.type === CLIENT_BALANCE_TYPE){
-          promises.push(
-            ClientBalanceService.applyClientBalanceRecord(form,{
-              quotationId: quotationId,
-              userId: req.user.id,
-              client: client,
-              paymentId: paymentCreated.id              
-            })
-          );
-        }        
 
         return promises;
       })
