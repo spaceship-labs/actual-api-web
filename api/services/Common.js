@@ -6,6 +6,8 @@ var assign = require('object-assign');
 var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
 
 function formatMongoRecord(record){
+//Error en record._id
+  console.log(record._id);
   record.id = record._id.toString();
   for(var key in record){
     if( record[key] instanceof ObjectId){
