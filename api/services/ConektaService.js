@@ -8,7 +8,7 @@ module.exports = {
 	createOrder: createOrder,
 	chargeOrder: chargeOrder
 };
-function createOrder (argument) {
+function createOrder() {
 	conekta.Order.create({
 	  "currency": "mxn",
 	  "customer_info": {
@@ -27,7 +27,7 @@ function createOrder (argument) {
 	      console.log('ID', order.id);
 	      return order;
 	});
-},
+}
 
 function chargeOrder() {
 	var params = {
