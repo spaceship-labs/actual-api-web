@@ -5,7 +5,8 @@ conekta.api_version = '2.0.0';
 
 
 module.exports = {
-	createOrder: createOrder
+	createOrder: createOrder,
+	chargeOrder: chargeOrder
 };
 function createOrder (argument) {
 	conekta.Order.create({
