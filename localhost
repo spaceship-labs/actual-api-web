@@ -1,0 +1,4 @@
+# Nmap 7.12 scan initiated Tue Mar  7 10:44:47 2017 as: nmap -sT -o localhost 1337
+Strange read error from 0.0.5.57 (22 - 'Invalid argument')
+Strange read error from 0.0.5.57 (22 - 'Invalid argument')
+# Nmap done at Tue Mar  7 10:44:47 2017 -- 1 IP address (0 hosts up) scanned in 0.11 seconds
