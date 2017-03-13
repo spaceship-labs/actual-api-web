@@ -44,11 +44,7 @@ module.exports = {
       .then(function(quotationFound){
         quotation = quotationFound;
         client = quotation.Client;
-
-        return PaymentService.getExchangeRate();
-      })
-      .then(function(exchangeRateFound){
-        exchangeRate = exchangeRateFound;
+        //ConektaService.create()
 
         return PaymentWeb.create(form);
       })
