@@ -8,9 +8,21 @@ module.exports = {
 	getDetailsStock: getDetailsStock,
 	substractProductsStock: substractProductsStock,
 	validateQuotationStockById: validateQuotationStockById,
-	isFreeSaleProduct: isFreeSaleProduct
+	isFreeSaleProduct: isFreeSaleProduct,
+	syncOrderDetailsProducts: syncOrderDetailsProducts
 };
 
+
+function syncOrderDetailsProducts(orderDetails){
+	var itemCodes = orderDetails.map(function(orderDetail){
+		var product = orderDetail.Product;
+		return product.ItemCode;
+	});
+	itemCodes = _.uniq(itemCodes);
+	sails.log.info('Updating :', itemCodes);
+
+	return Promise.map(itemCodes, SyncService.syncProductByItemCode);
+}
 
 function isFreeSaleProduct(product){
   if(product){

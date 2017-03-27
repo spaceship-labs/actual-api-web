@@ -99,15 +99,10 @@ function buildShippingItem(stockItem, storeWarehouseId, zipcodeDelivery, options
     .then(function(season){
       var seasonDays   = (season && season.Days) || 7;
       var days = productDays + seasonDays + zipcodeDays;
+      /*
       sails.log.info('product days', productDays);
       sails.log.info('season days', seasonDays);
       sails.log.info('zipcodeDays', zipcodeDays);
-
-      //Product in same store/warehouse
-      /*
-      if(stockItem.whsCode === delivery.ToCode && stockItem.ImmediateDelivery){
-        days = productDays;
-      }
       */
       
       var date = addDays(new Date(), days);
@@ -132,19 +127,6 @@ function filterStockItems(stockItems){
     if(stockItem.ImmediateDelivery){
       return false;
     }
-
-    /*
-    var delivery = _.find(deliveries, function(delivery) {
-      return delivery.FromCode == stockItem.whsCode;
-    });
-
-    //Only use immediate delivery stock items, when from and to warehouses
-    //are the same
-    if(stockItem.ImmediateDelivery){
-      return stockItem.whsCode === delivery.ToCode;
-    }
-    */
-
     return true;
   });
 }

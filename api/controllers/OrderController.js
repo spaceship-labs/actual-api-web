@@ -71,6 +71,7 @@ module.exports = {
     var form = req.params.all();
     var order;
     var responseSent = false;
+    var orderDetails;
 
     OrderService.createFromQuotation(form, req.user)
       .then(function(orderCreated){
@@ -78,33 +79,30 @@ module.exports = {
         res.json(orderCreated);
         responseSent = true;
         order = orderCreated;
+        orderDetails = orderCreated.Details;
 
         //STARTS EMAIL SENDING PROCESS
         return OrderWeb.findOne({id:orderCreated.id})
           .populate('User')
           .populate('Client')
           .populate('Payments')
+          .populate('EwalletRecords')
           .populate('Address');
       })
       .then(function(order){
         return [
           Email.sendOrderConfirmation(order.id),
           Email.sendFreesale(order.id),
-          //InvoiceService.create(order.id)
+          //InvoiceService.createOrderInvoice(order.id),
+          StockService.syncOrderDetailsProducts(orderDetails)
         ];
       })
-      //.spread(function(orderSent, freesaleSent, alegraInvoice){
-      .spread(function(orderSent, freesaleSent){
+      //.spread(function(orderSent, freesaleSent, invoice, productsSynced){
+      .spread(function(orderSent, freesaleSent, productsSynced){
         console.log('Email de orden enviado: ' + order.folio);
+        console.log('productsSynced', productsSynced);
+        //console.log('generated invoice', invoice);
       })
-      /*
-        sails.log.info('Email de orden enviado');
-        return Invoice.create({ id: alegraInvoice.id, order: order });
-      })
-      .then(function(invoice){
-        console.log('generated invoice', invoice);
-      })
-      */
       .catch(function(err){
         console.log(err);
         if(!responseSent){

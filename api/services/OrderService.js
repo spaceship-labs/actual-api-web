@@ -1,10 +1,10 @@
 var _ = require('underscore');
 var Promise = require('bluebird');
 
+var EWALLET_POSITIVE = 'positive';
 var INVOICE_SAP_TYPE = 'Invoice';
 var ORDER_SAP_TYPE = 'Order';
 var ERROR_SAP_TYPE = 'Error';
-var CLIENT_BALANCE_TYPE = 'client-balance';
 var BALANCE_SAP_TYPE = 'Balance';
 
 module.exports = {
@@ -89,12 +89,21 @@ function getTotalsByUser(form){
 
 }
 
-function createFromQuotation(form, req){
+function getGroupByQuotationPayments(payments){
+  var group = 1;
+  if(payments.length > 0){
+    var paymentsCount = payments.length;
+    group = payments[paymentsCount - 1].group;
+  }
+  return group;
+}
+
+function createFromQuotation(form, currentUser){
   var quotationId  = form.quotationId;
   var opts         = {
-    paymentGroup: form.paymentGroup || 1,
+    //paymentGroup: form.paymentGroup || 1,
     updateDetails: true,
-    currentStore: req.user.activeStore.id
+    currentStoreId: currentUser.activeStore.id
   };
   var orderCreated = false;
   var SlpCode      = -1;
@@ -115,14 +124,19 @@ function createFromQuotation(form, req){
           new Error('Ya se ha creado un pedido sobre esta cotización : ' + orderUrl)
         );
       }
-      return StockService.validateQuotationStockById(quotationId, req);
+      return [
+          StockService.validateQuotationStockById(quotationId, currentUser.activeStore),
+          PaymentWeb.find({Quotation: quotationId}).sort('createdAt ASC')
+        ];
     })
-    .then(function(isValidStock){
+    .spread(function(isValidStock, quotationPayments){
       if(!isValidStock){
         return Promise.reject(
           new Error('Inventario no suficiente para crear la orden')
         );
       }
+      opts.paymentGroup = getGroupByQuotationPayments(quotationPayments);
+
       var calculator = QuotationService.Calculator();
       return calculator.updateQuotationTotals(quotationId, opts);
     })
@@ -132,7 +146,8 @@ function createFromQuotation(form, req){
         .populate('Details')
         .populate('Address')
         .populate('User')
-        .populate('Client');
+        .populate('Client')
+        .populate('EwalletRecords');
     })
     .then(function(quotationFound){
       quotation = quotationFound;
@@ -151,7 +166,7 @@ function createFromQuotation(form, req){
         );
       }
 
-      var user = req.user;
+      var user = currentUser;
       if(user.Seller){
         SlpCode = user.Seller.SlpCode;
       }
@@ -174,7 +189,7 @@ function createFromQuotation(form, req){
         User: user.id,
         CardCode: quotation.Client.CardCode,
         SlpCode: SlpCode,
-        Store: opts.currentStore,
+        Store: opts.currentStoreId,
         //Store: user.activeStore
       };
 
@@ -232,8 +247,8 @@ function createFromQuotation(form, req){
       sails.log.info('createSaleOrder response', sapResponse);
       var log = {
         content: sapEndpoint + '\n' +  JSON.stringify(sapResponse),
-        User   : req.user.id,
-        Store  : opts.currentStore,
+        User   : currentUser.id,
+        Store  : opts.currentStoreId,
         Quotation: quotationId
       };
       return SapOrderConnectionLogWeb.create(log);
@@ -252,7 +267,7 @@ function createFromQuotation(form, req){
         return Promise.reject(new Error(errorStr));
       }
       orderParams.documents = sapResult;
-      orderParams.SapOrderConnectionLog = sapLog.id;
+      orderParams.SapOrderConnectionLogWeb = sapLog.id;
 
       return OrderWeb.create(orderParams);
     })
@@ -276,9 +291,8 @@ function createFromQuotation(form, req){
     })
     .then(function(orderDetailsFound){
       orderDetails = orderDetailsFound;
-      return StockService.substractProductsStock(orderDetails);
-    })
-    .then(function(){
+      //return StockService.substractProductsStock(orderDetails);
+      
       var updateFields = {
         Order: orderCreated.id,
         status: 'to-order',
@@ -290,20 +304,20 @@ function createFromQuotation(form, req){
         saveSapReferences(sapResult, orderCreated, orderDetails)
       ];
     })
-    /*
     .spread(function(quotationUpdated, sapOrdersReference){
       var params = {
         details: quotation.Details,
-        storeId: opts.currentStore,
+        storeId: opts.currentStoreId,
         orderId: orderCreated.id,
         quotationId: quotation.id,
         userId: quotation.User.id,
         client: quotation.Client
       };
       return processEwalletBalance(params);
-    })
-    */  
+    })  
     .then(function(){
+      orderCreated = orderCreated.toObject();
+      orderCreated.Details = orderDetails;
       return orderCreated;
     });
 }
@@ -318,9 +332,17 @@ function isValidOrderCreated(sapResponse, sapResult, paymentsToCreate){
       };
     }
 
+    var sapResultWithBalance = _.clone(sapResult);
     sapResult = sapResult.filter(function(item){
       return item.type !== BALANCE_SAP_TYPE;
     });
+
+    //If only balance was returned
+    if(sapResult.length === 0){
+      return {
+        error: 'Documentos no generados en SAP'
+      };
+    }
 
     var everyOrderHasPayments = sapResult.every(function(sapOrder){
       return checkIfSapOrderHasPayments(sapOrder, paymentsToCreate);
@@ -342,7 +364,7 @@ function isValidOrderCreated(sapResponse, sapResult, paymentsToCreate){
       };
     }
 
-    var clientBalance = extractBalanceFromSapResult(sapResult);
+    var clientBalance = extractBalanceFromSapResult(sapResultWithBalance);
     if(!clientBalance || isNaN(clientBalance) ){
       return {
         error: 'Balance del cliente no definido en la respuesta'
@@ -382,12 +404,14 @@ function checkIfSapOrderHasReference(sapOrder){
 function checkIfSapOrderHasPayments(sapOrder, paymentsToCreate){
   if( _.isArray(sapOrder.Payments) ){
 
-    //No payments are returned when using only client balance
-    var everyPaymentIsClientBalance = paymentsToCreate.every(function(p){
-      return p.type === CLIENT_BALANCE_TYPE;
-    });
+    //No payments are returned when using only client balance or credit
+    console.log('everyPaymentIsClientBalanceOrCredit(paymentsToCreate)', everyPaymentIsClientBalanceOrCredit(paymentsToCreate));
+    
+    /*paymentsToCreate = paymentsToCreate.filter(function(){
 
-    if(everyPaymentIsClientBalance){
+    })*/
+
+    if(everyPaymentIsClientBalanceOrCredit(paymentsToCreate)){
       return true;
     }
 
@@ -400,6 +424,14 @@ function checkIfSapOrderHasPayments(sapOrder, paymentsToCreate){
 
   return false;
 }
+
+function everyPaymentIsClientBalanceOrCredit(paymentsToCreate){
+  var everyPaymentIsClientBalance = paymentsToCreate.every(function(p){
+    return p.type === PaymentService.CLIENT_BALANCE_TYPE || p.type === PaymentService.CLIENT_CREDIT_TYPE;
+  });  
+  return everyPaymentIsClientBalance;
+}
+
 
 function saveSapReferences(sapResult, order, orderDetails){
   var clientBalance = parseFloat(extractBalanceFromSapResult(sapResult));
