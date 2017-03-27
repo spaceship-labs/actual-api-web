@@ -10,7 +10,7 @@ module.exports = {
 	chargeOrder: chargeOrder
 };
 
-conekta.card.validateNumber('4242424242424242');
+//conekta.card.validateNumber('4242424242424242');
 
 function createOrder(payment) {
 

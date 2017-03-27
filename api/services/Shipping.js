@@ -9,24 +9,31 @@ module.exports = {
 };
 
 function productShipping(product, storeWarehouse, options) {
-  return Delivery.find({ToCode: storeWarehouse.WhsCode, Active:'Y'})
-    .then(function(deliveries) {
-      var companies = deliveries.map(function(delivery) {
-        return delivery.FromCode;
-      });
-      return [
-        DatesDelivery.find({
-          ItemCode: product.ItemCode,
-          whsCode: companies,
-          OpenCreQty: {
-            '>': 0
-          }
-        }),
-        deliveries,
-      ];
-    })
-    .spread(function(stockItems, deliveries) {
-      var codes = stockItems.map(function(p){return p.whsCode});
+  var SAMPLE_ZIPCODE = 1000;
+
+  return Promise.all([
+      DatesDelivery.find({
+        ItemCode: product.ItemCode,
+        whsCode: CEDIS_QROO_CODE,
+        OpenCreQty: {
+          '>': 0
+        }
+      }),
+      ZipcodeDelivery.findOne({
+        cp: SAMPLE_ZIPCODE,
+        entrega: 'SI'
+        //TODO: Add more query fields
+      })
+    ])
+    .then(function(results) {
+      var stockItems = results[0];
+      var zipcodeDelivery = results[1];
+
+      if(!zipcodeDelivery){
+        return Promise.reject(new Error("Envios no disponibles para ese código postal"));
+      }
+
+      var codes = stockItems.map(function(p){return p.whsCode;});
       return Company
         .find({WhsCode: codes})
         .then(function(codes) {
@@ -37,24 +44,24 @@ function productShipping(product, storeWarehouse, options) {
             }).id;
             return stockItem;
           });
-          return [stockItems, deliveries];
+          return [stockItems, zipcodeDelivery];
         });
     })
-    .spread(function(stockItems, deliveries){
-      if(deliveries.length > 0 && stockItems.length > 0){
+    .spread(function(stockItems, zipcodeDelivery){
+      if( stockItems.length > 0){
 
-        stockItems = filterStockItems(stockItems, deliveries);
+        stockItems = filterStockItems(stockItems);
         var shippingPromises = stockItems.map(function(stockItem){
           return buildShippingItem(
             stockItem, 
-            deliveries, 
-            storeWarehouse.id
+            storeWarehouse.id, 
+            zipcodeDelivery
           );
         });
 
         return Promise.all(shippingPromises);
       }
-      else if( StockService.isFreeSaleProduct(product) && deliveries){
+      else if( StockService.isFreeSaleProduct(product) ){
         product.freeSaleDeliveryDays = product.freeSaleDeliveryDays || 0;
         var shipDate = moment().add(product.freeSaleDeliveryDays,'days').startOf('day').toDate();
         var freeSaleStockItem = {
@@ -66,7 +73,7 @@ function productShipping(product, storeWarehouse, options) {
         };
 
         return Promise.all([
-          buildShippingItem(freeSaleStockItem, deliveries, storeWarehouse.id)
+          buildShippingItem(freeSaleStockItem, storeWarehouse.id, zipcodeDelivery)
         ]);
       }
 
@@ -80,27 +87,28 @@ function productShipping(product, storeWarehouse, options) {
 
 }
 
-function buildShippingItem(stockItem, deliveries, storeWarehouseId, options){
+function buildShippingItem(stockItem, storeWarehouseId, zipcodeDelivery, options){
   options = options || {};
-
-  var delivery = _.find(deliveries, function(delivery) {
-    return delivery.FromCode == stockItem.whsCode;
-  });
 
   var productDate  = new Date(stockItem.ShipDate);
   var productDays  = daysDiff(new Date(), productDate);
   var seasonQuery  = getQueryDateRange({}, productDate);
+  var zipcodeDays  = zipcodeDelivery.dias_ent_bigticket;
 
   return Season.findOne(seasonQuery)
     .then(function(season){
       var seasonDays   = (season && season.Days) || 7;
-      var deliveryDays = (delivery && delivery.Days) || 0;
-      var days = productDays + seasonDays + deliveryDays;
-      
+      var days = productDays + seasonDays + zipcodeDays;
+      sails.log.info('product days', productDays);
+      sails.log.info('season days', seasonDays);
+      sails.log.info('zipcodeDays', zipcodeDays);
+
       //Product in same store/warehouse
+      /*
       if(stockItem.whsCode === delivery.ToCode && stockItem.ImmediateDelivery){
         days = productDays;
       }
+      */
       
       var date = addDays(new Date(), days);
 
@@ -117,7 +125,7 @@ function buildShippingItem(stockItem, deliveries, storeWarehouseId, options){
     });
 }
 
-function filterStockItems(stockItems, deliveries){
+function filterStockItems(stockItems){
 
   return stockItems.filter(function(stockItem){
     
