@@ -38,7 +38,7 @@ function createOrder(payment) {
 		     resolve(order); 
 		});
 
-	})
+	});
 
 }
 
@@ -50,7 +50,7 @@ function chargeOrder(order) {
 				"expires_at": 1479167175
 			},
 			"amount": 350000
-		}
+		};
 		conekta.Order.find(order.id, function(err, order) {
 		    order.createCharge(params, function(err, charge) {
 		        if(err){
@@ -61,7 +61,7 @@ function chargeOrder(order) {
 		    });
 		}); 
 
-	})
+	});
 }
 
 

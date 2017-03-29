@@ -19,7 +19,10 @@ module.exports = {
         'CardCode'
       ],
       selectFields: form.fields,
-      populateFields: ['Client']
+      populateFields:['invoice'],
+      filters:{
+
+      }
     };
     Common.find(model, form, extraParams)
       .then(function(result){

@@ -6,8 +6,6 @@ var assign = require('object-assign');
 var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
 
 function formatMongoRecord(record){
-//Error en record._id
-  //console.log(record._id);
   record.id = record._id.toString();
   for(var key in record){
     if( record[key] instanceof ObjectId){
@@ -88,7 +86,7 @@ module.exports = {
         });
       });
     });
-  },    
+  },  
 
   reassignOrdersDates: function() {
     console.log('started find reassignOrdersDates');
@@ -294,7 +292,8 @@ module.exports = {
             ,{}
             ,function (err, object) {
                if(err) console.log(err);
-               val.folio = object.value.seq;
+               var zeroPadSize = 6;
+               val.folio = numLeftPad(object.value.seq, zeroPadSize);
                cb(val);
             }
         );
@@ -431,4 +430,11 @@ module.exports = {
     return str;
 
   }
+};
+
+
+function numLeftPad(num, size) {
+  var numStr = num+"";
+  while (numStr.length < size) numStr = "0" + numStr;
+  return numStr;
 }
