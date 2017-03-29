@@ -96,15 +96,14 @@ module.exports = {
         return [
           Email.sendOrderConfirmation(order.id),
           Email.sendFreesale(order.id),
-          //InvoiceService.createOrderInvoice(order.id),
+          InvoiceService.createOrderInvoice(order.id),
           StockService.syncOrderDetailsProducts(orderDetails)
         ];
       })
-      //.spread(function(orderSent, freesaleSent, invoice, productsSynced){
-      .spread(function(orderSent, freesaleSent, productsSynced){
+      .spread(function(orderSent, freesaleSent, invoice, productsSynced){
         console.log('Email de orden enviado: ' + order.folio);
         console.log('productsSynced', productsSynced);
-        //console.log('generated invoice', invoice);
+        console.log('generated invoice', invoice);
       })
       .catch(function(err){
         console.log(err);

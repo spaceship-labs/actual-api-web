@@ -1,14 +1,14 @@
 var _ 			= require('underscore');
 var moment  = require('moment');
 var Promise = require('bluebird');
-var ADDRESS_TYPE 		= 'S';
+var ADDRESS_TYPE 		= 'B';
 var CLIENT_DATE_FORMAT = 'MM/DD/YYYY';
 var CARDCODE_TYPE = 'CardCode';
 var PERSON_TYPE = 'Person';
 var ERROR_TYPE = 'Error';
 
 module.exports = {
-
+	ADDRESS_TYPE: ADDRESS_TYPE,
 	areContactsRepeated: areContactsRepeated,
 	filterContacts: filterContacts,
 	getContactIndex: getContactIndex,

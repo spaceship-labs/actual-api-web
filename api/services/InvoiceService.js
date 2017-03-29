@@ -1,6 +1,7 @@
 var _ = require('underscore');
 var moment = require('moment');
 var request = require('request-promise');
+var Promise = require('bluebird');
 var ALEGRAUSER = process.env.ALEGRAUSER;
 var ALEGRATOKEN = process.env.ALEGRATOKEN;
 var token = new Buffer(ALEGRAUSER + ":" + ALEGRATOKEN).toString('base64');
@@ -9,39 +10,71 @@ var alegraACCOUNTID = 1;
 var RFCPUBLIC = 'XAXX010101000';
 
 module.exports = {
-  create: create,
+  createOrderInvoice: createOrderInvoice,
   send: send,
 };
 
-function create(orderId) {
-  return OrderWeb
-    .findOne(orderId)
-    .populate('Client')
-    .populate('Details')
-    .populate('Payments')
-    .then(function(order) {
-      var client = order.Client;
-      var details = order.Details.map(function(d) { return d.id; });
-      var payments = order.Payments;
-      return [
-        order,
-        payments,
-        OrderDetailWeb.find(details).populate('Product'),
-        FiscalAddress.findOne({ CardCode: client.CardCode }),
-        client,
-      ];
-    })
-    .spread(function(order, payments, details, address, client) {
-      return [
-        order,
-        preparePayments(payments),
-        prepareClient(order, client, address),
-        prepareItems(details)
-      ];
-    })
-    .spread(function(order, payments, client, items) {
-      return prepareInvoice(order, payments, client, items);
-    });
+function createOrderInvoice(orderId) {
+  return new Promise(function(resolve, reject){
+    
+    var orderFound;
+    var errInvoice;
+
+    if(process.env.MODE !== 'production'){
+      resolve({});
+      return;
+    }
+    
+    OrderWeb.findOne(orderId)
+      .populate('Client')
+      .populate('Details')
+      .populate('Payments')
+      .then(function(order) {
+        orderFound = order;
+        var client = order.Client;
+        var details = order.Details.map(function(d) { return d.id; });
+        var payments = order.Payments;
+        return [
+          order,
+          payments,
+          OrderDetail.find(details).populate('Product'),
+          FiscalAddress.findOne({ CardCode: client.CardCode, AdresType: ClientService.ADDRESS_TYPE }),
+          client,
+        ];
+      })
+      .spread(function(order, payments, details, address, client) {
+        return [
+          order,
+          preparePayments(payments),
+          prepareClient(order, client, address),
+          prepareItems(details)
+        ];
+      })
+      .spread(function(order, payments, client, items) {
+        return prepareInvoice(order, payments, client, items);
+      })
+      .then(function(alegraInvoice){
+        resolve(
+          Invoice.create({ alegraId: alegraInvoice.id, order: orderId })
+        );
+      })
+      .catch(function(err){
+        errInvoice = err;
+
+        var log = {
+          User: orderFound ? orderFound.User : null,
+          Order: orderId,
+          Store: orderFound ? orderFound.Store : null,
+          responseData: JSON.stringify(errInvoice),
+          isError: true
+        };
+
+        return AlegraLogWeb.create(log);
+      })
+      .then(function(logCreated){
+        reject(errInvoice);        
+      });
+  });
 }
 
 function send(orderID) {
@@ -50,14 +83,27 @@ function send(orderID) {
     .populate('Client')
     .then(function(order) {
       return [
-        InvoiceWeb.findOne({ order: orderID }),
-        FiscalAddress.findOne({ CardCode: order.Client.CardCode }),
+        Invoice.findOne({ order: orderID }),
+        FiscalAddress.findOne({ CardCode: order.Client.CardCode, AdresType: ClientService.ADDRESS_TYPE }),
       ];
     })
     .spread(function(invoice, address) {
-      //var emails = ['tugorez@gmail.com', 'informatica@actualg.com', address.E_Mail];
-      var emails = ['tugorez@gmail.com'];
-      var id = invoice.id;
+      var emails = [];
+      sails.log.info('address', address.U_Correos);
+
+      if(process.env.MODE === 'production'){
+        emails = [
+          address.U_Correos,
+          'luisperez@spaceshiplabs.com',
+          'informatica@actualg.com',
+          'cgarcia@actualg.com',
+          'facturar@actualg.com'
+        ];
+      }else{
+        emails = ['tugorez@gmail.com', 'luisperez@spaceshiplabs.com'];
+      }
+
+      var id = invoice.alegraId;
       return { id: id, emails: emails };
     })
     .then(function(data) {
@@ -86,15 +132,19 @@ function prepareInvoice(order, payments, client, items) {
     client: client,
     items: items,
     paymentMethod: 'other',
-    anotation: order.CardCode,
+    anotation: order.folio,
     stamp: {
       generateStamp: true,
     },
+    orderObject: order
   };
   return createInvoice(data);
 }
 
 function createInvoice(data) {
+  var orderObject = _.clone(data.orderObject);
+  delete data.orderObject;
+
   var options = {
     method: 'POST',
     uri: 'https://app.alegra.com/api/v1/invoices',
@@ -104,7 +154,45 @@ function createInvoice(data) {
     },
     json: true,
   };
-  return request(options);
+
+  var log = {
+    User: orderObject.User,
+    Order: orderObject.id,
+    Store: orderObject.Store,
+    requestData: JSON.stringify(data),
+    url: options.uri
+  };
+
+  var resultAlegra;
+  var requestError;
+
+  return new Promise(function(resolve, reject){
+
+    AlegraLogWeb.create(log)
+      .then(function(logCreated){
+        log.id = logCreated.id;
+        return request(options);
+      })
+      .then(function(result){
+        resultAlegra = result;
+        return AlegraLogWeb.update({id:log.id}, {responseData: JSON.stringify(result)});
+      })
+      .then(function(logUpdated){
+        resolve(resultAlegra);
+      })
+      .catch(function(err){
+        requestError = err;
+        return AlegraLogWeb.update({id:log.id}, {
+          responseData: JSON.stringify(err),
+          isError: true
+        });
+
+      })
+      .then(function(logUpdated){
+        reject(requestError);
+      });
+
+  });
 }
 
 function prepareClient(order, client, address) {
@@ -114,7 +202,7 @@ function prepareClient(order, client, address) {
     data = {
       name: address.companyName,
       identification: client.LicTradNum,
-      email: address.E_Mail,
+      email: address.U_Correos,
       address: {
         street: address.Street,
         exteriorNumber: address.U_NumExt,
@@ -135,8 +223,8 @@ function prepareClient(order, client, address) {
       address: {
         country: 'México',
         state: order.U_Estado || 'Quintana Roo',
-        
-        //TODO; Check default Inovice data for GENERAL PUBLIC 
+
+        //TODO; Check default Inovice data for GENERAL PUBLIC
         //colony: order.U_Colonia,
         //street: 'entre calle ' + order.U_Entrecalle + ' y calle ' + order.U_Ycalle,
         //exteriorNumber: order.U_Noexterior,
