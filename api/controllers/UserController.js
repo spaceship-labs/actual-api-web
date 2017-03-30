@@ -108,7 +108,20 @@ module.exports = {
         console.log(err);
         res.negotiate(err);
       });      
-  }
+  },
+
+  register: function(req, res){
+    var form = req.allParams();
+    UserWeb.create(form)
+      .then(function(_user){
+        return res.ok({user: _user});
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });     
+  },
+
 };
 
 function validateToken(token, email, cb){

@@ -3,6 +3,7 @@ var _       = require('underscore');
 var moment = require('moment');
 var CEDIS_QROO_CODE = '01';
 var CEDISQ_QROO_ID = '576acfee5280c21ef87ea5b5';
+var DELIVERY_AVAILABLE = 'SI';
 
 module.exports = {
   product: productShipping
@@ -21,7 +22,7 @@ function productShipping(product, storeWarehouse, options) {
       }),
       ZipcodeDelivery.findOne({
         cp: SAMPLE_ZIPCODE,
-        entrega: 'SI'
+        entrega: DELIVERY_AVAILABLE
         //TODO: Add more query fields
       })
     ])
@@ -55,7 +56,8 @@ function productShipping(product, storeWarehouse, options) {
           return buildShippingItem(
             stockItem, 
             storeWarehouse.id, 
-            zipcodeDelivery
+            zipcodeDelivery,
+            product
           );
         });
 
@@ -73,7 +75,7 @@ function productShipping(product, storeWarehouse, options) {
         };
 
         return Promise.all([
-          buildShippingItem(freeSaleStockItem, storeWarehouse.id, zipcodeDelivery)
+          buildShippingItem(freeSaleStockItem, storeWarehouse.id, zipcodeDelivery, product)
         ]);
       }
 
@@ -87,18 +89,18 @@ function productShipping(product, storeWarehouse, options) {
 
 }
 
-function buildShippingItem(stockItem, storeWarehouseId, zipcodeDelivery, options){
-  options = options || {};
+function buildShippingItem(stockItem, storeWarehouseId, zipcodeDelivery, product){
 
   var productDate  = new Date(stockItem.ShipDate);
   var productDays  = daysDiff(new Date(), productDate);
   var seasonQuery  = getQueryDateRange({}, productDate);
-  var zipcodeDays  = zipcodeDelivery.dias_ent_bigticket;
+  var zipcodeDays  = getZipcodeDays(product, zipcodeDelivery);
 
   return Season.findOne(seasonQuery)
     .then(function(season){
       var seasonDays   = (season && season.Days) || 7;
-      var days = productDays + seasonDays + zipcodeDays;
+      var days = productDays + zipcodeDays;
+      //var days = productDays + seasonDays + zipcodeDays;
       /*
       sails.log.info('product days', productDays);
       sails.log.info('season days', seasonDays);
@@ -118,6 +120,10 @@ function buildShippingItem(stockItem, storeWarehouseId, zipcodeDelivery, options
         ImmediateDelivery: stockItem.ImmediateDelivery        
       };      
     });
+}
+
+function getZipcodeDays(product, zipcodeDelivery){
+  return zipcodeDelivery.dias_ent_bigticket;
 }
 
 function filterStockItems(stockItems){

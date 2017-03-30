@@ -63,6 +63,10 @@ module.exports.routes = {
     action: 'update'
   },
 
+  '/user/register':{
+    controller: 'user',
+    action: 'register'
+  },
 
   '/product/find/:page':{
     controller: 'product',

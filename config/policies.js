@@ -35,6 +35,7 @@ module.exports.policies = {
     update: ['setupDefaultData','isAuthenticated', 'isAllowed'],
     send_password_recovery: true,
     update_password: true,
+    register: true
   },
   MeController: {
     '*': ['setupDefaultData','isAuthenticated'],
