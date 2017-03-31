@@ -7,16 +7,20 @@ var moment = require('moment-timezone');
 
 module.exports = function (req, res, next) {
     passport.authenticate('jwt', function (error, user, info) {
-      if (error) return res.serverError(error);
-      if (!user){
-        return res.unauthorized(null, info && info.code, info && info.message);
-      }
-      req.user = user;
 
       sails.config.timezone = getTimezone(user.activeStore);
       moment.tz.setDefault(sails.config.timezone.label);
 
-     next();
+      if (error) return res.serverError(error);
+      if (!user){
+        next();
+        return;
+        //return res.unauthorized(null, info && info.code, info && info.message);
+      }
+      req.user = user;
+      next();
+
+      
     })(req, res);
 };
 

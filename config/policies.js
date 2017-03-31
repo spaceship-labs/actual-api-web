@@ -19,29 +19,38 @@
 
 module.exports.policies = {
 
-  '*': ['setupDefaultData'],
+  '*': ['isAuthenticated','setupDefaultData'],
   AuthController:{
     '*': ['setupDefaultData']
   },
   QuotationController:{
     '*': ['setupDefaultData','isAuthenticated'],
+    /*
     create: ['setupDefaultData'],
-    findById: ['setupDefaultData']
+    findById: ['setupDefaultData'],
+    findByIdQuickRead: ['setupDefaultData'],
+    getQuotationPaymentOptions: ['setupDefaultData'],
+    getCurrentStock: ['setupDefaultData']
+    */
   },
   PaymentController:{
-    add: ['setupDefaultData','isAuthenticated']
+    /*add: ['setupDefaultData','isAuthenticated']*/
   },
   UserController:{
     '*': ['setupDefaultData','isAuthenticated'],
+    /*
     create: ['setupDefaultData','isAuthenticated', 'isAllowed'],
     update: ['setupDefaultData','isAuthenticated', 'isAllowed'],
+    */
     send_password_recovery: true,
     update_password: true,
     register: true
   },
   MeController: {
+    /*
     '*': ['setupDefaultData','isAuthenticated'],
     activeStore: ['setupDefaultData']
+    */
   },
 
   /***************************************************************************

@@ -80,20 +80,25 @@ module.exports = {
   findByIdQuickRead: function(req, res){
     var form = req.params.all();
     var id = form.id;
-    var userId = req.user.id;
     var query = {
       id: id,
-      User: userId
     };
+
+    if(req.user){
+      query.User = req.user.id;
+    }
+
     QuotationWeb.findOne(query)
       .populate('Details')
       .then(function(quotation){
         if(!quotation){
           return Promise.reject(new Error('Cotización no encontrada'));
         } 
-        if(quotation.User !== req.user.id){
-          return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
-        }              
+        if(quotation.User){
+          if(quotation.User !== req.user.id){
+            return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
+          }              
+        }
         res.json(quotation);
       })
       .catch(function(err){
@@ -105,7 +110,6 @@ module.exports = {
   findById: function(req, res){
     var form = req.params.all();
     var id = form.id;
-    var userId = req.user.id;
     var getPayments = form.payments;
     var forceLatestData  = true;
     if( !isNaN(id) ){
@@ -132,7 +136,7 @@ module.exports = {
       quotationQuery.populate('Payments');
     }
 
-    var updateToLatest = QuotationService.updateQuotationToLatestData(id, userId, {
+    var updateToLatest = QuotationService.updateQuotationToLatestData(id, {
       update:true,
       currentStore: req.activeStore.id
     });
@@ -145,9 +149,13 @@ module.exports = {
         if(!quotation){
           return Promise.reject(new Error('Cotización no encontrada'));
         }
-        if(quotation.User.id !== req.user.id && quotation.User){
-          return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
-        }        
+  
+        if(quotation.User){
+          if(quotation.User.id !== req.user.id){
+            return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
+          }        
+        }
+  
         return res.json(quotation);
       })
       .catch(function(err){
@@ -367,8 +375,13 @@ module.exports = {
     var details;
     var query = {
       Quotation: quotationId,
-      User: req.user.id
     };
+
+    if(req.user){
+      query.User = req.user.id;      
+    }
+
+    sails.log.info('query', query);
 
     QuotationDetailWeb.find(query).populate('Product')
       .then(function(detailsFound){
@@ -408,9 +421,12 @@ module.exports = {
 
     Common.nativeFindOne({_id: ObjectId(quotationId)}, QuotationWeb)
       .then(function(quotation){
-        if(quotation.User !== req.user.id){
-          return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
-        }   
+        
+        if(quotation.User){
+          if(quotation.User !== req.user.id){
+            return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
+          }   
+        }
 
         var options = {
           financingTotals: form.financingTotals || false

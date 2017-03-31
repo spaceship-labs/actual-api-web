@@ -54,7 +54,7 @@ module.exports = {
   getTotalsByUser: getTotalsByUser
 };
 
-function updateQuotationToLatestData(quotationId, userId, options){
+function updateQuotationToLatestData(quotationId, options){
   var params = {
     paymentGroup: options.paymentGroup || 1,
     updateDetails: true,
