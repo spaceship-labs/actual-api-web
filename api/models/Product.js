@@ -123,6 +123,13 @@ module.exports = {
         type:'integer',
         defaultsTo: 0
       },
+      deliveryType:{
+        type:'string',
+        enum:[
+          'bigticket',
+          'softline'
+        ]
+      },      
       slowMovement:{type:'boolean'},
       seenTimes: {type:'integer'},
       immediateDelivery:{type:'boolean'},

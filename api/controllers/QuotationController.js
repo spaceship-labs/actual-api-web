@@ -15,12 +15,13 @@ module.exports = {
     
     form.Details = formatProductsIds(form.Details);
     form.Details = form.Details.map(function(d){
-      d.User = req.user.id;
+      if(req.user){
+        d.User = req.user.id;
+      }
       return d;
     });
     form.Store = req.activeStore.id;
-    form.User = req.user.id;
-    form.isWeb = true;
+    //form.User = req.user.id;
 
     var opts = {
       paymentGroup:1,
@@ -58,7 +59,7 @@ module.exports = {
 
     Common.nativeFindOne({_id: ObjectId(id)}, QuotationWeb)
       .then(function(quotation){
-        if(quotation.User !== req.user.id){
+        if(quotation.User !== req.user.id && quotation.User){
           return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
         }
         return QuotationWeb.update({id:id}, form);
@@ -111,9 +112,12 @@ module.exports = {
       id = parseInt(id);
     }
     var query = {
-      id: id,
-      User: req.user.id
+      id: id
     };
+
+    if(req.user){
+      query.User = req.user.id;
+    }
 
     var quotationQuery =  QuotationWeb.findOne(query)
       .populate('Details')
@@ -141,7 +145,7 @@ module.exports = {
         if(!quotation){
           return Promise.reject(new Error('Cotización no encontrada'));
         }
-        if(quotation.User.id !== req.user.id){
+        if(quotation.User.id !== req.user.id && quotation.User){
           return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
         }        
         return res.json(quotation);

@@ -1,6 +1,6 @@
 var Promise = require('bluebird');
 var conekta = require('conekta');
-conekta.api_key = '9YxqfRnx4sMQDnRsqdYn';
+conekta.api_key = process.env.CONEKTA_KEY;
 conekta.locale = 'es';
 conekta.api_version = '2.0.0';
 

@@ -24,7 +24,9 @@ module.exports.policies = {
     '*': ['setupDefaultData']
   },
   QuotationController:{
-    '*': ['setupDefaultData','isAuthenticated']
+    '*': ['setupDefaultData','isAuthenticated'],
+    create: ['setupDefaultData'],
+    findById: ['setupDefaultData']
   },
   PaymentController:{
     add: ['setupDefaultData','isAuthenticated']
