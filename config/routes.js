@@ -389,6 +389,11 @@ module.exports.routes = {
     action:'getPaymentGroups'
   },
 
+  '/payment/test':{
+    controller: 'payment',
+    action: 'test'
+  }
+
   /*
   '/fixorders':{
     controller:'sync',

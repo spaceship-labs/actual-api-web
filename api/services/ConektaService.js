@@ -1,18 +1,24 @@
 var Promise = require('bluebird');
 var conekta = require('conekta');
-conekta.api_key = process.env.CONEKTA_KEY;
 conekta.locale = 'es';
 conekta.api_version = '2.0.0';
 
 
 module.exports = {
 	createOrder: createOrder,
-	chargeOrder: chargeOrder
+	chargeOrder: chargeOrder,
+	test: test
 };
 
-//conekta.card.validateNumber('4242424242424242');
+function test(req){
+	conekta.api_key = SiteService.getConektaKeyBySite(req);
+	sails.log.info('req.headers.site', req.headers.site);
+	sails.log.info('api_key', conekta.api_key);
+}
 
-function createOrder(payment) {
+
+function createOrder(payment, req) {
+	conekta.api_key = SiteService.getConektaKeyBySite(req);
 
 	return new Promise(function(resolve, reject){
 
@@ -42,7 +48,9 @@ function createOrder(payment) {
 
 }
 
-function chargeOrder(order) {
+function chargeOrder(order, req) {
+	conekta.api_key = SiteService.getConektaKeyBySite(req);
+	
 	return new Promise(function(resolve, reject){
 		var params = {
 			"payment_method": {
@@ -64,6 +72,9 @@ function chargeOrder(order) {
 	});
 }
 
+function getConektaKeyBySite(){
+
+}
 
 /*
 

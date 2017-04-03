@@ -47,12 +47,12 @@ function password(userName, userEmail, recoveryUrl, cb) {
   personalization.addTo(to);
   personalization.setSubject(subject);
   mail.setFrom(from);
-  mail.addContent(content)
-  mail.addPersonalization(personalization)
-  requestBody = mail.toJSON()
-  request.method = 'POST'
-  request.path = '/v3/mail/send'
-  request.body = requestBody
+  mail.addContent(content);
+  mail.addPersonalization(personalization);
+  requestBody = mail.toJSON();
+  request.method = 'POST';
+  request.path = '/v3/mail/send';
+  request.body = requestBody;
   sendgrid.API(request, function (response) {
     if (response.statusCode >= 200 && response.statusCode <= 299) {
       cb();
@@ -209,19 +209,28 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
   var mail             = new helper.Mail();
   var personalization  = new helper.Personalization();
   var from             = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
-  var to               = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
+  var clientEmail      = client.E_Mail;
+  var to               = new helper.Email(clientEmail, client.CardName);
   var subject          = 'Confirmación de compra | Folio #' + order.folio;
   var content          = new helper.Content("text/html", emailBody);
-  personalization.addTo(to);
+
+  var toAux = new helper.Email('luisperez@spaceshiplabs.com', 'Luis Perez');
+  personalization.addTo(toAux);
+
+  if(process.env.MODE === 'production'){
+    sails.log.info('sending email order ', order.folio);
+    personalization.addTo(to);
+    personalization.addTo(from);
+  }
   personalization.setSubject(subject);
-  /**/
+  /*
     var to2 = new helper.Email('oreinhart@actualg.com', 'Oliver Reinhart');
     var to3 = new helper.Email('tugorez@gmail.com', 'Juanjo Tugorez');
     var to4 = new helper.Email('luis19prz@gmail.com', 'Luis Perez');
     if(user.email !== 'oreinhart@actualg.com') personalization.addTo(to2);
     if(user.email !== 'tugorez@gmail.com') personalization.addTo(to3);
     if(user.email !== 'luis19prz@gmail.com') personalization.addTo(to4);
-  /**/
+  */
   mail.setFrom(from);
   mail.addContent(content);
   mail.addPersonalization(personalization);
@@ -253,7 +262,7 @@ function quotation(quotationId, activeStore) {
       var store    = quotation.Store;
       var details  = quotation.Details.map(function(detail) { return detail.id; });
       details      = QuotationDetail.find(details).populate('Product').populate('Promotion');
-      var payments = PaymentService.getPaymentGroupsForEmail(quotation.id, activeStore.id);
+      var payments = PaymentService.getPaymentGroupsForEmail(quotation.id, activeStore);
       var transfers = TransferService.transfers(store.group);
       return [client, user,  quotation, details, payments, transfers, store];
     })
@@ -340,18 +349,27 @@ function sendQuotation(client, user, quotation, products, payments, transfers, s
   var mail             = new helper.Mail();
   var personalization  = new helper.Personalization();
   var from             = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
-  var to               = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
+  var clientEmail      = client.E_Mail;
+  var to               = new helper.Email(clientEmail, client.CardName);
   var subject          = 'Cotización | Folio #' + quotation.folio;
   var content          = new helper.Content("text/html", emailBody);
-  /**/
+  /*
     var to2 = new helper.Email('oreinhart@actualg.com', 'Oliver Reinhart');
     var to3 = new helper.Email('tugorez@gmail.com', 'Juanjo Tugorez');
     var to4 = new helper.Email('luis19prz@gmail.com', 'Luis Perez');
     if(user.email !== 'oreinhart@actualg.com') personalization.addTo(to2);
     if(user.email !== 'tugorez@gmail.com') personalization.addTo(to3);
     if(user.email !== 'luis19prz@gmail.com') personalization.addTo(to4);
-  /**/
-  personalization.addTo(to);
+  */
+  var toAux = new helper.Email('luisperez@spaceshiplabs.com', 'Luis Perez');
+  personalization.addTo(toAux);
+
+  if(process.env.MODE === 'production'){
+    sails.log.info('sending email quotation ', quotation.folio);
+    personalization.addTo(to);
+    personalization.addTo(from);
+  }
+
   personalization.setSubject(subject);
   mail.setFrom(from);
   mail.addContent(content);
@@ -461,14 +479,18 @@ function sendFreesale(user, order, products, store) {
   var content          = new helper.Content("text/html", emailBody);
   personalization.addTo(to);
   personalization.setSubject(subject);
-  /**/
+
+  var toAux = new helper.Email('luisperez@spaceshiplabs.com', 'Luis Perez');
+  personalization.addTo(toAux);
+
+  /*
     var to2 = new helper.Email('oreinhart@actualg.com', 'Oliver Reinhart');
     var to3 = new helper.Email('tugorez@gmail.com', 'Juanjo Tugorez');
     var to4 = new helper.Email('luis19prz@gmail.com', 'Luis Perez');
     if(user.email !== 'oreinhart@actualg.com') personalization.addTo(to2);
     if(user.email !== 'tugorez@gmail.com') personalization.addTo(to3);
     if(user.email !== 'luis19prz@gmail.com') personalization.addTo(to4);
-  /**/
+  */
   mail.setFrom(from);
   mail.addContent(content);
   mail.addPersonalization(personalization);
@@ -521,6 +543,9 @@ function paymentMethod(payment) {
     case 'client-balance':
       payment_name = 'Saldo a favor';
       break;
+    case 'client-credit':
+      payment_name = 'Crédito cliente';
+      break;      
     default:
       payment_name = '';
       break;
@@ -545,7 +570,7 @@ function paymentType(payment) {
       payment_name = 'Crédito ' + payment.terminal;
       break;
     case 'single-payment-terminal':
-      payment_name = 'Débito ' + payment.terminal;
+      payment_name = 'Una sola exhibición terminal ' + payment.terminal;
       break;
     case 'ewallet':
       payment_name = 'Contado';
@@ -563,6 +588,9 @@ function paymentType(payment) {
     case 'client-balance':
       payment_name = 'Saldo a favor cliente';
       break;
+    case 'client-credit':
+      payment_name = 'Crédito cliente';
+      break;        
     default:
       payment_name = '';
       break;

@@ -8,6 +8,11 @@ var CANCELLED_STATUS = 'cancelled';
 var PAYMENT_CANCEL_TYPE = 'cancellation';
 module.exports = {
 
+  test: function(req, res){
+    ConektaService.test(req);
+    res.ok();
+  },
+
   add: function(req, res){
     var form          = req.params.all();
     var quotationId   = form.quotationid;

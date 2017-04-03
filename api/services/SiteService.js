@@ -1,6 +1,7 @@
 module.exports = {
 	getDefaultActiveStoreId: getDefaultActiveStoreId,
-	getSiteDisplayProperty: getSiteDisplayProperty
+	getSiteDisplayProperty: getSiteDisplayProperty,
+	getConektaKeyBySite: getConektaKeyBySite
 };
 
 function getDefaultActiveStoreId(req){
@@ -27,6 +28,33 @@ function getDefaultActiveStoreId(req){
 	}
 
 	return activeStoreId;
+}
+
+
+function getConektaKeyBySite(req){
+	//sails.log.info('req.headers', req.headers);
+	var site = req.headers.site || 'actual-studio';
+	var conektaKey;
+
+	switch(site){
+		case 'actual-studio':
+			conektaKey = process.env.CONEKTA_KEY_STUDIO;
+			break;
+
+		case 'actual-home':
+			conektaKey = process.env.CONEKTA_KEY_HOME;
+			break;
+
+		case 'actual-kids':
+			conektaKey = process.env.CONEKTA_KEY_KIDS;
+			break;
+
+		default: 
+			conektaKey = process.env.CONEKTA_KEY_STUDIO;
+			break;
+	}
+
+	return conektaKey;
 }
 
 
