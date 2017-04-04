@@ -151,7 +151,7 @@ module.exports = {
         }
   
         if(quotation.User){
-          if(quotation.User.id !== req.user.id){
+          if( !req.user ||  (quotation.User.id !== req.user.id) ){
             return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
           }        
         }
@@ -380,8 +380,6 @@ module.exports = {
     if(req.user){
       query.User = req.user.id;      
     }
-
-    sails.log.info('query', query);
 
     QuotationDetailWeb.find(query).populate('Product')
       .then(function(detailsFound){

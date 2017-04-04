@@ -1,5 +1,8 @@
 var Promise = require('bluebird');
 var conekta = require('conekta');
+var LOCAL_CURRENCY = 'MXN';
+var CONEKTA_PAYMENT_TYPE_CARD = 'card';
+
 conekta.locale = 'es';
 conekta.api_version = '2.0.0';
 
@@ -19,9 +22,11 @@ function test(req){
 
 function createOrder(orderId, req) {
 	conekta.api_key = SiteService.getConektaKeyBySite(req);
+	sails.log.info('req.headers.site', req.headers.site);
+	sails.log.info('api_key', conekta.api_key);
 	var order;
 
-	return QuotationWeb.findOne({id: orderId})
+	return QuotationWeb.findOne({id: orderId}).populate('Payments')
 		.then(function(orderFound){
 			order = orderFound;
 
@@ -34,14 +39,32 @@ function createOrder(orderId, req) {
 		})
 		.spread(function(customerInfo, lineItems){
 			var discountLine = getOrderDiscountLine(order);
+			var charges = getOrderCharges(order, order.Payments);
 
 			return new Promise(function(resolve, reject){
 
 				var conektaOrderParams = {
-					currency: 'mxn',
+					currency: LOCAL_CURRENCY,
 					customer_info: customerInfo,
 					line_items: lineItems,
-					discount_lines: [discountLine]
+					discount_lines: [discountLine],
+					charges: charges,
+					shipping_lines:[{
+						amount: 0,
+						carrier: 'Fedex'
+					}],
+					shipping_contact:{
+	          receiver: "Mario perez",
+	          phone: "+5215555555555",
+	          between_streets: "Street 1 and Street 2",
+	          address: {
+	              "street1": "Wallaaby",
+	              "city": "Sydney",
+	              "state": "P. Sherman",
+	              "postal_code": "78215",
+	              "country": "MX"
+						}					
+					}
 				};
 
 				sails.log.info('conektaOrderParams', conektaOrderParams);
@@ -60,6 +83,22 @@ function createOrder(orderId, req) {
 			});
 
 		});
+}
+
+function getOrderCharges(order, orderPayments){
+	orderPayments = orderPayments || [];
+	return orderPayments.map(function(payment){
+		var charge = {
+			//amount: convertToCents(payment.ammount),
+			amount: convertToCents(order.total),
+			token_id: payment.cardToken,
+			payment_method:{
+				type: CONEKTA_PAYMENT_TYPE_CARD,
+				token_id: payment.cardToken
+			}
+		};
+		return charge;
+	});
 }
 
 function getOrderDiscountLine(order){
