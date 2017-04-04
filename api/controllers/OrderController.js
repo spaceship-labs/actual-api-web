@@ -76,7 +76,16 @@ module.exports = {
     var responseSent = false;
     var orderDetails;
 
-    OrderService.createFromQuotation(form, req.user)
+    OrderService.createFromQuotation2(form, req)
+      .then(function(conektaOrder){
+        res.json(conektaOrder);
+      })
+      .catch(function(err){
+        console.log('err', err);
+        res.negotiate(err);
+      });
+    /*
+    OrderService.createFromQuotation(form, req)
       .then(function(orderCreated){
         //RESPONSE
         res.json(orderCreated);
@@ -111,6 +120,7 @@ module.exports = {
           res.negotiate(err);
         }
       });
+    */
   },
 
   getCountByUser: function(req, res){

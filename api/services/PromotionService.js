@@ -3,47 +3,49 @@ var Promise = require('bluebird');
 var _ = require('underscore');
 var STUDIO_CODE = '001';
 var AMBAS_CODE = '003';
+var CLIENT_FIXED_DISCOUNT = 'F';
+var CLIENT_ADDITIONAL_DISCOUNT = 'M';
 
 module.exports ={
-	getProductMainPromo: getProductMainPromo,
+  areSpecialClientPromotions: areSpecialClientPromotions,
+  removeSpecialClientPromotions: removeSpecialClientPromotions,
+  getProductMainPromo: getProductMainPromo,
   getProductActivePromotions: getProductActivePromotions,
   getPromotionWithHighestDiscount: getPromotionWithHighestDiscount,
   STUDIO_CODE: STUDIO_CODE,
   AMBAS_CODE: AMBAS_CODE
 };
 
-function getProductMainPromo(productId){
-  var currentDate = new Date();	
-	var promotionsQuery = {
+function getProductMainPromo(productId, quotationId){
+  var currentDate = new Date(); 
+  var promotionsQuery = {
     startDate: {'$lte': currentDate},
-    endDate: {'$gte': currentDate},		
-	};
-	var productFind = Common.nativeFindOne({_id: ObjectId(productId)}, Product);
-	var promotionsFind = Common.nativeFind(promotionsQuery, Promotion);
+    endDate: {'$gte': currentDate},   
+  };
+  var productFind = Common.nativeFindOne({_id: ObjectId(productId)}, Product);
+  var promotionsFind = Common.nativeFind(promotionsQuery, Promotion);
 
-	return Promise.join(productFind, promotionsFind)
-		.then(function(results){
-			var product = results[0];
-			var activePromotions = results[1];
+  return Promise.join(productFind, promotionsFind)
+    .then(function(results){
+      var product = results[0];
+      var activePromotions = results[1];
 
       if(!product){
         return Promise.reject(new Error('Producto no encontrado'));
       }
 
-			var promotions = getProductActivePromotions(product, activePromotions);
-			return getPromotionWithHighestDiscount(promotions);
-		});
+      return getProductActivePromotions(product, activePromotions, quotationId);
+    })
+    .then(function(productActivePromotions){
+      return getPromotionWithHighestDiscount(productActivePromotions);      
+    });
 }
 
-
-function getProductActivePromotions(product, activePromotions){
+function getProductActivePromotions(product, activePromotions, quotationId){
   var productActivePromotions = activePromotions.filter(function(promotion){
     var isValid = false;
     if(promotion.sa){
-      var productSA = product.U_Empresa;
-      if(productSA === AMBAS_CODE){
-        productSA = STUDIO_CODE;
-      }
+      var productSA = getProductSA(product);
 
       if(promotion.sa === productSA){
         isValid = true;
@@ -54,9 +56,8 @@ function getProductActivePromotions(product, activePromotions){
   });
 
   productActivePromotions = filterByHighestRegisteredPromotion(productActivePromotions);
-  productActivePromotions = mapRelatedPromotions(productActivePromotions, product);
-
-  return productActivePromotions;
+  
+  return mapRelatedPromotions(productActivePromotions, product, quotationId);
 }
 
 function filterByHighestRegisteredPromotion(productActivePromotions){
@@ -89,8 +90,9 @@ function mapRelatedPromotions(promotions, product, quotationId){
     });
   }
 
-  return mappedPromotions;
+  return Promise.resolve(mappedPromotions);
 }
+
 
 function getRelatedPromotionGroupDiscount(group, promotion, product){
   var originalCashDiscount = promotion.discountPg1;
@@ -102,20 +104,42 @@ function getRelatedPromotionGroupDiscount(group, promotion, product){
 }
 
 function getPromotionWithHighestDiscount(promotions){
-	if(promotions.length <= 0){
-		return false;
-	}
+  if(promotions.length <= 0){
+    return false;
+  }
 
   var highestDiscountPromo;
   var indexMaxPromo = 0;
   var maxDiscount = 0;
   promotions = promotions || [];
+
+  //sails.log.info('promotions in getPromotionWithHighestDiscount', promotions);
   promotions.forEach(function(promo, index){
     if(promo.discountPg1 >= maxDiscount){
       maxDiscount   = promo.discountPg1;
       indexMaxPromo = index;
     }
-  });	
+  }); 
   highestDiscountPromo = promotions[indexMaxPromo];
   return highestDiscountPromo;
+}
+
+function getProductSA(product){
+  var productSA = product.U_Empresa;
+  if(productSA === AMBAS_CODE || !productSA){
+    productSA = STUDIO_CODE;
+  }  
+  return productSA;
+}
+
+function areSpecialClientPromotions(promotions){
+  return _.some(promotions,function(promotion){
+    return promotion.clientDiscountReference;
+  });
+}
+
+function removeSpecialClientPromotions(promotions){
+  return promotions.filter(function(promotion){
+    return !promotion.clientDiscountReference;
+  });
 }

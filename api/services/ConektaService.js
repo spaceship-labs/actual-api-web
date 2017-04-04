@@ -17,35 +17,95 @@ function test(req){
 }
 
 
-function createOrder(payment, req) {
+function createOrder(orderId, req) {
 	conekta.api_key = SiteService.getConektaKeyBySite(req);
+	var order;
 
-	return new Promise(function(resolve, reject){
+	return QuotationWeb.findOne({id: orderId})
+		.then(function(orderFound){
+			order = orderFound;
 
-		conekta.Order.create({
-		  "currency": "mxn",
-		  "customer_info": {
-				"name": "Jul Ceballos",
-		        "phone": "+5215555555555",
-		        "email": "jul@conekta.io"  
-		    },
-		  "line_items": [{
-		    "name": "Box of Cohiba S1s",
-		    "unit_price": 35000,
-		    "quantity": 1
-		  }]
-		}, function(err, res) {
-			if(err){
-				reject(err);
-			}
+			var promises = [
+				getOrderCustomerInfo(order.User),
+				getOrderLineItems(order.id)
+			];
 
-		      var order =  res.toObject();
-		      console.log('ID', order.id);
-		     resolve(order); 
+			return promises;
+		})
+		.spread(function(customerInfo, lineItems){
+			var discountLine = getOrderDiscountLine(order);
+
+			return new Promise(function(resolve, reject){
+
+				var conektaOrderParams = {
+					currency: 'mxn',
+					customer_info: customerInfo,
+					line_items: lineItems,
+					discount_lines: [discountLine]
+				};
+
+				sails.log.info('conektaOrderParams', conektaOrderParams);
+
+				conekta.Order.create(conektaOrderParams, function(err, res) {
+					if(err){
+						console.log('err conekta', err);
+						reject(err);
+					}
+
+					var order =  res.toObject();
+					console.log('ID', order.id);
+					resolve(order); 
+				});
+
+			});
+
 		});
+}
 
+function getOrderDiscountLine(order){
+	var discountLine = {
+		code: 'Descuento general',
+		type: 'campaign',
+		amount: convertToCents(order.discount || 0)
+	};
+	return discountLine;
+}
+
+function getOrderCustomerInfo(clientId){
+	return UserWeb.findOne({id: clientId})
+		.then(function(user){
+			var customerInfo = {
+				name: user.firstName + ' ' + user.lastName,
+				phone: '5215555555555',
+				//phone: user.phone,
+				email: user.email
+			};
+			return customerInfo;
+		});
+}
+
+function getOrderLineItems(orderId){
+	return QuotationDetailWeb.find({Quotation: orderId}).populate('Product')
+		.then(function(details){
+			return mapDetailsToLineItems(details);
+		});
+}
+
+function mapDetailsToLineItems(details){
+	return details.map(function(detail){
+		var lineItem = {
+			name: detail.Product.ItemName,
+			unit_price: convertToCents(detail.unitPrice),
+			quantity: detail.quantity,
+			sku: detail.Product.ItemCode,
+		};
+		return lineItem;
 	});
+}
 
+function convertToCents(amount){
+	var centsAmount = parseInt(amount * 100);
+	return centsAmount;
 }
 
 function chargeOrder(order, req) {
@@ -71,23 +131,3 @@ function chargeOrder(order, req) {
 
 	});
 }
-
-function getConektaKeyBySite(){
-
-}
-
-/*
-
-
-createOrder()
-	.then(function(order){
-		return chargeOrder(order);
-	})
-	.then(function(charge){
-		console.log(charge)
-		res.json(charge);
-	})
-	.catch(function(err){
-
-	})
-*/

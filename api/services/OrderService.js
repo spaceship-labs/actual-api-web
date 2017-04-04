@@ -9,6 +9,7 @@ var BALANCE_SAP_TYPE = 'Balance';
 
 module.exports = {
   createFromQuotation: createFromQuotation,
+  createFromQuotation2: createFromQuotation2,
   getCountByUser: getCountByUser,
   getTotalsByUser: getTotalsByUser
 };
@@ -98,7 +99,17 @@ function getGroupByQuotationPayments(payments){
   return group;
 }
 
-function createFromQuotation(form, currentUser){
+function createFromQuotation2(form, req){
+  var quotationId = form.quotationId;
+  return ConektaService.createOrder(quotationId, req)
+    .then(function(conektaOrder){
+      sails.log.info('conektaOrder', conektaOrder);
+      return conektaOrder;
+    });
+}
+
+function createFromQuotation(form, req){
+  var currentUser = req.user;
   var quotationId  = form.quotationId;
   var opts         = {
     //paymentGroup: form.paymentGroup || 1,

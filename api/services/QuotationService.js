@@ -58,7 +58,7 @@ function updateQuotationToLatestData(quotationId, options){
   var params = {
     paymentGroup: options.paymentGroup || 1,
     updateDetails: true,
-    currentStore: options.currentStore,
+    currentStoreId: options.currentStoreId,
     isEmptyQuotation: options.isEmptyQuotation
   };
 
@@ -66,7 +66,9 @@ function updateQuotationToLatestData(quotationId, options){
     return nativeQuotationUpdate(quotationId, defaultQuotationTotals);
   }
     
-  return nativeQuotationFindOne(quotationId)
+  var findCrieria = {_id: new ObjectId(quotationId)};       
+
+  return Common.nativeFindOne(findCrieria, QuotationWeb)
     .then(function(quotation){
       if(!quotation){
         return Promise.reject(new Error('Cotización no encontrada'));
@@ -74,16 +76,6 @@ function updateQuotationToLatestData(quotationId, options){
       var calculator = Calculator();
       return calculator.updateQuotationTotals(quotationId, params);
     });
-}
-
-function getBigticketMaxPercentage(subtotal2){
-  var maxPercentage = 0;
-  for(var i=0;i<BIGTICKET_TABLE.length;i++){
-    if(subtotal2 >= BIGTICKET_TABLE[i].min && subtotal2 <= BIGTICKET_TABLE[i].max){
-      maxPercentage = BIGTICKET_TABLE[i].maxPercentage;
-    }
-  }
-  return maxPercentage;
 }
 
 
@@ -98,17 +90,19 @@ function Calculator(){
       financingTotals: true
     });
 
+    var quotationTotals;
+
     if(options.isEmptyQuotation){
       return nativeQuotationUpdate(quotationId, defaultQuotationTotals);
     }
 
     return getQuotationTotals(quotationId, options)
       .then(function(totals){
-        
         if(options && options.updateParams){
           totals = _.extend(totals, options.updateParams);
         }
-        return nativeQuotationUpdate(quotationId, totals);
+        quotationTotals = totals;
+        return nativeQuotationUpdate(quotationId, quotationTotals);
       });
   }
 
@@ -124,13 +118,13 @@ function Calculator(){
         return QuotationWeb.findOne({id:quotationId}).populate('Details');
       })
       .then(function(quotationFound){
-        quotation = quotationFound;
-        details = quotation.Details; 
+        quotation = quotationFound; 
+        details = quotation.Details;
         var packagesIds = getQuotationPackagesIds(details);
 
         if(packagesIds.length > 0){
           return [
-            getPackagesByStore(options.currentStore),
+            getPackagesByStoreId(options.currentStoreId),
             ProductGroup.find({id:packagesIds})
               .populate('PackageRules')
           ];
@@ -147,7 +141,7 @@ function Calculator(){
         var totals = sumProcessedDetails(processedDetails, options);
         var ammountPaidPg1 = quotation.ammountPaidPg1 || 0;
         var plainTotals = _.clone(totals);
-        var auxPromise = new Promise(function(resolve,reject){resolve();});
+        var auxPromise = Promise.resolve();
 
         if( ammountPaidPg1 > 0 && options.financingTotals){
 
@@ -198,14 +192,11 @@ function Calculator(){
       discount:0,
       totalProducts: 0,
       paymentGroup: options.paymentGroup,
-      immediateDelivery: processedDetails.every(function(detail){
-        return detail.immediateDelivery;
-      })
     };
 
     processedDetails.forEach(function(pd){
-      totals.total         += pd.total;
       totals.totalPg1      += pd.totalPg1;
+      totals.total         += pd.total;
       totals.subtotal      += pd.subtotal;
       totals.subtotal2     += pd.subtotal2;
       totals.discount      += (pd.subtotal - pd.total);
@@ -213,7 +204,7 @@ function Calculator(){
     });    
 
     totals.financingCostPercentage = calculateFinancingPercentage(totals.totalPg1, totals.total);
-    
+
     return totals;
   }
 
@@ -225,15 +216,6 @@ function Calculator(){
       });
   }
 
-  function getPromosByStore(storeId){
-    var currentDate = new Date();
-    var queryPromos = Search.getPromotionsQuery();
-    return Store.findOne({id:storeId})
-      .populate('Promotions', queryPromos)
-      .then(function(store){
-        return store.Promotions;
-      });
-  }
 
   function getQuotationPackagesIds(details){
     var packages = [];
@@ -245,7 +227,7 @@ function Calculator(){
     return _.uniq(packages);
   }
 
-  function getPackagesByStore(storeId){
+  function getPackagesByStoreId(storeId){
     var queryPromos = Search.getPromotionsQuery();
     return Store.findOne({id:storeId})
       .populate('PromotionPackages', queryPromos)
@@ -312,10 +294,9 @@ function Calculator(){
   //  Every detail must contain a Product object populated
   function processQuotationDetails(details, options){
     options = options || {paymentGroup:1};
-    var processedDetails = details.map(function(detail){
-      return getDetailTotals(detail, options);
-    });
-    return Promise.all(processedDetails)
+    return Promise.mapSeries(details, function(detail){
+      return getDetailTotals(detail, options);      
+    })
       .then(function(pDetails){
         if(options.updateDetails){
           return updateDetails(pDetails);
@@ -356,10 +337,15 @@ function Calculator(){
     var productId   = detail.Product;
     var quantity    = detail.quantity;
     var currentDate = new Date();
+    var quotationId = detail.Quotation;
+    var product;
     
     return Product.findOne({id:productId})
-      .then(function(product){
-        var mainPromo                 = getProductMainPromo(product, quantity);
+      .then(function(productResult){
+        product = productResult;
+        return getProductMainPromo(product, quantity, quotationId);
+      })
+      .then(function(mainPromo){
         var unitPrice                 = product.Price;
         var discountKey               = getDiscountKey(options.paymentGroup);
         var discountPercent           = mainPromo ? mainPromo[discountKey] : 0;
@@ -371,13 +357,14 @@ function Calculator(){
         var totalPg1                  = total;
         var financingCostPercentage   = 0;
         var discountName              = mainPromo ? getPromotionOrPackageName(mainPromo) : null;
-        
+
         //var total                 = quantity * unitPriceWithDiscount;
         var subtotalWithPromotions    = total;
         var discount                  = total - subtotal;
 
         //TODO: Reactivate ewallet 
         var ewallet                   = 0;
+
 
         //Calculate financing
         if(mainPromo){
@@ -414,16 +401,20 @@ function Calculator(){
           totalPg1                    : totalPg1,
           financingCostPercentage     : financingCostPercentage,
           unitPrice                   : unitPrice,
-          unitPriceWithDiscount       : unitPriceWithDiscount,
-          immediateDelivery           : isImmediateDelivery(detail.shipDate)
+          unitPriceWithDiscount       : unitPriceWithDiscount
         };
 
-        if(mainPromo.id && !mainPromo.PromotionPackage){
+        if(mainPromo.id && !mainPromo.PromotionPackage && !mainPromo.clientDiscountReference){
           detailTotals.Promotion = mainPromo.id;
         }
+
         else if(mainPromo.PromotionPackage){
           mainPromo.discountApplied = true;
           detailTotals.PromotionPackageApplied = mainPromo.PromotionPackage;
+        }
+        
+        else if(mainPromo.clientDiscountReference){
+          detailTotals.clientDiscountReference = mainPromo.clientDiscountReference;
         }
 
         return detailTotals;
@@ -432,12 +423,13 @@ function Calculator(){
 
   function calculateFinancingPercentage(totalPg1, total){
     return (total - totalPg1) / totalPg1;
-  }  
+  }
 
   function getPromotionOrPackageName(promotionOrPackage){
     var promotionFound = _.findWhere(activePromotions, {id:promotionOrPackage.id});
     if(promotionFound){
-      return promotionFound.publicName;
+      return promotionOrPackage.publicName;
+      //return promotionFound.publicName;
     }
 
     var packageFound = _.findWhere(storePackages, {id:promotionOrPackage.PromotionPackage});
@@ -447,13 +439,6 @@ function Calculator(){
 
     return null;
   }
-
-  function isImmediateDelivery(shipDate){
-    var FORMAT = 'D/M/YYYY';
-    var currentDate = moment().format(FORMAT);
-    shipDate = moment(shipDate).format(FORMAT);
-    return currentDate === shipDate;
-  }  
 
   function calculateDiscountPercent(subtotal, total){
     var discountPercent = 0;
@@ -476,36 +461,28 @@ function Calculator(){
 
   //@params product Object from model Product
   //Populated with promotions
-  function getProductMainPromo(product, quantity){
-    var packageRule = getDetailPackageRule(product.id, quantity)
-    promotions = PromotionService.getProductActivePromotions(product, activePromotions);
-    //Taking package rule as a promotion
-    if(packageRule){
-      promotions = promotions.concat([packageRule]);
-    }
-    return PromotionService.getPromotionWithHighestDiscount(promotions);
+  function getProductMainPromo(product, quantity, quotationId){
+    var packageRule = getDetailPackageRule(product.id, quantity);
+    var promotions = [];
+    return PromotionService.getProductActivePromotions(product, activePromotions, quotationId)
+      .then(function(productActivePromotions){
+        promotions = productActivePromotions;
+
+        //Taking package rule as a promotion
+        if(packageRule){
+
+          //Remove client promotions if there is a package rule 
+          promotions = PromotionService.removeSpecialClientPromotions(promotions);
+
+          promotions = promotions.concat([packageRule]);
+
+        }
+        return PromotionService.getPromotionWithHighestDiscount(promotions);
+      });
   }
 
   function isPackageDiscountApplied(){
     return _.findWhere(packagesRules, {discountApplied:true});
-  }
-
-  function getProductActivePromotions(product, activePromotions){
-    activePromotions = activePromotions.filter(function(promotion){
-      var isValid = false;
-      if(promotion.sas){
-        var productSA = product.EmpresaName || product.nameSA;
-        if(promotion.sas.indexOf(productSA) > -1 ){
-          isValid = true;
-        } 
-      }
-
-      return isValid;
-    });
-
-    sails.log.info('activePromotions', activePromotions);
-
-    return activePromotions;
   }
 
   function getDetailPackageRule(productId, quantity){
@@ -529,7 +506,7 @@ function Calculator(){
   }
 
   function updateDetails(details){
-    var updatedDetails = details.map(function(d){
+    return Promise.mapSeries(details, function(d){
       return updateDetail(d).then(function(updated){
         if(updated && updated.length > 0){
           return updated[0];
@@ -537,7 +514,6 @@ function Calculator(){
         return null;
       });
     });
-    return Promise.all(updatedDetails);
   }
 
   function updateDetail(detail){
@@ -567,28 +543,6 @@ function Calculator(){
   };
 }
 
-
-function nativeQuotationFindOne(quotationId){
-  return new Promise(function(resolve, reject){
-    
-    QuotationWeb.native(function(err, collection){
-      if(err){
-        console.log('err finding quotation',err);
-        reject(err);
-      }
-      var findCrieria = {_id: new ObjectId(quotationId)};
-      collection.findOne(findCrieria, function(errFind, quotationFound){
-        if(errFind){
-          console.log('err findOne',errFind);
-          reject(errFind);
-        }
-        resolve(quotationFound);
-      });
-    });
-
-  });
-}
-
 function nativeQuotationUpdate(quotationId,params){
   return new Promise(function(resolve, reject){
     QuotationWeb.native(function(err, collection){
@@ -609,6 +563,23 @@ function nativeQuotationUpdate(quotationId,params){
         resolve(result);
       });
     });
+  });
+}
+
+function getMultipleUsersTotals(options){
+  var usersIds = options.usersIds;
+  return Promise.map(usersIds,function(uid){
+    var _opts = _.extend(options,{
+      userId: uid
+    });
+
+    return getTotalsByUser(_opts)
+      .then(function(totals){
+        var user = {
+          id: uid,
+          totals: totals
+        };
+      });
   });
 }
 
@@ -661,6 +632,10 @@ function getTotalsByUser(options){
     queryUntilToday.isClosed   = isClosed;
     queryByDateRange.isClosed  = isClosed;  
   }
+
+  //sails.log.info('query untilToday', queryUntilToday);
+  //sails.log.info('queryByDateRange', queryByDateRange);
+  //sails.log.info('queryAllByDateRange', queryAllByDateRange);
 
   var props = {
     totalUntilToday: QuotationWeb.find(queryUntilToday).sum('total'),
