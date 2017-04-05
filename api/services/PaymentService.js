@@ -189,7 +189,6 @@ var paymentGroups = [
         label:'1 pago con',
         name:'Una sola exhibición terminal',
         type:'single-payment-terminal',
-        //type:'credit-card',
         description:'VISA, MasterCard, American Express',
         cardsImages:['/cards/visa.png','/cards/mastercard.png','/cards/american.png'],
         cards:['Visa','MasterCard','American Express'],
