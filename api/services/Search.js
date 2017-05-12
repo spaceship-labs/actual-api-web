@@ -3,24 +3,74 @@ var _        = require('underscore');
 var Promise  = require('bluebird');
 
 module.exports = {
+  applyBrandsQuery        : applyBrandsQuery,
+  applyDiscountsQuery     : applyDiscountsQuery,  
   applyFilters            : applyFilters,
   applyOrFilters          : applyOrFilters,
+  applySlowMovementQuery  : applySlowMovementQuery,
+  applySpotlightQuery     : applySpotlightQuery,
+  applyStockRangesQuery   : applyStockRangesQuery,
+  applySocietiesQuery     : applySocietiesQuery,
   areFiltersApplied       : areFiltersApplied,
+  getDiscountPriceKeyByStoreCode: getDiscountPriceKeyByStoreCode,
   getMultiIntersection    : getMultiIntersection,
+  getPriceQuery           : getPriceQuery,
   getProductsByCategories : getProductsByCategories,
   getProductsByCategory   : getProductsByCategory,
   getProductsByFilterValue: getProductsByFilterValue,
   getProductsByGroup      : getProductsByGroup,
   getPromotionsQuery      : getPromotionsQuery,
+  getSortValueBySortOption: getSortValueBySortOption,
   hashToArray             : hashToArray,
+  populateProductsIdsToPromotions: populateProductsIdsToPromotions,
   promotionCronJobSearch  : promotionCronJobSearch,
   queryIdsProducts        : queryIdsProducts,
-  getPriceQuery           : getPriceQuery,
   queryTerms              : queryTerms,
-  populateProductsIdsToPromotions: populateProductsIdsToPromotions,
   relatePromotionsToProducts: relatePromotionsToProducts,
-  getDiscountPriceKeyByStoreCode: getDiscountPriceKeyByStoreCode  
 };
+
+function applySlowMovementQuery(query){
+  query.slowMovement = true;
+  return query;
+}
+
+function applySpotlightQuery(query){
+  query.spotlight = true;
+  return query;
+}
+
+function applySocietiesQuery(query, societyCodes){
+  if( _.isArray(societyCodes) && societyCodes.length > 0 ){
+    query.U_Empresa = societyCodes;
+  }
+  return query;
+}
+
+function getSortValueBySortOption(sortOption, activeStore){
+  var sortValue = 'DiscountPrice ASC';
+
+  if(sortOption.key === 'stock'){
+    sortOption.key = activeStore.code;
+  }
+
+  switch(sortOption.key){
+    case 'stock':
+      sortOption.key = activeStore.code;
+      break;
+    case 'spotlight':
+    case 'slowMovement':
+      sortOption.key = 'DiscountPrice';
+      break;
+    default:
+      sortOption.key = sortOption.key;
+      break;
+  }
+
+
+  sortValue = sortOption.key + ' ' + sortOption.direction;
+
+  return sortValue;
+}
 
 //Promotions array of promotion object with property productsIds
 function relatePromotionsToProducts(promotions, products){
@@ -61,6 +111,7 @@ function queryIdsProducts(query, idProducts) {
   });
 }
 
+
 function getPriceQuery(query, priceField, minPrice, maxPrice) {
   var priceQuery = {
     '>=': minPrice || 0,
@@ -84,6 +135,44 @@ function applyFilters(query, filters) {
   return query;
 }
 
+function applyBrandsQuery(query, brandsIds){
+  if( _.isArray(brandsIds) && brandsIds.length > 0 ){
+    query.CustomBrand = brandsIds;
+  }
+  return query;
+}
+
+function applyDiscountsQuery(query, discounts){
+  if( _.isArray(discounts) && discounts.length > 0 ){
+    query.Discount = discounts;
+  }
+  return query;
+}
+
+function applyStockRangesQuery(query, stockField, stockRanges) {
+  if( _.isArray(stockRanges) && stockRanges.length > 0 ){
+    var orConditions = stockRanges.map(function(stockRange){
+      var stockRangeQuery = {
+        '>=': stockRange[0],
+        '<=': stockRange[1]
+      };
+
+      var orQuery = {};
+      orQuery[stockField] = stockRangeQuery;
+
+      return orQuery;
+    });
+
+    if(query.$and){
+      query.$and.push({$or: orConditions});
+    }else{
+      query.$and = [{$or:orConditions}];
+    }
+  }
+
+  return query;
+}
+
 function applyOrFilters(query, filters){
   if( _.isArray(filters) && filters.length > 0 ){
     var andConditions = [];
@@ -100,8 +189,9 @@ function applyOrFilters(query, filters){
         }
       }
     });
+
     if(andConditions.length > 0){
-      query.$and = andConditions;
+      query.$and = query.$and ?  query.$and.concat(andConditions) : query.$and;
     }
   }
   return query;
@@ -117,8 +207,15 @@ function isFilterValid(filter){
   return false;
 }
 
+function areEmptyTerms(terms){
+  return _.every(terms,function(term){
+    return !term;
+  });
+}
+
 function queryTerms(query, terms) {
-  if (!terms || terms.length == 0) {
+
+  if (!terms || terms.length === 0 || areEmptyTerms(terms) ) {
     return query;
   }
   var searchFields = [
@@ -130,6 +227,7 @@ function queryTerms(query, terms) {
   ];
   var filter = searchFields.reduce(function(acum, sf){
     var and = terms.reduce(function(acum, term){
+      term = term.trim();
       var fname = {};
       fname[sf] = {contains: term};
       return acum.concat(fname);
@@ -181,8 +279,10 @@ function getProductsByFilterValue(filtervaluesIds){
     .then(function(relations) {
       relationsHash   = getProductRelationsHash(relations, 'product', 'productfiltervalue');
       relationsArray  = hashToArray(relationsHash);
+      
        //Check if product has all the filter values
-      relationsArray  = getRelationsWithFilterValues(relationsArray, filtervaluesIds);
+      //relationsArray  = getRelationsWithFilterValues(relationsArray, filtervaluesIds);
+      
       return relationsArray.map(function(relation) {
         return relation[0]; //Product ID
       });
