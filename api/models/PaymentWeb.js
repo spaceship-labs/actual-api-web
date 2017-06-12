@@ -14,7 +14,7 @@ module.exports = {
         '18-msi',
       ]
     },
-    folio:{type:'integer'},
+    folio:{type:'string'},
     name:{type:'string'},
     ammount:{type:'float'},
     currency:{
@@ -59,10 +59,10 @@ module.exports = {
       model:'store'
       //model:'company'
     },
-    Order:{
+    OrderWeb:{
       model:'OrderWeb'
     },
-    Quotation:{
+    QuotationWeb:{
       model:'QuotationWeb'
     },
     User:{
@@ -71,7 +71,7 @@ module.exports = {
     Client:{
       model: 'Client'
     },
-    PaymentSap:{
+    PaymentSapWeb:{
       model: 'PaymentSapWeb'
     },
 

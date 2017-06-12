@@ -401,7 +401,8 @@ function Calculator(){
           totalPg1                    : totalPg1,
           financingCostPercentage     : financingCostPercentage,
           unitPrice                   : unitPrice,
-          unitPriceWithDiscount       : unitPriceWithDiscount
+          unitPriceWithDiscount       : unitPriceWithDiscount,
+          immediateDelivery           : Shipping.isDateImmediateDelivery(detail.shipDate)
         };
 
         if(mainPromo.id && !mainPromo.PromotionPackage && !mainPromo.clientDiscountReference){

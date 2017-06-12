@@ -8,16 +8,19 @@ module.exports = {
   findById: function(req, res){
     var form        = req.params.all();
     var id          = form.id;
-    var clientFound = false;
+    //var clientFound = false;
     Client.findOne({id:id}).then(function(client){
       if(!client){
         return Promise.reject(new Error('Cliente no encontrado'));
       }
-      return ClientService.populateClientRelations(client);
+      res.json(client);
+      //return ClientService.populateClientRelations(client);
     })
+    /*
     .then(function(populatedClient){
       res.json(populatedClient);
     })
+    */
     .catch(function(err){
       console.log(err);
       return res.negotiate(err);
@@ -41,7 +44,6 @@ module.exports = {
       });
     }
     form               = ClientService.mapClientFields(form);
-    form.User          = req.user.id;
     contacts           = ClientService.filterContacts(form.contacts);
     contacts           = contacts.map(ClientService.mapContactFields);
 
@@ -71,7 +73,8 @@ module.exports = {
     params = {
       client: form,
       fiscalAddress: fiscalAddress,
-      clientContacts: contacts
+      clientContacts: contacts,
+      activeStoreId: req.activeStore.id
     };
 
     Client.findOne({E_Mail:email})
@@ -105,7 +108,7 @@ module.exports = {
         });
 
         sails.log.info('contacts', contacts);
-
+        sails.log.info('form',form);
         return Client.create(form);
       })
       .then(function(created){
@@ -141,6 +144,10 @@ module.exports = {
         sails.log.info('contactsCreated or fiscalAddressCreated', contactsCreated);
         sails.log.info('fiscalAddressCreated', fiscalAddressCreated);
         
+        if(contactsCreated && contacts){
+          createdClient.Contacts = contactsCreated;
+        }
+
         res.json(createdClient);
       })
       .catch(function(err){
@@ -167,6 +174,7 @@ module.exports = {
         if(usedEmail){
           return Promise.reject(new Error('Email previamente utilizado'));
         }
+        sails.log.info('form', form);
         return SapService.updateClient(CardCode, form);
       })
       .then(function(resultSap){
@@ -278,10 +286,26 @@ module.exports = {
       });
   },
 
+  getFiscalAddressByClient: function(req, res){
+    var form = req.allParams();
+    var CardCode = form.CardCode;
+    var query = {
+      CardCode: CardCode,
+      AdresType: ClientService.ADDRESS_TYPE
+    }
+    FiscalAddress.findOne(query)
+      .then(function(fiscalAddress){
+        res.json(fiscalAddress);
+      })
+      .catch(function(err){
+        console.log('err', err);
+        res.negotiate(err);
+      })
+},
+
   updateFiscalAddress: function(req, res){
     var form = req.params.all();
     var CardCode = form.CardCode;
-    var id = form.id;
     var fiscalAddress = ClientService.mapFiscalFields(form);
     delete form.AdresType;
     if(!form.LicTradNum || !ClientService.isValidRFC(form.LicTradNum)){

@@ -14,20 +14,23 @@ module.exports = {
     },
     Details: {
       collection:'QuotationDetailWeb',
-      via:'Quotation'
+      via:'QuotationWeb'
     },
     Address:{
       model:'ClientContact',
     },
-    Order:{
+    OrderWeb:{
       model:'OrderWeb'
     },
     Payments:{
       collection: 'PaymentWeb',
-      via:'Quotation'
+      via:'QuotationWeb'
     },
     Store:{
       model:'store'
+    },
+    ZipcodeDelivery:{
+      model:'ZipcodeDelivery'
     },
     SapOrderConnectionLogs: {
       collection: 'SapOrderConnectionLogWeb',
@@ -42,7 +45,7 @@ module.exports = {
     isClosedNotes:{type:'text'},
     immediateDelivery:{type:'boolean'},
     clientName: {type:'string'},
-    folio:{type:'integer'},
+    folio:{type:'string'},
     total:{type:'float'},
     totalPg1: {type:'float'},
     ammountPaidPg1: {type:'float'},

@@ -6,11 +6,23 @@ var CEDISQ_QROO_ID = '576acfee5280c21ef87ea5b5';
 var DELIVERY_AVAILABLE = 'SI';
 
 module.exports = {
-  product: productShipping
+  product: productShipping,
+  isDateImmediateDelivery: isDateImmediateDelivery
 };
 
 function productShipping(product, storeWarehouse, options) {
+  options = options || {};
   var SAMPLE_ZIPCODE = 1000;
+
+  var defaultZipcodeQuery = {
+    cp: SAMPLE_ZIPCODE,
+  };
+
+  var zipcodeDeliveryQuery = defaultZipcodeQuery;
+
+  if(options.zipcodeDeliveryId){
+    zipcodeDeliveryQuery = {id: options.zipcodeDeliveryId};
+  }
 
   return Promise.all([
       DatesDelivery.find({
@@ -20,11 +32,7 @@ function productShipping(product, storeWarehouse, options) {
           '>': 0
         }
       }),
-      ZipcodeDelivery.findOne({
-        cp: SAMPLE_ZIPCODE,
-        entrega: DELIVERY_AVAILABLE
-        //TODO: Add more query fields
-      })
+      ZipcodeDelivery.findOne(zipcodeDeliveryQuery)
     ])
     .then(function(results) {
       var stockItems = results[0];
@@ -175,3 +183,9 @@ function daysDiff(a, b) {
   return Math.floor((utc2 - utc1) / _MS_PER_DAY);
 }
 
+function isDateImmediateDelivery(shipDate){
+  var FORMAT = 'D/M/YYYY';
+  var currentDate = moment().format(FORMAT);
+  shipDate = moment(shipDate).format(FORMAT);
+  return currentDate === shipDate;
+}

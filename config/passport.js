@@ -23,35 +23,28 @@ var JWT_STRATEGY_CONFIG = {
 };
 
 function _onLocalStrategyAuth(email, password, next){
-  UserWeb.findOne({email: email})
-    .exec(function(error, user){
+  Client.findOne({E_Mail: email})
+    .exec(function(error, client){
       if (error) return next(error, false, {});
-      if (!user) return next(null, false,{
+      if (!client) return next(null, false,{
         code: 'INCORRECT_AUTHDATA',
         message:'Incorrect auth data'
       });
 
-      if(!user.active){
-        return next(null, false, {
-          code: 'USER_NOT_ACTIVE',          
-          message: 'USER NOT ACTIVE'
-        });        
-      }            
-
       //TODO: replace with new cipher service type
-      if( !CipherService.comparePassword(password, user) ){
+      if( !CipherService.comparePassword(password, client) ){
         return next(null, false, {
           code: 'INCORRECT_AUTHDATA',
           message:'Incorrect auth data'        
         });
       }
 
-      UserWeb.update({id : user.id},{ lastLogin : new Date() })
+      Client.update({id : client.id},{ lastLogin : new Date() })
         .exec(function(err,ruser){
           if (error) return next(error, false, {});
 
-          delete user.password;
-          return next(null, user, {});
+          delete client.password;
+          return next(null, client, {});
         });
 
   });
@@ -61,28 +54,28 @@ function _onLocalStrategyAuth(email, password, next){
 
 function _onJwtStrategyAuth(payload, next){
   var payloadUser = payload.user || {};
-  var userId = payloadUser.id || false;
-  if(!userId){
+  var clientId = payloadUser.id || false;
+  if(!clientId){
     return next(null, false, {
       code: 'USER_ID_UNDEFINED',
       message: 'USER ID UNDEFINED'
     });
   }
 
-  return UserWeb.findOne({id: userId})
-    //.populate('Stores')
-    .then(function(userFound){
-      var user = userFound;
+  return Client.findOne({id: clientId})
+    .then(function(clientFound){
+      var client = clientFound;
 
-      if(!user.active){
+      /*
+      if(!client.active){
         return next(null, false, {
-          code: 'USER_NOT_ACTIVE',
-          message: 'USER NOT ACTIVE'
+          code: 'client_NOT_ACTIVE',
+          message: 'client NOT ACTIVE'
         });        
       }
+      */
 
-
-      return next(null, user, {});
+      return next(null, client, {});
     })
     .catch(function(err){
       console.log('err', err);

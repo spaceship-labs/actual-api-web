@@ -4,7 +4,7 @@ module.exports = {
   schema: true,
   attributes:{
     DocEntry:{type:'integer'},
-    folio:{type:'integer'},
+    folio:{type:'string'},
     documents:{
       type:'array'
     },
@@ -31,11 +31,11 @@ module.exports = {
     },
     Details: {
       collection:'OrderDetailWeb',
-      via:'Order'
+      via:'OrderWeb'
     },
     Payments: {
       collection:'PaymentWeb',
-      via:'Order'
+      via:'OrderWeb'
     },
     User:{
       model: 'UserWeb',

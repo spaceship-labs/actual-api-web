@@ -33,13 +33,13 @@ module.exports = {
     PromotionPackageApplied:{
       model:'ProductGroup'
     },
-    Order:{
+    OrderWeb:{
       model:'OrderWeb',
     },
     Product: {
       model:'Product'
     },
-    QuotationDetail:{
+    QuotationDetailWeb:{
       model: 'QuotationDetailWeb'
     },    
 

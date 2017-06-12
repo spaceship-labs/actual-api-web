@@ -1,7 +1,8 @@
 module.exports = {
 	getDefaultActiveStoreId: getDefaultActiveStoreId,
 	getSiteDisplayProperty: getSiteDisplayProperty,
-	getConektaKeyBySite: getConektaKeyBySite
+	getConektaKeyBySite: getConektaKeyBySite,
+	getSocietyCodesByActiveStore: getSocietyCodesByActiveStore
 };
 
 function getDefaultActiveStoreId(req){
@@ -81,4 +82,24 @@ function getSiteDisplayProperty(req){
 	}
 
 	return siteDisplayProperty;
+}
+
+function getSocietyCodesByActiveStore(activeStore){
+	var codes = [];
+	switch(activeStore.name){
+		case 'actualstudio.com':
+			codes = ['001','003'];
+			break;
+
+		case 'actualhome.com':
+			codes = ['002','003'];
+			break;
+
+		case 'actualkids.com':
+			codes = ['004'];
+			break;
+	}
+
+	return codes;
+
 }

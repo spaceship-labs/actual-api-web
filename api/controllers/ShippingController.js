@@ -11,6 +11,10 @@ module.exports = {
     var productCode = form.productCode;
     var store = false;
     var storeId = SiteService.getDefaultActiveStoreId(req);
+    var zipcodeDeliveryId = form.zipcodeDeliveryId;
+    var options = {
+      zipcodeDeliveryId: zipcodeDeliveryId
+    };
 
     Store.findOne({id:storeId}).populate('Warehouse')
       .then(function(storeResult){
@@ -18,7 +22,7 @@ module.exports = {
         return Common.nativeFindOne({ItemCode: productCode}, Product);
       })
       .then(function(product){
-        return Shipping.product(product, store.Warehouse);        
+        return Shipping.product(product, store.Warehouse, options);        
       })
       .then(function(shipping) {
         return res.json(shipping);
@@ -26,6 +30,38 @@ module.exports = {
       .catch(function(err) {
         return res.negotiate(err);
       });
-  }
-};
+  },
 
+  getZipcodeDelivery: function(req, res){
+    var form = req.allParams();
+    var zipcode = form.zipcode;
+
+    if(!isNaN(zipcode)){
+      zipcode = parseInt(zipcode);
+    }
+
+    ZipcodeDelivery.findOne({cp: zipcode})
+      .then(function(zipcodeDelivery){
+        res.json(zipcodeDelivery);
+      })
+      .catch(function(err){
+        console.log('err', err);
+        res.negotiate(err);
+      })
+  },
+
+  getZipcodeDeliveryById: function(req, res){
+    var form = req.allParams();
+    var id = form.id;
+
+    ZipcodeDelivery.findOne({id: id})
+      .then(function(zipcodeDelivery){
+        res.json(zipcodeDelivery);
+      })
+      .catch(function(err){
+        console.log('err', err);
+        res.negotiate(err);
+      })
+  }
+
+};

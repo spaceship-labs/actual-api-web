@@ -10,8 +10,7 @@ var BALANCE_SAP_TYPE = 'Balance';
 module.exports = {
   find: function(req, res){
     var form = req.params.all();
-    var client = form.client;
-    var model = 'order';
+    var model = 'orderweb';
     var extraParams = {
       searchFields: [
         'folio',
@@ -21,7 +20,7 @@ module.exports = {
       selectFields: form.fields,
       populateFields:['invoice'],
       filters:{
-
+        Client: req.user.id
       }
     };
     Common.find(model, form, extraParams)

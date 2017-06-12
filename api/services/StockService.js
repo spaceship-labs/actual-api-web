@@ -132,9 +132,11 @@ function getStoresWithProduct(ItemCode, whsCode){
 }
 
 function validateQuotationStockById(quotationId, req){
-  var warehouse;
+	var quotation;
+	var details;
   return QuotationWeb.findOne({id: quotationId}).populate('Details')
-	.then(function(quotation){
+	.then(function(quotationFound){
+		quotation = quotationFound;
     var whsId = req.activeStore.Warehouse;
     details = quotation.Details;
     var detailsIds = details.map(function(d){ return d.id; });
@@ -144,12 +146,11 @@ function validateQuotationStockById(quotationId, req){
     ];
   })
   .spread(function(warehouse,details){
-    return getDetailsStock(details, warehouse);    
+		var activeStore = req.activeStore;
+    return getDetailsStock(details, warehouse, quotation.ZipcodeDelivery, activeStore);    
   })
   .then(function(detailsStock){
-  	//console.log('detailsStock', detailsStock);
-  	//console.log('isValidStock', isValidStock(detailsStock));
-  	return isValidStock(detailsStock);
+		return isValidStock(detailsStock);
   });  
 }
 
@@ -163,7 +164,7 @@ function isValidStock(detailsStock){
 }
 
 //details must be populated with products
-function getDetailsStock(details, warehouse){
+function getDetailsStock(details, warehouse, zipcodeDeliveryId, activeStore){
 	var promises = [];
 	var products = details.map(function(detail){
 		return detail.Product;
@@ -173,29 +174,34 @@ function getDetailsStock(details, warehouse){
 	});
 	
 	for(var i=0;i<products.length; i++){
-		promises.push( Shipping.product(products[i], warehouse) );
+		var options = {
+			zipcodeDeliveryId: zipcodeDeliveryId
+		}
+		promises.push( Shipping.product(products[i], warehouse, options) );
 	}
+
 	return Promise.all(promises)
 		.then(function(results){
 			var deliveryDates = results.reduce(function(arr, group){
 				arr = arr.concat(group);
 				return arr;
 			}, []);	
-			var finalDetails = mapDetailsWithDeliveryDates(details, deliveryDates);
+			var finalDetails = mapDetailsWithDeliveryDates(details, deliveryDates,activeStore);
 			return finalDetails;
 		});
 }
 
-function mapDetailsWithDeliveryDates(details, deliveryDates){
+function mapDetailsWithDeliveryDates(details, deliveryDates,activeStore){
+	var societyCodes   = SiteService.getSocietyCodesByActiveStore(activeStore);
+
 	for(var i = 0; i<details.length; i++){
 		var detailDelivery = findValidDelivery(details[i], deliveryDates);
-		//sails.log.info('detailDelivery', detailDelivery);
-		//sails.log.info('details[i]', details[i]);
 
-
-		if(detailDelivery && details[i].Product.Available > 0){
-			detailDelivery.available -= details[i].quantity;
-			//details[i].delivery = detailDelivery;
+		if(
+				detailDelivery && 
+				(details[i].Product.Active === 'Y' || details[i].isFreeSale ) &&
+				checkIfProductHasSocietyCodes(details[i].Product, societyCodes) 
+		){
 			details[i].validStock = true;
 		}else{
 			details[i].validStock = false;			
@@ -203,6 +209,11 @@ function mapDetailsWithDeliveryDates(details, deliveryDates){
 	}
 
 	return details;
+}
+
+function checkIfProductHasSocietyCodes(product, societyCodes){
+	var productSociety = product.U_Empresa;
+	return societyCodes.indexOf(productSociety) > -1;
 }
 
 function findValidDelivery(detail,deliveryDates){
@@ -219,7 +230,13 @@ function findValidDelivery(detail,deliveryDates){
 		var deliveryDate = moment(delivery.date).startOf('day').format('DD-MM-YYYY');
 		var isValidDelivery;
 
-		if(detailShipDate === deliveryDate && detail.quantity <= delivery.available){				
+
+		if( detailShipDate === deliveryDate && 
+			  detail.quantity <= delivery.available &&
+			  detail.immediateDelivery === delivery.ImmediateDelivery &&
+				detail.shipCompanyFrom === delivery.companyFrom &&
+				detail.shipCompany === delivery.company
+			){	
 			isValidDelivery = true;
 		}else{
 			isValidDelivery = false;

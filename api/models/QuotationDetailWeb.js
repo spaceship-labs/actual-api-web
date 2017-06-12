@@ -27,7 +27,7 @@ module.exports = {
     Promotion:{
       model:'Promotion'
     },
-    Quotation:{
+    QuotationWeb:{
       model:'QuotationWeb',
     },    
     Product: {
@@ -35,6 +35,9 @@ module.exports = {
     },
     User:{
       model: 'UserWeb'
+    },
+    Client:{
+      model:'Client'
     },
     //ship
     shipDate: {

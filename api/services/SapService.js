@@ -1,6 +1,5 @@
-//var baseUrl = process.env.SAP_URL; //'http://sapnueve.homedns.org:8080'
+var baseUrl = process.env.SAP_URL;
 //var baseUrl = 'http://189.149.131.100:8080';
-var baseUrl = 'http://sapnueve.homedns.org:8080';
 var request = require('request-promise');
 var Promise = require('bluebird');
 var buildUrl = require('build-url');
@@ -57,21 +56,16 @@ function syncProduct(itemCode){
 
 function createClient(params){
   var path           = 'Contact';
-  var client         = params.client;
+  var client         = _.clone(params.client);
   var fiscalAddress  = params.fiscalAddress || {};
   var clientContacts = params.clientContacts || [];
   delete client.Currency;
+  delete client.password;
 
   client.LicTradNum  = client.LicTradNum || 'XAXX010101000';
+  client.SlpCode = -1;
 
-  return UserWeb.findOne({id:client.User}).populate('Seller')
-    .then(function(user){
-      client.SlpCode = -1;//Assigns seller code from SAP
-      if(user.Seller){
-        client.SlpCode = user.Seller.SlpCode || -1;
-      }
-      return getSeriesNum(user.activeStore);
-    })
+  return getSeriesNum(params.activeStoreId)
     .then(function(seriesNum){
       client.Series = seriesNum; //Assigns seriesNum number depending on activeStore
       var requestParams = {
@@ -92,11 +86,13 @@ function createClient(params){
 }
 
 function updateClient(cardcode, form){
+  sails.log.info('form in updateClient', form);
   form = _.omit(form, _.isUndefined);
 
   //Important: DONT UPDATE BALANCE IN SAP
   delete form.Balance;
   delete form.Currency;
+  delete form.password;
 
   var path = 'Contact';
   var params = {

@@ -175,6 +175,31 @@ module.exports.routes = {
     action:'getEwalletByClient'
   },
 
+  'GET /client/:CardCode/contacts':{
+    controller:'client',
+    action: 'getContactsByClient'
+  },
+  
+  'POST /client/:CardCode/contacts':{
+    controller:'client',
+    action: 'createContact'
+  },
+
+  'PUT /client/:CardCode/contacts/:CntctCode':{
+    controller:'client',
+    action: 'updateContact'
+  },  
+
+  'GET /client/:CardCode/fiscaladdress':{
+    controller:'client',
+    action: 'getFiscalAddressByClient'
+  },
+
+  'PUT /client/:CardCode/fiscaladdress':{
+    controller:'client',
+    action: 'updateFiscalAddress'
+  },  
+
   '/quotation/create':{
     controller: 'quotation',
     action: 'create'
@@ -242,6 +267,11 @@ module.exports.routes = {
     action:'getQuotationPayments'
   },
 
+  'GET /quotation/:id/zipcodedelivery':{
+    controller: 'quotation',
+    action: 'getQuotationZipcodeDelivery'
+  },
+
 
   '/quotation/:id/saporderconnectionlogs':{
     controller:'quotation',
@@ -256,11 +286,6 @@ module.exports.routes = {
   '/client/update/:CardCode':{
     controller: 'client',
     action: 'update'
-  },
-
-  '/product/advancedsearch':{
-    controller: 'productsearch',
-    action:'advancedSearch'
   },
 
   '/product/searchbyfilters':{
@@ -392,6 +417,16 @@ module.exports.routes = {
   '/payment/test':{
     controller: 'payment',
     action: 'test'
+  },
+
+  'GET /shipping/zipcodedelivery':{
+    controller: 'shipping',
+    action: 'getZipcodeDelivery'
+  },
+ 
+  'GET /shipping/zipcodedelivery/:id':{
+    controller: 'shipping',
+    action: 'getZipcodeDeliveryById'
   }
 
   /*

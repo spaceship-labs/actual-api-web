@@ -36,9 +36,13 @@ module.exports = {
             console.log('err findOne',errFind);
             reject(errFind);
           }
-          recordFound = formatMongoRecord(recordFound);
-          resolve(recordFound);
-        });
+          if(recordFound){
+            recordFound = formatMongoRecord(recordFound);
+            resolve(recordFound);
+          }else{
+            resolve();
+          }
+      });
       });
 
     });
@@ -138,6 +142,8 @@ module.exports = {
     var searchFields = extraParams.searchFields || [];
     var populateFields = extraParams.populateFields || [];
     var selectFields = extraParams.selectFields || [];
+    var filters = extraParams.filters;
+
     var items = form.items || 10;
     var page = form.page || 1;
     var term = form.term;
@@ -145,7 +151,6 @@ module.exports = {
     var query = {};
     var querySearchAux = {};
     var model = sails.models[modelName];
-    var filters = form.filters;
     var selectObj = false;
     var read = false;
     var getAll = form.getAll;
@@ -221,7 +226,6 @@ module.exports = {
 
     }
 
-    //sails.log.info('query', query);
     querySearchAux = _.clone(query);
 
     if(!getAll){

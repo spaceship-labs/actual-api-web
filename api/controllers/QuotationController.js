@@ -16,7 +16,7 @@ module.exports = {
     form.Details = formatProductsIds(form.Details);
     form.Details = form.Details.map(function(d){
       if(req.user){
-        d.User = req.user.id;
+        d.Client = req.user.id;
       }
       return d;
     });
@@ -59,8 +59,10 @@ module.exports = {
 
     Common.nativeFindOne({_id: ObjectId(id)}, QuotationWeb)
       .then(function(quotation){
-        if(quotation.User !== req.user.id && quotation.User){
-          return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
+        if(req.user){
+          if(quotation.Client !== req.user.id && quotation.Client){
+            return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
+          }
         }
         return QuotationWeb.update({id:id}, form);
       })
@@ -85,7 +87,7 @@ module.exports = {
     };
 
     if(req.user){
-      query.User = req.user.id;
+      query.Client = req.user.id;
     }
 
     QuotationWeb.findOne(query)
@@ -94,8 +96,8 @@ module.exports = {
         if(!quotation){
           return Promise.reject(new Error('Cotización no encontrada'));
         } 
-        if(quotation.User){
-          if(quotation.User !== req.user.id){
+        if(quotation.Client){
+          if(quotation.Client !== req.user.id){
             return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
           }              
         }
@@ -120,14 +122,14 @@ module.exports = {
     };
 
     if(req.user){
-      query.User = req.user.id;
+      query.Client = req.user.id;
     }
 
     var quotationQuery =  QuotationWeb.findOne(query)
       .populate('Details')
-      .populate('User')
       .populate('Client')
-      .populate('Order');
+      .populate('ZipcodeDelivery')
+      .populate('OrderWeb');
       //.populate('Payments');
       //.populate('Records')
       //.populate('Manager');
@@ -169,10 +171,10 @@ module.exports = {
   addDetail: function(req, res){
     var form = req.params.all();
     var id = form.id;
-    form.Quotation = id;
+    form.QuotationWeb = id;
     form.Details = formatProductsIds(form.Details);
     form.shipDate = moment(form.shipDate).startOf('day').toDate();
-    form.User = req.user.id;
+    form.Client = req.user.id;
 
     delete form.id;
     var opts = {
@@ -183,7 +185,7 @@ module.exports = {
     
     Common.nativeFindOne({_id: ObjectId(id)}, QuotationWeb)
       .then(function(quotation){
-        if(quotation.User !== req.user.id){
+        if(quotation.Client !== req.user.id){
           return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
         }
         return QuotationDetailWeb.create(form);
@@ -208,13 +210,13 @@ module.exports = {
   addMultipleDetails: function(req, res){
     var form = req.params.all();
     var id = form.id;
-    form.Quotation = id;
+    form.QuotationWeb = id;
     form.Details = formatProductsIds(form.Details);
     
     if(form.Details && form.Details.length > 0 && _.isArray(form.Details) ){
       form.Details = form.Details.map(function(d){
         d.shipDate = moment(d.shipDate).startOf('day').toDate();
-        d.User = req.user.id;
+        d.Client = req.user.id;
         return d;
       });
     }
@@ -228,7 +230,7 @@ module.exports = {
 
     Common.nativeFindOne({_id: ObjectId(id)}, QuotationWeb)
       .then(function(quotation){
-        if(quotation.User !== req.user.id){
+        if(quotation.Client !== req.user.id){
           return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
         }
         return QuotationDetailWeb.create(form.Details);
@@ -257,13 +259,13 @@ module.exports = {
     var opts = {
       paymentGroup:1,
       updateDetails: true,
-      currentStore: req.user.activeStore.id
+      currentStore: req.activeStore.id
     };
 
 
     Common.nativeFindOne({_id: ObjectId(quotationId)}, QuotationDetailWeb)
       .then(function(quotationDetail){
-        if(quotationDetail.User !== req.user.id){
+        if(quotationDetail.Client !== req.user.id){
           return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
         }
 
@@ -274,7 +276,7 @@ module.exports = {
         return calculator.updateQuotationTotals(quotationId, opts);
       })
       .then(function(updatedQuotationResult){
-        return QuotationDetail.findOne({id: quotationId}).populate('Details');
+        return QuotationWeb.findOne({id: quotationId}).populate('Details');
       })
       .then(function(quotation){
         res.json(quotation);
@@ -330,7 +332,6 @@ module.exports = {
       currentStore: req.activeStore.id
     };
     var calculator = QuotationService.Calculator();
-    console.log('params', params);
 
     Common.nativeFindOne({_id: ObjectId(id)}, QuotationWeb)
       .then(function(quotation){
@@ -371,24 +372,34 @@ module.exports = {
   getCurrentStock: function(req, res){
     var form = req.allParams();
     var quotationId = form.quotationId;
-    var warehouse;
     var details;
+    var quotation;
     var query = {
-      Quotation: quotationId,
+      QuotationWeb: quotationId,
     };
 
     if(req.user){
-      query.User = req.user.id;      
+      query.Client = req.user.id;      
+    }else{
+      query.Client = null;
     }
 
-    QuotationDetailWeb.find(query).populate('Product')
-      .then(function(detailsFound){
-        details = detailsFound;
+    var promises = [
+      QuotationWeb.findOne({id:quotationId, select:['ZipcodeDelivery']}),
+      QuotationDetailWeb.find(query).populate('Product')
+    ];
+      
+      Promise.all(promises)
+      .then(function(results){
+        quotation = results[0];
+        details = results[1];
         var whsId = req.activeStore.Warehouse;
         return Company.findOne({id: whsId});
       })
       .then(function(warehouse){
-        return StockService.getDetailsStock(details, warehouse);    
+        var zipcodeDeliveryId = quotation.ZipcodeDelivery;
+        var activeStore = req.activeStore;
+        return StockService.getDetailsStock(details, warehouse, zipcodeDeliveryId, activeStore);    
       })
       .then(function(results){
         res.json(results);
@@ -462,9 +473,12 @@ module.exports = {
     var form = req.allParams();
     var quotationId = form.id;
     var query = {
-      Quotation:quotationId,
-      User: req.user.id
+      Quotation:quotationId
     };
+
+    if(req.user){
+      query.Client = req.user.id;
+    }
 
     SapOrderConnectionLogWeb.find(query)
       .then(function(logs){
@@ -474,7 +488,38 @@ module.exports = {
         console.log(err);
         res.negotiate(err);
       });
+  },
+
+  getQuotationZipcodeDelivery: function(req, res){
+    var form = req.params.all();
+    var id = form.id;
+    var query = {
+      id: id,
+    };
+
+    if(req.user){
+      query.Client = req.user.id;
+    }
+
+    QuotationWeb.findOne(query)
+      .populate('ZipcodeDelivery')
+      .then(function(quotation){
+        if(!quotation){
+          return Promise.reject(new Error('Cotización no encontrada'));
+        } 
+        if(quotation.Client){
+          if(quotation.Client !== req.user.id){
+            return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
+          }              
+        }
+        res.json(quotation.ZipcodeDelivery);
+      })
+      .catch(function(err){
+        console.log('err', err);
+        res.negotiate(err);
+      });
   }
+  
 
 };
 

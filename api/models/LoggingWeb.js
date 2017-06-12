@@ -8,8 +8,8 @@
 
 module.exports = {
   attributes: {
-    user: {
-      model: 'userweb',
+    client: {
+      model: 'client',
       required: true
     },
     message: {

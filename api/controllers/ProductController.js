@@ -40,11 +40,14 @@ module.exports = {
       startDate: {'<=': currentDate},
       endDate: {'>=': currentDate},
     };
+    var activeStore    = req.activeStore;
+    var societyCodes   = SiteService.getSocietyCodesByActiveStore(activeStore);
     var displayProperty = SiteService.getSiteDisplayProperty(req);
     var query = {
       or: [ {ItemCode:id}, {ItemName:id} ]
     };
     query[displayProperty] = true;
+    query = Search.applySocietiesQuery(query, societyCodes);
 
     Product.findOne(query)
       .populate('files')

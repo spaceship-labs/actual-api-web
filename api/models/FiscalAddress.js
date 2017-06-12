@@ -9,6 +9,7 @@ module.exports = {
       columnName: 'Address',
       type:'string'
     },
+    companyPublicName:{type:'string'},
     CardCode:{type:'string'},
     Phone1: {type:'string'},
     U_Correos:{type:'string'},

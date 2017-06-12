@@ -26,10 +26,14 @@ module.exports = {
     /*-----*/
     FirstName: {type:'string'},
     LastName: {type:'string'},
+    password:{type:'string'},
+    lastLogin: {type:'datetime'},
+    /*
     email: {
       type:'string',
       unique: true
     },
+    */
 
     bussinessLegalName: {type:'string'},
     bussinessName: {type:'string'},
@@ -54,5 +58,23 @@ module.exports = {
       collection:'OrderWeb',
       via: 'Client',
     },
-  }
+    toJSON: function () {
+      var obj = this.toObject();
+      delete obj.password;
+      return obj;
+    }    
+  },
+  beforeUpdate: function (values, next) {
+    if (values.new_password) {
+      values.password = CipherService.hashPassword(values.new_password);
+    }
+    next();
+  },
+  beforeCreate: function (values, next) {
+    if (values.password) {
+      values.password = CipherService.hashPassword(values.password);
+    }
+    next();
+  }  
 };
+
