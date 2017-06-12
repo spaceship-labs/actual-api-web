@@ -20,6 +20,17 @@ module.exports = {
   // models: {
   //   connection: 'someMysqlServer'
   // },
+  connections:{
+    mongodb: {
+      adapter: 'sails-mongo',
+      host: process.env.MONGODB_HOST || 'YOUR_MONGODB_SERVER_HOSTNAME_OR_IP_ADDRESS',
+      port: process.env.MONGODB_PORT || 27017,
+      user: process.env.MONGODB_USER || 'YOUR_MONGODB_USER',
+      password: process.env.MONGODB_PASS || 'YOUR_MONGODB_PASSWORD',
+      database: process.env.MONGODB_NAME || 'YOUR_MONGODB_DB',
+      url:null
+    },    
+  }
 
   /***************************************************************************
    * Set the port in the production environment to 80                        *
