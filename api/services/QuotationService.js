@@ -74,6 +74,10 @@ function updateQuotationToLatestData(quotationId, options){
       if(!quotation){
         return Promise.reject(new Error('Cotización no encontrada'));
       }
+
+      return setQuotationZipcodeDeliveryByContactId(quotation.id, quotation.Address);
+    })
+    .then(function(){
       var calculator = Calculator();
       return calculator.updateQuotationTotals(quotationId, params);
     });
@@ -565,6 +569,11 @@ function nativeQuotationUpdate(quotationId,params){
 }
 
 function setQuotationZipcodeDeliveryByContactId(quotationId,contactId){
+
+  if(!contactId){
+    return Promise.resolve();
+  }
+
   return ClientContact.findOne({id:contactId})
     .then(function(contact){
       var cp = contact.U_CP;
@@ -574,7 +583,6 @@ function setQuotationZipcodeDeliveryByContactId(quotationId,contactId){
       return ZipcodeDelivery.findOne({cp:cp});  
     })
     .then(function(zipcodeDelivery){
-      console.log('zipcodedelivery', zipcodeDelivery);
       var zipcodeDeliveryId = zipcodeDelivery.id;
       var findCriteria = {_id: ObjectId(quotationId)};
       var params = {ZipcodeDelivery: ObjectId(zipcodeDeliveryId)};
