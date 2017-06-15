@@ -164,6 +164,7 @@ function Calculator(){
 
   }
 
+  function mapDetailsWithFinancingCost(details, ammountPaidPg1, quotationPlainTotals){
     return details.map(function(detail){
       var proportionalPaymentPg1 = (detail.totalPg1 / quotationPlainTotals.totalPg1) * ammountPaidPg1;
       var proportionalPayment = (detail.total / quotationPlainTotals.total) * ammountPaidPg1;
