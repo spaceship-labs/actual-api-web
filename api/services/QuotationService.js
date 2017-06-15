@@ -51,7 +51,8 @@ module.exports = {
   nativeQuotationUpdate: nativeQuotationUpdate,
   updateQuotationToLatestData: updateQuotationToLatestData,
   getCountByUser: getCountByUser,
-  getTotalsByUser: getTotalsByUser
+  getTotalsByUser: getTotalsByUser,
+  setQuotationZipcodeDeliveryByContactId: setQuotationZipcodeDeliveryByContactId
 };
 
 function updateQuotationToLatestData(quotationId, options){
@@ -140,7 +141,6 @@ function Calculator(){
       .then(function(processedDetails){
         var totals = sumProcessedDetails(processedDetails, options);
         var ammountPaidPg1 = quotation.ammountPaidPg1 || 0;
-        var plainTotals = _.clone(totals);
         var auxPromise = Promise.resolve();
 
         if( ammountPaidPg1 > 0 && options.financingTotals){
@@ -151,7 +151,6 @@ function Calculator(){
           if(options.updateDetails){
             auxPromise = updateDetails(processedDetails);
           }
-
         }
 
         return [
@@ -165,7 +164,6 @@ function Calculator(){
 
   }
 
-  function mapDetailsWithFinancingCost(details, ammountPaidPg1, quotationPlainTotals){
     return details.map(function(detail){
       var proportionalPaymentPg1 = (detail.totalPg1 / quotationPlainTotals.totalPg1) * ammountPaidPg1;
       var proportionalPayment = (detail.total / quotationPlainTotals.total) * ammountPaidPg1;
@@ -333,10 +331,9 @@ function Calculator(){
   //Must contain a Product object populated
   function getDetailTotals(detail, options){
     options = options || {};
-    paymentGroup = options.paymentGroup || 1;
+    var paymentGroup = options.paymentGroup || 1;
     var productId   = detail.Product;
     var quantity    = detail.quantity;
-    var currentDate = new Date();
     var quotationId = detail.Quotation;
     var product;
     
@@ -359,7 +356,6 @@ function Calculator(){
         var discountName              = mainPromo ? getPromotionOrPackageName(mainPromo) : null;
 
         //var total                 = quantity * unitPriceWithDiscount;
-        var subtotalWithPromotions    = total;
         var discount                  = total - subtotal;
 
         //TODO: Reactivate ewallet 
@@ -565,6 +561,24 @@ function nativeQuotationUpdate(quotationId,params){
       });
     });
   });
+}
+
+function setQuotationZipcodeDeliveryByContactId(quotationId,contactId){
+  return ClientContact.findOne({id:contactId})
+    .then(function(contact){
+      var cp = contact.U_CP;
+      if(!cp){
+        return Promise.reject(new Error("La dirección de entrega no tiene un código postal asignado"));
+      }
+      return ZipcodeDelivery.findOne({cp:cp});  
+    })
+    .then(function(zipcodeDelivery){
+      console.log('zipcodedelivery', zipcodeDelivery);
+      var zipcodeDeliveryId = zipcodeDelivery.id;
+      var findCriteria = {_id: ObjectId(quotationId)};
+      var params = {ZipcodeDelivery: ObjectId(zipcodeDeliveryId)};
+      return Common.nativeUpdateOne(findCriteria, params, QuotationWeb);
+    })
 }
 
 function getMultipleUsersTotals(options){

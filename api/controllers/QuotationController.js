@@ -79,6 +79,40 @@ module.exports = {
       });
   },
 
+  updateQuotationAddress: function(req, res){
+    var form = req.params.all();
+    var quotationId = form.id;
+    var params = {
+      Address: form.addressId
+    };
+    var contactId;
+    var updatedQuotation;
+    form.Store =  req.activeStore.id;
+
+
+    Common.nativeFindOne({_id: ObjectId(quotationId)}, QuotationWeb)
+      .then(function(quotation){
+        if(req.user){
+          if(quotation.Client !== req.user.id && quotation.Client){
+            return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
+          }
+        }
+        return QuotationWeb.update({id:quotationId}, params);
+      })
+      .then(function(resultUpdate){
+        updatedQuotation = resultUpdate[0];
+        contactId = updatedQuotation.Address;
+        return QuotationService.setQuotationZipcodeDeliveryByContactId(quotationId, contactId);
+      })
+      .then(function(){
+        res.json(updatedQuotation);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
+  },  
+
   findByIdQuickRead: function(req, res){
     var form = req.params.all();
     var id = form.id;
@@ -113,7 +147,6 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
     var getPayments = form.payments;
-    var forceLatestData  = true;
     if( !isNaN(id) ){
       id = parseInt(id);
     }
@@ -131,8 +164,6 @@ module.exports = {
       .populate('ZipcodeDelivery')
       .populate('OrderWeb');
       //.populate('Payments');
-      //.populate('Records')
-      //.populate('Manager');
 
     if(getPayments){
       quotationQuery.populate('Payments');
@@ -174,7 +205,10 @@ module.exports = {
     form.QuotationWeb = id;
     form.Details = formatProductsIds(form.Details);
     form.shipDate = moment(form.shipDate).startOf('day').toDate();
-    form.Client = req.user.id;
+    
+    if(req.user){
+      form.Client = req.user.id;
+    }
 
     delete form.id;
     var opts = {
@@ -185,8 +219,10 @@ module.exports = {
     
     Common.nativeFindOne({_id: ObjectId(id)}, QuotationWeb)
       .then(function(quotation){
-        if(quotation.Client !== req.user.id){
-          return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
+        if(req.user){
+          if(quotation.Client !== req.user.id){
+            return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
+          }
         }
         return QuotationDetailWeb.create(form);
       })
@@ -263,9 +299,9 @@ module.exports = {
     };
 
 
-    Common.nativeFindOne({_id: ObjectId(quotationId)}, QuotationDetailWeb)
-      .then(function(quotationDetail){
-        if(quotationDetail.Client !== req.user.id){
+    Common.nativeFindOne({_id: ObjectId(quotationId)}, QuotationWeb)
+      .then(function(quotation){
+        if(quotation.Client !== req.user.id){
           return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
         }
 
@@ -293,19 +329,7 @@ module.exports = {
     form.filters = form.filters || {};
     form.filters.User = req.user.id;
 
-    var client = form.client;
     var model = 'quotationweb';
-    var clientSearch = form.clientSearch;
-    var clientSearchFields = ['CardName', 'E_Mail'];
-    var preSearch = new Promise(function(resolve, reject){
-      resolve();
-    });
-
-    if(clientSearch && form.term){
-      preSearch = clientsIdSearch(form.term, clientSearchFields);
-      delete form.term;
-    }
-
     var extraParams = {
       searchFields: ['folio','id'],
       selectFields: form.fields,
@@ -378,11 +402,13 @@ module.exports = {
       QuotationWeb: quotationId,
     };
 
+    /*
     if(req.user){
       query.Client = req.user.id;      
     }else{
       query.Client = null;
     }
+    */
 
     var promises = [
       QuotationWeb.findOne({id:quotationId, select:['ZipcodeDelivery']}),

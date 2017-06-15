@@ -193,7 +193,7 @@ module.exports = {
     });
   },
 
-    getProductMainPromo: function(req, res){
+  getProductMainPromo: function(req, res){
     var form = req.allParams();
     var id = form.id;
     PromotionService.getProductMainPromo(id)

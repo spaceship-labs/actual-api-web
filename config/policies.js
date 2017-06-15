@@ -25,16 +25,20 @@ module.exports.policies = {
   },
   QuotationController:{
     '*': ['setupDefaultData','isAuthenticated'],
-    /*
     create: ['setupDefaultData'],
     findById: ['setupDefaultData'],
     findByIdQuickRead: ['setupDefaultData'],
     getQuotationPaymentOptions: ['setupDefaultData'],
-    getCurrentStock: ['setupDefaultData']
-    */
+    getCurrentStock: ['setupDefaultData'],
+    addDetail:['setupDefaultData'],
+    update: ['setupDefaultData'],
+    getQuotationZipcodeDelivery:['setupDefaultData']
   },
   PaymentController:{
-    /*add: ['setupDefaultData','isAuthenticated']*/
+    add: ['setupDefaultData','isAuthenticated']
+  },
+  OrderController:{
+    '*': ['isAuthenticated', 'setupDefaultData'],
   },
   UserController:{
     '*': ['setupDefaultData','isAuthenticated'],
@@ -46,12 +50,47 @@ module.exports.policies = {
     update_password: true,
     register: true
   },
+  ClientController:{
+    create:['setupDefaultData']
+  },
   MeController: {
+    activeStore: ['setupDefaultData']
     /*
     '*': ['setupDefaultData','isAuthenticated'],
     activeStore: ['setupDefaultData']
     */
   },
+  CommonController:{
+    '*':['setupDefaultData']
+  },  
+  ShippingController:{
+    '*':['setupDefaultData']
+  },  
+  SiteController:{
+    '*':['setupDefaultData']
+  },
+  CompanyController:{
+    '*':['setupDefaultData']
+  },  
+  PMPeriodController:{
+    '*':['setupDefaultData']
+  },  
+  ProductController:{
+    '*':['setupDefaultData']
+  },
+  ProductFilterController:{
+    '*':['setupDefaultData']
+  },
+
+  CustomBrandController:{
+    '*':['setupDefaultData']
+  },
+  ProductCategoryController:{
+    '*':['setupDefaultData']
+  },
+  ProductSearchController:{
+    '*':['setupDefaultData']
+  }
 
   /***************************************************************************
   *                                                                          *

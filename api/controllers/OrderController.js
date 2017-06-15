@@ -76,6 +76,7 @@ module.exports = {
     var orderDetails;
 
     OrderService.createFromQuotation2(form, req)
+      /*
       .then(function(conektaOrder){
         res.json(conektaOrder);
       })
@@ -83,8 +84,10 @@ module.exports = {
         console.log('err', err);
         res.negotiate(err);
       });
+      */
     /*
     OrderService.createFromQuotation(form, req)
+    */
       .then(function(orderCreated){
         //RESPONSE
         res.json(orderCreated);
@@ -94,10 +97,8 @@ module.exports = {
 
         //STARTS EMAIL SENDING PROCESS
         return OrderWeb.findOne({id:orderCreated.id})
-          .populate('User')
           .populate('Client')
           .populate('Payments')
-          .populate('EwalletRecords')
           .populate('Address');
       })
       .then(function(order){
@@ -119,7 +120,7 @@ module.exports = {
           res.negotiate(err);
         }
       });
-    */
+    
   },
 
   getCountByUser: function(req, res){

@@ -34,7 +34,7 @@ module.exports = {
     },
     SapOrderConnectionLogs: {
       collection: 'SapOrderConnectionLogWeb',
-      via: 'Quotation'
+      via: 'QuotationWeb'
     },
 
     CardName: {type:'string'},

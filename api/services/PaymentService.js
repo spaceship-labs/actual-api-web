@@ -15,8 +15,85 @@ module.exports = {
   getPaymentGroupsForEmail: getPaymentGroupsForEmail,
   getMethodGroupsWithTotals: getMethodGroupsWithTotals,
   getPaymentGroups: getPaymentGroups,
-  getExchangeRate: getExchangeRate
+  getExchangeRate: getExchangeRate,
+  addPayment: addPayment
 };
+
+function addPayment(payment, quotationId, req){
+  var paymentGroup  = payment.group || 1;
+  var paymentCreated;
+  var client;
+  var quotationPayments = [];
+  var exchangeRate;
+  var quotation;
+  var quotationUpdateParams;
+  payment.QuotationWeb = quotationId;
+  payment.Store = req.activeStore.id;
+  payment.Client = req.user.id;
+
+
+  return StockService.validateQuotationStockById(quotationId, req)
+    .then(function(isValidStock){
+
+      if(!isValidStock){
+        return Promise.reject(new Error('Inventario no suficiente'));
+      }
+
+      var findQuotation = QuotationWeb.findOne({id:quotationId}).populate('Payments');
+
+      if(payment.type === EWALLET_TYPE){
+        findQuotation.populate('Client');
+      }
+
+      return findQuotation;
+    })
+    .then(function(quotationFound){
+      quotation = quotationFound;
+      client = quotation.Client;
+      return PaymentWeb.create(payment);
+    })
+    .then(function(_paymentCreated){
+      paymentCreated = _paymentCreated;
+      quotationPayments = quotation.Payments.concat([paymentCreated]);
+
+      var promises = [
+        calculateQuotationAmountPaid(quotationPayments, exchangeRate),
+        calculateQuotationAmountPaidGroup1(quotationPayments, exchangeRate)
+      ];
+
+      if(payment.type === EWALLET_TYPE){
+        promises.push(
+          EwalletService.applyEwalletRecord(payment,{
+            quotationId: quotationId,
+            userId: req.user.id,
+            client: client,
+            paymentId: paymentCreated.id
+          })
+        );
+      }
+
+      return promises;
+    })
+    .spread(function(ammountPaid, ammountPaidPg1){
+      quotationUpdateParams = {
+        ammountPaid: ammountPaid,
+        ammountPaidPg1: ammountPaidPg1,
+        paymentGroup: paymentGroup
+      };
+      return QuotationService.nativeQuotationUpdate(quotationId, quotationUpdateParams);
+    })
+    .then(function(quotationUpdated){
+
+      if(payment.returnQuotation){
+        delete quotation.Payments;
+        quotation.ammountPaid = quotationUpdateParams.ammountPaid;
+        quotation.paymentGroup = quotationUpdateParams.paymentGroup;
+        return quotation;
+      }
+      
+      return paymentCreated;
+    })
+}
 
 function calculateQuotationAmountPaid(quotationPayments, exchangeRate){
   var payments  = quotationPayments || [];
@@ -116,7 +193,6 @@ function getMethodGroupsWithTotals(quotationId, activeStore, options){
           m.discount = mG.discount;
           m.exchangeRate = exchangeRate;
           if(m.type === CASH_USD_TYPE){
-            var exrStr = numeral(exchangeRate).format('0,0.00');
             m.description = 'Tipo de cambio '+exrStr+' MXN';
           }
           else if(m.type === EWALLET_TYPE){

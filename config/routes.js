@@ -169,6 +169,10 @@ module.exports.routes = {
     action: 'search'
   },
 
+  'GET /client/:id':{
+    controller:'client',
+    action:'findById'
+  },
 
   '/client/:id/ewallet':{
     controller:'client',
@@ -278,6 +282,11 @@ module.exports.routes = {
     action:'getQuotationSapLogs'
   },
 
+  'PUT /quotation/:id/address':{
+    controller:'quotation',
+    action:'updateQuotationAddress'
+  },
+
   '/payment/add/:quotationid':{
     controller: 'payment',
     action:'add'
@@ -342,16 +351,6 @@ module.exports.routes = {
   '/promotion/update/:id':{
     controller: 'promotion',
     action:'update'
-  },
-
-  '/pmperiod/find/:page':{
-    controller: 'pmperiod',
-    action:'find'
-  },
-
-  '/pmperiod/findbyid/:id':{
-    controller: 'pmperiod',
-    action:'findById'
   },
 
   '/pmperiod/getactive':{

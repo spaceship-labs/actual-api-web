@@ -8,19 +8,22 @@ module.exports = {
   findById: function(req, res){
     var form        = req.params.all();
     var id          = form.id;
+    var populate = form.populate;
     //var clientFound = false;
     Client.findOne({id:id}).then(function(client){
       if(!client){
         return Promise.reject(new Error('Cliente no encontrado'));
       }
+      
+      if(populate){
+        return ClientService.populateClientRelations(client);
+      }else{
+        return Promise.resolve(client);
+      }
+    })
+    .then(function(client){
       res.json(client);
-      //return ClientService.populateClientRelations(client);
     })
-    /*
-    .then(function(populatedClient){
-      res.json(populatedClient);
-    })
-    */
     .catch(function(err){
       console.log(err);
       return res.negotiate(err);
@@ -77,8 +80,16 @@ module.exports = {
       activeStoreId: req.activeStore.id
     };
 
-    Client.findOne({E_Mail:email})
-      .then(function(usedEmail){
+    ClientService.validateContactsZipcode(params.clientContacts)
+    .then(function(areValid){
+
+      if(!areValid){
+        return Promise.reject(new Error('El código postal no es valido para tu dirección de entrega'));
+      }
+
+      return Client.findOne({E_Mail:email});
+    })
+    .then(function(usedEmail){
         if(usedEmail){
           return Promise.reject(new Error('Email previamente utilizado'));
         }
@@ -221,8 +232,15 @@ module.exports = {
   createContact: function(req, res){
     var form = req.params.all();
     var cardCode = form.CardCode;
-    form = ClientService.mapContactFields(form);    
-    SapService.createContact(cardCode, form)
+    form = ClientService.mapContactFields(form);
+
+    ClientService.validateContactsZipcode([form])
+      .then(function(areValid){
+        if(!areValid){
+          return Promise.reject(new Error('El código postal no es valido para tu dirección de entrega'));
+        }
+        return SapService.createContact(cardCode, form)
+      })
       .then(function(resultSap){
         sails.log.info('response createContact', resultSap);
         var sapData = JSON.parse(resultSap.value);
@@ -254,7 +272,14 @@ module.exports = {
     var contactCode = form.CntctCode;
     var cardCode = form.CardCode;
     form = ClientService.mapContactFields(form);
-    ClientContact.find({CardCode: cardCode, select:['CntctCode']})
+
+    ClientService.validateContactsZipcode([form])
+      .then(function(areValid){
+        if(!areValid){
+          return Promise.reject(new Error('El código postal no es valido para tu dirección de entrega'));
+        }
+        return ClientContact.find({CardCode: cardCode, select:['CntctCode']});
+      })
       .then(function(contacts){
         var contactIndex = ClientService.getContactIndex(contacts, contactCode);
         return SapService.updateContact(cardCode ,contactIndex, form);

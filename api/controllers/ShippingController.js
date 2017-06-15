@@ -62,6 +62,6 @@ module.exports = {
         console.log('err', err);
         res.negotiate(err);
       })
-  }
+  },
 
 };

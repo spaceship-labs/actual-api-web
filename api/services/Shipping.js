@@ -7,7 +7,8 @@ var DELIVERY_AVAILABLE = 'SI';
 
 module.exports = {
   product: productShipping,
-  isDateImmediateDelivery: isDateImmediateDelivery
+  isDateImmediateDelivery: isDateImmediateDelivery,
+  isValidZipcode: isValidZipcode
 };
 
 function productShipping(product, storeWarehouse, options) {
@@ -188,4 +189,15 @@ function isDateImmediateDelivery(shipDate){
   var currentDate = moment().format(FORMAT);
   shipDate = moment(shipDate).format(FORMAT);
   return currentDate === shipDate;
+}
+
+function isValidZipcode(zipcode){
+  return ZipcodeDelivery.findOne({cp: zipcode})
+    .then(function(zipcodeDelivery){
+      if(zipcodeDelivery){
+        return true;
+      }else{
+        return false;
+      }
+    });
 }

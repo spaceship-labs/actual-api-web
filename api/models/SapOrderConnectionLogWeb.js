@@ -1,13 +1,13 @@
 //APP COLLECTION
 module.exports = {
   attributes: {
-    Quotation:{
+    QuotationWeb:{
       model: 'QuotationWeb'
     },
-    User:{
-      model: 'UserWeb'
+    Client:{
+      model: 'Client'
     },
-    Order: {
+    OrderWeb: {
       model:'OrderWeb'
     },
     Store:{

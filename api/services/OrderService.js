@@ -101,25 +101,36 @@ function getGroupByQuotationPayments(payments){
 
 function createFromQuotation2(form, req){
   var quotationId = form.quotationId;
-  return ConektaService.createOrder(quotationId, req)
+  var payment = form.payment;
+  var conektaOrder;
+
+  return ConektaService.createOrder(quotationId, payment, req)
     .then(function(conektaOrder){
       sails.log.info('conektaOrder', conektaOrder);
       return conektaOrder;
-    });
+    })
+    .then(function(_conektaOrder){
+      conektaOrder = _conektaOrder;
+      return PaymentService.addPayment(form.payment, quotationId, req);
+    })
+    .then(function(paymentCreted){
+      console.log('paymentcreated', paymentCreted);
+      form.conektaOrder = conektaOrder;
+      return createFromQuotation(form, req);
+    })
 }
 
 function createFromQuotation(form, req){
-  var currentUser = req.user;
   var quotationId  = form.quotationId;
   var opts         = {
-    //paymentGroup: form.paymentGroup || 1,
     updateDetails: true,
-    currentStoreId: currentUser.activeStore.id
+    currentStoreId: req.activeStore.id
   };
   var orderCreated = false;
   var SlpCode      = -1;
-  var currentStore = false;
+  var currentStore = req.activeStore;
   var sapResponse;
+  var sapResult;
   var quotation;
   var orderParams;
   var orderDetails;
@@ -136,7 +147,7 @@ function createFromQuotation(form, req){
         );
       }
       return [
-          StockService.validateQuotationStockById(quotationId, currentUser.activeStore),
+          StockService.validateQuotationStockById(quotationId, req),
           PaymentWeb.find({Quotation: quotationId}).sort('createdAt ASC')
         ];
     })
@@ -157,8 +168,7 @@ function createFromQuotation(form, req){
         .populate('Details')
         .populate('Address')
         .populate('User')
-        .populate('Client')
-        .populate('EwalletRecords');
+        .populate('Client');
     })
     .then(function(quotationFound){
       quotation = quotationFound;
@@ -177,10 +187,8 @@ function createFromQuotation(form, req){
         );
       }
 
-      var user = currentUser;
-      if(user.Seller){
-        SlpCode = user.Seller.SlpCode;
-      }
+      SlpCode = -1;
+
       var paymentsIds = quotation.Payments.map(function(p){return p.id;});
       orderParams = {
         source: quotation.source,
@@ -189,18 +197,18 @@ function createFromQuotation(form, req){
         subtotal: quotation.subtotal,
         discount: quotation.discount,
         paymentGroup: opts.paymentGroup,
-        groupCode: user.activeStore.GroupCode,
+        groupCode: req.activeStore.GroupCode,
         totalProducts: quotation.totalProducts,
         Client: quotation.Client.id,
         CardName: quotation.Client.CardName,
         Quotation: quotationId,
         Payments: paymentsIds,
-        EwalletRecords: quotation.EwalletRecords,
         ClientBalanceRecords: quotation.ClientBalanceRecords,
-        User: user.id,
         CardCode: quotation.Client.CardCode,
         SlpCode: SlpCode,
         Store: opts.currentStoreId,
+        ConektaOrderId: form.conektaOrder.id,
+        ConektaPaymentStatus: form.conektaOrder.payment_status
         //Store: user.activeStore
       };
 
@@ -231,10 +239,8 @@ function createFromQuotation(form, req){
         orderParams = _.extend(orderParams,quotation.Address);
       }
 
-      currentStore = user.activeStore;
-
       return [
-        QuotationDetailWeb.find({Quotation: quotation.id})
+        QuotationDetailWeb.find({QuotationWeb: quotation.id})
           .populate('Product'),
         Site.findOne({handle:'actual-group'})
       ];
@@ -258,9 +264,9 @@ function createFromQuotation(form, req){
       sails.log.info('createSaleOrder response', sapResponse);
       var log = {
         content: sapEndpoint + '\n' +  JSON.stringify(sapResponse),
-        User   : currentUser.id,
+        Client   : req.user.id,
         Store  : opts.currentStoreId,
-        Quotation: quotationId
+        QuotationWeb: quotationId
       };
       return SapOrderConnectionLogWeb.create(log);
     })  
@@ -279,6 +285,10 @@ function createFromQuotation(form, req){
       }
       orderParams.documents = sapResult;
       orderParams.SapOrderConnectionLogWeb = sapLog.id;
+      form.conektaOrder.conektaId = _.clone(form.conektaOrder.id);
+      delete form.conektaOrder.id;
+      orderParams.ConektaOrder = form.conektaOrder;
+      orderParams.conektaToken = form.conektaOrder.conektaId;
 
       return OrderWeb.create(orderParams);
     })
@@ -289,14 +299,14 @@ function createFromQuotation(form, req){
     .then(function(orderFound){
       //Cloning quotation details to order details
       quotation.Details.forEach(function(d){
-        d.QuotationDetail = _.clone(d.id);
+        d.QuotationDetailWeb = _.clone(d.id);
         delete d.id;
         orderFound.Details.add(d);
       });
       return orderFound.save();
     })
     .then(function(){
-      return OrderDetailWeb.find({Order: orderCreated.id})
+      return OrderDetailWeb.find({OrderWeb: orderCreated.id})
         .populate('Product')
         .populate('shipCompanyFrom');
     })
@@ -305,7 +315,7 @@ function createFromQuotation(form, req){
       //return StockService.substractProductsStock(orderDetails);
       
       var updateFields = {
-        Order: orderCreated.id,
+        OrderWeb: orderCreated.id,
         status: 'to-order',
         isClosed: true,
         isClosedReason: 'Order created'
@@ -321,12 +331,13 @@ function createFromQuotation(form, req){
         storeId: opts.currentStoreId,
         orderId: orderCreated.id,
         quotationId: quotation.id,
-        userId: quotation.User.id,
         client: quotation.Client
       };
+      /*
       return processEwalletBalance(params);
     })  
     .then(function(){
+    */
       orderCreated = orderCreated.toObject();
       orderCreated.Details = orderDetails;
       return orderCreated;

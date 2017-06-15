@@ -24,10 +24,21 @@ module.exports = {
 	mapContactFields: mapContactFields,
 	mapFiscalFields: mapFiscalFields,
 	populateClientRelations: populateClientRelations,
- 	isValidCardCode: isValidCardCode,
-
+	isValidCardCode: isValidCardCode,
+	validateContactsZipcode: validateContactsZipcode 
 };
 
+function validateContactsZipcode(contacts){
+	return Promise.map(contacts,function(contact){
+		return Shipping.isValidZipcode(contact.U_CP);
+	})
+	.then(function(results){
+		sails.log.info('results', results);
+		return _.every(results,function(isValid){
+			return isValid;
+		})
+	})
+}
 
 function mapClientFields(fields){
   fields.CardName = fields.FirstName || fields.CardName;

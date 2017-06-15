@@ -59,7 +59,11 @@ module.exports = {
     SapOrderConnectionLog:{
       model: 'SapOrderConnectionLogWeb'
     },
+    ConektaOrder:{
+      model:'ConektaOrder'
+    },
 
+    conektaToken:{type:'string'},
     //CONTACT ADDRESS FIELDS SNAPSHOT
     //APP/SAP FIELDS
 

@@ -63,7 +63,7 @@ function password(userName, userEmail, recoveryUrl, cb) {
 }
 
 function orderEmail(orderId) {
-  return Order
+  return OrderWeb
     .findOne(orderId)
     .populate('Client')
     .populate('User')
@@ -78,8 +78,8 @@ function orderEmail(orderId) {
       var details  = order.Details.map(function(detail) { return detail.id; });
       var payments = order.Payments.map(function(payment) { return payment.id; });
       var ewallet  = order.EwalletRecords;
-      details      = OrderDetail.find(details).populate('Product').populate('Promotion');
-      payments     = Payment.find(payments);
+      details      = OrderDetailWeb.find(details).populate('Product').populate('Promotion');
+      payments     = PaymentWeb.find(payments);
       return [client, user,  order, details, payments, ewallet, store];
     })
     .spread(function(client, user, order, details, payments, ewallet, store) {
@@ -250,7 +250,7 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
 }
 
 function quotation(quotationId, activeStore) {
-  return Quotation
+  return QuotationWeb
     .findOne(quotationId)
     .populate('Client')
     .populate('User')
@@ -261,7 +261,7 @@ function quotation(quotationId, activeStore) {
       var user     = quotation.User;
       var store    = quotation.Store;
       var details  = quotation.Details.map(function(detail) { return detail.id; });
-      details      = QuotationDetail.find(details).populate('Product').populate('Promotion');
+      details      = QuotationDetailWeb.find(details).populate('Product').populate('Promotion');
       var payments = PaymentService.getPaymentGroupsForEmail(quotation.id, activeStore);
       var transfers = TransferService.transfers(store.group);
       return [client, user,  quotation, details, payments, transfers, store];

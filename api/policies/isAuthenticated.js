@@ -13,12 +13,13 @@ module.exports = function (req, res, next) {
 
       if (error) return res.serverError(error);
       if (!user){
+        //next();
+        //return;
+        return res.unauthorized(null, info && info.code, info && info.message);
+      }else{
+        req.user = user;
         next();
-        return;
-        //return res.unauthorized(null, info && info.code, info && info.message);
       }
-      req.user = user;
-      next();
 
       
     })(req, res);

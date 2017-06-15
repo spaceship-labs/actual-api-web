@@ -14,89 +14,17 @@ module.exports = {
   },
 
   add: function(req, res){
-    var form          = req.params.all();
-    var quotationId   = form.quotationid;
-    var totalDiscount = form.totalDiscount || 0;
-    var paymentGroup  = form.group || 1;
-    var client        = false;
-    var quotationPayments = [];
-    var exchangeRate;
-    var quotation;
-    var quotationUpdateParams;
-    form.Quotation    = quotationId;
-    form.Store = req.activeStore.id;
-    form.User = req.user.id;
-
-    if (form.Details) {
-      form.Details = formatProductsIds(form.Details);
-    }
-
-    StockService.validateQuotationStockById(quotationId, req)
-      .then(function(isValidStock){
-
-        if(!isValidStock){
-          return Promise.reject(new Error('Inventario no suficiente'));
-        }
-
-        var findQuotation = QuotationWeb.findOne(form.Quotation).populate('Payments');
-
-        if(form.type === EWALLET_TYPE || form.type === CLIENT_BALANCE_TYPE){
-          findQuotation.populate('Client');
-        }
-
-        return findQuotation;
-      })
-      .then(function(quotationFound){
-        quotation = quotationFound;
-        client = quotation.Client;
-        //ConektaService.create()
-
-        return PaymentWeb.create(form);
-      })
-      .then(function(paymentCreated){
-        quotationPayments = quotation.Payments.concat([paymentCreated]);
-
-        var promises = [
-          PaymentService.calculateQuotationAmountPaid(quotationPayments, exchangeRate),
-          PaymentService.calculateQuotationAmountPaidGroup1(quotationPayments, exchangeRate)
-        ];
-
-        if(form.type === EWALLET_TYPE){
-          promises.push(
-            EwalletService.applyEwalletRecord(form,{
-              quotationId: quotationId,
-              userId: req.user.id,
-              client: client,
-              paymentId: paymentCreated.id
-            })
-          );
-        }
-
-        return promises;
-      })
-      .spread(function(ammountPaid, ammountPaidPg1){
-        quotationUpdateParams = {
-          ammountPaid: ammountPaid,
-          ammountPaidPg1: ammountPaidPg1,
-          paymentGroup: paymentGroup
-        };
-        return QuotationService.nativeQuotationUpdate(quotationId, quotationUpdateParams);
-        //return Quotation.update({id:quotationId}, params);
-      })
-      .then(function(resultUpdate){
-        delete quotation.Payments;
-        quotation.ammountPaid = quotationUpdateParams.ammountPaid;
-        quotation.paymentGroup = quotationUpdateParams.paymentGroup;
-
-        res.json(quotation);
-
-        //var updatedQuotation = resultUpdate[0];
-        //res.json(updatedQuotation);
+    var form        = req.params.all();
+    var quotationId = form.quotationId;
+    form.returnQuotation = true;
+    PaymentService.addPayment(form,quotationId, req)
+      .then(function(result){
+        res.json(result);
       })
       .catch(function(err){
-        console.log(err);
+        console.log('err', err);
         res.negotiate(err);
-      });
+      })
   },
 
 

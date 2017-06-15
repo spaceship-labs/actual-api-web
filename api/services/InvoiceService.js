@@ -37,7 +37,7 @@ function createOrderInvoice(orderId) {
         return [
           order,
           payments,
-          OrderDetail.find(details).populate('Product'),
+          OrderDetailWeb.find(details).populate('Product'),
           FiscalAddress.findOne({ CardCode: client.CardCode, AdresType: ClientService.ADDRESS_TYPE }),
           client,
         ];
@@ -55,7 +55,7 @@ function createOrderInvoice(orderId) {
       })
       .then(function(alegraInvoice){
         resolve(
-          Invoice.create({ alegraId: alegraInvoice.id, order: orderId })
+          InvoiceWeb.create({ alegraId: alegraInvoice.id, order: orderId })
         );
       })
       .catch(function(err){
@@ -83,7 +83,7 @@ function send(orderID) {
     .populate('Client')
     .then(function(order) {
       return [
-        Invoice.findOne({ order: orderID }),
+        InvoiceWeb.findOne({ order: orderID }),
         FiscalAddress.findOne({ CardCode: order.Client.CardCode, AdresType: ClientService.ADDRESS_TYPE }),
       ];
     })

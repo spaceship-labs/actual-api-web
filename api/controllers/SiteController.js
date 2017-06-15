@@ -1,5 +1,3 @@
-var Promise = require('bluebird');
-
 module.exports = {
   findByHandle: function(req, res){
     var form = req.params.all();

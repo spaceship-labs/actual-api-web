@@ -20,26 +20,31 @@ function test(req){
 }
 
 
-function createOrder(orderId, req) {
+function createOrder(orderId, payment, req) {
 	conekta.api_key = SiteService.getConektaKeyBySite(req);
 	sails.log.info('req.headers.site', req.headers.site);
 	sails.log.info('api_key', conekta.api_key);
 	var order;
 
-	return QuotationWeb.findOne({id: orderId}).populate('Payments')
+	return QuotationWeb.findOne({id: orderId})
 		.then(function(orderFound){
 			order = orderFound;
 
+			if(!orderFound.Address){
+				return Promise.reject(new Error('Asigna una dirección de envio para continuar'));
+			}
+
 			var promises = [
-				getOrderCustomerInfo(order.User),
-				getOrderLineItems(order.id)
+				getOrderCustomerInfo(order.Client),
+				getOrderCustomerAddress(order.Address),
+				getOrderLineItems(order.id),
 			];
 
 			return promises;
 		})
-		.spread(function(customerInfo, lineItems){
+		.spread(function(customerInfo, customerAddress, lineItems){
 			var discountLine = getOrderDiscountLine(order);
-			var charges = getOrderCharges(order, order.Payments);
+			var charges = getOrderCharges(order, [payment]);
 
 			return new Promise(function(resolve, reject){
 
@@ -53,18 +58,7 @@ function createOrder(orderId, req) {
 						amount: 0,
 						carrier: 'Fedex'
 					}],
-					shipping_contact:{
-	          receiver: "Mario perez",
-	          phone: "+5215555555555",
-	          between_streets: "Street 1 and Street 2",
-	          address: {
-	              "street1": "Wallaaby",
-	              "city": "Sydney",
-	              "state": "P. Sherman",
-	              "postal_code": "78215",
-	              "country": "MX"
-						}					
-					}
+					shipping_contact: customerAddress
 				};
 
 				sails.log.info('conektaOrderParams', conektaOrderParams);
@@ -72,12 +66,12 @@ function createOrder(orderId, req) {
 				conekta.Order.create(conektaOrderParams, function(err, res) {
 					if(err){
 						console.log('err conekta', err);
-						reject(err);
+						return reject(err);
 					}
 
 					var order =  res.toObject();
 					console.log('ID', order.id);
-					resolve(order); 
+					return resolve(order); 
 				});
 
 			});
@@ -111,20 +105,52 @@ function getOrderDiscountLine(order){
 }
 
 function getOrderCustomerInfo(clientId){
-	return UserWeb.findOne({id: clientId})
-		.then(function(user){
+	return Client.findOne({id: clientId})
+		.then(function(client){
 			var customerInfo = {
-				name: user.firstName + ' ' + user.lastName,
-				phone: '5215555555555',
+				name: client.CardName,
+				phone: "+5215555555555",
+				//phone: client.Phone1,
 				//phone: user.phone,
-				email: user.email
+				email: client.E_Mail
 			};
 			return customerInfo;
 		});
 }
 
+function getOrderCustomerAddress(addressId){
+	return ClientContact.findOne({id: addressId})
+		.then(function(contact){
+			/*
+			var customerInfo = {
+				name: client.CardName,
+				phone: client.Phone1,
+				//phone: user.phone,
+				email: client.E_Mail
+			};
+			return customerInfo;
+			*/
+			var customerAddress = {
+				receiver: contact.FirstName + ' ' + contact.LastName,
+				phone: "+5215555555555",
+				between_streets: "Street 1 and Street 2",
+				//between_streets: contact.U_Entrecalle + ' y ' + contact.U_Ycalle,
+				address: {
+						street1: "Wallaaby",
+						//"street1": contact.Address,
+						city: contact.U_Ciudad,
+						state: contact.U_Estado,
+						postal_code: contact.U_CP,
+						country: "MX"
+				}					
+			};
+			return customerAddress;
+		});
+}
+
+
 function getOrderLineItems(orderId){
-	return QuotationDetailWeb.find({Quotation: orderId}).populate('Product')
+	return QuotationDetailWeb.find({QuotationWeb: orderId}).populate('Product')
 		.then(function(details){
 			return mapDetailsToLineItems(details);
 		});
