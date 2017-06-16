@@ -36,10 +36,6 @@ module.exports = {
     var form = req.allParams();
     var zipcode = form.zipcode;
 
-    if(!isNaN(zipcode)){
-      zipcode = parseInt(zipcode);
-    }
-
     ZipcodeDelivery.findOne({cp: zipcode})
       .then(function(zipcodeDelivery){
         res.json(zipcodeDelivery);
