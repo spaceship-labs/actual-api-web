@@ -1,8 +1,9 @@
 module.exports = {
   schema: true,
+  migrate:'alter',
   tableName: 'zipcode',
   attributes: {
-    cp:{type:'integer'},
+    cp:{type:'string'},
     estado:{type:'string'},
     municipio:{type:'string'},
     asentamiento:{type:'string'},
