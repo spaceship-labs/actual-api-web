@@ -11,7 +11,6 @@
 var moment = require('moment-timezone');
 
 module.exports.bootstrap = function(cb) {
-
   //process.env.LOG_QUERIES =  true;
 
   // It's very important to trigger this callback method when you are finished
