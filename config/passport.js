@@ -109,6 +109,8 @@ module.exports = {
       var timeoutSeconds = 36000;
       //var express = require('express');
       //app.use(express.compress());      
+      var compression = require('compression');
+      app.use(compression());
       app.use(timeout(timeoutSeconds+'s'));
       app.use(Files.middleware);
     }

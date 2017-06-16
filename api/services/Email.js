@@ -7,7 +7,6 @@ var moment                = require('moment');
 var numeral               = require('numeral');
 var fs                    = require('fs');
 var ejs                   = require('ejs');
-var moment                = require('moment');
 var sendgrid              = require('sendgrid').SendGrid(key);
 var helper                = require('sendgrid').mail;
 var passwordTemplate      = fs.readFileSync(sails.config.appPath + '/views/email/password.html').toString();
@@ -66,23 +65,20 @@ function orderEmail(orderId) {
   return OrderWeb
     .findOne(orderId)
     .populate('Client')
-    .populate('User')
     .populate('Store')
     .populate('Details')
     .populate('Payments')
-    .populate('EwalletRecords')
     .then(function(order) {
       var client   = order.Client;
-      var user     = order.User;
       var store    = order.Store;
       var details  = order.Details.map(function(detail) { return detail.id; });
       var payments = order.Payments.map(function(payment) { return payment.id; });
-      var ewallet  = order.EwalletRecords;
+      var ewallet  = order.EwalletRecords || [];
       details      = OrderDetailWeb.find(details).populate('Product').populate('Promotion');
       payments     = PaymentWeb.find(payments);
-      return [client, user,  order, details, payments, ewallet, store];
+      return [client,  order, details, payments, ewallet, store];
     })
-    .spread(function(client, user, order, details, payments, ewallet, store) {
+    .spread(function(client, order, details, payments, ewallet, store) {
       var products = details.map(function(detail) {
         var date  = moment(detail.shipDate);
         moment.locale('es');
@@ -147,9 +143,9 @@ function orderEmail(orderId) {
         spent: numeral(sewallet).format('0,0.00'),
         balance: numeral(bewallet).format('0,0.00'),
       };
-      return [client, user, order, products, payments, ewallet, store];
+      return [client, order, products, payments, ewallet, store];
     })
-    .spread(function (client, user, order, products, payments, ewallet, store) {
+    .spread(function (client, order, products, payments, ewallet, store) {
       var mats = products.map(function(p) {
         return materials(p.id);
       });
@@ -159,12 +155,12 @@ function orderEmail(orderId) {
           mats.forEach(function(m, i) {
             products[i].material = m;
           });
-          return sendOrder(client, user, order, products, payments, ewallet, store);
+          return sendOrder(client, order, products, payments, ewallet, store);
         });
     });
 }
 
-function sendOrder(client, user, order, products, payments, ewallet, store) {
+function sendOrder(client, order, products, payments, ewallet, store) {
   var address = 'Número ' + order.U_Noexterior + ' Entre calle ' + order.U_Entrecalle + ' y calle ' + order.U_Ycalle + ' colonia ' + order.U_Colonia + ', ' + order.U_Mpio + ', ' + order.U_Estado + ', ' + order.U_CP;
   var emailBody = orderTemplate({
     client: {
@@ -174,11 +170,6 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
       cel: client.Cellular,
       references: '',
       balance: numeral(client.Balance).format('0,0.00'),
-    },
-    user: {
-      name: user.firstName + ' ' + user.lastName,
-      email: user.email,
-      phone: user.phone
     },
     order: {
       folio: order.folio,
@@ -208,7 +199,7 @@ function sendOrder(client, user, order, products, payments, ewallet, store) {
   var requestBody      = undefined;
   var mail             = new helper.Mail();
   var personalization  = new helper.Personalization();
-  var from             = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
+  var from             = new helper.Email('web@actualg.com', 'Web Actual Group');
   var clientEmail      = client.E_Mail;
   var to               = new helper.Email(clientEmail, client.CardName);
   var subject          = 'Confirmación de compra | Folio #' + order.folio;
@@ -390,18 +381,17 @@ function sendQuotation(client, user, quotation, products, payments, transfers, s
 }
 
 function freesaleEmail(orderId) {
-  return Order
+  return OrderWeb
     .findOne(orderId)
     .populate('Store')
     .populate('Details')
     .then(function(order) {
-      var user     = User.findOne({email: 'tugorez@gmail.com'});
       var store    = order.Store;
       var details  = order.Details.map(function(detail) { return detail.id; });
-      details      = OrderDetail.find(details).populate('Product');
-      return [user,  order, details, store];
+      details      = OrderDetailWeb.find(details).populate('Product');
+      return [ order, details, store];
     })
-    .spread(function(user, order, details, store) {
+    .spread(function(order, details, store) {
       var products = details
         .filter(function(detail) {
           return detail.isFreeSale;
@@ -425,9 +415,9 @@ function freesaleEmail(orderId) {
             image: baseURL + '/uploads/products/' + detail.Product.icon_filename
           };
         });
-      return [user, order, products, store];
+      return [order, products, store];
     })
-    .spread(function (user, order, products, store) {
+    .spread(function (order, products, store) {
       var mats = products.map(function(p) {
         return materials(p.id);
       });
@@ -437,20 +427,15 @@ function freesaleEmail(orderId) {
           mats.forEach(function(m, i) {
             products[i].material = m;
           });
-          return sendFreesale(user, order, products, store);
+          return sendFreesale(order, products, store);
         });
     });
 }
 
-function sendFreesale(user, order, products, store) {
+function sendFreesale(order, products, store) {
   console.log('orden ', order.folio, ' tiene ', products.length, ' articulos con freesale');
   if (!(products.length > 0)) return order;
   var emailBody = freesaleTemplate({
-    user: {
-      name: user.firstName + ' ' + user.lastName,
-      email: user.email,
-      phone: user.phone
-    },
     order: {
       id: order.id,
       folio: order.folio,

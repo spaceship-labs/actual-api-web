@@ -119,6 +119,7 @@ module.exports = {
     var query = {
       id: id,
     };
+    var userId = req.user ? req.user.id : false;
 
     if(req.user){
       query.Client = req.user.id;
@@ -131,7 +132,7 @@ module.exports = {
           return Promise.reject(new Error('Cotización no encontrada'));
         } 
         if(quotation.Client){
-          if(quotation.Client !== req.user.id){
+          if(quotation.Client !== userId){
             return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
           }              
         }
@@ -327,13 +328,13 @@ module.exports = {
   find: function(req, res){
     var form = req.params.all();
     form.filters = form.filters || {};
-    form.filters.User = req.user.id;
+    form.filters.Client = req.user.id;
 
     var model = 'quotationweb';
     var extraParams = {
       searchFields: ['folio','id'],
       selectFields: form.fields,
-      populateFields: ['Client']
+      filters: form.filters
     };
 
     Common.find(model, form, extraParams)
