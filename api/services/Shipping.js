@@ -13,7 +13,7 @@ module.exports = {
 
 function productShipping(product, storeWarehouse, options) {
   options = options || {};
-  var SAMPLE_ZIPCODE = 1000;
+  var SAMPLE_ZIPCODE = "01000";
 
   var defaultZipcodeQuery = {
     cp: SAMPLE_ZIPCODE,
