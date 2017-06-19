@@ -395,7 +395,7 @@ var paymentGroups = [
           {label:'Santander', value:'santander'}
         ],
         currency: 'mxn',
-        min:900,
+        min:800,
         needsVerification: true,
         web:true
       },

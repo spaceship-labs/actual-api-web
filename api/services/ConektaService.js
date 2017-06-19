@@ -82,6 +82,7 @@ function createOrder(orderId, payment, req) {
 function getOrderCharges(order, orderPayments){
 	orderPayments = orderPayments || [];
 	return orderPayments.map(function(payment){
+
 		var charge = {
 			//amount: convertToCents(payment.ammount),
 			amount: convertToCents(order.total),
@@ -91,6 +92,12 @@ function getOrderCharges(order, orderPayments){
 				token_id: payment.cardToken
 			}
 		};
+
+		if(payment.msi){
+			//charge.payment_method.type = 'default';
+			charge.payment_method.monthly_installments = payment.msi
+		}
+
 		return charge;
 	});
 }

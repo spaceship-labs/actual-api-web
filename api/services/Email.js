@@ -208,6 +208,10 @@ function sendOrder(client, order, products, payments, ewallet, store) {
   var toAux = new helper.Email('luisperez@spaceshiplabs.com', 'Luis Perez');
   personalization.addTo(toAux);
 
+  var toAux2 = new helper.Email('cpavia@actualg.com', 'Cesar Pavia');
+  personalization.addTo(toAux2);
+
+
   if(process.env.MODE === 'production'){
     sails.log.info('sending email order ', order.folio);
     personalization.addTo(to);

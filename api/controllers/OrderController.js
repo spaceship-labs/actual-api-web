@@ -75,6 +75,7 @@ module.exports = {
     var responseSent = false;
     var orderDetails;
 
+    sails.log.info('init ', new Date());
     OrderService.createFromQuotation2(form, req)
       /*
       .then(function(conektaOrder){
@@ -90,6 +91,8 @@ module.exports = {
     */
       .then(function(orderCreated){
         //RESPONSE
+        sails.log.info('end ', new Date());
+
         res.json(orderCreated);
         responseSent = true;
         order = orderCreated;
