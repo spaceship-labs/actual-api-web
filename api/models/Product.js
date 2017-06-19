@@ -49,6 +49,7 @@ module.exports = {
       Name:{type:'string'},
       Handle:{type:'string'},
       Description:{type:'text'},
+      deliveryType:{type:'string'},
       //CHECAR Model:{type:'string'},
 
       Brand:{ //BrandExtra

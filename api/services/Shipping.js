@@ -132,7 +132,14 @@ function buildShippingItem(stockItem, storeWarehouseId, zipcodeDelivery, product
 }
 
 function getZipcodeDays(product, zipcodeDelivery){
-  return zipcodeDelivery.dias_ent_bigticket;
+  var zipcodeDays;
+  if(product.deliveryType === 'softline'){
+    zipcodeDays = zipcodeDelivery.dias_ent_softline;
+  }else{
+    zipcodeDays = zipcodeDelivery.dias_ent_bigticket;
+  }
+
+  return zipcodeDays;
 }
 
 function filterStockItems(stockItems){
