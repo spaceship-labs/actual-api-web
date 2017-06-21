@@ -140,11 +140,11 @@ function getOrderCustomerAddress(addressId){
 			var customerAddress = {
 				receiver: contact.FirstName + ' ' + contact.LastName,
 				phone: "+5215555555555",
-				between_streets: "Street 1 and Street 2",
+				between_streets: "Placeholder streets",
 				//between_streets: contact.U_Entrecalle + ' y ' + contact.U_Ycalle,
 				address: {
-						street1: "Wallaaby",
-						//"street1": contact.Address,
+						street1: "Placeholder street",
+						//street1: contact.Address,
 						city: contact.U_Ciudad,
 						state: contact.U_Estado,
 						postal_code: contact.U_CP,

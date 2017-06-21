@@ -148,7 +148,7 @@ function createFromQuotation(form, req){
       }
       return [
           StockService.validateQuotationStockById(quotationId, req),
-          PaymentWeb.find({Quotation: quotationId}).sort('createdAt ASC')
+          PaymentWeb.find({QuotationWeb: quotationId}).sort('createdAt ASC')
         ];
     })
     .spread(function(isValidStock, quotationPayments){
@@ -163,6 +163,7 @@ function createFromQuotation(form, req){
       return calculator.updateQuotationTotals(quotationId, opts);
     })
     .then(function(updatedQuotationResult){
+
       return QuotationWeb.findOne({id: quotationId})
         .populate('Payments')
         .populate('Details')

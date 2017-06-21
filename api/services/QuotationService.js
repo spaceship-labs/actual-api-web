@@ -474,10 +474,12 @@ function Calculator(){
         if(packageRule){
 
           //Remove client promotions if there is a package rule 
-          promotions = PromotionService.removeSpecialClientPromotions(promotions);
+          //promotions = PromotionService.removeSpecialClientPromotions(promotions);
 
-          promotions = promotions.concat([packageRule]);
+          //promotions = promotions.concat([packageRule]);
 
+          //Take package promotion as unique
+          promotions = [packageRule];
         }
         return PromotionService.getPromotionWithHighestDiscount(promotions);
       });
