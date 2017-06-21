@@ -11,10 +11,9 @@ module.exports = {
       type:'integer'
     },
     OrderWeb: {
-      model: 'orderweb',
+      model: 'OrderWeb',
       required: true,
     }
   },
-  autoPK: false,
 };
 

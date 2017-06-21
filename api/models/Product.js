@@ -143,7 +143,7 @@ module.exports = {
       actual_home_merida:{type:'integer'},
       proyectos:{type:'integer'},
       actual_proyect:{type:'integer'},
-
+      excludeWeb:{type:'boolean'},
 
       //RELATIONS
       files: {

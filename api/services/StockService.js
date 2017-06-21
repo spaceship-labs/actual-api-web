@@ -200,7 +200,9 @@ function mapDetailsWithDeliveryDates(details, deliveryDates,activeStore){
 		if(
 				detailDelivery && 
 				(details[i].Product.Active === 'Y' || details[i].isFreeSale ) &&
-				checkIfProductHasSocietyCodes(details[i].Product, societyCodes) 
+				checkIfProductHasSocietyCodes(details[i].Product, societyCodes) &&
+				details[i].Product.excludeWeb &&
+				details[i].Product[activeStore.code] > 0
 		){
 			details[i].validStock = true;
 		}else{

@@ -45,7 +45,9 @@ module.exports = {
     }
 
     query.Active     = 'Y';
-    query[displayProperty] = true;           
+    query[displayProperty] = true;
+    query.excludeWeb = {'!=':true};
+               
     
     Search.getProductsByFilterValue(filtervalues)
       .then(function(result) {
@@ -169,7 +171,8 @@ module.exports = {
         
         query = _.extend(query,{
           id: productsIds,
-          Active: 'Y'
+          Active: 'Y',
+          excludeWeb: {'!=':true}
         });
 
         if(filterByStore && activeStore.code){
