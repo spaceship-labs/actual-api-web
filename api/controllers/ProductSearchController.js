@@ -15,13 +15,13 @@ module.exports = {
     var sortOption     = form.sortOption;
     var slowMovement   = form.slowMovement;
     var spotlight      = form.spotlight;
-    var displayProperty = SiteService.getSiteDisplayProperty(req); 
+    //var displayProperty = SiteService.getSiteDisplayProperty(req); 
 
     var populateImgs   = !_.isUndefined(form.populateImgs) ? form.populateImgs : true;    
     var filterByStore  = !_.isUndefined(form.filterByStore) ? form.filterByStore : true;    
     var productsIds    = [];
     var activeStore    = req.activeStore;
-    var societyCodes   = SiteService.getSocietyCodesByActiveStore(activeStore);
+    //var societyCodes   = SiteService.getSocietyCodesByActiveStore(activeStore);
 
     var paginate     = {
       page:  form.page  || 1,
@@ -34,7 +34,7 @@ module.exports = {
     query            = Search.getPriceQuery(query, priceField, minPrice, maxPrice);
     query            = Search.applyBrandsQuery(query, brandsIds);
     query            = Search.applyDiscountsQuery(query, discounts);
-    query            = Search.applySocietiesQuery(query, societyCodes); 
+    //query            = Search.applySocietiesQuery(query, societyCodes); 
 
     if(spotlight){
       query = Search.applySpotlightQuery(query);
@@ -45,9 +45,10 @@ module.exports = {
     }
 
     query.Active     = 'Y';
-    query[displayProperty] = true;
-    query.excludeWeb = {'!=':true};
-               
+    //query[displayProperty] = true;
+    //query.excludeWeb = {'!=':true};
+    query.excludeWeb = null;
+
     
     Search.getProductsByFilterValue(filtervalues)
       .then(function(result) {
@@ -119,20 +120,20 @@ module.exports = {
     var sortOption     = form.sortOption;
     var slowMovement   = form.slowMovement;
     var spotlight      = form.spotlight;
-    var displayProperty = SiteService.getSiteDisplayProperty(req); 
+    //var displayProperty = SiteService.getSiteDisplayProperty(req); 
 
     var query          = {};
     var productsIds    = [];
     var activeStore    = req.activeStore;
     var priceField     = 'DiscountPrice';
-    var societyCodes   = SiteService.getSocietyCodesByActiveStore(activeStore);
+    //var societyCodes   = SiteService.getSocietyCodesByActiveStore(activeStore);
 
 
     query = Search.getPriceQuery(query, priceField, minPrice, maxPrice);
     query = Search.applyBrandsQuery(query, brandsIds);
     query = Search.applyDiscountsQuery(query, discounts);
-    query = Search.applySocietiesQuery(query, societyCodes);            
-    query[displayProperty] = true;
+    //query = Search.applySocietiesQuery(query, societyCodes);            
+    //query[displayProperty] = true;
 
     if(spotlight){
       query = Search.applySpotlightQuery(query);
@@ -172,7 +173,7 @@ module.exports = {
         query = _.extend(query,{
           id: productsIds,
           Active: 'Y',
-          excludeWeb: {'!=':true}
+          excludeWeb: null
         });
 
         if(filterByStore && activeStore.code){
