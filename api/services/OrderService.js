@@ -11,7 +11,8 @@ module.exports = {
   createFromQuotation: createFromQuotation,
   createFromQuotation2: createFromQuotation2,
   getCountByUser: getCountByUser,
-  getTotalsByUser: getTotalsByUser
+  getTotalsByUser: getTotalsByUser,
+  getGroupByQuotationPayments: getGroupByQuotationPayments
 };
 
 
@@ -202,7 +203,7 @@ function createFromQuotation(form, req){
         totalProducts: quotation.totalProducts,
         Client: quotation.Client.id,
         CardName: quotation.Client.CardName,
-        Quotation: quotationId,
+        QuotationWeb: quotationId,
         Payments: paymentsIds,
         ClientBalanceRecords: quotation.ClientBalanceRecords,
         CardCode: quotation.Client.CardCode,

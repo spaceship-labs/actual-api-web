@@ -500,7 +500,7 @@ module.exports = {
     var form = req.allParams();
     var quotationId = form.id;
     var query = {
-      Quotation:quotationId
+      QuotationWeb:quotationId
     };
 
     if(req.user){

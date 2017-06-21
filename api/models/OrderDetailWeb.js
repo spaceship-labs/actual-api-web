@@ -9,6 +9,18 @@ module.exports = {
     subtotal2: 'float', // includes discounts but not big ticket neither family and friends
     total: 'float',
     totalPg1: 'float',
+    totalPg2: 'float',
+    totalPg3: 'float',
+    totalPg4: 'float',
+    totalPg5: 'float',
+
+    discountPg1: 'float',
+    discountPg2: 'float',
+    discountPg3: 'float',
+    discountPg4: 'float',
+    discountPg5: 'float',
+
+
     financingCostPercentage: 'float',
     discountPercentPromos: 'float', //by unit (does not include big ticket or FF discount)    
     discountPercent: 'float', //by unit (includes big ticket discount)

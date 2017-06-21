@@ -1,9 +1,9 @@
 module.exports = {
 	attributes:{
-	  User:{
-	    model: 'UserWeb'
+	  Client:{
+	    model: 'Client'
 	  },
-	  Order: {
+	  OrderWeb: {
 	    model:'OrderWeb'
 	  },
 	  url:{

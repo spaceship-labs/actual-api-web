@@ -192,6 +192,16 @@ function Calculator(){
       subtotal2:0,
       total:0,
       totalPg1: 0,
+      totalPg2: 0,
+      totalPg3: 0,
+      totalPg4: 0,
+      totalPg5: 0,
+      discountPg1: 0,
+      discountPg2: 0,
+      discountPg3: 0,
+      discountPg4: 0,
+      discountPg5: 0,
+
       discount:0,
       totalProducts: 0,
       paymentGroup: options.paymentGroup,
@@ -199,6 +209,17 @@ function Calculator(){
 
     processedDetails.forEach(function(pd){
       totals.totalPg1      += pd.totalPg1;
+      totals.totalPg2      += pd.totalPg2;
+      totals.totalPg3      += pd.totalPg3;
+      totals.totalPg4      += pd.totalPg4;
+      totals.totalPg5      += pd.totalPg5;
+
+      totals.discountPg1      += (pd.subtotal - pd.totalPg1);
+      totals.discountPg2      += (pd.subtotal - pd.totalPg2);
+      totals.discountPg3      += (pd.subtotal - pd.totalPg3);
+      totals.discountPg4      += (pd.subtotal - pd.totalPg4);
+      totals.discountPg5      += (pd.subtotal - pd.totalPg5);
+
       totals.total         += pd.total;
       totals.subtotal      += pd.subtotal;
       totals.subtotal2     += pd.subtotal2;
@@ -403,7 +424,7 @@ function Calculator(){
           financingCostPercentage     : financingCostPercentage,
           unitPrice                   : unitPrice,
           unitPriceWithDiscount       : unitPriceWithDiscount,
-          immediateDelivery           : Shipping.isDateImmediateDelivery(detail.shipDate)
+          immediateDelivery           : Shipping.isDateImmediateDelivery(detail.shipDate),
         };
 
         if(mainPromo.id && !mainPromo.PromotionPackage && !mainPromo.clientDiscountReference){
@@ -419,8 +440,28 @@ function Calculator(){
           detailTotals.clientDiscountReference = mainPromo.clientDiscountReference;
         }
 
+        var totalsGroups = calculateAllTotalsGroups(mainPromo, unitPrice, quantity);
+        //sails.log.info('totalsGroups', totalsGroups);
+        detailTotals = _.extend(detailTotals, totalsGroups);
+
         return detailTotals;
       });
+  }
+
+  function calculateAllTotalsGroups(mainPromo, unitPrice, quantity){
+
+    var totalsGroups = _.reduce([1,2,3,4,5], function(acum,group){
+      var _discountKey = getDiscountKey(group);
+      var _discountPercent = mainPromo[_discountKey];
+      var _unitPriceWithDiscount = calculateAfterDiscount(unitPrice, _discountPercent);
+      var totalPg = _unitPriceWithDiscount * quantity;
+      var subtotalPg = unitPrice * quantity;
+      acum['totalPg' + group] = totalPg;
+      acum['discountPg' + group] = totalPg - subtotalPg;
+      return acum;
+    },{});
+
+    return totalsGroups;
   }
 
   function calculateFinancingPercentage(totalPg1, total){

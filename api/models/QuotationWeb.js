@@ -48,6 +48,18 @@ module.exports = {
     folio:{type:'string'},
     total:{type:'float'},
     totalPg1: {type:'float'},
+    totalPg2: {type:'float'},
+    totalPg3: {type:'float'},
+    totalPg4: {type:'float'},
+    totalPg5: {type:'float'},
+
+    discountPg1: {type:'float'},
+    discountPg2: {type:'float'},
+    discountPg3: {type:'float'},
+    discountPg4: {type:'float'},
+    discountPg5: {type:'float'},
+
+
     ammountPaidPg1: {type:'float'},
     financingCostPercentage: 'float',    
     subtotal: {type:'float'},

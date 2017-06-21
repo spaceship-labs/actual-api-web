@@ -62,8 +62,8 @@ function createOrderInvoice(orderId) {
         errInvoice = err;
 
         var log = {
-          User: orderFound ? orderFound.User : null,
-          Order: orderId,
+          Client: orderFound.Client.id,
+          OrderWeb: orderId,
           Store: orderFound ? orderFound.Store : null,
           responseData: JSON.stringify(errInvoice),
           isError: true
@@ -156,8 +156,8 @@ function createInvoice(data) {
   };
 
   var log = {
-    User: orderObject.User,
-    Order: orderObject.id,
+    Client: orderObject.client.id,
+    OrderWeb: orderObject.id,
     Store: orderObject.Store,
     requestData: JSON.stringify(data),
     url: options.uri

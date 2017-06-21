@@ -43,8 +43,9 @@ function createOrder(orderId, payment, req) {
 			return promises;
 		})
 		.spread(function(customerInfo, customerAddress, lineItems){
-			var discountLine = getOrderDiscountLine(order);
-			var charges = getOrderCharges(order, [payment]);
+			var payments = [payment];
+			var charges = getOrderCharges(order, payments);
+			var discountLine = getOrderDiscountLine(order, payments);
 
 			return new Promise(function(resolve, reject){
 
@@ -81,11 +82,15 @@ function createOrder(orderId, payment, req) {
 
 function getOrderCharges(order, orderPayments){
 	orderPayments = orderPayments || [];
+	var paymentGroup = OrderService.getGroupByQuotationPayments(orderPayments);
+	
 	return orderPayments.map(function(payment){
+
+		var amount = order['totalPg' + paymentGroup];
 
 		var charge = {
 			//amount: convertToCents(payment.ammount),
-			amount: convertToCents(order.total),
+			amount: convertToCents(amount),
 			token_id: payment.cardToken,
 			payment_method:{
 				type: CONEKTA_PAYMENT_TYPE_CARD,
@@ -102,14 +107,18 @@ function getOrderCharges(order, orderPayments){
 	});
 }
 
-function getOrderDiscountLine(order){
+function getOrderDiscountLine(order, payments){
+	var paymentGroup = OrderService.getGroupByQuotationPayments(payments);
+	var discount = order['discountPg' + paymentGroup];
+
 	var discountLine = {
 		code: 'Descuento general',
 		type: 'campaign',
-		amount: convertToCents(order.discount || 0)
+		amount: convertToCents(discount || 0)
 	};
 	return discountLine;
 }
+
 
 function getOrderCustomerInfo(clientId){
 	return Client.findOne({id: clientId})

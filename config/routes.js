@@ -312,6 +312,11 @@ module.exports.routes = {
     action:'find'
   },
 
+  '/order/invoicelogs/:orderId':{
+    controller:'order',
+    action:'getInvoicesLogs'
+  },   
+
   '/order/createfromquotation/:quotationId':{
     controller:'order',
     action:'createFromQuotation',

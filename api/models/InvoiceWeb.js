@@ -7,12 +7,10 @@
 
 module.exports = {
   attributes: {
-    id: {
-      type: 'integer',
-      unique: true,
-      primaryKey: true,
+    alegraId: {
+      type:'integer'
     },
-    order: {
+    OrderWeb: {
       model: 'orderweb',
       required: true,
     }

@@ -126,6 +126,20 @@ module.exports = {
     
   },
 
+  getInvoicesLogs: function(req, res){
+    var form = req.params.all();
+    var orderId = form.orderId;
+
+    AlegraLogWeb.find({OrderWeb: orderId})
+      .then(function(logs){
+        res.json(logs);
+      })
+      .catch(function(err){
+        console.log('err' , err);
+        res.negotiate(err);
+      });
+  },  
+
   getCountByUser: function(req, res){
     var form = req.params.all();
     OrderService.getCountByUser(form)

@@ -13,6 +13,18 @@ module.exports = {
     ammountPaidPg1:{type:'float'},
     total:{type:'float'},
     totalPg1: {type:'float'},
+    totalPg2: {type:'float'},
+    totalPg3: {type:'float'},
+    totalPg4: {type:'float'},
+    totalPg5: {type:'float'},
+
+    discountPg1: {type:'float'},
+    discountPg2: {type:'float'},
+    discountPg3: {type:'float'},
+    discountPg4: {type:'float'},
+    discountPg5: {type:'float'},
+
+
     subtotal:{type:'float'},
     discount:{type:'float'},
     currency:{type:'string'},
@@ -22,7 +34,7 @@ module.exports = {
       type:'string',
       enum:['lost','pending','on-delivery','minimum-paid','paid']
     },
-    Quotation:{
+    QuotationWeb:{
       model:'QuotationWeb',
       unique:true
     },
