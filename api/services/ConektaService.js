@@ -26,6 +26,8 @@ function createOrder(orderId, payment, req) {
 	sails.log.info('api_key', conekta.api_key);
 	var order;
 
+	return Promise.reject(new Error("Break"));
+
 	return QuotationWeb.findOne({id: orderId})
 		.then(function(orderFound){
 			order = orderFound;

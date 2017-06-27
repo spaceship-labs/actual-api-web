@@ -126,7 +126,7 @@ function buildShippingItem(stockItem, storeWarehouseId, zipcodeDelivery, product
         company: storeWarehouseId,
         companyFrom: stockItem.warehouseId,
         itemCode: stockItem.ItemCode,
-        ImmediateDelivery: stockItem.ImmediateDelivery        
+        ImmediateDelivery: !_.isUndefined(stockItem.ImmediateDelivery) ? stockItem.ImmediateDelivery : false        
       };      
     });
 }

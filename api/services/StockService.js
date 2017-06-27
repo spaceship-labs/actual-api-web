@@ -201,7 +201,7 @@ function mapDetailsWithDeliveryDates(details, deliveryDates,activeStore){
 				detailDelivery && 
 				(details[i].Product.Active === 'Y' || details[i].isFreeSale ) &&
 				checkIfProductHasSocietyCodes(details[i].Product, societyCodes) &&
-				details[i].Product.excludeWeb &&
+				!details[i].Product.excludeWeb &&
 				details[i].Product[activeStore.code] > 0
 		){
 			details[i].validStock = true;
@@ -231,7 +231,6 @@ function findValidDelivery(detail,deliveryDates){
 		var detailShipDate = moment(detail.originalShipDate).startOf('day').format('DD-MM-YYYY');
 		var deliveryDate = moment(delivery.date).startOf('day').format('DD-MM-YYYY');
 		var isValidDelivery;
-
 
 		if( detailShipDate === deliveryDate && 
 			  detail.quantity <= delivery.available &&

@@ -154,6 +154,7 @@ module.exports = {
     var query = {
       id: id
     };
+    var userId = req.user ? req.user.id : false;
 
     if(req.user){
       query.Client = req.user.id;
@@ -184,8 +185,8 @@ module.exports = {
           return Promise.reject(new Error('Cotización no encontrada'));
         }
   
-        if(quotation.User){
-          if( !req.user ||  (quotation.User.id !== req.user.id) ){
+        if(quotation.Client){
+          if(quotation.Client.id !== userId){
             return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
           }        
         }
