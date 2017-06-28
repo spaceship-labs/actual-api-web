@@ -9,12 +9,11 @@ module.exports = {
     var form        = req.params.all();
     var id          = form.id;
     var populate = form.populate;
-    //var clientFound = false;
     Client.findOne({id:id}).then(function(client){
       if(!client){
         return Promise.reject(new Error('Cliente no encontrado'));
       }
-      
+
       if(populate){
         return ClientService.populateClientRelations(client);
       }else{
@@ -64,12 +63,12 @@ module.exports = {
         return res.negotiate(err);
       }
     }
-    
+
     if(form.fiscalAddress && ClientService.isValidFiscalAddress(form.fiscalAddress)){
       fiscalAddress  = _.clone(form.fiscalAddress);
       fiscalAddress  = ClientService.mapFiscalFields(fiscalAddress);
     }
-   
+
     delete form.contacts;
     delete form.fiscalAddress;
 
@@ -108,7 +107,7 @@ module.exports = {
           }
           return Promise.reject(new Error(err));
         }
-        
+
         form.CardCode     = sapData.result;
         form.BirthDate    = moment(form.BirthDate).toDate();
         var contactCodes  = sapData.pers;
@@ -147,14 +146,14 @@ module.exports = {
           return new Promise(function(resolve, reject){
             resolve();
           });
-        
+
         }
 
       })
       .spread(function(contactsCreated, fiscalAddressCreated){
         sails.log.info('contactsCreated or fiscalAddressCreated', contactsCreated);
         sails.log.info('fiscalAddressCreated', fiscalAddressCreated);
-        
+
         if(contactsCreated && contacts){
           createdClient.Contacts = contactsCreated;
         }
@@ -253,8 +252,8 @@ module.exports = {
             err = defualtErrMsg;
           }
           return Promise.reject(new Error(err));
-        } 
-        var CntctCode  = sapData[0].result;       
+        }
+        var CntctCode  = sapData[0].result;
         form.CntctCode = parseInt(CntctCode);
         return ClientContact.create(form);
       })
@@ -265,7 +264,7 @@ module.exports = {
         console.log(err);
         res.negotiate(err);
       });
-  },  
+  },
 
   updateContact: function(req, res){
     var form = req.params.all();
@@ -297,7 +296,7 @@ module.exports = {
             err = defualtErrMsg;
           }
           return Promise.reject(new Error(err));
-        } 
+        }
 
         return ClientContact.update({CntctCode: contactCode}, form);
       })
@@ -383,4 +382,3 @@ module.exports = {
   },
 
 };
-
