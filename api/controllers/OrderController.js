@@ -48,19 +48,19 @@ module.exports = {
       .populate('Address')
       .populate('Payments')
       .populate('Store')
-      .populate('OrdersSap')
-      .populate('SapOrderConnectionLog')
+      .populate('OrdersSapWeb')
+      .populate('SapOrderConnectionLogWeb')
       .then(function(foundOrder){
         order = foundOrder.toObject();
-        var sapReferencesIds = order.OrdersSap.map(function(ref){
+        var sapReferencesIds = order.OrdersSapWeb.map(function(ref){
           return ref.id;
         });
         return OrderSapWeb.find(sapReferencesIds)
-          .populate('PaymentsSap')
-          .populate('ProductSeries');
+          .populate('PaymentsSapWeb')
+          .populate('ProductSeriesWeb');
       })
-      .then(function(ordersSap){
-        order.OrdersSap = ordersSap;
+      .then(function(ordersSapWeb){
+        order.OrdersSapWeb = ordersSapWeb;
         res.json(order);
       })
       .catch(function(err){
@@ -76,27 +76,13 @@ module.exports = {
     var orderDetails;
 
     sails.log.info('init ', new Date());
-    OrderService.createFromQuotation2(form, req)
-      /*
-      .then(function(conektaOrder){
-        res.json(conektaOrder);
-      })
-      .catch(function(err){
-        console.log('err', err);
-        res.negotiate(err);
-      });
-      */
-    /*
     OrderService.createFromQuotation(form, req)
-    */
       .then(function(orderCreated){
         //RESPONSE
         sails.log.info('end ', new Date());
 
         res.json(orderCreated);
         responseSent = true;
-        order = orderCreated;
-        orderDetails = orderCreated.Details;
 
         //STARTS EMAIL SENDING PROCESS
         return OrderWeb.findOne({id:orderCreated.id})
@@ -104,15 +90,22 @@ module.exports = {
           .populate('Payments')
           .populate('Address');
       })
-      .then(function(order){
+      .then(function(_order){
+        order = _order;
+        return OrderDetailWeb.find({OrderWeb: order.id}).populate('Product');
+      })
+      .then(function(_orderDetails){
+        orderDetails = _orderDetails;
+
         return [
           Email.sendOrderConfirmation(order.id),
           Email.sendFreesale(order.id),
           InvoiceService.createOrderInvoice(order.id),
+          OrderService.relateOrderToSap(order, orderDetails, req),
           StockService.syncOrderDetailsProducts(orderDetails)
         ];
       })
-      .spread(function(orderSent, freesaleSent, invoice, productsSynced){
+      .spread(function(orderSent, freesaleSent, invoice, sapOrderRelated,productsSynced){
         console.log('Email de orden enviado: ' + order.folio);
         console.log('productsSynced', productsSynced);
         console.log('generated invoice', invoice);
@@ -124,6 +117,37 @@ module.exports = {
         }
       });
     
+  },
+
+  generateSapOrder: function(req, res){
+    var form = req.allParams();
+    var id = form.id;
+    var promises = [
+      OrderWeb.findOne({id: id})
+        .populate('Client')
+        .populate('Address')
+        .populate('Payments'),
+      OrderDetailWeb.find({OrderWeb: id}).populate('Product')
+    ];
+
+    Promise.all(promises)
+      .then(function(results){
+        var order = results[0];
+        var orderDetails = results[1];
+
+        if(!order){
+          return Promise.reject(new Error('No se encontro el pedido'));
+        }
+
+        return OrderService.relateOrderToSap(order, orderDetails, req);
+      })
+      .then(function(){
+        res.ok();
+      })
+      .catch(function(err){
+        console.log('err', err);
+        res.negotiate(err);
+      });
   },
 
   getInvoicesLogs: function(req, res){

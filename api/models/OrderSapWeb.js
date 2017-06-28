@@ -3,16 +3,16 @@ module.exports = {
 		invoiceSap: 'string',
 		document: 'string',
 
-		Order:{
+		OrderWeb:{
 			model:'OrderWeb'
 		},
-		PaymentsSap:{
+		PaymentsSapWeb:{
 			collection:'PaymentSapWeb',
-			via:'OrderSap'
+			via:'OrderSapWeb'
 		},
-		ProductSeries:{
+		ProductSeriesWeb:{
 			collection:'ProductSerieWeb',
-			via:'OrderSap'
+			via:'OrderSapWeb'
 		}
 	}
 };

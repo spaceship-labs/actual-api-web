@@ -484,8 +484,7 @@ module.exports = {
     var form = req.allParams();
     var quotationId = form.id;
     var query = {
-      Quotation: quotationId,
-      User: req.user.id
+      QuotationWeb: quotationId
     };
     PaymentWeb.find(query)
       .then(function(payments){

@@ -9,10 +9,10 @@ var BALANCE_SAP_TYPE = 'Balance';
 
 module.exports = {
   createFromQuotation: createFromQuotation,
-  createFromQuotation2: createFromQuotation2,
   getCountByUser: getCountByUser,
   getTotalsByUser: getTotalsByUser,
-  getGroupByQuotationPayments: getGroupByQuotationPayments
+  getGroupByQuotationPayments: getGroupByQuotationPayments,
+  relateOrderToSap: relateOrderToSap
 };
 
 
@@ -100,51 +100,87 @@ function getGroupByQuotationPayments(payments){
   return group;
 }
 
-function createFromQuotation2(form, req){
+function createFromQuotation(form, req){
   var quotationId = form.quotationId;
   var payment = form.payment;
   var conektaOrder;
 
+  var promises = [
+    ConektaOrder.findOne({QuotationWeb: quotationId}),
+    PaymentWeb.findOne({QuotationWeb:quotationId})
+  ];
+
+  return Promise.all(promises)
+    .then(function(results){
+
+      var conektaOrderFound = results[0];
+      var paymentFound = results[0];
+      var nextPromise;
+      var step;
+
+      if(!conektaOrderFound && !paymentFound){
+        return createConektaOrderAndPayment(quotationId, payment, req)
+          .then(function(_conektaOrder){
+            form.conektaOrder = _conektaOrder;
+            return createOrder(form, req);             
+          });
+      }
+
+      else if(conektaOrderFound && !paymentFound){
+        console.log('creando el pago');
+        return PaymentService.addPayment(form.payment, quotationId, req)
+          .then(function(paymentCreated){
+            form.conektaOrder = conektaOrderFound;
+            return createOrder(form, req);
+          });
+      }
+
+      else{
+        sails.log.info('directo a createorder');
+        form.conektaOrder = conektaOrderFound;
+        nextPromise = createOrder(form, req);        
+      }
+    });
+}
+
+function createConektaOrderAndPayment(quotationId, payment, req){
+  var conektaOrder;
   return ConektaService.createOrder(quotationId, payment, req)
     .then(function(conektaOrder){
-      sails.log.info('conektaOrder', conektaOrder);
       return conektaOrder;
     })
     .then(function(_conektaOrder){
       conektaOrder = _conektaOrder;
-      return PaymentService.addPayment(form.payment, quotationId, req);
+      payment.stockValidated = true;
+      return PaymentService.addPayment(payment, quotationId, req);
     })
-    .then(function(paymentCreted){
-      console.log('paymentcreated', paymentCreted);
-      form.conektaOrder = conektaOrder;
-      return createFromQuotation(form, req);
-    })
+    .then(function(paymentCreated){
+      console.log('paymentcreated', paymentCreated);
+      return conektaOrder;
+    });
 }
 
-function createFromQuotation(form, req){
+function createOrder(form, req){
+  //return Promise.reject(new Error("Break"));
+
   var quotationId  = form.quotationId;
-  var opts         = {
+  var options         = {
     updateDetails: true,
     currentStoreId: req.activeStore.id
   };
   var orderCreated = false;
   var SlpCode      = -1;
   var currentStore = req.activeStore;
-  var sapResponse;
-  var sapResult;
   var quotation;
-  var orderParams;
+  var orderToCreate;
   var orderDetails;
-  var sapLog;
 
   //Validating if quotation doesnt have an order assigned
-  return OrderWeb.findOne({Quotation: quotationId})
+  return OrderWeb.findOne({QuotationWeb: quotationId})
     .then(function(order){
       if(order){
-        var frontUrl = process.env.baseURLFRONT || 'http://ventas.miactual.com';
-        var orderUrl = frontUrl + '/checkout/order/' + order.id;
         return Promise.reject(
-          new Error('Ya se ha creado un pedido sobre esta cotización : ' + orderUrl)
+          new Error('Ya se ha creado un pedido sobre esta cotización')
         );
       }
       return [
@@ -158,10 +194,9 @@ function createFromQuotation(form, req){
           new Error('Inventario no suficiente para crear la orden')
         );
       }
-      opts.paymentGroup = getGroupByQuotationPayments(quotationPayments);
-
+      options.paymentGroup = getGroupByQuotationPayments(quotationPayments);
       var calculator = QuotationService.Calculator();
-      return calculator.updateQuotationTotals(quotationId, opts);
+      return calculator.updateQuotationTotals(quotationId, options);
     })
     .then(function(updatedQuotationResult){
 
@@ -169,17 +204,14 @@ function createFromQuotation(form, req){
         .populate('Payments')
         .populate('Details')
         .populate('Address')
-        .populate('User')
         .populate('Client');
     })
     .then(function(quotationFound){
       quotation = quotationFound;
 
-      if(quotation.Order){
-        var frontUrl = process.env.baseURLFRONT || 'http://ventas.miactual.com';
-        var orderUrl = frontUrl + '/checkout/order/' + quotation.Order;
+      if(quotation.OrderWeb){
         return Promise.reject(
-          new Error('Ya se ha creado un pedido sobre esta cotización : ' + orderUrl)
+          new Error('Ya se ha creado un pedido sobre esta cotización')
         );
       }
 
@@ -192,45 +224,39 @@ function createFromQuotation(form, req){
       SlpCode = -1;
 
       var paymentsIds = quotation.Payments.map(function(p){return p.id;});
-      orderParams = {
-        source: quotation.source,
+      orderToCreate = {
         ammountPaid: quotation.ammountPaid,
-        total: quotation.total,
-        subtotal: quotation.subtotal,
-        discount: quotation.discount,
-        paymentGroup: opts.paymentGroup,
-        groupCode: req.activeStore.GroupCode,
-        totalProducts: quotation.totalProducts,
-        Client: quotation.Client.id,
-        CardName: quotation.Client.CardName,
-        QuotationWeb: quotationId,
-        Payments: paymentsIds,
-        ClientBalanceRecords: quotation.ClientBalanceRecords,
         CardCode: quotation.Client.CardCode,
+        CardName: quotation.Client.CardName,
+        Client: quotation.Client.id,
+        discount: quotation.discount,
+        paymentGroup: options.paymentGroup,
+        Payments: paymentsIds,
+        QuotationWeb: quotationId,
         SlpCode: SlpCode,
-        Store: opts.currentStoreId,
-        ConektaOrderId: form.conektaOrder.id,
-        ConektaPaymentStatus: form.conektaOrder.payment_status
-        //Store: user.activeStore
+        source: quotation.source,
+        Store: options.currentStoreId,
+        subtotal: quotation.subtotal,
+        total: quotation.total,
+        totalProducts: quotation.totalProducts,
       };
 
-      var minPaidPercentage = quotation.minPaidPercentage || 100;
-      
+      var minPaidPercentage = 100;
       if( getPaidPercentage(quotation.ammountPaid, quotation.total) < minPaidPercentage){
         return Promise.reject(
           new Error('No se ha pagado la cantidad minima de la orden')
         );
       }
       if(minPaidPercentage < 100){
-        orderParams.status = 'minimum-paid';
+        orderToCreate.status = 'minimum-paid';
       }else{
-        orderParams.status = 'paid';
+        orderToCreate.status = 'pending-sap';
       }
       
       if(quotation.Address){
-        orderParams.Address = _.clone(quotation.Address.id);
-        orderParams.address = _.clone(quotation.Address.Address);
-        orderParams.CntctCode = _.clone(quotation.Address.CntctCode);
+        orderToCreate.Address = _.clone(quotation.Address.id);
+        orderToCreate.address = _.clone(quotation.Address.Address);
+        orderToCreate.CntctCode = _.clone(quotation.Address.CntctCode);
 
         delete quotation.Address.id;
         delete quotation.Address.Address; //Address field in person contact
@@ -238,61 +264,15 @@ function createFromQuotation(form, req){
         delete quotation.Address.updatedAt;
         delete quotation.Address.CntctCode;
         delete quotation.Address.CardCode;
-        orderParams = _.extend(orderParams,quotation.Address);
+        orderToCreate = _.extend(orderToCreate,quotation.Address);
       }
 
-      return [
-        QuotationDetailWeb.find({QuotationWeb: quotation.id})
-          .populate('Product'),
-        Site.findOne({handle:'actual-group'})
-      ];
-    })
-    .spread(function(quotationDetails, site){
-      return SapService.createSaleOrder({
-        quotationId:      quotationId,
-        groupCode:        orderParams.groupCode,
-        cardCode:         orderParams.CardCode,
-        slpCode:          SlpCode,
-        cntctCode:        orderParams.CntctCode,
-        payments:         quotation.Payments,
-        exchangeRate:     site.exchangeRate,
-        currentStore:     currentStore,
-        quotationDetails: quotationDetails
-      });
-    })
-    .then(function(sapResponseAux){
-      sapResponse = sapResponseAux.response;
-      var sapEndpoint = decodeURIComponent(sapResponseAux.endPoint);
-      sails.log.info('createSaleOrder response', sapResponse);
-      var log = {
-        content: sapEndpoint + '\n' +  JSON.stringify(sapResponse),
-        Client   : req.user.id,
-        Store  : opts.currentStoreId,
-        QuotationWeb: quotationId
-      };
-      return SapOrderConnectionLogWeb.create(log);
-    })  
-    .then(function(sapLogCreated){
-      sapLog = sapLogCreated;
+      orderToCreate.ConektaOrderId = form.conektaOrder.conektaId;
+      orderToCreate.ConektaPaymentStatus = form.conektaOrder.payment_status;      
+      orderToCreate.ConektaOrder = form.conektaOrder;
+      orderToCreate.conektaToken = form.conektaOrder.conektaId;
 
-      sapResult = JSON.parse(sapResponse.value);
-      var isValidSapResponse = isValidOrderCreated(sapResponse, sapResult, quotation.Payments);
-      if( isValidSapResponse.error ){
-        var defaultErrMsg = 'Error en la respuesta de SAP';
-        var errorStr = isValidSapResponse.error || defaultErrMsg;
-        if(errorStr === true){
-          errorStr = defaultErrMsg;
-        }
-        return Promise.reject(new Error(errorStr));
-      }
-      orderParams.documents = sapResult;
-      orderParams.SapOrderConnectionLogWeb = sapLog.id;
-      form.conektaOrder.conektaId = _.clone(form.conektaOrder.id);
-      delete form.conektaOrder.id;
-      orderParams.ConektaOrder = form.conektaOrder;
-      orderParams.conektaToken = form.conektaOrder.conektaId;
-
-      return OrderWeb.create(orderParams);
+      return OrderWeb.create(orderToCreate);
     })
     .then(function(created){
       orderCreated = created;
@@ -308,41 +288,80 @@ function createFromQuotation(form, req){
       return orderFound.save();
     })
     .then(function(){
-      return OrderDetailWeb.find({OrderWeb: orderCreated.id})
-        .populate('Product')
-        .populate('shipCompanyFrom');
-    })
-    .then(function(orderDetailsFound){
-      orderDetails = orderDetailsFound;
-      //return StockService.substractProductsStock(orderDetails);
-      
       var updateFields = {
         OrderWeb: orderCreated.id,
         status: 'to-order',
         isClosed: true,
         isClosedReason: 'Order created'
       };
-      return [
-        QuotationWeb.update({id:quotation.id} , updateFields),
-        saveSapReferences(sapResult, orderCreated, orderDetails)
-      ];
+
+      return QuotationWeb.update({id:quotation.id} , updateFields);
     })
-    .spread(function(quotationUpdated, sapOrdersReference){
-      var params = {
-        details: quotation.Details,
-        storeId: opts.currentStoreId,
-        orderId: orderCreated.id,
-        quotationId: quotation.id,
-        client: quotation.Client
-      };
-      /*
-      return processEwalletBalance(params);
-    })  
-    .then(function(){
-    */
+    .then(function(quotationUpdated){
       orderCreated = orderCreated.toObject();
       orderCreated.Details = orderDetails;
       return orderCreated;
+    });
+}
+
+//@params
+//order: Populated with:
+// *Client
+// *Address
+// *Payments
+
+//orderDetails: Populated with:
+// *Product
+function relateOrderToSap(order, orderDetails,req){
+  var SlpCode = -1;
+
+  return Site.findOne({handle:'actual-group'})
+    .then(function(site){
+
+      var sapOrderParams = {
+        quotationId:      order.QuotationWeb,
+        groupCode:        req.activeStore.GroupCode,
+        cardCode:         order.Client.CardCode,
+        slpCode:          SlpCode,
+        cntctCode:        order.Address.CntctCode,
+        payments:         order.Payments,
+        exchangeRate:     site.exchangeRate,
+        currentStore:     req.activeStore,
+        quotationDetails: orderDetails
+      };
+
+      return SapService.createSaleOrder(sapOrderParams);
+    })
+    .then(function(sapResponseAux){
+      sapResponse = sapResponseAux.response;
+      var sapEndpoint = decodeURIComponent(sapResponseAux.endPoint);
+      sails.log.info('createSaleOrder response', sapResponse);
+      var log = {
+        content: sapEndpoint + '\n' +  JSON.stringify(sapResponse),
+        Client   : req.user.id,
+        Store  : req.activeStore.id,
+        QuotationWeb: order.QuotationWeb
+      };
+      return SapOrderConnectionLogWeb.create(log);
+    })  
+    .then(function(sapLogCreated){
+      sapLog = sapLogCreated;
+
+      sapResult = JSON.parse(sapResponse.value);
+      var isValidSapResponse = isValidOrderCreated(sapResponse, sapResult, order.Payments);
+      if( isValidSapResponse.error ){
+        var defaultErrMsg = 'Error en la respuesta de SAP';
+        var errorStr = isValidSapResponse.error || defaultErrMsg;
+        if(errorStr === true){
+          errorStr = defaultErrMsg;
+        }
+        return Promise.reject(new Error(errorStr));
+      }
+      
+      return saveOrderSapReferences(sapResult, order, orderDetails);
+    })
+    .then(function(){
+      return OrderWeb.update({id: order.id},{status:'completed'});
     });
 }
 
@@ -457,7 +476,7 @@ function everyPaymentIsClientBalanceOrCredit(paymentsToCreate){
 }
 
 
-function saveSapReferences(sapResult, order, orderDetails){
+function saveOrderSapReferences(sapResult, order, orderDetails){
   var clientBalance = parseFloat(extractBalanceFromSapResult(sapResult));
   var clientId = order.Client.id || order.Client;
 
@@ -469,13 +488,13 @@ function saveSapReferences(sapResult, order, orderDetails){
   var ordersSap = sapResult.map(function(orderSap){
 
     var orderSapReference = {
-      Order: order.id,
+      OrderWeb: order.id,
       invoiceSap: orderSap.Invoice || null,
       document: orderSap.Order,
-      PaymentsSap: orderSap.Payments.map(function(payment){
+      PaymentsSapWeb: orderSap.Payments.map(function(payment){
         return {
           document: payment.pay,
-          Payment: payment.reference
+          PaymentWeb: payment.reference
         };
       }),
     };
@@ -490,8 +509,8 @@ function saveSapReferences(sapResult, order, orderDetails){
     if(orderSap.series && _.isArray(orderSap.series)){
       orderSapReference.ProductSeries = orderSap.series.map(function(serie){
         var productSerie =  {
-          QuotationDetail: serie.DetailId,
-          OrderDetail: _.findWhere(orderDetails, {QuotationDetail: serie.DetailId}),
+          QuotationDetailWeb: serie.DetailId,
+          OrderDetailWeb: _.findWhere(orderDetails, {QuotationDetailWeb: serie.DetailId}),
           seriesNumbers: serie.Number
         };
         return productSerie;

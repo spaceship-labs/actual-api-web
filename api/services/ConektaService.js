@@ -26,9 +26,13 @@ function createOrder(orderId, payment, req) {
 	sails.log.info('api_key', conekta.api_key);
 	var order;
 
-	return Promise.reject(new Error("Break"));
-
-	return QuotationWeb.findOne({id: orderId})
+	return StockService.validateQuotationStockById(orderId, req)
+	  .then(function(isValidStock){
+	    if(!isValidStock){
+	      return Promise.reject(new Error('Inventario no suficiente'));
+	    }	
+    	return QuotationWeb.findOne({id: orderId});
+    })
 		.then(function(orderFound){
 			order = orderFound;
 
@@ -64,17 +68,21 @@ function createOrder(orderId, payment, req) {
 					shipping_contact: customerAddress
 				};
 
-				sails.log.info('conektaOrderParams', conektaOrderParams);
-
+				//sails.log.info('conektaOrderParams', conektaOrderParams);
 				conekta.Order.create(conektaOrderParams, function(err, res) {
 					if(err){
 						console.log('err conekta', err);
 						return reject(err);
 					}
 
-					var order =  res.toObject();
-					console.log('ID', order.id);
-					return resolve(order); 
+					var conektaOrder =  res.toObject();
+					console.log('ID', conektaOrder.id);
+					conektaOrder.conektaId = conektaOrder.id;
+					conektaOrder.QuotationWeb = orderId;
+					conektaOrder.amount = convertCentsToPesos(conektaOrder.amount);
+					delete conektaOrder.id;
+					return resolve(ConektaOrder.create(conektaOrder));
+					//return resolve(conektaOrder); 
 				});
 
 			});
@@ -184,6 +192,11 @@ function mapDetailsToLineItems(details){
 		};
 		return lineItem;
 	});
+}
+
+function convertCentsToPesos(amount){
+	var pesos = amount / 100;
+	return pesos;
 }
 
 function convertToCents(amount){

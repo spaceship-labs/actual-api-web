@@ -2,13 +2,13 @@ module.exports = {
 	attributes:{
 		document: 'string',
 		
-		Order:{
+		OrderWeb:{
 			model:'OrderWeb'
 		},
-		OrderSap:{
+		OrderSapWeb:{
 			model:'OrderSapWeb'
 		},
-		Payment:{
+		PaymentWeb:{
 			model: 'PaymentWeb'
 		}
 	}

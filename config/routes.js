@@ -338,6 +338,11 @@ module.exports.routes = {
     action:'getCountByUser'
   },
 
+  'POST /order/:id/ordersap':{
+    controller:'order',
+    action: 'generateSapOrder'
+  },
+
   '/me/update':{
     controller:'me',
     action:'update'

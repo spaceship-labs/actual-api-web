@@ -391,7 +391,7 @@ function Calculator(){
         //Calculate financing
         if(mainPromo){
           var _discountKey = getDiscountKey(1);
-          var _discountPercent = mainPromo[_discountKey];
+          var _discountPercent = mainPromo[_discountKey] || 0;
           var _unitPriceWithDiscount = calculateAfterDiscount(unitPrice, _discountPercent);
           totalPg1 = _unitPriceWithDiscount * quantity;
           financingCostPercentage = calculateFinancingPercentage(totalPg1, total);
@@ -452,7 +452,7 @@ function Calculator(){
 
     var totalsGroups = _.reduce([1,2,3,4,5], function(acum,group){
       var _discountKey = getDiscountKey(group);
-      var _discountPercent = mainPromo[_discountKey];
+      var _discountPercent = mainPromo[_discountKey] || 0;
       var _unitPriceWithDiscount = calculateAfterDiscount(unitPrice, _discountPercent);
       var totalPg = _unitPriceWithDiscount * quantity;
       var subtotalPg = unitPrice * quantity;

@@ -31,14 +31,19 @@ function addPayment(payment, quotationId, req){
   payment.Store = req.activeStore.id;
   payment.Client = req.user.id;
 
+  var stockValidationPromise;
+  if(payment.stockValidated){
+    stockValidationPromise = Promise.resolve(true);
+  }else{
+    stockValidationPromise = StockService.validateQuotationStockById(quotationId, req);
+  }
 
-  return StockService.validateQuotationStockById(quotationId, req)
+  return stockValidationPromise
     .then(function(isValidStock){
 
       if(!isValidStock){
         return Promise.reject(new Error('Inventario no suficiente'));
       }
-
       var findQuotation = QuotationWeb.findOne({id:quotationId}).populate('Payments');
 
       if(payment.type === EWALLET_TYPE){

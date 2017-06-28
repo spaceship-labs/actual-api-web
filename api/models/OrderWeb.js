@@ -32,7 +32,7 @@ module.exports = {
     WhsCode:{type:'string'},
     status:{
       type:'string',
-      enum:['lost','pending','on-delivery','minimum-paid','paid']
+      enum:['lost','pending','on-delivery','minimum-paid','paid','pending-sap','completed']
     },
     QuotationWeb:{
       model:'QuotationWeb',
@@ -60,15 +60,15 @@ module.exports = {
       //model:'company',
       //required: 'true'
     },
-    PaymentsSap:{
+    PaymentsSapWeb:{
       collection:'PaymentSapWeb',
-      via:'Order'
+      via:'OrderWeb'
     },
-    OrdersSap:{
+    OrdersSapWeb:{
       collection:'OrderSapWeb',
-      via:'Order'
+      via:'OrderWeb'
     },
-    SapOrderConnectionLog:{
+    SapOrderConnectionLogWeb:{
       model: 'SapOrderConnectionLogWeb'
     },
     ConektaOrder:{
