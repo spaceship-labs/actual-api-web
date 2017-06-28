@@ -40,34 +40,16 @@ module.exports.connections = {
   * Run: npm install sails-mysql                                             *
   *                                                                          *
   ***************************************************************************/
-  mysql: {
-    adapter: 'sails-mysql',
-    host: process.env.DB_HOST || 'YOUR_MYSQL_SERVER_HOSTNAME_OR_IP_ADDRESS',
-    user: process.env.DB_USER || 'YOUR_MYSQL_USER',
-    port: process.env.DB_PORT || 3306,
-    password: process.env.DB_PASSWORD || 'YOUR_MYSQL_PASSWORD',
-    database: process.env.DB_NAME || 'YOUR_MYSQL_DB'
-  },
-
-  sqlserver: {
-    adapter: 'sails-sqlserver',
-    user: 'spaceship',
-    password: '#02n4c4y5:az',
-    host: 'actual.database.windows.net', // azure database
-    database: 'actual',
-    options: {
-      encrypt: true   // use this for Azure databases
-    }
-  },
-
   mongodb: {
     adapter: 'sails-mongo',
+    /*
     host: process.env.MONGODB_HOST || 'YOUR_MONGODB_SERVER_HOSTNAME_OR_IP_ADDRESS',
     port: process.env.MONGODB_PORT || 27017,
     user: process.env.MONGODB_USER || 'YOUR_MONGODB_USER',
     password: process.env.MONGODB_PASS || 'YOUR_MONGODB_PASSWORD',
     database: process.env.MONGODB_NAME || 'YOUR_MONGODB_DB',
-    url:null
+    */
+    url: process.env.MONGODB_URL || 'YOUR_MONGODB_URL'
   },
 
   /*
