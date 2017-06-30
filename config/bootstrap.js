@@ -17,7 +17,14 @@ module.exports.bootstrap = function(cb) {
   // with the bootstrap!  (otherwise your server will never lift, since it's waiting on the bootstrap)
   CronJobs.init();
   Files.getContainerLink();
-  
+
+  var msgMode = 'sandbox/dev';
+	if(process.env.MODE === 'production'){
+		msgMode = 'production';
+	}
+
+  sails.log.info('Lifted ' + msgMode + ' mode');  
+
   sails.config.timezone = {label:'America/Cancun', offset:-6};
   //moment.tz.setDefault(sails.config.timezone.label);
   cb();

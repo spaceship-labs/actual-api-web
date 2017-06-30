@@ -24,6 +24,7 @@ module.exports = {
     discountPg4: {type:'float'},
     discountPg5: {type:'float'},
 
+    isSpeiOrder: {type:'boolean'},
 
     subtotal:{type:'float'},
     discount:{type:'float'},
@@ -32,7 +33,7 @@ module.exports = {
     WhsCode:{type:'string'},
     status:{
       type:'string',
-      enum:['lost','pending','on-delivery','minimum-paid','paid','pending-sap','completed']
+      enum:['lost','pending','on-delivery','minimum-paid','paid','pending-sap', 'pending-payment','completed']
     },
     QuotationWeb:{
       model:'QuotationWeb',
@@ -75,7 +76,10 @@ module.exports = {
       model:'ConektaOrder'
     },
 
-    conektaToken:{type:'string'},
+    conektaId:{type:'string'},
+    receiving_account_bank:{type:'string'},
+    receiving_account_number:{type:'string'},
+    conektaAmount: {type:'float'},
     //CONTACT ADDRESS FIELDS SNAPSHOT
     //APP/SAP FIELDS
 

@@ -115,14 +115,12 @@ function createFromQuotation(form, req){
 
       var conektaOrderFound = results[0];
       var paymentFound = results[0];
-      var nextPromise;
-      var step;
 
       if(!conektaOrderFound && !paymentFound){
         return createConektaOrderAndPayment(quotationId, payment, req)
           .then(function(_conektaOrder){
             form.conektaOrder = _conektaOrder;
-            return createOrder(form, req);             
+            return createOrder(form, req);
           });
       }
 
@@ -138,7 +136,7 @@ function createFromQuotation(form, req){
       else{
         sails.log.info('directo a createorder');
         form.conektaOrder = conektaOrderFound;
-        nextPromise = createOrder(form, req);        
+        return createOrder(form, req);
       }
     });
 }
@@ -155,7 +153,6 @@ function createConektaOrderAndPayment(quotationId, payment, req){
       return PaymentService.addPayment(payment, quotationId, req);
     })
     .then(function(paymentCreated){
-      console.log('paymentcreated', paymentCreated);
       return conektaOrder;
     });
 }
@@ -252,7 +249,12 @@ function createOrder(form, req){
       }else{
         orderToCreate.status = 'pending-sap';
       }
-      
+
+      if( form.conektaOrder.isSpeiOrder ){
+        orderToCreate.status = 'pending-payment';
+        orderToCreate.isSpeiOrder = true;
+      }
+
       if(quotation.Address){
         orderToCreate.Address = _.clone(quotation.Address.id);
         orderToCreate.address = _.clone(quotation.Address.Address);
@@ -268,9 +270,12 @@ function createOrder(form, req){
       }
 
       orderToCreate.ConektaOrderId = form.conektaOrder.conektaId;
-      orderToCreate.ConektaPaymentStatus = form.conektaOrder.payment_status;      
+      orderToCreate.ConektaPaymentStatus = form.conektaOrder.payment_status;
       orderToCreate.ConektaOrder = form.conektaOrder;
-      orderToCreate.conektaToken = form.conektaOrder.conektaId;
+      orderToCreate.conektaId = form.conektaOrder.conektaId;
+      orderToCreate.receiving_account_bank = form.conektaOrder.receiving_account_bank || false;
+      orderToCreate.receiving_account_number = form.conektaOrder.receiving_account_number || false;
+      orderToCreate.conektaAmount = form.conektaOrder.amount;
 
       return OrderWeb.create(orderToCreate);
     })
@@ -315,6 +320,10 @@ function createOrder(form, req){
 function relateOrderToSap(order, orderDetails,req){
   var SlpCode = -1;
 
+  if(order.status === 'pending-payment'){
+    return Promise.resolve('Pedido pendiente por pagar');
+  }
+
   return Site.findOne({handle:'actual-group'})
     .then(function(site){
 
@@ -343,7 +352,7 @@ function relateOrderToSap(order, orderDetails,req){
         QuotationWeb: order.QuotationWeb
       };
       return SapOrderConnectionLogWeb.create(log);
-    })  
+    })
     .then(function(sapLogCreated){
       sapLog = sapLogCreated;
 
@@ -357,7 +366,7 @@ function relateOrderToSap(order, orderDetails,req){
         }
         return Promise.reject(new Error(errorStr));
       }
-      
+
       return saveOrderSapReferences(sapResult, order, orderDetails);
     })
     .then(function(){
@@ -413,7 +422,7 @@ function isValidOrderCreated(sapResponse, sapResult, paymentsToCreate){
         error: 'Balance del cliente no definido en la respuesta'
       };
     }
-    
+
   }
   return {
     error: true
@@ -433,11 +442,11 @@ function collectSapErrorsBySapOrder(sapOrder){
   if(sapOrder.type === ERROR_SAP_TYPE){
     return sapOrder.result;
   }
-  return null; 
+  return null;
 }
 
 function checkIfSapOrderHasReference(sapOrder){
-  return sapOrder.result && 
+  return sapOrder.result &&
     (
       sapOrder.type === INVOICE_SAP_TYPE ||
       sapOrder.type === ORDER_SAP_TYPE
@@ -449,7 +458,7 @@ function checkIfSapOrderHasPayments(sapOrder, paymentsToCreate){
 
     //No payments are returned when using only client balance or credit
     console.log('everyPaymentIsClientBalanceOrCredit(paymentsToCreate)', everyPaymentIsClientBalanceOrCredit(paymentsToCreate));
-    
+
     /*paymentsToCreate = paymentsToCreate.filter(function(){
 
     })*/
@@ -471,7 +480,7 @@ function checkIfSapOrderHasPayments(sapOrder, paymentsToCreate){
 function everyPaymentIsClientBalanceOrCredit(paymentsToCreate){
   var everyPaymentIsClientBalance = paymentsToCreate.every(function(p){
     return p.type === PaymentService.CLIENT_BALANCE_TYPE || p.type === PaymentService.CLIENT_CREDIT_TYPE;
-  });  
+  });
   return everyPaymentIsClientBalance;
 }
 
@@ -519,7 +528,7 @@ function saveOrderSapReferences(sapResult, order, orderDetails){
 
     return orderSapReference;
   });
-  
+
   return Promise.join(
     OrderSapWeb.create(ordersSap),
     Client.update({id:clientId},{Balance: clientBalance})
@@ -580,5 +589,3 @@ function getPaidPercentage(amountPaid, total){
   var percentage = amountPaid / (total / 100);
   return percentage;
 }
-
-

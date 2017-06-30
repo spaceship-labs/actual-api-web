@@ -95,7 +95,7 @@ function addPayment(payment, quotationId, req){
         quotation.paymentGroup = quotationUpdateParams.paymentGroup;
         return quotation;
       }
-      
+
       return paymentCreated;
     })
 }
@@ -163,7 +163,7 @@ function getMethodGroupsWithTotals(quotationId, activeStore, options){
     'discountPg4',
     'discountPg5'
   ];
-      
+
   var totalsPromises = methodsGroups.map(function(mG) {
     var id = quotationId;
     var paymentGroup = mG.group || 1;
@@ -174,7 +174,7 @@ function getMethodGroupsWithTotals(quotationId, activeStore, options){
     };
     params.currentStore = activeStore.id;
     var calculator = QuotationService.Calculator();
-    return calculator.getQuotationTotals(id, params);        
+    return calculator.getQuotationTotals(id, params);
   });
 
   return Promise.all(totalsPromises)
@@ -281,6 +281,20 @@ var paymentGroups = [
         needsVerification: true,
         min:0,
         web: true
+      },
+      {
+        label:'Transferencia',
+        name:'Transferencia',
+        type:'transfer',
+        description:'',
+        currency: 'mxn',
+        terminals:[
+          {label:'Banamex', value:'banamex'},
+          {label:'Bancomer', value:'bancomer'},
+          {label:'Banorte', value:'banorte'},
+          {label:'Santander', value:'santander'}
+        ],
+        needsVerification: true
       },
     ]
   },

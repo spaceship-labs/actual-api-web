@@ -2,6 +2,7 @@ var Promise = require('bluebird');
 var conekta = require('conekta');
 var LOCAL_CURRENCY = 'MXN';
 var CONEKTA_PAYMENT_TYPE_CARD = 'card';
+var CONEKTA_PAYMENT_TYPE_SPEI = 'spei';
 
 conekta.locale = 'es';
 conekta.api_version = '2.0.0';
@@ -9,28 +10,35 @@ conekta.api_version = '2.0.0';
 
 module.exports = {
 	createOrder: createOrder,
-	chargeOrder: chargeOrder,
-	test: test
+	isConektaSpeiOrder: isConektaSpeiOrder
 };
 
-function test(req){
-	conekta.api_key = SiteService.getConektaKeyBySite(req);
-	sails.log.info('req.headers.site', req.headers.site);
-	sails.log.info('api_key', conekta.api_key);
+function isConektaSpeiOrder(conektaOrder){
+	var speiOrder = false;
+	if(conektaOrder.charges){
+		var payment_method = conektaOrder.charges.data[0].payment_method;
+		if(payment_method.receiving_account_number){
+			speiOrder = {
+				receiving_account_bank: payment_method.receiving_account_bank,
+				receiving_account_number: payment_method.receiving_account_number
+			};
+		}
+	}
+	return speiOrder;
 }
 
 
 function createOrder(orderId, payment, req) {
 	conekta.api_key = SiteService.getConektaKeyBySite(req);
-	sails.log.info('req.headers.site', req.headers.site);
-	sails.log.info('api_key', conekta.api_key);
+	//sails.log.info('req.headers.site', req.headers.site);
+	//sails.log.info('api_key', conekta.api_key);
 	var order;
 
 	return StockService.validateQuotationStockById(orderId, req)
 	  .then(function(isValidStock){
 	    if(!isValidStock){
 	      return Promise.reject(new Error('Inventario no suficiente'));
-	    }	
+	    }
     	return QuotationWeb.findOne({id: orderId});
     })
 		.then(function(orderFound){
@@ -53,6 +61,22 @@ function createOrder(orderId, payment, req) {
 			var charges = getOrderCharges(order, payments);
 			var discountLine = getOrderDiscountLine(order, payments);
 
+			var getTotalLinesAmount = function (lineItems, discountLine){
+				var totalLines = lineItems.reduce(function(acum, lineItem){
+					acum += (lineItem.unit_price*lineItem.quantity);
+					return acum;
+				},0);
+				totalLines = totalLines - discountLine.amount;
+				return totalLinesAmount;
+			}
+
+			//TODO: check how to match original payment amount instead of using the same order total.
+			//The amount converted to cents, sometimes differs by one,for example 97914 and 97913
+			var totalLinesAmount = getTotalLinesAmount(lineItems, discountLine);
+			if(charges.length > 0){
+				charges[0].amount = totalLinesAmount;
+			}
+
 			return new Promise(function(resolve, reject){
 
 				var conektaOrderParams = {
@@ -68,7 +92,6 @@ function createOrder(orderId, payment, req) {
 					shipping_contact: customerAddress
 				};
 
-				//sails.log.info('conektaOrderParams', conektaOrderParams);
 				conekta.Order.create(conektaOrderParams, function(err, res) {
 					if(err){
 						console.log('err conekta', err);
@@ -76,13 +99,23 @@ function createOrder(orderId, payment, req) {
 					}
 
 					var conektaOrder =  res.toObject();
-					console.log('ID', conektaOrder.id);
+
+					console.log('conekta order ID', conektaOrder.id);
 					conektaOrder.conektaId = conektaOrder.id;
+					conektaOrder.requestData = JSON.stringify(conektaOrderParams);
+					conektaOrder.responseData = JSON.stringify(conektaOrder);
 					conektaOrder.QuotationWeb = orderId;
+
+					var speiOrder = isConektaSpeiOrder(conektaOrder);
+					if(speiOrder){
+						conektaOrder.isSpeiOrder = true;
+						conektaOrder = _.extend(conektaOrder, speiOrder);
+					}
+
 					conektaOrder.amount = convertCentsToPesos(conektaOrder.amount);
 					delete conektaOrder.id;
 					return resolve(ConektaOrder.create(conektaOrder));
-					//return resolve(conektaOrder); 
+					//return resolve(conektaOrder);
 				});
 
 			});
@@ -90,27 +123,33 @@ function createOrder(orderId, payment, req) {
 		});
 }
 
+
+
 function getOrderCharges(order, orderPayments){
 	orderPayments = orderPayments || [];
 	var paymentGroup = OrderService.getGroupByQuotationPayments(orderPayments);
-	
+
 	return orderPayments.map(function(payment){
 
 		var amount = order['totalPg' + paymentGroup];
+		var type = (payment.type === 'transfer') ? CONEKTA_PAYMENT_TYPE_SPEI : CONEKTA_PAYMENT_TYPE_CARD;
 
 		var charge = {
 			//amount: convertToCents(payment.ammount),
 			amount: convertToCents(amount),
 			token_id: payment.cardToken,
 			payment_method:{
-				type: CONEKTA_PAYMENT_TYPE_CARD,
-				token_id: payment.cardToken
+				type: type,
 			}
 		};
 
+		if(payment.type !== 'transfer'){
+			charge.payment_method.token_id = payment.cardToken;
+		}
+
 		if(payment.msi){
 			//charge.payment_method.type = 'default';
-			charge.payment_method.monthly_installments = payment.msi
+			charge.payment_method.monthly_installments = payment.msi;
 		}
 
 		return charge;
@@ -168,7 +207,7 @@ function getOrderCustomerAddress(addressId){
 						state: contact.U_Estado,
 						postal_code: contact.U_CP,
 						country: "MX"
-				}					
+				}
 			};
 			return customerAddress;
 		});
@@ -206,7 +245,7 @@ function convertToCents(amount){
 
 function chargeOrder(order, req) {
 	conekta.api_key = SiteService.getConektaKeyBySite(req);
-	
+
 	return new Promise(function(resolve, reject){
 		var params = {
 			"payment_method": {
@@ -223,7 +262,7 @@ function chargeOrder(order, req) {
 		        console.log(charge);
 		    	resolve(charge);
 		    });
-		}); 
+		});
 
 	});
 }
