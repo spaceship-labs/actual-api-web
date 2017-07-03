@@ -40,9 +40,6 @@ module.exports = {
       query = Search.applySpotlightQuery(query);
     }
 
-    if(slowMovement){
-      query = Search.applySlowMovementQuery(query);      
-    }
 
     query.Active     = 'Y';
     //query[displayProperty] = true;
@@ -139,9 +136,6 @@ module.exports = {
       query = Search.applySpotlightQuery(query);
     }
 
-    if(slowMovement){
-      query = Search.applySlowMovementQuery(query);      
-    }
 
     var paginate       = {
       page:  form.page  || 1,

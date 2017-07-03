@@ -204,7 +204,8 @@ function getAdapterConfig(){
       username: process.env.CLOUDUSERNAME,
       apiKey: process.env.CLOUDAPIKEY,
       region: process.env.CLOUDREGION,
-      container: process.env.CLOUDCONTAINER
+      container: process.env.CLOUDCONTAINER,
+      useHttps: true
     };
     return adapterPkgCloud(uploadOptions);
   }

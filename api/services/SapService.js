@@ -86,7 +86,6 @@ function createClient(params){
 }
 
 function updateClient(cardcode, form){
-  sails.log.info('form in updateClient', form);
   form = _.omit(form, _.isUndefined);
 
   //Important: DONT UPDATE BALANCE IN SAP
