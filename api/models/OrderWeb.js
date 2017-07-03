@@ -50,7 +50,7 @@ module.exports = {
       collection:'PaymentWeb',
       via:'OrderWeb'
     },
-    User:{
+    UserWeb:{
       model: 'UserWeb',
     },
     Address:{

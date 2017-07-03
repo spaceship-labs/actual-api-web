@@ -9,7 +9,7 @@ module.exports = {
     Client:{
       model:'Client'
     },
-    User:{
+    UserWeb:{
       model: 'UserWeb',
     },
     Details: {

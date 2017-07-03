@@ -23,28 +23,28 @@ var JWT_STRATEGY_CONFIG = {
 };
 
 function _onLocalStrategyAuth(email, password, next){
-  Client.findOne({E_Mail: email})
-    .exec(function(error, client){
+  UserWeb.findOne({email: email})
+    .exec(function(error, user){
       if (error) return next(error, false, {});
-      if (!client) return next(null, false,{
+      if (!user) return next(null, false,{
         code: 'INCORRECT_AUTHDATA',
         message:'Incorrect auth data'
       });
 
       //TODO: replace with new cipher service type
-      if( !CipherService.comparePassword(password, client) ){
+      if( !CipherService.comparePassword(password, user) ){
         return next(null, false, {
           code: 'INCORRECT_AUTHDATA',
           message:'Incorrect auth data'        
         });
       }
 
-      Client.update({id : client.id},{ lastLogin : new Date() })
-        .exec(function(err,ruser){
+      UserWeb.update({id : user.id},{ lastLogin : new Date() })
+        .exec(function(err,_user){
           if (error) return next(error, false, {});
 
-          delete client.password;
-          return next(null, client, {});
+          delete user.password;
+          return next(null, user, {});
         });
 
   });
@@ -54,17 +54,17 @@ function _onLocalStrategyAuth(email, password, next){
 
 function _onJwtStrategyAuth(payload, next){
   var payloadUser = payload.user || {};
-  var clientId = payloadUser.id || false;
-  if(!clientId){
+  var userId = payloadUser.id || false;
+  if(!userId){
     return next(null, false, {
       code: 'USER_ID_UNDEFINED',
       message: 'USER ID UNDEFINED'
     });
   }
 
-  return Client.findOne({id: clientId})
-    .then(function(clientFound){
-      var client = clientFound;
+  return UserWeb.findOne({id: userId})
+    .then(function(userFound){
+      var client = userFound;
 
       /*
       if(!client.active){

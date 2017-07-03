@@ -19,15 +19,15 @@ function _onPassportAuth(req, res, error, user, info){
     activeStore: activeStoreId
   };
   
-  Client.update(user.id, updateParams)
+  UserWeb.update(user.id, updateParams)
     .then(function(clients) {
       return clients[0];
     })
-    .then(function(clientUpdated) {
+    .then(function(userUpdated) {
       /*Logging stuff*/
-      var message    = clientUpdated.FirstName + ' ' + clientUpdated.LastName + ' ingresó al sistema';
+      var message    = userUpdated.firstName + ' ' + userUpdated.lastName + ' ingresó al sistema';
       var action     = 'login';
-      return Logger.log(clientUpdated.id, message, action);
+      return Logger.log(userUpdated.id, message, action);
     })
     .then(function(log){
       user.activeStore = activeStoreId;

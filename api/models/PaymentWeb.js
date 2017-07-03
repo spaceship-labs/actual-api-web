@@ -66,7 +66,7 @@ module.exports = {
     QuotationWeb:{
       model:'QuotationWeb'
     },
-    User:{
+    UserWeb:{
       model:'UserWeb'
     },
     Client:{

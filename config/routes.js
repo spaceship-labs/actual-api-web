@@ -58,11 +58,6 @@ module.exports.routes = {
     action: 'find'
   },
 
-  '/user/update/:id':{
-    controller: 'user',
-    action: 'update'
-  },
-
   '/user/register':{
     controller: 'user',
     action: 'register'
@@ -179,12 +174,12 @@ module.exports.routes = {
     action:'getEwalletByClient'
   },
 
-  'GET /client/:CardCode/contacts':{
+  'GET /me/client/contacts':{
     controller:'client',
     action: 'getContactsByClient'
   },
   
-  'POST /client/:CardCode/contacts':{
+  'POST /me/client/contacts':{
     controller:'client',
     action: 'createContact'
   },
@@ -292,11 +287,6 @@ module.exports.routes = {
     action:'add'
   }, 
 
-  '/client/update/:CardCode':{
-    controller: 'client',
-    action: 'update'
-  },
-
   '/product/searchbyfilters':{
     controller: 'productsearch',
     action:'searchByfilters'
@@ -343,9 +333,19 @@ module.exports.routes = {
     action: 'generateSapOrder'
   },
 
-  '/me/update':{
-    controller:'me',
+  'PUT /me/update':{
+    controller:'client',
     action:'update'
+  },
+
+  'GET /me':{
+    controller: 'me',
+    action: 'getCurrentUser'
+  },
+
+  'GET /me/client':{
+    controller: 'me',
+    action: 'getClient'
   },
 
   '/promotion/find/:page':{
@@ -358,19 +358,9 @@ module.exports.routes = {
     action:'findById'
   },
 
-  '/promotion/update/:id':{
-    controller: 'promotion',
-    action:'update'
-  },
-
   '/pmperiod/getactive':{
     controller: 'pmperiod',
     action:'getActive'
-  },
-
-  '/site/update/:handle':{
-    controller:'site',
-    action:'update'
   },
 
   '/site/findbyhandle/:handle':{

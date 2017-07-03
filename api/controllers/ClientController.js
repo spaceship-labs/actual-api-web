@@ -39,6 +39,7 @@ module.exports = {
     var params         = {};
 
     var fiscalAddress  = {};
+    var createdUserWeb;
 
     if (email && email.match(actualMail)) {
       return res.badRequest({
@@ -73,11 +74,13 @@ module.exports = {
     delete form.fiscalAddress;
 
     params = {
-      client: form,
+      client: _.clone(form),
       fiscalAddress: fiscalAddress,
       clientContacts: contacts,
       activeStoreId: req.activeStore.id
     };
+
+    delete params.client.password;
 
     ClientService.validateContactsZipcode(params.clientContacts)
     .then(function(areValid){
@@ -86,10 +89,13 @@ module.exports = {
         return Promise.reject(new Error('El código postal no es valido para tu dirección de entrega'));
       }
 
-      return Client.findOne({E_Mail:email});
+      return [
+        Client.findOne({E_Mail:email}),
+        UserService.checkIfUserEmailIsTaken(email)
+      ];
     })
-    .then(function(usedEmail){
-        if(usedEmail){
+    .spread(function(usedEmail, isUserMailTaken){
+        if(usedEmail || isUserMailTaken){
           return Promise.reject(new Error('Email previamente utilizado'));
         }
         return SapService.createClient(params);
@@ -119,10 +125,20 @@ module.exports = {
 
         sails.log.info('contacts', contacts);
         sails.log.info('form',form);
-        return Client.create(form);
+        return [
+          Client.create(form),
+        ];
       })
-      .then(function(created){
-        createdClient = created;
+      .spread(function(_createdClient, _createdUser){
+        createdClient = _createdClient;
+        form.Client = createdClient.id;
+        return UserService.createUserFromClient(form);
+      })
+      .then(function(_createdUser){
+        createdUserWeb = _createdUser;
+        return Client.update({id: createdClient.id},{UserWeb: createdUserWeb.id});
+      })
+      .then(function(_updatedClients){
         var promises = [];
 
         if(contacts && contacts.length > 0){
@@ -158,7 +174,10 @@ module.exports = {
           createdClient.Contacts = contactsCreated;
         }
 
-        res.json(createdClient);
+        res.json({
+          user: createdUserWeb,
+          client: createdClient
+        });
       })
       .catch(function(err){
         console.log(err);
@@ -170,6 +189,8 @@ module.exports = {
     var form = req.params.all();
     var CardCode = form.CardCode;
     var email = form.E_Mail;
+    var userId = req.user ? req.user.id : false;
+    var updatedClient;
     form = ClientService.mapClientFields(form);
     delete form.FiscalAddress;
     //Dont remove
@@ -179,12 +200,31 @@ module.exports = {
       return res.negotiate(new Error('Email requerido'));
     }
 
-    Client.findOne({E_Mail:email, id: {'!=': form.id}})
-      .then(function(usedEmail){
-        if(usedEmail){
+    if(!userId){
+      return res.negotiate(new Error('No autorizado'));
+    }
+
+    var promises = [
+      UserService.checkIfUserEmailIsTaken(email, userId),
+      Client.findOne({E_Mail:email, id: {'!=': form.id}})
+    ];
+
+    Promise.all(promises)
+      .then(function(results){
+        var isUserEmailTaken = results[0];
+        var usedEmail = results[1];
+        if(usedEmail || isUserEmailTaken){
           return Promise.reject(new Error('Email previamente utilizado'));
         }
         sails.log.info('form', form);
+      
+        return Client.findOne({UserWeb: userId, CardCode: CardCode});
+      })
+      .then(function(_client){
+        if(!_client){
+          return Promise.reject(new Error('No autorizado'));
+        }
+
         return SapService.updateClient(CardCode, form);
       })
       .then(function(resultSap){
@@ -207,7 +247,15 @@ module.exports = {
 
       })
       .then(function(updated){
-        res.json(updated);
+        updateClient = updated[0];
+        return UserService.updateUserFromClient(updateClient);
+      })
+      .then(function(updatedUser){
+        res.json({
+          client: updateClient,
+          user: updatedUser
+        });
+        //res.json(updated);
       })
       .catch(function(err){
         console.log(err);
@@ -217,8 +265,9 @@ module.exports = {
 
   getContactsByClient: function(req, res){
     var form = req.params.all();
-    var CardCode = form.CardCode;
-    ClientContact.find({CardCode:CardCode})
+    var cardCode = req.user.CardCode;
+
+    ClientContact.find({CardCode:cardCode})
       .then(function(contacts){
         res.json(contacts);
       })
@@ -230,7 +279,8 @@ module.exports = {
 
   createContact: function(req, res){
     var form = req.params.all();
-    var cardCode = form.CardCode;
+    var cardCode = req.user.CardCode;
+    form.CardCode = cardCode;
     form = ClientService.mapContactFields(form);
 
     ClientService.validateContactsZipcode([form])
@@ -238,7 +288,7 @@ module.exports = {
         if(!areValid){
           return Promise.reject(new Error('El código postal no es valido para tu dirección de entrega'));
         }
-        return SapService.createContact(cardCode, form)
+        return SapService.createContact(cardCode, form);
       })
       .then(function(resultSap){
         sails.log.info('response createContact', resultSap);

@@ -1,13 +1,8 @@
-var Promise = require('bluebird');
-
 //APP COLLECTION
 module.exports = {
   migrate:'alter',
   schema: true,
   attributes: {
-    webUser:{
-      type:'boolean'
-    },
     password: {
         type: 'string'
     },
@@ -33,12 +28,13 @@ module.exports = {
     },
     Quotations:{
       collection: 'QuotationWeb',
-      via:'User'
+      via:'UserWeb'
     },
     Orders:{
       collection:'OrderWeb',
-      via:'User'
+      via:'UserWeb'
     },
+    CardCode:{type:'string'},
 
     dialCode: {type:'string'},
     phone:{type:'string'},
@@ -85,25 +81,25 @@ module.exports = {
       collection: 'store',
       via: 'users'
     },
-    mainStore: {
-      model: 'store'
-    },
-    activeStore: {
-      model: 'store'
-    },
     permissions: {
       collection: 'permission',
       via: 'owners'
     },
     Payments:{
       collection:'paymentweb',
-      via: 'User'
+      via: 'UserWeb'
+    },
+    Client:{
+      model:'Client'
+    },
+    role:{
+      type:'string',
+      enum:['client','admin']
     },
     toJSON: function () {
       var obj = this.toObject();
       obj.name = obj.firstName + ' ' + obj.lastName;
       delete obj.password;
-      delete obj.socialProfiles;
       return obj;
     }
   },

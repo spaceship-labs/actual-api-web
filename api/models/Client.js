@@ -26,8 +26,8 @@ module.exports = {
     /*-----*/
     FirstName: {type:'string'},
     LastName: {type:'string'},
-    password:{type:'string'},
-    lastLogin: {type:'datetime'},
+    //password:{type:'string'},
+    //lastLogin: {type:'datetime'},
     /*
     email: {
       type:'string',
@@ -49,6 +49,10 @@ module.exports = {
     /*----------/
       RELATIONS
     /*----------*/
+    UserWeb:{
+      model:'UserWeb'
+    },
+
     Quotations: {
       collection:'QuotationWeb',
       via: 'Client',
