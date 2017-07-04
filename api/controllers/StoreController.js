@@ -33,11 +33,13 @@ module.exports = {
       });
   },
 
-  getPackagesByStore: function(req, res){
+  getPackagesByCurrentStore: function(req, res){
     var form        = req.params.all();
     var id          = form.id;
+    var activeStoreId = req.activeStore.id;
     var queryPromos = Search.getPromotionsQuery();
-    Store.findOne({id:id})
+    
+    Store.findOne({id:activeStoreId})
       .populate('PromotionPackages', queryPromos)
       .then(function(store){
         res.json(store.PromotionPackages);

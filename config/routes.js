@@ -373,9 +373,9 @@ module.exports.routes = {
     action:'getPromosByStore'
   },
 
-  '/store/:id/packages':{
+  '/store/packages':{
     controller:'store',
-    action:'getPackagesByStore'
+    action:'getPackagesByCurrentStore'
   },
 
   '/common/states':{

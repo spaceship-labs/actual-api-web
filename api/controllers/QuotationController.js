@@ -338,8 +338,9 @@ module.exports = {
 
   find: function(req, res){
     var form = req.params.all();
+    var clientId = UserService.getCurrentUserClientId(req);
     form.filters = form.filters || {};
-    form.filters.Client = req.user.id;
+    form.filters.Client = clientId;
 
     var model = 'quotationweb';
     var extraParams = {

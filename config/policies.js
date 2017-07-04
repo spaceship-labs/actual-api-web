@@ -90,6 +90,9 @@ module.exports.policies = {
   },
   ProductSearchController:{
     '*':['setupDefaultData']
+  },
+  StoreController:{
+    '*':['setupDefaultData']    
   }
 
   /***************************************************************************

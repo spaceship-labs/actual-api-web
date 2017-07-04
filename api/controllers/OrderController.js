@@ -11,6 +11,8 @@ module.exports = {
   find: function(req, res){
     var form = req.params.all();
     var model = 'orderweb';
+    var clientId = UserService.getCurrentUserClientId(req);
+
     var extraParams = {
       searchFields: [
         'folio',
@@ -20,7 +22,7 @@ module.exports = {
       selectFields: form.fields,
       populateFields:['invoice'],
       filters:{
-        Client: req.user.id
+        Client: clientId
       }
     };
     Common.find(model, form, extraParams)
@@ -41,6 +43,7 @@ module.exports = {
     if( !isNaN(id) ){
       id = parseInt(id);
     }
+
     OrderWeb.findOne({id: id})
       .populate('Details')
       .populate('UserWeb')

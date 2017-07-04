@@ -35,6 +35,7 @@ module.exports = {
       type:'string',
       enum:['lost','pending','on-delivery','minimum-paid','paid','pending-sap', 'pending-payment','completed']
     },
+    inSapWriteProgress:{type:'boolean'},
     QuotationWeb:{
       model:'QuotationWeb',
       unique:true

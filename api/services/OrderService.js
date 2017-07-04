@@ -244,6 +244,7 @@ function createOrder(form, req){
 // *Product
 function relateOrderToSap(order, orderDetails,req){
   var SlpCode = -1;
+  var error;
   var clientId = UserService.getCurrentUserClientId(req);
   var userId = UserService.getCurrentUserId(req);
 
@@ -251,55 +252,72 @@ function relateOrderToSap(order, orderDetails,req){
     return Promise.resolve('Pedido pendiente por pagar');
   }
 
-  return Site.findOne({handle:'actual-group'})
-    .then(function(site){
+  var promises = [
+    Site.findOne({handle:'actual-group'}),
+    OrderWeb.update({id:order.id}, {inSapWriteProgress: true})
+  ];
+  
+  return new Promise(function(resolve, reject){
+      Promise.all(promises)
+      .then(function(results){
+        var site = results[0];
 
-      var sapOrderParams = {
-        quotationId:      order.QuotationWeb,
-        groupCode:        req.activeStore.GroupCode,
-        cardCode:         order.Client.CardCode,
-        slpCode:          SlpCode,
-        cntctCode:        order.Address.CntctCode,
-        payments:         order.Payments,
-        exchangeRate:     site.exchangeRate,
-        currentStore:     req.activeStore,
-        quotationDetails: orderDetails
-      };
+        var sapOrderParams = {
+          quotationId:      order.QuotationWeb,
+          groupCode:        req.activeStore.GroupCode,
+          cardCode:         order.Client.CardCode,
+          slpCode:          SlpCode,
+          cntctCode:        order.Address.CntctCode,
+          payments:         order.Payments,
+          exchangeRate:     site.exchangeRate,
+          currentStore:     req.activeStore,
+          quotationDetails: orderDetails
+        };
 
-      return SapService.createSaleOrder(sapOrderParams);
-    })
-    .then(function(sapResponseAux){
-      sapResponse = sapResponseAux.response;
-      var sapEndpoint = decodeURIComponent(sapResponseAux.endPoint);
-      sails.log.info('createSaleOrder response', sapResponse);
-      var log = {
-        content: sapEndpoint + '\n' +  JSON.stringify(sapResponse),
-        Client   : clientId,
-        UserWeb: userId,
-        Store  : req.activeStore.id,
-        QuotationWeb: order.QuotationWeb
-      };
-      return SapOrderConnectionLogWeb.create(log);
-    })
-    .then(function(sapLogCreated){
-      sapLog = sapLogCreated;
+        return SapService.createSaleOrder(sapOrderParams);
+      })
+      .then(function(sapResponseAux){
+        sapResponse = sapResponseAux.response;
+        var sapEndpoint = decodeURIComponent(sapResponseAux.endPoint);
+        sails.log.info('createSaleOrder response', sapResponse);
+        var log = {
+          content: sapEndpoint + '\n' +  JSON.stringify(sapResponse),
+          Client   : clientId,
+          UserWeb: userId,
+          Store  : req.activeStore.id,
+          QuotationWeb: order.QuotationWeb
+        };
+        return SapOrderConnectionLogWeb.create(log);
+      })
+      .then(function(sapLogCreated){
+        sapLog = sapLogCreated;
 
-      sapResult = JSON.parse(sapResponse.value);
-      var isValidSapResponse = isValidOrderCreated(sapResponse, sapResult, order.Payments);
-      if( isValidSapResponse.error ){
-        var defaultErrMsg = 'Error en la respuesta de SAP';
-        var errorStr = isValidSapResponse.error || defaultErrMsg;
-        if(errorStr === true){
-          errorStr = defaultErrMsg;
+        sapResult = JSON.parse(sapResponse.value);
+        var isValidSapResponse = isValidOrderCreated(sapResponse, sapResult, order.Payments);
+        if( isValidSapResponse.error ){
+          var defaultErrMsg = 'Error en la respuesta de SAP';
+          var errorStr = isValidSapResponse.error || defaultErrMsg;
+          if(errorStr === true){
+            errorStr = defaultErrMsg;
+          }
+          return Promise.reject(new Error(errorStr));
         }
-        return Promise.reject(new Error(errorStr));
-      }
 
-      return saveOrderSapReferences(sapResult, order, orderDetails);
-    })
-    .then(function(){
-      return OrderWeb.update({id: order.id},{status:'completed'});
-    });
+        return saveOrderSapReferences(sapResult, order, orderDetails);
+      })
+      .then(function(){
+        resolve(
+          OrderWeb.update({id: order.id},{status:'completed', inSapWriteProgress:false})
+        );
+      })
+      .catch(function(err){
+        error = err;
+        return OrderWeb.update({id: order.id},{inSapWriteProgress:false});
+      })
+      .then(function(updated){
+        reject(error);
+      });
+  });
 }
 
 function isValidOrderCreated(sapResponse, sapResult, paymentsToCreate){
