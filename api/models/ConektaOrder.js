@@ -13,6 +13,9 @@ module.exports = {
     receiving_account_bank:{type:'string'},
     receiving_account_number:{type:'string'},
 
+    UserWeb:{
+      model:'UserWeb'
+    },
     QuotationWeb:{
       model:'QuotationWeb'
     },

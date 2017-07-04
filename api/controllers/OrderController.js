@@ -43,7 +43,7 @@ module.exports = {
     }
     OrderWeb.findOne({id: id})
       .populate('Details')
-      .populate('User')
+      .populate('UserWeb')
       .populate('Client')
       .populate('Address')
       .populate('Payments')
@@ -75,17 +75,20 @@ module.exports = {
     var responseSent = false;
     var orderDetails;
 
-    sails.log.info('init ', new Date());
+    sails.log.info('init order creation', new Date());
+    sails.log.info('quoationId', form.quotationId);
     OrderService.createFromQuotation(form, req)
       .then(function(orderCreated){
         //RESPONSE
         sails.log.info('end ', new Date());
+        sails.log.info('quoationId', form.quotationId);
 
         res.json(orderCreated);
         responseSent = true;
 
         //STARTS EMAIL SENDING PROCESS
         return OrderWeb.findOne({id:orderCreated.id})
+          .populate('UserWeb')
           .populate('Client')
           .populate('Payments')
           .populate('Address');
@@ -100,7 +103,7 @@ module.exports = {
         return [
           Email.sendOrderConfirmation(order.id),
           Email.sendFreesale(order.id),
-          InvoiceService.createOrderInvoice(order.id),
+          InvoiceService.createOrderInvoice(order.id, req),
           OrderService.relateOrderToSap(order, orderDetails, req),
           StockService.syncOrderDetailsProducts(orderDetails)
         ];
@@ -124,6 +127,7 @@ module.exports = {
     var id = form.id;
     var promises = [
       OrderWeb.findOne({id: id})
+        .populate('UserWeb')
         .populate('Client')
         .populate('Address')
         .populate('Payments'),

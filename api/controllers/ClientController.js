@@ -1,7 +1,8 @@
 var _       = require('underscore');
 var moment  = require('moment');
 var Promise = require('bluebird');
-var ADDRESS_TYPE = 'S';
+var ADDRESS_TYPE_S = 'S';
+var ADDRESS_TYPE_B = 'B';
 
 module.exports = {
 
@@ -150,8 +151,18 @@ module.exports = {
         if(fiscalAddress){
           fiscalAddress           = ClientService.mapFiscalFields(fiscalAddress);
           fiscalAddress.CardCode  = createdClient.CardCode;
-          fiscalAddress.AdresType = ADDRESS_TYPE;
-          promises.push(FiscalAddress.create(fiscalAddress));
+          fiscalAddress.AdresType = ADDRESS_TYPE_S;
+          
+          var fiscalAddressTypeS = _.clone(fiscalAddress);
+          var fiscalAddressTypeB = _.clone(fiscalAddress);
+          fiscalAddressTypeB.AdresType = ADDRESS_TYPE_B;
+
+          var fiscalAddresses = [
+            fiscalAddressTypeS,
+            fiscalAddressTypeB
+          ];
+
+          promises.push(FiscalAddress.create(fiscalAddresses));
         }
 
         if(promises.length > 0){
@@ -187,7 +198,7 @@ module.exports = {
 
   update: function(req, res){
     var form = req.params.all();
-    var CardCode = form.CardCode;
+    var CardCode = _.clone(req.user.CardCode);
     var email = form.E_Mail;
     var userId = req.user ? req.user.id : false;
     var updatedClient;
@@ -319,7 +330,8 @@ module.exports = {
   updateContact: function(req, res){
     var form = req.params.all();
     var contactCode = form.CntctCode;
-    var cardCode = form.CardCode;
+    var cardCode = req.user.CardCode;
+    form.CardCode = cardCode;
     form = ClientService.mapContactFields(form);
 
     ClientService.validateContactsZipcode([form])
@@ -362,30 +374,42 @@ module.exports = {
 
   getFiscalAddressByClient: function(req, res){
     var form = req.allParams();
-    var CardCode = form.CardCode;
+    var CardCode = req.user.CardCode;
     var query = {
       CardCode: CardCode,
       AdresType: ClientService.ADDRESS_TYPE
-    }
-    FiscalAddress.findOne(query)
-      .then(function(fiscalAddress){
+    };
+
+    var promises = [
+      Client.findOne({CardCode:CardCode, select:['LicTradNum']}),
+      FiscalAddress.findOne(query)
+    ];      
+    
+    Promise.all(promises)
+      .then(function(results){
+        var client = results[0];
+        var fiscalAddress = results[1];
+        fiscalAddress.LicTradNum = client.LicTradNum;
+
         res.json(fiscalAddress);
       })
       .catch(function(err){
         console.log('err', err);
         res.negotiate(err);
-      })
-},
+      });
+  },
 
   updateFiscalAddress: function(req, res){
     var form = req.params.all();
-    var CardCode = form.CardCode;
+    var CardCode = req.user.CardCode;
     var fiscalAddress = ClientService.mapFiscalFields(form);
     delete form.AdresType;
+
     if(!form.LicTradNum || !ClientService.isValidRFC(form.LicTradNum)){
       var err = new Error('RFC no valido');
       return res.negotiate(err);
     }
+    
     SapService.updateFiscalAddress(CardCode, fiscalAddress)
       .then(function(resultSap){
         sails.log.info('updateFiscalAddress response', resultSap);

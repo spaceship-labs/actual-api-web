@@ -14,7 +14,10 @@ module.exports = {
   send: send,
 };
 
-function createOrderInvoice(orderId) {
+function createOrderInvoice(orderId, req) {
+  var userId = UserService.getCurrentUserId(req);
+  var clientId = UserService.getCurrentUserClientId(req);
+
   return new Promise(function(resolve, reject){
     
     var orderFound;
@@ -54,14 +57,22 @@ function createOrderInvoice(orderId) {
         return prepareInvoice(order, payments, client, items);
       })
       .then(function(alegraInvoice){
+        var invoiceToCreate = {
+          alegraId: alegraInvoice.id, 
+          OrderWeb: orderId,
+          UserWeb: userId,
+          Client: clientId
+        };
+
         resolve(
-          InvoiceWeb.create({ alegraId: alegraInvoice.id, order: orderId })
+          InvoiceWeb.create(invoiceToCreate)
         );
       })
       .catch(function(err){
         errInvoice = err;
 
         var log = {
+          UserWeb: userId,
           Client: orderFound.Client.id,
           OrderWeb: orderId,
           Store: orderFound ? orderFound.Store : null,

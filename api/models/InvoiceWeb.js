@@ -13,6 +13,12 @@ module.exports = {
     OrderWeb: {
       model: 'OrderWeb',
       required: true,
+    },
+    Client:{
+    	model:'Client'
+    },
+    UserWeb:{
+    	model:'UserWeb'
     }
   },
 };

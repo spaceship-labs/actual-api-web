@@ -3,6 +3,9 @@ module.exports = {
 	  Client:{
 	    model: 'Client'
 	  },
+	  UserWeb:{
+	    model: 'UserWeb'
+	  },
 	  OrderWeb: {
 	    model:'OrderWeb'
 	  },

@@ -69,6 +69,7 @@ module.exports = {
     }    
   },
   beforeUpdate: function (values, next) {
+    delete values.CardCode;
     if (values.new_password) {
       values.password = CipherService.hashPassword(values.new_password);
     }

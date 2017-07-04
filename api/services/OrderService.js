@@ -9,87 +9,9 @@ var BALANCE_SAP_TYPE = 'Balance';
 
 module.exports = {
   createFromQuotation: createFromQuotation,
-  getCountByUser: getCountByUser,
-  getTotalsByUser: getTotalsByUser,
   getGroupByQuotationPayments: getGroupByQuotationPayments,
   relateOrderToSap: relateOrderToSap
 };
-
-
-
-function getCountByUser(form){
-  var userId = form.userId;
-  var fortNightRange = Common.getFortnightRange();
-
-  //Fortnight range by default
-  var startDate = form.startDate || fortNightRange.start;
-  var endDate = form.endDate || fortNightRange.end;
-  var queryDateRange = {
-    User: userId,
-    createdAt: { '>=': startDate, '<=': endDate }
-  };
-  var queryfortNightRange = {
-    User: userId,
-    createdAt: { '>=': fortNightRange.start, '<=': fortNightRange.end }
-  };
-
-  return Promise.join(
-    OrderWeb.count(queryfortNightRange),
-    OrderWeb.count(queryDateRange)
-  )
-    .then(function(results){
-      var response = {
-        fortnight: results[0],
-        dateRange: results[1]
-      };
-      return response;
-    });
-
-}
-
-function getTotalsByUser(form){
-  var userId = form.userId;
-  var getFortnightTotals = !_.isUndefined(form.fortnight) ? form.fortnight : true;
-  var fortNightRange = Common.getFortnightRange();
-
-  //Fortnight range by default
-  var startDate = form.startDate || fortNightRange.start;
-  var endDate = form.endDate || fortNightRange.end;
-  var queryDateRange = {
-    User: userId,
-    createdAt: { '>=': startDate, '<=': endDate }
-  };
-  var queryfortNightRange = {
-    User: userId,
-    createdAt: { '>=': fortNightRange.start, '<=': fortNightRange.end }
-  };
-
-  var props = {
-    totalDateRange: OrderWeb.find(queryDateRange).sum('total')
-  };
-  if(getFortnightTotals){
-    props.totalFortnight = OrderWeb.find(queryfortNightRange).sum('total');
-  }
-
-  //Find all totals
-  return Promise.props(props)
-    .then(function(result){
-      var totalFortnight = 0;
-      var totalDateRange = 0;
-      if(getFortnightTotals && result.totalFortnight.length > 0){
-        totalFortnight = result.totalFortnight[0].total;
-      }
-      if(result.totalDateRange.length > 0){
-        totalDateRange = result.totalDateRange[0].total;
-      }
-      var response = {
-        fortnight: totalFortnight || false,
-        dateRange: totalDateRange
-      };
-      return response;
-    });
-
-}
 
 function getGroupByQuotationPayments(payments){
   var group = 1;
@@ -101,13 +23,14 @@ function getGroupByQuotationPayments(payments){
 }
 
 function createFromQuotation(form, req){
+  var clientId = UserService.getCurrentUserClientId(req);
   var quotationId = form.quotationId;
   var payment = form.payment;
   var conektaOrder;
 
   var promises = [
-    ConektaOrder.findOne({QuotationWeb: quotationId}),
-    PaymentWeb.findOne({QuotationWeb:quotationId})
+    ConektaOrder.findOne({QuotationWeb: quotationId, Client: clientId}),
+    PaymentWeb.findOne({QuotationWeb:quotationId, Client: clientId})
   ];
 
   return Promise.all(promises)
@@ -201,6 +124,7 @@ function createOrder(form, req){
         .populate('Payments')
         .populate('Details')
         .populate('Address')
+        .populate('UserWeb')
         .populate('Client');
     })
     .then(function(quotationFound){
@@ -226,6 +150,7 @@ function createOrder(form, req){
         CardCode: quotation.Client.CardCode,
         CardName: quotation.Client.CardName,
         Client: quotation.Client.id,
+        UserWeb: quotation.UserWeb.id,
         discount: quotation.discount,
         paymentGroup: options.paymentGroup,
         Payments: paymentsIds,
@@ -319,6 +244,8 @@ function createOrder(form, req){
 // *Product
 function relateOrderToSap(order, orderDetails,req){
   var SlpCode = -1;
+  var clientId = UserService.getCurrentUserClientId(req);
+  var userId = UserService.getCurrentUserId(req);
 
   if(order.status === 'pending-payment'){
     return Promise.resolve('Pedido pendiente por pagar');
@@ -347,7 +274,8 @@ function relateOrderToSap(order, orderDetails,req){
       sails.log.info('createSaleOrder response', sapResponse);
       var log = {
         content: sapEndpoint + '\n' +  JSON.stringify(sapResponse),
-        Client   : req.user.id,
+        Client   : clientId,
+        UserWeb: userId,
         Store  : req.activeStore.id,
         QuotationWeb: order.QuotationWeb
       };

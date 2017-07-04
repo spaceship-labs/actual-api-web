@@ -26,7 +26,9 @@ module.exports = {
     Client:{
         model:'Client'
     }
-
-
-  }
+  },
+  beforeUpdate: function (values, next) {
+    delete values.CardCode;
+    next();
+  },  
 };

@@ -29,7 +29,8 @@ function addPayment(payment, quotationId, req){
   var quotationUpdateParams;
   payment.QuotationWeb = quotationId;
   payment.Store = req.activeStore.id;
-  payment.Client = req.user.id;
+  payment.UserWeb = UserService.getCurrentUserId(req);
+  payment.Client = UserService.getCurrentUserClientId(req);
 
   var stockValidationPromise;
   if(payment.stockValidated){
@@ -97,7 +98,7 @@ function addPayment(payment, quotationId, req){
       }
 
       return paymentCreated;
-    })
+    });
 }
 
 function calculateQuotationAmountPaid(quotationPayments, exchangeRate){

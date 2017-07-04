@@ -164,40 +164,10 @@ module.exports.routes = {
     action: 'search'
   },
 
-  'GET /client/:id':{
-    controller:'client',
-    action:'findById'
-  },
-
   '/client/:id/ewallet':{
     controller:'client',
     action:'getEwalletByClient'
   },
-
-  'GET /me/client/contacts':{
-    controller:'client',
-    action: 'getContactsByClient'
-  },
-  
-  'POST /me/client/contacts':{
-    controller:'client',
-    action: 'createContact'
-  },
-
-  'PUT /client/:CardCode/contacts/:CntctCode':{
-    controller:'client',
-    action: 'updateContact'
-  },  
-
-  'GET /client/:CardCode/fiscaladdress':{
-    controller:'client',
-    action: 'getFiscalAddressByClient'
-  },
-
-  'PUT /client/:CardCode/fiscaladdress':{
-    controller:'client',
-    action: 'updateFiscalAddress'
-  },  
 
   '/quotation/create':{
     controller: 'quotation',
@@ -347,6 +317,31 @@ module.exports.routes = {
     controller: 'me',
     action: 'getClient'
   },
+
+  'GET /me/client/contacts':{
+    controller:'client',
+    action: 'getContactsByClient'
+  },
+  
+  'POST /me/client/contacts':{
+    controller:'client',
+    action: 'createContact'
+  },  
+
+  'PUT /me/client/contacts/:CntctCode':{
+    controller:'client',
+    action: 'updateContact'
+  },  
+
+  'GET /me/client/fiscaladdress':{
+    controller:'client',
+    action: 'getFiscalAddressByClient'
+  },
+
+  'PUT /me/client/fiscaladdress':{
+    controller:'client',
+    action: 'updateFiscalAddress'
+  },  
 
   '/promotion/find/:page':{
     controller: 'promotion',

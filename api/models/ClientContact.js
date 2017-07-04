@@ -36,5 +36,10 @@ module.exports = {
     }
 
 
-  }
+  },
+  beforeUpdate: function (values, next) {
+    delete values.CardCode;
+    delete values.CntctCode;
+    next();
+  },    
 };

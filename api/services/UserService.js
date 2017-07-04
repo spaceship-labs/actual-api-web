@@ -2,8 +2,21 @@ var _ = require('underscore');
 module.exports = {
 	createUserFromClient: createUserFromClient,
 	checkIfUserEmailIsTaken: checkIfUserEmailIsTaken,
-	updateUserFromClient: updateUserFromClient
+	updateUserFromClient: updateUserFromClient,
+	getCurrentUserClientId: getCurrentUserClientId,
+	getCurrentUserId: getCurrentUserId
 };
+
+function getCurrentUserId(req){
+  var userId = req.user ? req.user.id : false;
+  return userId;
+}
+
+
+function getCurrentUserClientId(req){
+	var currentUserClientId = req.user ? req.user.Client : false;
+	return currentUserClientId;
+}
 
 function createUserFromClient(client){
 	var userToCreate = {

@@ -33,13 +33,15 @@ function createOrder(orderId, payment, req) {
 	//sails.log.info('req.headers.site', req.headers.site);
 	//sails.log.info('api_key', conekta.api_key);
 	var order;
+	var userId = UserService.getCurrentUserId(req);
+	var clientId = UserService.getCurrentUserClientId(req);
 
 	return StockService.validateQuotationStockById(orderId, req)
 	  .then(function(isValidStock){
 	    if(!isValidStock){
 	      return Promise.reject(new Error('Inventario no suficiente'));
 	    }
-    	return QuotationWeb.findOne({id: orderId});
+    	return QuotationWeb.findOne({id: orderId, Client: clientId});
     })
 		.then(function(orderFound){
 			order = orderFound;
@@ -68,7 +70,7 @@ function createOrder(orderId, payment, req) {
 				},0);
 				totalLines = totalLines - discountLine.amount;
 				return totalLinesAmount;
-			}
+			};
 
 			//TODO: check how to match original payment amount instead of using the same order total.
 			//The amount converted to cents, sometimes differs by one,for example 97914 and 97913
@@ -105,6 +107,7 @@ function createOrder(orderId, payment, req) {
 					conektaOrder.requestData = JSON.stringify(conektaOrderParams);
 					conektaOrder.responseData = JSON.stringify(conektaOrder);
 					conektaOrder.QuotationWeb = orderId;
+					conektaOrder.UserWeb = userId;
 
 					var speiOrder = isConektaSpeiOrder(conektaOrder);
 					if(speiOrder){

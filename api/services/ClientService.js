@@ -25,7 +25,7 @@ module.exports = {
 	mapFiscalFields: mapFiscalFields,
 	populateClientRelations: populateClientRelations,
 	isValidCardCode: isValidCardCode,
-	validateContactsZipcode: validateContactsZipcode 
+	validateContactsZipcode: validateContactsZipcode,
 };
 
 function validateContactsZipcode(contacts){
@@ -36,8 +36,8 @@ function validateContactsZipcode(contacts){
 		sails.log.info('results', results);
 		return _.every(results,function(isValid){
 			return isValid;
-		})
-	})
+		});
+	});
 }
 
 function mapClientFields(fields){
