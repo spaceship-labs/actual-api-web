@@ -172,12 +172,16 @@ function sendOrder(client, order, products, payments, ewallet, store) {
       balance: numeral(client.Balance).format('0,0.00'),
     },
     order: {
+      isSpeiOrder: order.isSpeiOrder,
       folio: order.folio,
+      receiving_account_number: order.receiving_account_number,
+      receiving_account_bank: order.receiving_account_bank,
       subtotal: numeral(order.subtotal).format('0,0.00'),
       discount: numeral(order.discount).format('0,0.00'),
       total: numeral(order.total).format('0,0.00'),
       paid: numeral(order.total).format('0,0.00'),
       pending: numeral(0).format('0,0.00'),
+      conektaAmount: numeral(order.conektaAmount).format('0,0.00'),      
     },
     company: {
       url: baseURL,
