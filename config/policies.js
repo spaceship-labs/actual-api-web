@@ -46,9 +46,9 @@ module.exports.policies = {
     create: ['setupDefaultData','isAuthenticated', 'isAllowed'],
     update: ['setupDefaultData','isAuthenticated', 'isAllowed'],
     */
-    send_password_recovery: true,
-    update_password: true,
-    register: true
+    send_password_recovery: ['setupDefaultData'],
+    update_password: ['setupDefaultData'],
+    register: ['setupDefaultData']
   },
   ClientController:{
     create:['setupDefaultData']

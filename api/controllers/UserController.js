@@ -11,6 +11,8 @@ module.exports = {
   send_password_recovery: function(req, res){
     var form  = req.params.all();
     var email = form.email || false;
+    var store = req.activeStore || {};
+
     if(email && Common.validateEmail(email) ){
       UserWeb.findOne( {email:email}, {select: ['id', 'password', 'email']} )
         .then(function(user){
@@ -18,8 +20,12 @@ module.exports = {
           var tokenAux = bcrypt.hashSync(values ,bcrypt.genSaltSync(10));
           var token = tokenAux;
           //var token = tokenAux.replace(/\//g, "-");
+          var storeUrl = store.url_sandbox;
+          if(process.env.MODE === 'production'){
+            storeUrl = store.url;
+          }
 
-          var frontendURL =  process.env.baseURLFRONT || 'http://ventas.miactual.com';
+          var frontendURL =  storeUrl || 'http://actualstudio.com';
 
           var recoverURL =  frontendURL + '/reset-password?';
           recoverURL += 'token='+token;
@@ -29,7 +35,7 @@ module.exports = {
             user.email,
             recoverURL,
             function(err) {
-              if (err){return res.negotiate(err)};
+              if (err){return res.negotiate(err);}
               return res.ok({
                 success:true,
               });

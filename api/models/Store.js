@@ -19,7 +19,8 @@ module.exports = {
       type: 'string'
     },
     code:{type:'string'},
-    
+    url:{type:'string'},
+    url_sandbox:{type:'string'},    
 
     //RELATIONS
     users: {
