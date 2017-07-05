@@ -390,10 +390,11 @@ module.exports = {
   sendEmail: function(req, res){
     var form = req.params.all();
     var id = form.id;
+    var currentUserClientId = UserService.getCurrentUserClientId(req);
 
     Common.nativeFindOne({_id: ObjectId(id)}, QuotationWeb)
       .then(function(quotation){
-        if(quotation.User !== req.user.id){
+        if(quotation.Client !== currentUserClientId){
           return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
         }      
         return Email.sendQuotation(id, req.activeStore);

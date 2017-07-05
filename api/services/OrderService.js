@@ -10,8 +10,25 @@ var BALANCE_SAP_TYPE = 'Balance';
 module.exports = {
   createFromQuotation: createFromQuotation,
   getGroupByQuotationPayments: getGroupByQuotationPayments,
-  relateOrderToSap: relateOrderToSap
+  relateOrderToSap: relateOrderToSap,
+  getOrderStatusMapper: getOrderStatusMapper,
+  getOrderStatusLabel: getOrderStatusLabel
 };
+
+function getOrderStatusMapper(){
+  var statusMap = {
+    'pending': 'Pendiente',
+    'pending-sap': 'Pagado y procesando',
+    'completed': 'Pagado',
+    'pending-payment': 'Pendiente de pago'
+  };        
+  return statusMap;
+}
+
+function getOrderStatusLabel(status){
+  var statusMap = getOrderStatusMapper();
+  return statusMap[status] || status;
+}
 
 function getGroupByQuotationPayments(payments){
   var group = 1;
@@ -312,7 +329,11 @@ function relateOrderToSap(order, orderDetails,req){
       })
       .catch(function(err){
         error = err;
-        return OrderWeb.update({id: order.id},{inSapWriteProgress:false});
+        var params = {inSapWriteProgress:false};
+        if(order.hookLogId){
+          params.HookLog = hookLogId; 
+        }
+        return OrderWeb.update({id: order.id}, params);
       })
       .then(function(updated){
         reject(error);

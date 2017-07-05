@@ -156,6 +156,7 @@ function getExchangeRate(){
 }
 
 function getMethodGroupsWithTotals(quotationId, activeStore, options){
+  options = options || {};
   var methodsGroups = paymentGroups;
   var discountKeys = [
     'discountPg1',

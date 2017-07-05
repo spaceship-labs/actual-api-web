@@ -176,6 +176,7 @@ function sendOrder(client, order, products, payments, ewallet, store) {
       folio: order.folio,
       receiving_account_number: order.receiving_account_number,
       receiving_account_bank: order.receiving_account_bank,
+      status: OrderService.getOrderStatusLabel(order.status),
       subtotal: numeral(order.subtotal).format('0,0.00'),
       discount: numeral(order.discount).format('0,0.00'),
       total: numeral(order.total).format('0,0.00'),
@@ -185,7 +186,7 @@ function sendOrder(client, order, products, payments, ewallet, store) {
     },
     company: {
       url: baseURL,
-      image: store.logo,
+      logo: store.logo || baseURL+'/logos/group.png',
       survey: surveyURL,
     },
     products: products,
@@ -252,20 +253,18 @@ function quotation(quotationId, activeStore) {
   return QuotationWeb
     .findOne(quotationId)
     .populate('Client')
-    .populate('User')
     .populate('Store')
     .populate('Details')
     .then(function(quotation) {
       var client   = quotation.Client;
-      var user     = quotation.User;
       var store    = quotation.Store;
       var details  = quotation.Details.map(function(detail) { return detail.id; });
       details      = QuotationDetailWeb.find(details).populate('Product').populate('Promotion');
       var payments = PaymentService.getPaymentGroupsForEmail(quotation.id, activeStore);
       var transfers = TransferService.transfers(store.group);
-      return [client, user,  quotation, details, payments, transfers, store];
+      return [client,  quotation, details, payments, transfers, store];
     })
-    .spread(function(client, user, quotation, details, payments, transfers, store) {
+    .spread(function(client, quotation, details, payments, transfers, store) {
       var products = details.map(function(detail) {
         var date  = moment(detail.shipDate);
         moment.locale('es');
@@ -288,9 +287,9 @@ function quotation(quotationId, activeStore) {
           image: baseURL + '/uploads/products/' + detail.Product.icon_filename
         };
       });
-      return [client, user, quotation, products, payments, transfers, store];
+      return [client, quotation, products, payments, transfers, store];
     })
-    .spread(function(client, user, quotation, products, payments, transfers, store) {
+    .spread(function(client, quotation, products, payments, transfers, store) {
       var mats = products.map(function(p) {
         return materials(p.id);
       });
@@ -300,12 +299,12 @@ function quotation(quotationId, activeStore) {
           mats.forEach(function(m, i) {
             products[i].material = m;
           });
-          return sendQuotation(client, user, quotation, products, payments, transfers, store);
+          return sendQuotation(client, quotation, products, payments, transfers, store);
         });
     });
 }
 
-function sendQuotation(client, user, quotation, products, payments, transfers, store) {
+function sendQuotation(client, quotation, products, payments, transfers, store) {
   var date = moment(quotation.updatedAt);
   moment.locale('es');
   date.locale(false);
@@ -315,12 +314,6 @@ function sendQuotation(client, user, quotation, products, payments, transfers, s
       address: '',
       phone: client.Phone1,
       cel: client.Cellular
-    },
-    user: {
-      name: user.firstName + ' ' + user.lastName,
-      email: user.email,
-      phone: user.phone,
-      cel: user.mobilePhone,
     },
     quotation: {
       folio: quotation.folio,
@@ -332,6 +325,7 @@ function sendQuotation(client, user, quotation, products, payments, transfers, s
     },
     company: {
       url: baseURL,
+      logo: store.logo || baseURL+'/logos/group.png',
       image: store.logo
     },
     products: products,
@@ -347,7 +341,7 @@ function sendQuotation(client, user, quotation, products, payments, transfers, s
   var requestBody      = undefined;
   var mail             = new helper.Mail();
   var personalization  = new helper.Personalization();
-  var from             = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
+  var from             = new helper.Email('web@actualg.com', 'Web Actual Group');
   var clientEmail      = client.E_Mail;
   var to               = new helper.Email(clientEmail, client.CardName);
   var subject          = 'Cotización | Folio #' + quotation.folio;
@@ -374,9 +368,9 @@ function sendQuotation(client, user, quotation, products, payments, transfers, s
   mail.addContent(content);
   mail.addPersonalization(personalization);
   requestBody = mail.toJSON();
-  request.method = 'POST'
-  request.path = '/v3/mail/send'
-  request.body = requestBody
+  request.method = 'POST';
+  request.path = '/v3/mail/send';
+  request.body = requestBody;
   return new Promise(function(resolve, reject){
     sendgrid.API(request, function (response) {
       if (response.statusCode >= 200 && response.statusCode <= 299) {
