@@ -34,6 +34,11 @@ function createOrderInvoice(orderId, req) {
       .populate('Payments')
       .then(function(order) {
         orderFound = order;
+
+        if(order.status === 'pending-payment'){
+          return Promise.resolve('Pedido pendiente por pagar');
+        }
+
         var client = order.Client;
         var details = order.Details.map(function(d) { return d.id; });
         var payments = order.Payments;
