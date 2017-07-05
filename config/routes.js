@@ -421,6 +421,11 @@ module.exports.routes = {
   'GET /shipping/zipcodedelivery/:id':{
     controller: 'shipping',
     action: 'getZipcodeDeliveryById'
+  },
+
+  '/spei-webhook':{
+    controller: 'order',
+    action: 'receiveSpeiNotification'
   }
 
   /*

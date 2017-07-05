@@ -194,6 +194,10 @@ module.exports = {
         console.log(err);
         res.negotiate(err);
       });
+  },
+
+  receiveSpeiNotification: function(req, res){
+    res.json(req.body);
   }
 
 };
