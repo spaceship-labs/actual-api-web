@@ -197,7 +197,18 @@ module.exports = {
   },
 
   receiveSpeiNotification: function(req, res){
-    res.json(req.body);
+    var hookLog = {
+      content: req.body
+    };
+    
+    HookLog.create(hookLog)
+      .then(function(created){
+        res.json(req.body);
+      })
+      .catch(function(err){
+        console.log('err', err);
+        res.negotiate(err);
+      });
   }
 
 };
