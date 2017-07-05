@@ -84,6 +84,23 @@ function orderEmail(orderId) {
         moment.locale('es');
         date.locale(false);
         date = date.format('DD/MMM/YYYY');
+
+        var promotionStartDate;
+        var promotionEndDate;
+        var promotionValidity;
+
+        if(detail.Promotion){
+          promotionStartDate  = moment(detail.Promotion.startDate);
+          promotionStartDate.locale(false);
+          promotionStartDate = promotionStartDate.format('DD/MMM/YYYY');
+
+          promotionEndDate  = moment(detail.Promotion.endDate);
+          promotionEndDate.locale(false);
+          promotionEndDate = promotionEndDate.format('DD/MMM/YYYY');
+
+          promotionValidity = promotionStartDate +' al ' + promotionEndDate;
+        }
+
         return {
           id: detail.Product.id,
           name:  detail.Product.ItemName,
@@ -98,7 +115,8 @@ function orderEmail(orderId) {
           total: numeral(detail.total).format('0,0.00'),
           discount: detail.discountPercent,
           promo: (detail.Promotion || {}).publicName,
-          image: baseURL + '/uploads/products/' + detail.Product.icon_filename
+          image: baseURL + '/uploads/products/' + detail.Product.icon_filename,
+          promotionValidity: promotionValidity
         };
       });
       var payments = payments.map(function(payment) {
@@ -270,6 +288,23 @@ function quotation(quotationId, activeStore) {
         moment.locale('es');
         date.locale(false);
         date = date.format('DD/MMM/YYYY');
+
+        var promotionStartDate;
+        var promotionEndDate;
+        var promotionValidity;
+
+        if(detail.Promotion){
+          promotionStartDate  = moment(detail.Promotion.startDate);
+          promotionStartDate.locale(false);
+          promotionStartDate = promotionStartDate.format('DD/MMM/YYYY');
+
+          promotionEndDate  = moment(detail.Promotion.endDate);
+          promotionEndDate.locale(false);
+          promotionEndDate = promotionEndDate.format('DD/MMM/YYYY');
+
+          promotionValidity = promotionStartDate +' al ' + promotionEndDate;
+        }
+
         return {
           id: detail.Product.id,
           name:  detail.Product.ItemName,
@@ -284,7 +319,8 @@ function quotation(quotationId, activeStore) {
           total: numeral(detail.total).format('0,0.00'),
           discount: detail.discountPercent,
           promo: (detail.Promotion || {}).publicName,
-          image: baseURL + '/uploads/products/' + detail.Product.icon_filename
+          image: baseURL + '/uploads/products/' + detail.Product.icon_filename,
+          promotionValidity: promotionValidity
         };
       });
       return [client, quotation, products, payments, transfers, store];

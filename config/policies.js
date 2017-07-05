@@ -39,7 +39,8 @@ module.exports.policies = {
   },
   OrderController:{
     '*': ['isAuthenticated', 'setupDefaultData'],
-    'receiveSpeiNotification': ['setupDefaultData']
+    'receiveSpeiNotification': ['setupDefaultData'],
+    sendOrderEmail:false
   },
   UserController:{
     '*': ['setupDefaultData','isAuthenticated'],

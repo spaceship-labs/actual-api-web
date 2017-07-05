@@ -8,6 +8,19 @@ var BALANCE_SAP_TYPE = 'Balance';
 
 
 module.exports = {
+  sendOrderEmail: function(req, res){
+    var form = req.params.all();
+    var orderId = form.id;
+    Email.sendOrderConfirmation(orderId)
+      .then(function(){
+        res.ok();
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
+  },
+  
   find: function(req, res){
     var form = req.params.all();
     var model = 'orderweb';

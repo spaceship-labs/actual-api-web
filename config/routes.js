@@ -426,8 +426,13 @@ module.exports.routes = {
   '/spei-webhook':{
     controller: 'order',
     action: 'receiveSpeiNotification'
-  }
+  },
 
+
+  '/test/sendorder/:id':{
+    controller:'order',
+    action:'sendOrderEmail'
+  }
   /*
   '/fixorders':{
     controller:'sync',

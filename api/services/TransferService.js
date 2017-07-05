@@ -16,7 +16,7 @@ function transfers(group) {
       currency: 'Pesos',
       bank: 'Bancomer',
       sucursal: '-',
-      account: '194554957',
+      account: '0194554957',
       clabe: '012691001945549572',
       swift: '-'
     },
