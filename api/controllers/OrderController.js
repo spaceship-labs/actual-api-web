@@ -198,9 +198,9 @@ module.exports = {
 
   receiveSpeiNotification: function(req, res){
     var hookLog = {
-      content: req.body
+      content: JSON.stringify(req.body)
     };
-    
+
     HookLog.create(hookLog)
       .then(function(created){
         res.json(req.body);
