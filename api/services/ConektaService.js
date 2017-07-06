@@ -260,22 +260,23 @@ function processNotification(req, res){
       var data = reqBody.data ||  false;
     	
     	res.ok();
-    	return processSpeiNotification(data);
+    	return processSpeiNotification(reqBody);
     });	
 }
 
-function processSpeiNotification(reqData){
+function processSpeiNotification(reqBody){
 
-  if(!reqData){
+  if(!reqBody || !reqBody.data){
     return Promise.resolve("No se recibio el formato correcto");
   }
 
-  console.log('hook type:', reqData.type);
+  console.log('hook type:', reqBody.type);
 
-  if(reqData.type !== 'charge.paid'){
+  if(reqBody.type !== 'charge.paid'){
   	return Promise.resolve("No es una notification de pago");
   }
 
+  var reqData = reqBody.data;
   var conektaOrderId = reqData.object.order_id;
   var status = reqData.object.status;
   var payment_method = reqData.object.payment_method;
