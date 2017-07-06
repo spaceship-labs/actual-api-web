@@ -278,10 +278,17 @@ function mapPaymentsToSap(payments, exchangeRate){
       paymentSap.DateTerminal = moment().format(SAP_DATE_FORMAT);
       paymentSap.ReferenceTerminal = payment.verificationCode;
     }
-    if(payment.msi || payment.type === 'single-payment-terminal'){
+
+    //Mapping credit and debit card to accepted type in SAP
+    if(payment.type === 'credit-card' || payment.type === 'debit-card'){
+      paymentSap.TypePay = 'single-payment-terminal';
+    }
+
+    if(payment.msi || payment.type === 'credit-card' ||  payment.type === 'debit-card'){
       paymentSap.CardNum = '4802';
       paymentSap.CardDate = '05/16'; //MM/YY
     }
+
 
     return paymentSap;
   });

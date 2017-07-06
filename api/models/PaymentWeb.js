@@ -6,7 +6,8 @@ module.exports = {
     type: {
       type:'string',
       enum:[
-        'single-payment-terminal',
+        'debit-card',
+        'credit-card',
         'transfer',
         '3-msi',
         '6-msi',

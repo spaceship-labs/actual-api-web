@@ -269,26 +269,48 @@ var paymentGroups = [
     discountKey:'discountPg1',
     methods: [
       {
-        label:'1 pago con',
-        name:'Una sola exhibición terminal',
-        type:'single-payment-terminal',
-        description:'VISA, MasterCard, American Express',
+        label:'Tarjeta de crédito',
+        name:'Tarjeta de crédito',
+        type:'credit-card',
+        description:'',
         cardsImages:['/cards/visa.png','/cards/mastercard.png','/cards/american.png'],
         cards:['Visa','MasterCard','American Express'],
-        terminals:[
-          {label:'American Express', value:'american-express'},
-          {label:'Banamex', value:'banamex'}
-        ],
         currency: 'mxn',
-        needsVerification: true,
         min:0,
-        web: true
+      },
+
+      {
+        label:'Tarjeta de débito',
+        name:'Tarjeta de débito',
+        type:'debit-card',
+        description:'',
+        cardsImages:['/cards/banamex.png','/cards/hsbc.png','/cards/santander.png'],
+        moreCards: true,
+        cards:['Banamex','HSBC','Inbursa','Santander'],
+        currency: 'mxn',
+        min:0,
       },
       {
         label:'Transferencia',
         name:'Transferencia',
         type:'transfer',
         description:'',
+        cardsImages:['/cards/banamex.png','/cards/hsbc.png','/cards/santander.png'],
+        moreCards: true,
+        cards:[
+          'Banamex',
+          'Banbajio',
+          'Bancomer',
+          'Banco Azteca',
+          'Banorte',
+          'CI Banco',
+          'HSBC',
+          'Inbursa',
+          'IXE',
+          'Multiva',
+          'Santander',
+          'Scotiabank'
+        ],
         currency: 'mxn',
         terminals:[
           {label:'Banamex', value:'banamex'},
@@ -296,7 +318,6 @@ var paymentGroups = [
           {label:'Banorte', value:'banorte'},
           {label:'Santander', value:'santander'}
         ],
-        needsVerification: true
       },
     ]
   },
@@ -319,27 +340,21 @@ var paymentGroups = [
           'American Express',
           'Banamex',
           'Banbajio',
-          'Bancomer',
-          'Banca Mifel',
-          'Banco Ahorro Famsa',
           'Banjercito',
           'Banorte',
+          'Banca Mifel',
+          'Bancomer',
           'Banregio',
+          'Famsa',
+          'HSBC',
           'Inbursa',
           'Itaucard',
-          'Ixe',
-          'Liverpool Premium Card',
+          'Invex',
+          'IXE',
           'Santander',
-          'Scotiabank'
+          'Liverpool Premium Card',
         ],
         moreCards: true,
-        terminals:[
-          {label:'American Express', value:'american-express'},
-          {label:'Banamex', value:'banamex'},
-          {label:'Bancomer', value:'bancomer'},
-          {label:'Banorte', value:'banorte'},
-          {label:'Santander', value:'santander'}
-        ],
         currency: 'mxn',
         min:300,
         needsVerification: true,
@@ -356,37 +371,32 @@ var paymentGroups = [
         name:'6 meses sin intereses',
         type:'6-msi',
         msi:6,
+        moreCards:true,
         cardsImages:[
           '/cards/amexcard.png',
           '/cards/banamex.png',
           '/cards/bancomer.png',
         ],
-        cards:[
+        cards: [
           'Afirme',
           'American Express',
           'Banamex',
           'Banbajio',
-          'Bancomer',
-          'Banca Mifel',
-          'Banco Ahorro Famsa',
           'Banjercito',
           'Banorte',
+          'Banca Mifel',
+          'Bancomer',
           'Banregio',
+          'Famsa',
+          'HSBC',
           'Inbursa',
           'Itaucard',
-          'Ixe',
-          'Liverpool Premium Card',
+          'Invex',
+          'IXE',
           'Santander',
-          'Scotiabank'
+          'Liverpool Premium Card',
         ],
-        moreCards: true,
-        terminals:[
-          {label:'American Express', value:'american-express'},
-          {label:'Banamex', value:'banamex'},
-          {label:'Bancomer', value:'bancomer'},
-          {label:'Banorte', value:'banorte'},
-          {label:'Santander', value:'santander'}
-        ],
+
         currency: 'mxn',
         min:600,
         needsVerification: true,
@@ -397,23 +407,30 @@ var paymentGroups = [
         name:'9 meses sin intereses',
         type:'9-msi',
         msi:9,
+        moreCards:true,
         cardsImages:[
           '/cards/amexcard.png',
           '/cards/banamex.png',
           '/cards/bancomer.png',
         ],
-        cards:[
+        cards: [
+          'Afirme',
           'American Express',
           'Banamex',
+          'Banbajio',
+          'Banjercito',
+          'Banorte',
+          'Banca Mifel',
           'Bancomer',
-          'Santander'
-        ],
-        moreCards: true,
-        terminals:[
-          {label:'American Express', value:'american-express'},
-          {label:'Banamex', value:'banamex'},
-          {label:'Bancomer', value:'bancomer'},
-          {label:'Santander', value:'santander'}
+          'Banregio',
+          'Famsa',
+          'HSBC',
+          'Inbursa',
+          'Itaucard',
+          'Invex',
+          'IXE',
+          'Santander',
+          'Liverpool Premium Card',
         ],
         currency: 'mxn',
         min:800,
@@ -431,36 +448,30 @@ var paymentGroups = [
         name:'12 meses sin intereses',
         type:'12-msi',
         msi:12,
+        moreCards:true,
         cardsImages:[
           '/cards/amexcard.png',
           '/cards/banamex.png',
           '/cards/bancomer.png',
         ],
-        cards:[
-          'American Express',
+        cards: [
           'Afirme',
+          'American Express',
           'Banamex',
-          'Bancomer',
           'Banbajio',
-          'Banca Mifel',
-          'Banco Ahorro Famsa',
           'Banjercito',
           'Banorte',
+          'Banca Mifel',
+          'Bancomer',
           'Banregio',
+          'Famsa',
+          'HSBC',
           'Inbursa',
           'Itaucard',
-          'Ixe',
-          'Liverpool Premium Card',
+          'Invex',
+          'IXE',
           'Santander',
-          'Scotiabank'
-        ],
-        moreCards: true,
-        terminals:[
-          {label:'American Express', value:'american-express'},
-          {label:'Banamex', value:'banamex'},
-          {label:'Bancomer', value:'bancomer'},
-          {label:'Banorte', value:'banorte'},
-          {label:'Santander', value:'santander'}
+          'Liverpool Premium Card',
         ],
         currency: 'mxn',
         min: 1200,
@@ -473,6 +484,7 @@ var paymentGroups = [
     group:5,
     discountKey:'discountPg5',
     methods: [
+      /*
       {
         label:'18',
         name:'18 meses sin intereses',
@@ -495,6 +507,7 @@ var paymentGroups = [
         min:2000,
         web:true
       },
+      */
     ]
   },
 ];
