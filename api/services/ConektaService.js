@@ -259,7 +259,7 @@ function processNotification(req){
       var reqBody = req.body || {};
       var data = reqBody.data ||  false;
     	
-    	return processSpeiNotification(reqData);
+    	return processSpeiNotification(data);
     });	
 }
 
