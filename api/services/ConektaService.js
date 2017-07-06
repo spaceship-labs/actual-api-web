@@ -263,7 +263,7 @@ function processNotification(req){
     });	
 }
 
-function processSpeiNotification(req){
+function processSpeiNotification(reqData){
 
   if(!reqData){
     return Promise.reject(new Error("No se recibio el formato correcto"));
