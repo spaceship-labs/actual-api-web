@@ -210,7 +210,7 @@ module.exports = {
   },
 
   receiveSpeiNotification: function(req, res){
-    ConektaService.processNotification()
+    ConektaService.processNotification(req)
       .then(function(res){
         res.ok();
       })
