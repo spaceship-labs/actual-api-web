@@ -10,7 +10,8 @@ conekta.api_version = '2.0.0';
 
 module.exports = {
 	createOrder: createOrder,
-	isConektaSpeiOrder: isConektaSpeiOrder
+	isConektaSpeiOrder: isConektaSpeiOrder,
+	processNotification: processNotification
 };
 
 function isConektaSpeiOrder(conektaOrder){
@@ -246,26 +247,78 @@ function convertToCents(amount){
 	return centsAmount;
 }
 
-function chargeOrder(order, req) {
-	conekta.api_key = SiteService.getConektaKeyBySite(req);
+function processNotification(req){
+  var hookLog = {
+    content: JSON.stringify(req.body)
+  };
+  var createdHook;
 
-	return new Promise(function(resolve, reject){
-		var params = {
-			"payment_method": {
-				"type": "card",
-				"expires_at": 1479167175
-			},
-			"amount": 350000
-		};
-		conekta.Order.find(order.id, function(err, order) {
-		    order.createCharge(params, function(err, charge) {
-		        if(err){
-		        	reject(err);
-		        }
-		        console.log(charge);
-		    	resolve(charge);
-		    });
-		});
-
-	});
+  return HookLog.create(hookLog)
+    .then(function(created){
+      createdHook = created;
+      var reqBody = req.body || {};
+      var data = reqBody.data ||  false;
+    	
+    	return processSpeiNotification(reqData);
+    });	
 }
+
+function processSpeiNotification(req){
+
+  if(!reqData){
+    return Promise.reject(new Error("No se recibio el formato correcto"));
+  }
+
+  if(reqData.type !== 'charge.paid'){
+  	return Promise.reject(new Error("No es una notification de pago"));
+  }
+
+  var conektaOrderId = reqData.object.order_id;
+  var status = reqData.object.status;
+  var payment_method = reqData.object.payment_method;
+  var conektaOrderPromise;
+  var order;
+
+  if(payment_method.type != "spei"){
+  	return Promise.reject(new Error("No es una notification de pago SPEI"));  	
+  }
+
+  if(status === 'paid'){
+    conektaOrderPromise = ConektaOrder.findOne({conektaId:conektaOrderId});
+  }else{
+    return Promise.reject(new Error("No se encontro la orden"));
+  }
+
+  sails.log.info('Spei notification ' + conektaOrderId);
+
+  return conektaOrderPromise
+  .then(function(conektaOrder){
+      var orderId = conektaOrder.OrderWeb;
+
+      var promises = [
+        OrderWeb.findOne({id: orderId})
+          .populate('UserWeb')
+          .populate('Client')
+          .populate('Address')
+          .populate('Payments'),
+        OrderDetailWeb.find({OrderWeb: orderId}).populate('Product')
+      ];
+
+      return Promise.all(promises);       
+    })
+    .then(function(results){
+      order = results[0];
+      var orderDetails = results[1];
+
+      if(!order){
+        return Promise.reject(new Error('No se encontro el pedido'));
+      }
+
+      sails.log.info('Relating order to sap via spei notification: ' + createdHook.id);
+      order.hookLogId = createdHook.id;
+      return OrderService.relateOrderToSap(order, orderDetails, req);
+    })
+    .then(function(related){
+    	return Email.sendOrderConfirmation(order.id);
+    }) ;
+ }

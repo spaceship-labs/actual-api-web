@@ -210,75 +210,10 @@ module.exports = {
   },
 
   receiveSpeiNotification: function(req, res){
-    var hookLog = {
-      content: JSON.stringify(req.body)
-    };
-
-    HookLog.create(hookLog)
-      .then(function(created){
-        res.json(req.body);
+    ConektaService.processNotification()
+      .then(function(res){
+        res.ok();
       })
-      .catch(function(err){
-        console.log('err', err);
-        res.negotiate(err);
-      });
-  },  
-
-  receiveSpeiNotification2: function(req, res){
-    var hookLog = {
-      content: JSON.stringify(req.body)
-    };
-    var createdHook;
-
-    HookLog.create(hookLog)
-      .then(function(created){
-        createdHook = created;
-        var reqBody = req.body || {};
-        var data = reqBody.data ||  false;
-
-        if(!data){
-          return Promise.reject(new Error("No se recibio el formato correcto"));
-        }
-
-        var conektaOrderId = data.object.order_id;
-        var status = data.object.status;
-
-        if(status === 'paid'){
-          return  ConektaOrder.findOne({conektaId:conektaOrderId});
-        }else{
-          return Promise.reject(new Error("No se encontro la orden"));
-        }
-
-        //res.json(req.body);
-      })
-      .then(function(conektaOrder){
-
-        var orderId = conektaOrder.OrderWeb;
-
-        var promises = [
-          OrderWeb.findOne({id: orderId})
-            .populate('UserWeb')
-            .populate('Client')
-            .populate('Address')
-            .populate('Payments'),
-          OrderDetailWeb.find({OrderWeb: orderId}).populate('Product')
-        ];
-
-        Promise.all(promises)
-          .then(function(results){
-            var order = results[0];
-            var orderDetails = results[1];
-
-            if(!order){
-              return Promise.reject(new Error('No se encontro el pedido'));
-            }
-
-            sails.log.info('Relating order to sap via spei notification: ' + createdHook.id);
-            order.hookLogId = createdHook.id;
-            return OrderService.relateOrderToSap(order, orderDetails, req);
-          });        
-      })
-
       .catch(function(err){
         console.log('err', err);
         res.negotiate(err);

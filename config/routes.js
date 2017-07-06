@@ -78,9 +78,14 @@ module.exports.routes = {
     action: 'search'
   },
 
-  '/product/findbyid/:id':{
+  'GET /product/findbyid/:id':{
     controller: 'product',
     action: 'findById'
+  },
+
+  'GET /product/findbyslug/:slug':{
+    controller: 'product',
+    action: 'findBySlug'
   },
 
   '/product/addseen/:ItemCode':{

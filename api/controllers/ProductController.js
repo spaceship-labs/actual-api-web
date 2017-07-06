@@ -34,7 +34,6 @@ module.exports = {
   findById: function(req, res){
     var form = req.params.all();
     var id = form.id;
-    //Product.find({id:id}).exec(function(err, results){
     var currentDate = new Date();
     var queryPromo = {
       startDate: {'<=': currentDate},
@@ -44,10 +43,47 @@ module.exports = {
     //var societyCodes   = SiteService.getSocietyCodesByActiveStore(activeStore);
     //var displayProperty = SiteService.getSiteDisplayProperty(req);
     var query = {
-      or: [ {ItemCode:id}, {ItemName:id} ]
+      ItemCode: id
     };
     //query[displayProperty] = true;
     //query = Search.applySocietiesQuery(query, societyCodes);
+
+    Product.findOne(query)
+      .populate('files')
+      .populate('Categories')
+      .populate('FilterValues')
+      .populate('Sizes')
+      .populate('Groups')
+      .populate('Promotions', queryPromo)
+      .then(function(product){
+        res.ok({data:product});
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
+
+  },
+
+  findBySlug: function(req, res){
+    var form = req.params.all();
+    var slug = form.slug || '';
+    var currentDate = new Date();
+    var queryPromo = {
+      startDate: {'<=': currentDate},
+      endDate: {'>=': currentDate},
+    };
+
+    slug = decodeURIComponent(slug);
+    slug = slug.replace(new RegExp('-', 'g'), ' ');
+
+    console.log('slug', slug);
+    var query = {
+      or: [ 
+        {Name: new RegExp(slug,"i")},
+        {ItemName: new RegExp(slug,"i")} 
+      ]
+    };
 
     Product.findOne(query)
       .populate('files')
