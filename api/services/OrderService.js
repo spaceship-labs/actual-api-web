@@ -329,6 +329,7 @@ function relateOrderToSap(order, orderDetails,req){
       })
       .catch(function(err){
         error = err;
+        console.log('err relateOrderToSap', err);
         var params = {inSapWriteProgress:false};
         if(order.hookLogId){
           params.HookLog = hookLogId; 

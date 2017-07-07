@@ -306,17 +306,18 @@ function processSpeiNotification(req, createdHookLog){
 	  		}
 	  		order = _order;
 
-	      var orderId = _order.id;
+	      var orderId = order.id;
         return OrderDetailWeb.find({OrderWeb: orderId}).populate('Product');
 	    })
 	    .then(function(details){
 	      var orderDetails = details;
 
-	      sails.log.info('Relating order to sap via spei notification: ' + createdHookLog.id);
+	      sails.log.info('Relating order ' + order.id +' to sap via spei notification: ' + createdHookLog.id);
 	      order.hookLogId = createdHookLog.id;
 	      return OrderService.relateOrderToSap(order, orderDetails, req);
 	    })
 	    .then(function(related){
+	    	sails.log.info('Sending order ' + order.id + ' email notification after spei pay');
 	    	return Email.sendOrderConfirmation(order.id);
 	    });
  }
