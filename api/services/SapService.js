@@ -270,6 +270,11 @@ function mapPaymentsToSap(payments, exchangeRate){
       PaymentAppId: payment.id,
       amount: payment.ammount
     };
+
+    if(payment.type === 'transfer'){
+      payment.terminal = 'banorte';
+    }
+
     if(payment.currency === 'usd'){
       paymentSap.rate = exchangeRate;
     }
