@@ -287,43 +287,35 @@ function processSpeiNotification(reqBody){
   	return Promise.resolve("No es una notification de pago SPEI");  	
   }
 
-  if(status === 'paid'){
-    conektaOrderPromise = ConektaOrder.findOne({conektaId:conektaOrderId});
-  }else{
+  if(status!== 'paid'){
     return Promise.resolve("No se encontro la orden");
   }
 
   sails.log.info('Spei notification ' + conektaOrderId);
 
-  return conektaOrderPromise
-  .then(function(conektaOrder){
-      var orderId = conektaOrder.OrderWeb;
+  return OrderWeb.findOne({conektaId:conektaOrderId})
+    .populate('UserWeb')
+    .populate('Client')
+    .populate('Address')
+    .populate('Payments')
+	  .then(function(_order){
 
-      var promises = [
-        OrderWeb.findOne({id: orderId})
-          .populate('UserWeb')
-          .populate('Client')
-          .populate('Address')
-          .populate('Payments'),
-        OrderDetailWeb.find({OrderWeb: orderId}).populate('Product')
-      ];
+	  		if(!_order){
+					return Promise.resolve("No se encontro la orden");  			
+	  		}
+	  		order = _order;
 
-      return Promise.all(promises);       
-    })
-    .then(function(results){
-      order = results[0];
-      var orderDetails = results[1];
+	      var orderId = _order.id;
+        return OrderDetailWeb.find({OrderWeb: orderId}).populate('Product');
+	    })
+	    .then(function(details){
+	      var orderDetails = details;
 
-      if(!order){
-        return Promise.resolve('No se encontro el pedido');
-        //return Promise.reject(new Error('No se encontro el pedido'));
-      }
-
-      sails.log.info('Relating order to sap via spei notification: ' + createdHook.id);
-      order.hookLogId = createdHook.id;
-      return OrderService.relateOrderToSap(order, orderDetails, req);
-    })
-    .then(function(related){
-    	return Email.sendOrderConfirmation(order.id);
-    }) ;
+	      sails.log.info('Relating order to sap via spei notification: ' + createdHook.id);
+	      order.hookLogId = createdHook.id;
+	      return OrderService.relateOrderToSap(order, orderDetails, req);
+	    })
+	    .then(function(related){
+	    	return Email.sendOrderConfirmation(order.id);
+	    });
  }

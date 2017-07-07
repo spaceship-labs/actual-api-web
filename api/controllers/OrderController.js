@@ -210,14 +210,19 @@ module.exports = {
   },
 
   receiveSpeiNotification: function(req, res){
+    var resolved = false;
     ConektaService.processNotification(req, res)
       .then(function(res){
-        console.log('Prcoessed notification');
-        //res.ok();
+        console.log('Processed notification');
+        res.ok();
+        resolved = true;
       })
       .catch(function(err){
-        console.log('err', err);
-        res.negotiate(err);
+        console.log('err notification', err);
+        if(!resolved){
+          res.ok();
+        }
+        //res.negotiate(err);
       });
   }
 
