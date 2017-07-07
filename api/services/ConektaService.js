@@ -260,11 +260,12 @@ function processNotification(req, res){
       var data = reqBody.data ||  false;
     	
     	res.ok();
-    	return processSpeiNotification(reqBody, createdHookLog);
+    	return processSpeiNotification(req, createdHookLog);
     });	
 }
 
-function processSpeiNotification(reqBody, createdHookLog){
+function processSpeiNotification(req, createdHookLog){
+	var reqBody = req.body || {};
 
   if(!reqBody || !reqBody.data){
     return Promise.resolve("No se recibio el formato correcto");
