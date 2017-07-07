@@ -251,20 +251,20 @@ function processNotification(req, res){
   var hookLog = {
     content: JSON.stringify(req.body)
   };
-  var createdHook;
+  var createdHookLog;
 
   return HookLog.create(hookLog)
     .then(function(created){
-      createdHook = created;
+      createdHookLog = created;
       var reqBody = req.body || {};
       var data = reqBody.data ||  false;
     	
     	res.ok();
-    	return processSpeiNotification(reqBody);
+    	return processSpeiNotification(reqBody, createdHookLog);
     });	
 }
 
-function processSpeiNotification(reqBody){
+function processSpeiNotification(reqBody, createdHookLog){
 
   if(!reqBody || !reqBody.data){
     return Promise.resolve("No se recibio el formato correcto");
@@ -311,8 +311,8 @@ function processSpeiNotification(reqBody){
 	    .then(function(details){
 	      var orderDetails = details;
 
-	      sails.log.info('Relating order to sap via spei notification: ' + createdHook.id);
-	      order.hookLogId = createdHook.id;
+	      sails.log.info('Relating order to sap via spei notification: ' + createdHookLog.id);
+	      order.hookLogId = createdHookLog.id;
 	      return OrderService.relateOrderToSap(order, orderDetails, req);
 	    })
 	    .then(function(related){
