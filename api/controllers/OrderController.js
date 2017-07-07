@@ -117,14 +117,14 @@ module.exports = {
         orderDetails = _orderDetails;
 
         return [
-          //Email.sendOrderConfirmation(order.id),
+          Email.sendOrderConfirmation(order.id),
           Email.sendFreesale(order.id),
           InvoiceService.createOrderInvoice(order.id, req),
           OrderService.relateOrderToSap(order, orderDetails, req),
           StockService.syncOrderDetailsProducts(orderDetails)
         ];
       })
-      .spread(function(/*orderSent, */freesaleSent, invoice, sapOrderRelated,productsSynced){
+      .spread(function(orderSent, freesaleSent, invoice, sapOrderRelated,productsSynced){
         console.log('Email de orden enviado: ' + order.folio);
         console.log('productsSynced', productsSynced);
         console.log('generated invoice', invoice);

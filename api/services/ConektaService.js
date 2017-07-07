@@ -319,7 +319,7 @@ function processSpeiNotification(req, createdHookLog){
 	    })
 	    .then(function(related){
 	    	sails.log.info('Sending order ' + order.id + ' email notification after spei pay');
-	    	return Promise.resolve('Done');
-	    	//return Email.sendOrderConfirmation(order.id);
+	    	//return Promise.resolve('Done');
+	    	return Email.sendOrderConfirmation(order.id);
 	    });
  }

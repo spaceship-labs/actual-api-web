@@ -265,7 +265,7 @@ function relateOrderToSap(order, orderDetails,req){
   var clientId = UserService.getCurrentUserClientId(req);
   var userId = UserService.getCurrentUserId(req);
 
-  sails.log.info('relatingViaConektaNotification', order.relatingViaConektaNotification);
+  //sails.log.info('relatingViaConektaNotification', order.relatingViaConektaNotification);
 
   if(order.status === 'pending-payment' && !order.relatingViaConektaNotification){
     console.log('Pedido pendiente por pagar ' + order.id);
