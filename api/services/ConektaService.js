@@ -314,10 +314,12 @@ function processSpeiNotification(req, createdHookLog){
 
 	      sails.log.info('Relating order ' + order.id +' to sap via spei notification: ' + createdHookLog.id);
 	      order.hookLogId = createdHookLog.id;
+	      order.relatingViaConektaNotification = true;
 	      return OrderService.relateOrderToSap(order, orderDetails, req);
 	    })
 	    .then(function(related){
 	    	sails.log.info('Sending order ' + order.id + ' email notification after spei pay');
-	    	return Email.sendOrderConfirmation(order.id);
+	    	return Promise.resolve('Done');
+	    	//return Email.sendOrderConfirmation(order.id);
 	    });
  }
