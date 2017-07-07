@@ -212,7 +212,7 @@ module.exports = {
   receiveSpeiNotification: function(req, res){
     var resolved = false;
     ConektaService.processNotification(req, res)
-      .then(function(res){
+      .then(function(result){
         console.log('Processed notification');
         res.ok();
         resolved = true;
