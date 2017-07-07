@@ -265,7 +265,7 @@ function relateOrderToSap(order, orderDetails,req){
   var clientId = UserService.getCurrentUserClientId(req);
   var userId = UserService.getCurrentUserId(req);
 
-  if(order.status === 'pending-payment'){
+  if(order.status === 'pending-payment' && !order.relatingViaConektaNotification){
     return Promise.resolve('Pedido pendiente por pagar');
   }
 
