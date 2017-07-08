@@ -16,6 +16,11 @@ module.exports = {
     if(email && Common.validateEmail(email) ){
       UserWeb.findOne( {email:email}, {select: ['id', 'password', 'email']} )
         .then(function(user){
+
+          if(!user){
+            return res.negotiate(new Error('No se encontro el usuario'));
+          }
+
           var values = user.id + user.email + user.password;
           var tokenAux = bcrypt.hashSync(values ,bcrypt.genSaltSync(10));
           var token = tokenAux;

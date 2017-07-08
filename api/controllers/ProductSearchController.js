@@ -43,8 +43,8 @@ module.exports = {
 
     query.Active     = 'Y';
     //query[displayProperty] = true;
-    //query.excludeWeb = {'!=':true};
-    query.excludeWeb = null;
+    query.excludeWeb = {'!':true};
+    //query.excludeWeb = null;
 
     
     Search.getProductsByFilterValue(filtervalues)
@@ -69,6 +69,8 @@ module.exports = {
           freeSaleStock: {'>':0}
         });
         delete freeSaleQuery[activeStore.code];
+
+        //sails.log.info('query', JSON.stringify(query));
 
         var searchQuery = {
           $or: [
@@ -167,7 +169,7 @@ module.exports = {
         query = _.extend(query,{
           id: productsIds,
           Active: 'Y',
-          excludeWeb: null
+          excludeWeb: {'!':true}
         });
 
         if(filterByStore && activeStore.code){
