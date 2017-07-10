@@ -77,9 +77,14 @@ module.exports = {
     brokerName:{type:'string'},
 
     //relations - permissions
+    /*
     Stores: {
       collection: 'store',
       via: 'users'
+    },
+    */
+    Store:{
+      model: 'Store'
     },
     permissions: {
       collection: 'permission',

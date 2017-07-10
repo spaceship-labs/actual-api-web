@@ -4,6 +4,7 @@ var moment = require('moment');
 var CEDIS_QROO_CODE = '01';
 var CEDISQ_QROO_ID = '576acfee5280c21ef87ea5b5';
 var DELIVERY_AVAILABLE = 'SI';
+var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
 
 module.exports = {
   product: productShipping,
@@ -14,6 +15,7 @@ module.exports = {
 function productShipping(product, storeWarehouse, options) {
   options = options || {};
   var SAMPLE_ZIPCODE = "01000";
+  var pendingProductDetailsSum = 0;
 
   var defaultZipcodeQuery = {
     cp: SAMPLE_ZIPCODE,
@@ -33,11 +35,13 @@ function productShipping(product, storeWarehouse, options) {
           '>': 0
         }
       }),
-      ZipcodeDelivery.findOne(zipcodeDeliveryQuery)
+      ZipcodeDelivery.findOne(zipcodeDeliveryQuery),
+      getPendingProductDetailsSum(product)
     ])
     .then(function(results) {
       var stockItems = results[0];
       var zipcodeDelivery = results[1];
+      pendingProductDetailsSum = results[2];
 
       if(!zipcodeDelivery){
         return Promise.reject(new Error("Envios no disponibles para ese código postal"));
@@ -66,7 +70,8 @@ function productShipping(product, storeWarehouse, options) {
             stockItem, 
             storeWarehouse.id, 
             zipcodeDelivery,
-            product
+            product,
+            pendingProductDetailsSum
           );
         });
 
@@ -84,7 +89,13 @@ function productShipping(product, storeWarehouse, options) {
         };
 
         return Promise.all([
-          buildShippingItem(freeSaleStockItem, storeWarehouse.id, zipcodeDelivery, product)
+          buildShippingItem(
+            freeSaleStockItem, 
+            storeWarehouse.id, 
+            zipcodeDelivery, 
+            product,
+            pendingProductDetailsSum
+          )
         ]);
       }
 
@@ -98,7 +109,7 @@ function productShipping(product, storeWarehouse, options) {
 
 }
 
-function buildShippingItem(stockItem, storeWarehouseId, zipcodeDelivery, product){
+function buildShippingItem(stockItem, storeWarehouseId, zipcodeDelivery, product, pendingProductDetailsSum){
 
   var productDate  = new Date(stockItem.ShipDate);
   var productDays  = daysDiff(new Date(), productDate);
@@ -119,7 +130,7 @@ function buildShippingItem(stockItem, storeWarehouseId, zipcodeDelivery, product
       var date = addDays(new Date(), days);
 
       return {
-        available: stockItem.OpenCreQty,
+        available: stockItem.OpenCreQty - (pendingProductDetailsSum || 0),
         days: days,
         date: date,
         productDate: productDate,
@@ -207,4 +218,46 @@ function isValidZipcode(zipcode){
         return false;
       }
     });
+}
+
+function getPendingProductDetailsSum(product){
+  
+  var match = {
+    Product: ObjectId(product.id),
+    inSapWriteProgress: true
+  };
+
+  var group = {
+    _id: '$Product',
+    //_id: '$quantity',
+    pendingStock: {$sum:'$quantity'}
+  };
+
+  return new Promise(function(resolve, reject){
+    OrderDetailWeb.native(function(err, collection){
+      if(err){
+        console.log('err', err);
+        return reject(err);
+      }
+      
+      collection.aggregate([
+        {$match: match},
+        {$group:group}
+      ],
+        function(_err,results){
+          if(err){
+            console.log('_err', _err);
+            return reject(_err);
+          }
+
+          //sails.log.info('results', results);
+          if(results && results.length > 0){
+            return resolve(results[0].pendingStock);
+          }else{
+            return resolve(0);
+          }
+        }
+      );
+    });
+  });  
 }

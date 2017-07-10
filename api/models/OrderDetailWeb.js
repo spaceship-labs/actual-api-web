@@ -3,6 +3,7 @@ module.exports = {
   schema:true,
   migrate: 'alter',
   attributes: {
+    inSapWriteProgress: 'boolean',
     quantity: 'integer',
     discount: 'float',
     subtotal: 'float',

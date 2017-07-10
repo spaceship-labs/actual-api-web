@@ -133,7 +133,8 @@ module.exports = {
       .spread(function(_createdClient, _createdUser){
         createdClient = _createdClient;
         form.Client = createdClient.id;
-        return UserService.createUserFromClient(form);
+        form.id = createdClient.id;
+        return UserService.createUserFromClient(form, req);
       })
       .then(function(_createdUser){
         createdUserWeb = _createdUser;

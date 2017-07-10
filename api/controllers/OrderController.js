@@ -52,6 +52,8 @@ module.exports = {
   findById: function(req, res){
     var form = req.params.all();
     var id = form.id;
+    var clientId = UserService.getCurrentUserClientId(req);
+    var currentUser = req.user;
     var order;
     if( !isNaN(id) ){
       id = parseInt(id);
@@ -68,6 +70,12 @@ module.exports = {
       .populate('SapOrderConnectionLogWeb')
       .then(function(foundOrder){
         order = foundOrder.toObject();
+
+
+        if(order.Client.id != clientId && currentUser.role !== 'admin'){
+          return Promise.reject(new Error('No autorizado'));
+        }
+
         var sapReferencesIds = order.OrdersSapWeb.map(function(ref){
           return ref.id;
         });

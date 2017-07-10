@@ -227,10 +227,12 @@ function createOrder(form, req){
     })
     .then(function(orderFound){
       //Cloning quotation details to order details
-      quotation.Details.forEach(function(d){
-        d.QuotationDetailWeb = _.clone(d.id);
-        delete d.id;
-        orderFound.Details.add(d);
+      quotation.Details.forEach(function(detail){
+        detail.QuotationDetailWeb = _.clone(detail.id);
+        delete detail.id;
+
+        detail.inSapWriteProgress = true;
+        orderFound.Details.add(detail);
       });
       return orderFound.save();
     })
@@ -326,9 +328,13 @@ function relateOrderToSap(order, orderDetails,req){
         return saveOrderSapReferences(sapResult, order, orderDetails);
       })
       .then(function(){
-        resolve(
-          OrderWeb.update({id: order.id},{status:'completed', inSapWriteProgress:false})
-        );
+        return [
+          OrderWeb.update({id: order.id},{status:'completed', inSapWriteProgress:false}),
+          OrderDetailWeb.update({OrderWeb:order.id},{inSapWriteProgress: false})
+        ];
+      })
+      .spread(function(results){
+        resolve(results);        
       })
       .catch(function(err){
         error = err;

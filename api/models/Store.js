@@ -23,10 +23,6 @@ module.exports = {
     url_sandbox:{type:'string'},    
 
     //RELATIONS
-    users: {
-      collection: 'userweb',
-      via: 'Stores'
-    },
     Warehouse:{
       model:'Company'
     },
@@ -34,6 +30,10 @@ module.exports = {
       collection: 'promotion',
       via: 'Stores'
     },
+    UsersWeb:{
+      collection: 'userweb',
+      via: 'Store'
+    },    
     Payments: {
       collection:'PaymentWeb',
       via:'Store'
