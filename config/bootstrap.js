@@ -13,8 +13,6 @@ var moment = require('moment-timezone');
 module.exports.bootstrap = function(cb) {
   //process.env.LOG_QUERIES =  true;
 
-  // It's very important to trigger this callback method when you are finished
-  // with the bootstrap!  (otherwise your server will never lift, since it's waiting on the bootstrap)
   CronJobs.init();
   Files.getContainerLink();
 
@@ -27,5 +25,8 @@ module.exports.bootstrap = function(cb) {
 
   sails.config.timezone = {label:'America/Cancun', offset:-6};
   //moment.tz.setDefault(sails.config.timezone.label);
+
+  // It's very important to trigger this callback method when you are finished
+  // with the bootstrap!  (otherwise your server will never lift, since it's waiting on the bootstrap)
   cb();
 };
