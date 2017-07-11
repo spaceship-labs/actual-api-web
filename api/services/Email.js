@@ -86,7 +86,8 @@ function sendRegister(userName, userEmail, store, cb) {
     user_name: user_name,
     company: {
       url: baseURL,
-      logo: (store || {}).logo || baseURL+'/logos/group.png',
+      logo:  baseURL+'/logos/group.png',
+      //logo: (store || {}).logo || baseURL+'/logos/group.png',
     },
   });
   var content         = new helper.Content("text/html", res);
