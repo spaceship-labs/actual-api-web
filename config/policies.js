@@ -23,6 +23,10 @@ module.exports.policies = {
   AuthController:{
     '*': ['setupDefaultData']
   },
+  InvoiceController:{
+    '*': ['setupDefaultData','isAuthenticated'],
+    'sendFiscalData': ['setupDefaultData']
+  },
   QuotationController:{
     '*': ['setupDefaultData','isAuthenticated'],
     create: ['setupDefaultData'],

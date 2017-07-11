@@ -434,10 +434,12 @@ module.exports.routes = {
   },
 
 
-  '/test/sendorder/:id':{
-    controller:'order',
-    action:'sendOrderEmail'
-  }
+  '/sendfiscaldata':{
+    controller:'invoice',
+    action:'sendFiscalData'
+  },
+
+
   /*
   '/fixorders':{
     controller:'sync',

@@ -74,6 +74,46 @@ module.exports = {
         }
         return res.negotiate(err);
       });
+  },
+
+
+  sendFiscalData: function(req, res){
+    var params = req.allParams();
+    var form = params.form;
+    var email = params.email;
+    var name = params.name;
+
+    if( !Common.validateEmail(email) ){
+      res.negotiate(new Error('Email invalido'));
+      return;
+    }
+
+    var formArr = [
+      {label: 'Folio de compra', value: form.orderFolio},
+      {label: 'RFC', value: form.LicTradNum},
+      {label: 'Razón social', value: form.companyName},
+      {label: 'Nombre de la empresa', value: form.companyPublicName},
+      {label: 'Télefono', value: form.Phone1},
+      {label: 'Email', value: form.U_Correos},
+      {label: 'Calle', value: form.Street},
+      {label: 'No. exterior', value: form.U_NumExt},
+      {label: 'No. interior', value: form.U_NumInt},
+      {label: 'Colonia', value: form.Block},
+      {label: 'Ciudad', value: form.City},
+      {label: 'Estado', value: form.State},
+      {label: 'Código postal', value: form.ZipCode},
+      {label: 'Municipio', value: form.U_Localidad},
+    ];
+
+    Email.sendFiscalData(
+      name,
+      email,
+      formArr,
+      req.activeStore,
+      function(){
+        res.ok({success:true});
+      }
+    );
   }
 };
 
