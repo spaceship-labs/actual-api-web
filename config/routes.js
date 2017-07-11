@@ -439,6 +439,11 @@ module.exports.routes = {
     action:'sendFiscalData'
   },
 
+  '/sendcontact':{
+    controller:'common',
+    action:'sendContact'
+  },
+
 
   /*
   '/fixorders':{

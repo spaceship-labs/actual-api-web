@@ -15,6 +15,7 @@ var quotationTemplate     = fs.readFileSync(sails.config.appPath + '/views/email
 var freesaleTemplate      = fs.readFileSync(sails.config.appPath + '/views/email/freesale.html').toString();
 var registerTemplate      = fs.readFileSync(sails.config.appPath + '/views/email/register.html').toString();
 var fiscalDataTemplate    = fs.readFileSync(sails.config.appPath + '/views/email/fiscal-data.html').toString();
+var contactTemplate       = fs.readFileSync(sails.config.appPath + '/views/email/contact.html').toString();
 
 
 passwordTemplate          = ejs.compile(passwordTemplate);
@@ -23,6 +24,7 @@ quotationTemplate         = ejs.compile(quotationTemplate);
 freesaleTemplate          = ejs.compile(freesaleTemplate);
 registerTemplate          = ejs.compile(registerTemplate);
 fiscalDataTemplate        = ejs.compile(fiscalDataTemplate);
+contactTemplate           = ejs.compile(contactTemplate);
 
 
 module.exports = {
@@ -31,7 +33,8 @@ module.exports = {
   sendFreesale: freesaleEmail,
   sendQuotation: quotation,
   sendRegister: sendRegister,
-  sendFiscalData: sendFiscalData
+  sendFiscalData: sendFiscalData,
+  sendContact: sendContact
 };
 
 function password(userName, userEmail, recoveryUrl, cb) {
@@ -128,6 +131,48 @@ function sendFiscalData(name, email, form, store, cb) {
   //var to              = new helper.Email(userEmail, userName);
   var subject         = 'Datos de facturación ' + ((store || {}).name || '');
   var res             = fiscalDataTemplate({
+    form: form,
+    company: {
+      url: baseURL,
+      logo:  baseURL+'/logos/group.png',
+    },
+    store: store
+  });
+  var content         = new helper.Content("text/html", res);
+  personalization.addTo(to);
+  personalization.setSubject(subject);
+  mail.setFrom(from);
+  mail.addContent(content);
+  mail.addPersonalization(personalization);
+  requestBody = mail.toJSON();
+  request.method = 'POST';
+  request.path = '/v3/mail/send';
+  request.body = requestBody;
+  sendgrid.API(request, function (response) {
+    if (response.statusCode >= 200 && response.statusCode <= 299) {
+      cb();
+    } else {
+      cb(response);
+    }
+  });
+}
+
+function sendContact(name, email, form, store, cb) {
+
+  if(process.env.MODE !== 'production'){
+    //cb();
+    //return;
+  }
+
+  var request         = sendgrid.emptyRequest();
+  var requestBody     = undefined;
+  var mail            = new helper.Mail();
+  var personalization = new helper.Personalization();
+  var from            = new helper.Email(email, name);
+  var to = new helper.Email('luisperez@spaceshiplabs.com', 'Luis');
+  //var to              = new helper.Email(userEmail, userName);
+  var subject         = 'Contacto ' + ((store || {}).name || '');
+  var res             = contactTemplate({
     form: form,
     company: {
       url: baseURL,
