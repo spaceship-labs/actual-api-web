@@ -599,6 +599,8 @@ function paymentMethod(payment) {
     case 'ewallet':
       payment_name = 'Monedero electrónico';
       break;
+
+    case 'debit-card':       
     case 'credit-card':
     case 'single-payment-terminal':
     case '3-msi':
@@ -606,7 +608,7 @@ function paymentMethod(payment) {
     case '9-msi':
     case'12-msi':
     case'18-msi':
-      payment_name = 'Terminal';
+      payment_name = 'Tarjeta';
       break;
     case 'cheque':
       payment_name = 'Cheque';
@@ -636,6 +638,9 @@ function paymentType(payment) {
       break;
     case 'transfer':
       payment_name = 'Transferencia';
+      break;
+    case 'debit-card':
+      payment_name = 'Débito ' + payment.terminal;
       break;
     case 'credit-card':
       payment_name = 'Crédito ' + payment.terminal;
