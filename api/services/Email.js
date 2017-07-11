@@ -13,16 +13,21 @@ var passwordTemplate      = fs.readFileSync(sails.config.appPath + '/views/email
 var orderTemplate         = fs.readFileSync(sails.config.appPath + '/views/email/order.html').toString();
 var quotationTemplate     = fs.readFileSync(sails.config.appPath + '/views/email/quotation.html').toString();
 var freesaleTemplate      = fs.readFileSync(sails.config.appPath + '/views/email/freesale.html').toString();
+var registerTemplate      = fs.readFileSync(sails.config.appPath + '/views/email/register.html').toString();
+
 passwordTemplate          = ejs.compile(passwordTemplate);
 orderTemplate             = ejs.compile(orderTemplate);
 quotationTemplate         = ejs.compile(quotationTemplate);
 freesaleTemplate          = ejs.compile(freesaleTemplate);
+registerTemplate          = ejs.compile(registerTemplate);
+
 
 module.exports = {
   sendPasswordRecovery: password,
   sendOrderConfirmation: orderEmail,
   sendFreesale: freesaleEmail,
-  sendQuotation: quotation
+  sendQuotation: quotation,
+  sendRegister: sendRegister
 };
 
 function password(userName, userEmail, recoveryUrl, cb) {
@@ -34,12 +39,48 @@ function password(userName, userEmail, recoveryUrl, cb) {
   var personalization = new helper.Personalization();
   var from            = new helper.Email("noreply@actualgroup.com", "actualgroup");
   var to              = new helper.Email(userEmail, userName);
-  var subject         = 'recuperar contraseña';
+  var subject         = 'Recuperar contraseña';
   var res             = passwordTemplate({
     user_name: user_name,
     user_link: user_link,
     company: {
       url: baseURL,
+    },
+  });
+  var content         = new helper.Content("text/html", res);
+  personalization.addTo(to);
+  personalization.setSubject(subject);
+  mail.setFrom(from);
+  mail.addContent(content);
+  mail.addPersonalization(personalization);
+  requestBody = mail.toJSON();
+  request.method = 'POST';
+  request.path = '/v3/mail/send';
+  request.body = requestBody;
+  sendgrid.API(request, function (response) {
+    if (response.statusCode >= 200 && response.statusCode <= 299) {
+      cb();
+    } else {
+      cb(response);
+    }
+  });
+}
+
+function sendRegister(userName, userEmail, store, cb) {
+  var user_name       = userName;
+  var request         = sendgrid.emptyRequest();
+  var requestBody     = undefined;
+  var mail            = new helper.Mail();
+  var personalization = new helper.Personalization();
+  var from            = new helper.Email("noreply@actualgroup.com", "actualgroup");
+  //var to = new helper.Email('luisperez@spaceshiplabs.com', 'Luis');
+  var to              = new helper.Email(userEmail, userName);
+  var subject         = '¡Bienvenido a Actual Group!';
+  var res             = registerTemplate({
+    user_name: user_name,
+    company: {
+      url: baseURL,
+      logo: (store || {}).logo || baseURL+'/logos/group.png',
     },
   });
   var content         = new helper.Content("text/html", res);

@@ -61,6 +61,7 @@ function createClient(params){
   var clientContacts = params.clientContacts || [];
   delete client.Currency;
   delete client.password;
+  delete client._password;
 
   client.LicTradNum  = client.LicTradNum || 'XAXX010101000';
   client.SlpCode = -1;
@@ -92,6 +93,7 @@ function updateClient(cardcode, form){
   delete form.Balance;
   delete form.Currency;
   delete form.password;
+  delete form._password;
 
   var path = 'Contact';
   var params = {

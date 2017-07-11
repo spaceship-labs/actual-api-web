@@ -33,7 +33,6 @@ function validateContactsZipcode(contacts){
 		return Shipping.isValidZipcode(contact.U_CP);
 	})
 	.then(function(results){
-		sails.log.info('results', results);
 		return _.every(results,function(isValid){
 			return isValid;
 		});

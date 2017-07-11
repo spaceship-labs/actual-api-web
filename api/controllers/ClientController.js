@@ -190,6 +190,16 @@ module.exports = {
           user: createdUserWeb,
           client: createdClient
         });
+
+        Email.sendRegister(
+          createdUserWeb.firstName,
+          createdUserWeb.email,
+          req.activeStore,
+          function(){
+            sails.log.info('Email de registro enviado', createdUserWeb.email);
+          }
+        );
+
       })
       .catch(function(err){
         console.log(err);
