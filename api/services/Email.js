@@ -67,6 +67,12 @@ function password(userName, userEmail, recoveryUrl, cb) {
 }
 
 function sendRegister(userName, userEmail, store, cb) {
+
+  if(process.env.MODE !== 'production'){
+    cb();
+    return;
+  }
+
   var user_name       = userName;
   var request         = sendgrid.emptyRequest();
   var requestBody     = undefined;
