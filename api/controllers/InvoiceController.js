@@ -4,6 +4,7 @@
  * @description :: Server-side logic for managing invoices
  * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
  */
+var moment = require('moment');
 
 module.exports = {
   create: function(req, res) {
@@ -90,6 +91,7 @@ module.exports = {
 
     var formArr = [
       {label: 'Folio de compra', value: form.orderFolio},
+      {label: 'Fecha de compra', value: moment(form.orderDate || new Date()).format('DD/MM/YYYY') },
       {label: 'RFC', value: form.LicTradNum},
       {label: 'Razón social', value: form.companyName},
       {label: 'Nombre de la empresa', value: form.companyPublicName},
