@@ -269,6 +269,8 @@ function relateOrderToSap(order, orderDetails,req){
 
   //sails.log.info('relatingViaConektaNotification', order.relatingViaConektaNotification);
 
+  //return Promise.reject(new Error('Error forzado sap'));
+
   if(order.status === 'pending-payment' && !order.relatingViaConektaNotification){
     console.log('Pedido pendiente por pagar ' + order.id);
     return Promise.resolve('Pedido pendiente por pagar');

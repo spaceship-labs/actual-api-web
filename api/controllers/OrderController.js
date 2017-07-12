@@ -98,14 +98,16 @@ module.exports = {
     var order;
     var responseSent = false;
     var orderDetails;
+    var errLog;
+    var quotationId = form.quotationId;
 
     sails.log.info('init order creation', new Date());
-    sails.log.info('quoationId', form.quotationId);
+    sails.log.info('quotationId', form.quotationId);
     OrderService.createFromQuotation(form, req)
       .then(function(orderCreated){
         //RESPONSE
         sails.log.info('end ', new Date());
-        sails.log.info('quoationId', form.quotationId);
+        sails.log.info('quotationId', form.quotationId);
 
         res.json(orderCreated);
         responseSent = true;
@@ -139,9 +141,23 @@ module.exports = {
       })
       .catch(function(err){
         console.log(err);
+        errLog = err;
         if(!responseSent){
           res.negotiate(err);
         }
+
+        return QuotationWeb.findOne({id: quotationId, select:['folio']});
+      })
+      .then(function(quotationWithErr){
+        var formArr = [
+          {label:'Folio', value:quotationWithErr.folio},
+          {label:'Id', value: quotationWithErr.id},
+          {label:'Log', value: JSON.stringify(errLog)}
+        ];
+
+        Email.sendQuotationLog(formArr, req.activeStore, function(){
+          sails.log.info('Log de error enviado');
+        });
       });
     
   },

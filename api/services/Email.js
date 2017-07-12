@@ -16,6 +16,8 @@ var freesaleTemplate      = fs.readFileSync(sails.config.appPath + '/views/email
 var registerTemplate      = fs.readFileSync(sails.config.appPath + '/views/email/register.html').toString();
 var fiscalDataTemplate    = fs.readFileSync(sails.config.appPath + '/views/email/fiscal-data.html').toString();
 var contactTemplate       = fs.readFileSync(sails.config.appPath + '/views/email/contact.html').toString();
+var quotationLogTemplate  = fs.readFileSync(sails.config.appPath + '/views/email/quotation-log.html').toString();
+
 
 
 passwordTemplate          = ejs.compile(passwordTemplate);
@@ -25,6 +27,7 @@ freesaleTemplate          = ejs.compile(freesaleTemplate);
 registerTemplate          = ejs.compile(registerTemplate);
 fiscalDataTemplate        = ejs.compile(fiscalDataTemplate);
 contactTemplate           = ejs.compile(contactTemplate);
+quotationLogTemplate      = ejs.compile(quotationLogTemplate);
 
 
 module.exports = {
@@ -34,7 +37,8 @@ module.exports = {
   sendQuotation: quotation,
   sendRegister: sendRegister,
   sendFiscalData: sendFiscalData,
-  sendContact: sendContact
+  sendContact: sendContact,
+  sendQuotationLog: sendQuotationLog
 };
 
 function password(userName, userEmail, recoveryUrl, cb) {
@@ -667,6 +671,48 @@ function sendFreesale(order, products, store) {
         reject(response);
       }
     });
+  });
+}
+
+function sendQuotationLog(form, store, cb) {
+
+  if(process.env.MODE !== 'production'){
+    //cb();
+    //return;
+  }
+
+  var request         = sendgrid.emptyRequest();
+  var requestBody     = undefined;
+  var mail            = new helper.Mail();
+  var personalization = new helper.Personalization();
+  var from            = new helper.Email("noreply@actualgroup.com", "actualgroup");
+  var to = new helper.Email('luisperez@spaceshiplabs.com', 'Luis');
+  //var to              = new helper.Email(userEmail, userName);
+  var subject         = 'Error en proceso de compra ' + ((store || {}).name || '');
+  var res             = quotationLogTemplate({
+    form: form,
+    company: {
+      url: baseURL,
+      logo:  baseURL+'/logos/group.png',
+    },
+    store: store
+  });
+  var content         = new helper.Content("text/html", res);
+  personalization.addTo(to);
+  personalization.setSubject(subject);
+  mail.setFrom(from);
+  mail.addContent(content);
+  mail.addPersonalization(personalization);
+  requestBody = mail.toJSON();
+  request.method = 'POST';
+  request.path = '/v3/mail/send';
+  request.body = requestBody;
+  sendgrid.API(request, function (response) {
+    if (response.statusCode >= 200 && response.statusCode <= 299) {
+      cb();
+    } else {
+      cb(response);
+    }
   });
 }
 
