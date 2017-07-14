@@ -63,26 +63,24 @@ function createClient(params){
   delete client.password;
   delete client._password;
 
+  var seriesNum = params.activeStore.seriesNum;
+
   client.LicTradNum  = client.LicTradNum || 'XAXX010101000';
   client.SlpCode = -1;
-
-  return getSeriesNum(params.activeStoreId)
-    .then(function(seriesNum){
-      client.Series = seriesNum; //Assigns seriesNum number depending on activeStore
-      var requestParams = {
-        Client: encodeURIComponent(JSON.stringify(client)),
-        address: encodeURIComponent(JSON.stringify(fiscalAddress)),
-        person: encodeURIComponent(JSON.stringify(clientContacts))
-      };
-      var endPoint = buildUrl(baseUrl,{
-        path: path,
-        queryParams: requestParams
-      });
-      sails.log.info('createClient');
-      sails.log.info(decodeURIComponent(endPoint));
-      reqOptions.uri = endPoint;
-      return request(reqOptions);
-    });
+  client.Series = seriesNum; //Assigns seriesNum number depending on activeStore
+  var requestParams = {
+    Client: encodeURIComponent(JSON.stringify(client)),
+    address: encodeURIComponent(JSON.stringify(fiscalAddress)),
+    person: encodeURIComponent(JSON.stringify(clientContacts))
+  };
+  var endPoint = buildUrl(baseUrl,{
+    path: path,
+    queryParams: requestParams
+  });
+  sails.log.info('createClient');
+  sails.log.info(decodeURIComponent(endPoint));
+  reqOptions.uri = endPoint;
+  return request(reqOptions);
 
 }
 
@@ -203,7 +201,7 @@ function buildSaleOrderRequestParams(params){
     SalesPersonCode: params.slpCode || -1,
     CardCode: params.cardCode,
     DescuentoPDocumento: calculateUsedEwalletByPayments(params.payments),
-    WhsCode: "02",
+    WhsCode: "02", //DEFAULT
     Group: params.currentStore.group
   };
 

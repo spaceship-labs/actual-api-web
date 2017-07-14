@@ -78,7 +78,7 @@ module.exports = {
       client: _.clone(form),
       fiscalAddress: fiscalAddress,
       clientContacts: contacts,
-      activeStoreId: req.activeStore.id
+      activeStore: req.activeStore
     };
 
     delete params.client.password;

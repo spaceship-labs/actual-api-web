@@ -84,6 +84,9 @@ module.exports.policies = {
   ProductController:{
     '*':['setupDefaultData']
   },
+  ProductGroupController:{
+    '*':['setupDefaultData']
+  },  
   ProductFilterController:{
     '*':['setupDefaultData']
   },

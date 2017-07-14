@@ -20,7 +20,8 @@ module.exports = {
     },
     code:{type:'string'},
     url:{type:'string'},
-    url_sandbox:{type:'string'},    
+    url_sandbox:{type:'string'}, 
+    seriesNum:{type:'integer'},   
 
     //RELATIONS
     Warehouse:{
