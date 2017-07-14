@@ -126,13 +126,21 @@ module.exports = {
       .then(function(_orderDetails){
         orderDetails = _orderDetails;
 
-        return [
+        var promises = [
           Email.sendOrderConfirmation(order.id),
           Email.sendFreesale(order.id),
           InvoiceService.createOrderInvoice(order.id, req),
           OrderService.relateOrderToSap(order, orderDetails, req),
           StockService.syncOrderDetailsProducts(orderDetails)
         ];
+
+        if(order.isSpeiOrder){
+          promises.push(
+            Email.sendSpeiInstructions(order.UserWeb.firstName, order.UserWeb, order.folio, req.activeStore)
+          );
+        }
+
+        return promises;
       })
       .spread(function(orderSent, freesaleSent, invoice, sapOrderRelated,productsSynced){
         console.log('Email de orden enviado: ' + order.folio);
@@ -146,18 +154,31 @@ module.exports = {
           res.negotiate(err);
         }
 
-        return QuotationWeb.findOne({id: quotationId, select:['folio']});
+        return 
+          QuotationWeb.findOne({id: quotationId, select:['folio']})
+          .populate('Client');
       })
       .then(function(quotationWithErr){
-        var formArr = [
-          {label:'Folio', value:quotationWithErr.folio},
-          {label:'Id', value: quotationWithErr.id},
-          {label:'Log', value: JSON.stringify(errLog)}
-        ];
 
-        Email.sendQuotationLog(formArr, req.activeStore, function(){
-          sails.log.info('Log de error enviado');
-        });
+        if(quotationWithErr){
+          var client = quotationWithErr.Client || {};
+          var formArr = [
+            {label:'Folio', value:quotationWithErr.folio},
+            {label:'Id', value: quotationWithErr.id},
+            {label:'Cliente ID', value: client.CardCode},
+            {label:'Cliente Nombre', value: client.CardName},
+            {label:'Cliente Email', value: client.E_Mail},
+            {label:'Cliente Telefono', value: client.Phone1},
+
+            {label:'Log', value: JSON.stringify(errLog)}
+
+          ];
+
+          Email.sendQuotationLog(formArr, req.activeStore, function(){
+            sails.log.info('Log de error enviado');
+          });
+        }
+
       });
     
   },

@@ -21,7 +21,6 @@ module.exports = {
       return d;
     });
     form.Store = req.activeStore.id;
-    sails.log.info('req.user', req.user);
     form.UserWeb = req.user.id;
     form.Client = req.user.Client;
 

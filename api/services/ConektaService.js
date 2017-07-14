@@ -1,5 +1,7 @@
 var Promise = require('bluebird');
 var conekta = require('conekta');
+var moment = require('moment');
+
 var LOCAL_CURRENCY = 'MXN';
 var CONEKTA_PAYMENT_TYPE_CARD = 'card';
 var CONEKTA_PAYMENT_TYPE_SPEI = 'spei';
@@ -152,12 +154,25 @@ function getOrderCharges(order, orderPayments){
 		}
 
 		if(payment.msi){
-			//charge.payment_method.type = 'default';
 			charge.payment_method.monthly_installments = payment.msi;
+		}
+
+		if(payment.type === 'transfer'){
+			charge.payment_method.expires_at = getTransferExpirationUnixTime(order,payment);
+			sails.log.info('expiration unix', charge.payment_method.expires_at);
 		}
 
 		return charge;
 	});
+}
+
+function getTransferExpirationUnixTime(order,payment){
+	var orderDateTime = order.createdAt;
+	var paymentExpirationDateTime = moment(orderDateTime).add(12,'h');
+
+	//Conekta manipulates time by unix format
+	var paymentExpirationDateTimeUnix = paymentExpirationDateTime.unix();
+	return paymentExpirationDateTimeUnix;
 }
 
 function getOrderDiscountLine(order, payments){
