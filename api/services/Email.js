@@ -134,7 +134,7 @@ function sendFiscalData(name, email, form, store, cb) {
   var from            = new helper.Email(email, name);
   var to = new helper.Email('luisperez@spaceshiplabs.com', 'Luis');
   var toAux = new helper.Email('facturacion@actualg.com ', 'Facturacion Actual');
-  var toAux2 = new helper.Email('cpavia@actualg.com ', 'Cesar');
+  var toAux2 = new helper.Email('cpavia@actualg.com', 'Cesar');
 
   var subject         = 'Datos de facturación ' + ((store || {}).name || '');
   var res             = fiscalDataTemplate({
@@ -183,7 +183,7 @@ function sendContact(name, email, form, store, cb) {
   var personalization = new helper.Personalization();
   var from            = new helper.Email(email, name);
   var to              = new helper.Email('luisperez@spaceshiplabs.com', 'Luis');
-  var toAux           = new helper.Email('cpavia@actualg.com ', 'Cesar');
+  var toAux           = new helper.Email('cpavia@actualg.com', 'Cesar');
   var subject         = 'Contacto ' + ((store || {}).name || '');
   var res             = contactTemplate({
     form: form,

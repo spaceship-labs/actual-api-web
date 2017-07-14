@@ -35,9 +35,11 @@ function createOrderInvoice(orderId, req) {
       .then(function(order) {
         orderFound = order;
 
+        /*
         if(order.status === 'pending-payment'){
           return Promise.resolve('Pedido pendiente por pagar');
         }
+        */
 
         var client = order.Client;
         var details = order.Details.map(function(d) { return d.id; });
@@ -148,7 +150,7 @@ function prepareInvoice(order, payments, client, items) {
     client: client,
     items: items,
     paymentMethod: 'other',
-    anotation: order.folio,
+    anotation: order.folio + '-web',
     stamp: {
       generateStamp: true,
     },
