@@ -21,8 +21,10 @@ module.exports = {
       return d;
     });
     form.Store = req.activeStore.id;
-    form.UserWeb = req.user.id;
-    form.Client = req.user.Client;
+    if(req.user){
+      form.UserWeb = req.user.id;
+      form.Client = req.user.Client;
+    }
 
     var opts = {
       paymentGroup:1,
@@ -263,7 +265,9 @@ module.exports = {
     if(form.Details && form.Details.length > 0 && _.isArray(form.Details) ){
       form.Details = form.Details.map(function(d){
         d.shipDate = moment(d.shipDate).startOf('day').toDate();
-        d.Client = req.user.id;
+        if(req.user){
+          d.Client = req.user.id;
+        }
         return d;
       });
     }
@@ -372,9 +376,11 @@ module.exports = {
 
     Common.nativeFindOne({_id: ObjectId(id)}, QuotationWeb)
       .then(function(quotation){
+        /*
         if(quotation.User !== req.user.id){
           return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
-        }        
+        }   
+        */     
         return calculator.getQuotationTotals(id, params);
       })
       .then(function(totals){
@@ -467,12 +473,13 @@ module.exports = {
   getQuotationPaymentOptions: function(req, res){
     var form = req.allParams();
     var quotationId = form.id;
+    var currentUserClientId = UserService.getCurrentUserClientId(req);
 
     Common.nativeFindOne({_id: ObjectId(quotationId)}, QuotationWeb)
       .then(function(quotation){
         
-        if(quotation.User){
-          if(quotation.User !== req.user.id){
+        if(quotation.Client){
+          if(quotation.Client !== currentUserClientId){
             return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
           }   
         }
@@ -531,6 +538,8 @@ module.exports = {
     var query = {
       id: id,
     };
+    var currentUserClientId = UserService.getCurrentUserClientId(req);
+
 
     if(req.user){
       query.Client = req.user.id;
@@ -543,7 +552,7 @@ module.exports = {
           return Promise.reject(new Error('Cotización no encontrada'));
         } 
         if(quotation.Client){
-          if(quotation.Client !== req.user.id){
+          if(quotation.Client !== currentUserClientId){
             return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
           }              
         }
