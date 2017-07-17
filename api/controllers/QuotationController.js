@@ -266,7 +266,7 @@ module.exports = {
       form.Details = form.Details.map(function(d){
         d.shipDate = moment(d.shipDate).startOf('day').toDate();
         if(req.user){
-          d.Client = req.user.id;
+          d.Client = currentUserClientId;
         }
         return d;
       });

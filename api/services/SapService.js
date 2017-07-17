@@ -297,7 +297,7 @@ function mapPaymentsToSap(payments, exchangeRate){
     }
 
     //ADDING SAP MAPPING FOR WEB PAYMENTS
-    payment.TypePay += '-conekta';
+    paymentSap.TypePay += '-conekta';
 
 
     return paymentSap;

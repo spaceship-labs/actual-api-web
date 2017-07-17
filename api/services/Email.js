@@ -131,9 +131,28 @@ function sendFiscalData(name, email, form, store, cb) {
   var requestBody     = undefined;
   var mail            = new helper.Mail();
   var personalization = new helper.Personalization();
-  var from            = new helper.Email(email, name);
+
+  var getFromSenderByStore = function(store){
+    var sender = new helper.Email('facturacion@actualstudio.com', 'Facturacion actualstudio.com');
+    switch(store.name){
+      case 'actualhome.com':
+        sender = new helper.Email('facturacion@actualhome.com', 'Facturacion actualhome.com');
+        break;
+      case 'actualstudio.com':
+        sender = new helper.Email('facturacion@actualstudio.com', 'Facturacion actualstudio.com');
+        break;
+      case 'actualkids.com':
+        sender = new helper.Email('facturacion@actualkids.com', 'Facturacion actualkids.com');
+        break;
+    }
+    return sender;
+  };
+
+
+  //var from            = new helper.Email(email, name);
+  var from = getFromSenderByStore(store);
   var to = new helper.Email('luisperez@spaceshiplabs.com', 'Luis');
-  var toAux = new helper.Email('facturacion@actualg.com ', 'Facturacion Actual');
+  var toAux = new helper.Email('facturacionsitios@actualg.com', 'Facturacion Actual');
   var toAux2 = new helper.Email('cpavia@actualg.com', 'Cesar');
 
   var subject         = 'Datos de facturación ' + ((store || {}).name || '');
@@ -428,7 +447,7 @@ function sendOrder(client, order, products, payments, ewallet, store) {
   var requestBody      = undefined;
   var mail             = new helper.Mail();
   var personalization  = new helper.Personalization();
-  var from             = new helper.Email('web@actualg.com', 'Web Actual Group');
+  var from             = new helper.Email('no-reply@actualg.com', 'Actual Group');
   var clientEmail      = client.E_Mail;
   var to               = new helper.Email(clientEmail, client.CardName);
   var subject          = 'Confirmación de compra | Folio #' + order.folio;

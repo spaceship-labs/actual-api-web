@@ -90,6 +90,10 @@ module.exports = {
     }
 
     var formArr = [
+      {label: 'Email contacto', value: email},
+      {label: 'Nombre contacto', value: name},
+
+
       {label: 'Folio de compra', value: form.orderFolio},
       {label: 'Fecha de compra', value: moment(form.orderDate || new Date()).format('DD/MM/YYYY') },
       {label: 'RFC', value: form.LicTradNum},
