@@ -90,7 +90,9 @@ module.exports.policies = {
   ProductFilterController:{
     '*':['setupDefaultData']
   },
-
+  PackageController:{
+    '*':['setupDefaultData']
+  },
   CustomBrandController:{
     '*':['setupDefaultData']
   },

@@ -29,7 +29,7 @@ module.exports = {
     var opts = {
       paymentGroup:1,
       updateDetails: true,
-      currentStore: req.activeStore.id
+      currentStoreId: req.activeStore.id
     };
 
     QuotationWeb.create(form)
@@ -181,7 +181,7 @@ module.exports = {
 
     var updateToLatest = QuotationService.updateQuotationToLatestData(id, {
       update:true,
-      currentStore: req.activeStore.id
+      currentStoreId: req.activeStore.id
     });
 
     updateToLatest.then(function(){
@@ -226,7 +226,7 @@ module.exports = {
     var opts = {
       paymentGroup:1,
       updateDetails: true,
-      currentStore: req.activeStore.id
+      currentStoreId: req.activeStore.id
     };
     
     Common.nativeFindOne({_id: ObjectId(id)}, QuotationWeb)
@@ -276,7 +276,7 @@ module.exports = {
     var opts = {
       paymentGroup:1,
       updateDetails: true,
-      currentStore: req.activeStore.id
+      currentStoreId: req.activeStore.id
     };
 
     Common.nativeFindOne({_id: ObjectId(id)}, QuotationWeb)
@@ -311,7 +311,7 @@ module.exports = {
     var opts = {
       paymentGroup:1,
       updateDetails: true,
-      currentStore: req.activeStore.id
+      currentStoreId: req.activeStore.id
     };
 
 
@@ -370,7 +370,7 @@ module.exports = {
     var params = {
       update: false,
       paymentGroup: paymentGroup,
-      currentStore: req.activeStore.id
+      currentStoreId: req.activeStore.id
     };
     var calculator = QuotationService.Calculator();
 
