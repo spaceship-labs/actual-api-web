@@ -35,8 +35,10 @@ module.exports.policies = {
     getQuotationPaymentOptions: ['setupDefaultData'],
     getCurrentStock: ['setupDefaultData'],
     addDetail:['setupDefaultData'],
+    addMultipleDetails:['setupDefaultData'],
     update: ['setupDefaultData'],
-    getQuotationZipcodeDelivery:['setupDefaultData']
+    getQuotationZipcodeDelivery:['setupDefaultData'],
+    removeDetailsGroup:['setupDefaultData']
   },
   PaymentController:{
     add: ['setupDefaultData','isAuthenticated']

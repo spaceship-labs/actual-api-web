@@ -281,8 +281,10 @@ module.exports = {
 
     Common.nativeFindOne({_id: ObjectId(id)}, QuotationWeb)
       .then(function(quotation){
-        if(quotation.Client !== currentUserClientId){
-          return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
+        if(quotation.Client){
+          if(quotation.Client !== currentUserClientId){
+            return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
+          }
         }
         return QuotationDetailWeb.create(form.Details);
       })
@@ -317,8 +319,10 @@ module.exports = {
 
     Common.nativeFindOne({_id: ObjectId(quotationId)}, QuotationWeb)
       .then(function(quotation){
-        if(quotation.Client !== currentUserClientId){
-          return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
+        if(quotation.Client){
+          if(quotation.Client !== currentUserClientId){
+            return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
+          }
         }
 
         return QuotationDetailWeb.destroy({id:detailsIds});
