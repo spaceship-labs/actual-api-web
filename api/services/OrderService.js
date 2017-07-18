@@ -340,7 +340,7 @@ function relateOrderToSap(order, orderDetails,req){
       })
       .spread(function(updateOrder, updateDetails, syncResults){
         sails.log.info('syncResults', syncResults);
-        resolve(results);        
+        resolve(updateOrder);        
       })
       .catch(function(err){
         error = err;
