@@ -334,11 +334,13 @@ function relateOrderToSap(order, orderDetails,req){
       .then(function(){
         return [
           OrderWeb.update({id: order.id},{status:'completed', inSapWriteProgress:false}),
-          OrderDetailWeb.update({OrderWeb:order.id},{inSapWriteProgress: false})
+          OrderDetailWeb.update({OrderWeb:order.id},{inSapWriteProgress: false}),
+          StockService.syncOrderDetailsProducts(orderDetails)
         ];
       })
-      .spread(function(results){
-        resolve(results);        
+      .spread(function(updateOrder, updateDetails, syncResults){
+        sails.log.info('syncResults', syncResults);
+        resolve(updateOrder);        
       })
       .catch(function(err){
         error = err;

@@ -130,21 +130,13 @@ module.exports = {
           Email.sendOrderConfirmation(order.id),
           Email.sendFreesale(order.id),
           InvoiceService.createOrderInvoice(order.id, req),
-          OrderService.relateOrderToSap(order, orderDetails, req),
-          StockService.syncOrderDetailsProducts(orderDetails)
+          OrderService.relateOrderToSap(order, orderDetails, req)
         ];
-
-        if(order.isSpeiOrder){
-          promises.push(
-            Email.sendSpeiInstructions(order.UserWeb.firstName, order.UserWeb, order.folio, req.activeStore)
-          );
-        }
 
         return promises;
       })
-      .spread(function(orderSent, freesaleSent, invoice, sapOrderRelated,productsSynced){
+      .spread(function(orderSent, freesaleSent, invoice, sapOrderRelated){
         console.log('Email de orden enviado: ' + order.folio);
-        console.log('productsSynced', productsSynced);
         console.log('generated invoice', invoice);
       })
       .catch(function(err){
