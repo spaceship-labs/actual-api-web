@@ -35,7 +35,8 @@ module.exports = {
       selectFields: form.fields,
       populateFields:['invoice'],
       filters:{
-        Client: clientId
+        Client: clientId,
+        status: 'completed'
       }
     };
     Common.find(model, form, extraParams)
@@ -69,10 +70,19 @@ module.exports = {
       .populate('OrdersSapWeb')
       .populate('SapOrderConnectionLogWeb')
       .then(function(foundOrder){
+
+        if(!foundOrder){
+          return Promise.reject(new Error('No se encontro la orden'));
+        }
+
         order = foundOrder.toObject();
 
 
-        if(order.Client.id != clientId && currentUser.role !== 'admin'){
+        if(order.Client.id != clientId && currentUser.role !== 'admin'){        
+          return Promise.reject(new Error('No autorizado'));
+        }
+
+        if(currentUser.role !== 'admin' && order.isSpeiOrder && order.status !== 'completed'){
           return Promise.reject(new Error('No autorizado'));
         }
 

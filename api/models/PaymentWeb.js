@@ -8,7 +8,7 @@ module.exports = {
       enum:[
         'debit-card',
         'credit-card',
-        //'transfer',
+        'transfer',
         '3-msi',
         '6-msi',
         '9-msi',
