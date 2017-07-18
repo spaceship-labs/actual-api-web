@@ -39,7 +39,8 @@ module.exports = {
   sendFiscalData: sendFiscalData,
   sendContact: sendContact,
   sendQuotationLog: sendQuotationLog,
-  sendSpeiInstructions: sendSpeiInstructions
+  sendSpeiInstructions: sendSpeiInstructions,
+  sendSpeiQuotation: sendSpeiQuotation,
 };
 
 function password(userName, userEmail, recoveryUrl, cb) {
@@ -432,6 +433,9 @@ function sendOrder(client, order, products, payments, ewallet, store) {
       logo: store.logo || baseURL+'/logos/group.png',
       survey: surveyURL,
     },
+    site:{
+      url: store.url || 'https://ventas.miactual.com'
+    },    
     products: products,
     payments: payments,
     ewallet: {
@@ -565,11 +569,87 @@ function quotation(quotationId, activeStore) {
     });
 }
 
-function sendQuotation(client, quotation, products, payments, transfers, store) {
+function sendSpeiQuotation(quotationId, activeStore) {
+  return QuotationWeb
+    .findOne(quotationId)
+    .populate('Client')
+    .populate('Store')
+    .populate('Details')
+    .populate('OrderWeb')
+    .then(function(quotation) {
+      var client   = quotation.Client;
+      var store    = quotation.Store;
+      var details  = quotation.Details.map(function(detail) { return detail.id; });
+      details      = QuotationDetailWeb.find(details).populate('Product').populate('Promotion');
+      var payments = PaymentService.getPaymentGroupsForEmail(quotation.id, activeStore);
+      var transfers = TransferService.transfers(store.group);
+      var order     = quotation.OrderWeb;
+      return [client,  quotation, details, payments, transfers, store, order];
+    })
+    .spread(function(client, quotation, details, payments, transfers, store, order) {
+      var products = details.map(function(detail) {
+        var date  = moment(detail.shipDate);
+        moment.locale('es');
+        date.locale(false);
+        date = date.format('DD/MMM/YYYY');
+
+        var promotionStartDate;
+        var promotionEndDate;
+        var promotionValidity;
+
+        if(detail.Promotion){
+          promotionStartDate  = moment(detail.Promotion.startDate);
+          promotionStartDate.locale(false);
+          promotionStartDate = promotionStartDate.format('DD/MMM/YYYY');
+
+          promotionEndDate  = moment(detail.Promotion.endDate);
+          promotionEndDate.locale(false);
+          promotionEndDate = promotionEndDate.format('DD/MMM/YYYY');
+
+          promotionValidity = promotionStartDate +' al ' + promotionEndDate;
+        }
+
+        return {
+          id: detail.Product.id,
+          name:  detail.Product.ItemName,
+          code:  detail.Product.ItemCode,
+          color: (detail.Product.DetailedColor || '').split(' ')[0],
+          material: '',
+          ewallet: detail.ewallet && detail.ewallet.toFixed(2),
+          warranty: detail.Product.U_garantia.toLowerCase(),
+          qty: detail.quantity,
+          ship: date,
+          price: numeral(detail.unitPrice).format('0,0.00'),
+          total: numeral(detail.total).format('0,0.00'),
+          discount: detail.discountPercent,
+          promo: (detail.Promotion || {}).publicName,
+          image: baseURL + '/uploads/products/' + detail.Product.icon_filename,
+          promotionValidity: promotionValidity
+        };
+      });
+      return [client, quotation, products, payments, transfers, store];
+    })
+    .spread(function(client, quotation, products, payments, transfers, store, order) {
+      var mats = products.map(function(p) {
+        return materials(p.id);
+      });
+      return Promise
+        .all(mats)
+        .then(function(mats) {
+          mats.forEach(function(m, i) {
+            products[i].material = m;
+          });
+          return sendQuotation(client, quotation, products, payments, transfers, store, order);
+        });
+    });
+}
+
+function sendQuotation(client, quotation, products, payments, transfers, store, order) {
   var date = moment(quotation.updatedAt);
   moment.locale('es');
   date.locale(false);
-  var emailBody = quotationTemplate({
+
+  var emailParams = {
     client: {
       name: client.CardName,
       address: '',
@@ -589,13 +669,26 @@ function sendQuotation(client, quotation, products, payments, transfers, store) 
       logo: store.logo || baseURL+'/logos/group.png',
       image: store.logo
     },
+    site:{
+      url: store.url || 'https://ventas.miactual.com'
+    },
     products: products,
     payments: payments,
     transfers: transfers,
     ewallet: {
       balance: numeral(client.ewallet).format('0,0.00')
     }
-  });
+  };
+
+  if(order && order.isSpeiOrder){
+    emailParams.speiTransferData = {
+      conektaAmount: order.conektaAmount,
+      receiving_account_number: order.receiving_account_number,
+      receiving_account_bank: order.receiving_account_bank
+    };
+  }
+
+  var emailBody = quotationTemplate(emailParams);
 
   // mail stuff
   var request          = sendgrid.emptyRequest();

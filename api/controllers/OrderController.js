@@ -136,12 +136,20 @@ module.exports = {
       .then(function(_orderDetails){
         orderDetails = _orderDetails;
 
+        var emailSendingPromise;
+
+        if(order.isSpeiOrder){
+          emailSendingPromise = Email.sendOrderConfirmation(order.id);
+        }else{
+          emailSendingPromise = Email.sendSpeiQuotation(order.QuotationWeb, req.activeStore);          
+        }
+
+
         var promises = [
-          Email.sendOrderConfirmation(order.id),
+          emailSendingPromise,
           Email.sendFreesale(order.id),
           InvoiceService.createOrderInvoice(order.id, req),
-          OrderService.relateOrderToSap(order, orderDetails, req),
-          StockService.syncOrderDetailsProducts(orderDetails)
+          OrderService.relateOrderToSap(order, orderDetails, req)
         ];
 
         if(order.isSpeiOrder){
@@ -152,9 +160,14 @@ module.exports = {
 
         return promises;
       })
-      .spread(function(orderSent, freesaleSent, invoice, sapOrderRelated,productsSynced){
-        console.log('Email de orden enviado: ' + order.folio);
-        console.log('productsSynced', productsSynced);
+      .spread(function(orderSent, freesaleSent, invoice, sapOrderRelated){
+        
+        if(order.isSpeiOrder){
+          console.log('Email de cotizacion enviado: ' + order.folio);
+        }else{
+          console.log('Email de orden enviado: ' + order.folio);          
+        }
+        
         console.log('generated invoice', invoice);
       })
       .catch(function(err){
