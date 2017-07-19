@@ -139,9 +139,9 @@ module.exports = {
         var emailSendingPromise;
 
         if(order.isSpeiOrder){
-          emailSendingPromise = Email.sendOrderConfirmation(order.id);
+          emailSendingPromise = Email.sendSpeiQuotation(order.QuotationWeb, req.activeStore);
         }else{
-          emailSendingPromise = Email.sendSpeiQuotation(order.QuotationWeb, req.activeStore);          
+          emailSendingPromise = Email.sendOrderConfirmation(order.id);
         }
 
 

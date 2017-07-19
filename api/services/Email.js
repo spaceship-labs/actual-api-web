@@ -627,7 +627,7 @@ function sendSpeiQuotation(quotationId, activeStore) {
           promotionValidity: promotionValidity
         };
       });
-      return [client, quotation, products, payments, transfers, store];
+      return [client, quotation, products, payments, transfers, store, order];
     })
     .spread(function(client, quotation, products, payments, transfers, store, order) {
       var mats = products.map(function(p) {
