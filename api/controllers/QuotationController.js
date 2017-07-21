@@ -143,7 +143,7 @@ module.exports = {
     var userId = UserService.getCurrentUserId(req);
     var currentUserClientId = UserService.getCurrentUserClientId(req);
 
-    if(req.user){
+    if(req.user && !UserService.isUserAdminOrSeller(req)){
       query.Client = currentUserClientId;
     }
 
@@ -154,7 +154,7 @@ module.exports = {
           return Promise.reject(new Error('Cotización no encontrada'));
         } 
         if(quotation.Client){
-          if(quotation.Client !== currentUserClientId){
+          if(quotation.Client !== currentUserClientId && !UserService.isUserAdminOrSeller(req)){
             return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
           }              
         }
@@ -180,7 +180,7 @@ module.exports = {
     var userId = UserService.getCurrentUserId(req);
     var currentUserClientId = UserService.getCurrentUserClientId(req);
 
-    if(req.user){
+    if(req.user && !UserService.isUserAdminOrSeller(req)){
       query.Client = currentUserClientId;
     }
 
@@ -210,7 +210,7 @@ module.exports = {
         }
   
         if(quotation.Client){
-          if(quotation.Client.id !== currentUserClientId){
+          if(quotation.Client.id !== currentUserClientId && !UserService.isUserAdminOrSeller(req)){
             return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
           }        
         }
@@ -413,6 +413,29 @@ module.exports = {
       });
   },
 
+  findAll: function(req, res){
+    var form = req.params.all();
+    var clientId = UserService.getCurrentUserClientId(req);
+    form.filters = form.filters || {};
+    //form.filters.Store = req.activeStore.id;
+
+    var model = 'quotationweb';
+    var extraParams = {
+      searchFields: ['folio','id'],
+      selectFields: form.fields,
+      filters: form.filters
+    };
+
+    Common.find(model, form, extraParams)
+      .then(function(result){
+        res.ok(result);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
+  },
+
   getQuotationTotals: function(req, res){
     var form = req.params.all();
     var id = form.id;
@@ -565,7 +588,7 @@ module.exports = {
         }
         
         if(quotation.Client){
-          if(quotation.Client !== currentUserClientId){
+          if(quotation.Client !== currentUserClientId && !UserService.isUserAdminOrSeller(req)){
             return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
           }   
         }

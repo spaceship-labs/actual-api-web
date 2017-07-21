@@ -48,6 +48,32 @@ module.exports = {
       });
   },
 
+  findAll: function(req, res){
+    var form = req.params.all();
+    var model = 'orderweb';
+    var clientId = UserService.getCurrentUserClientId(req);
+
+    var extraParams = {
+      searchFields: [
+        'folio',
+        'CardName',
+        'CardCode'
+      ],
+      selectFields: form.fields,
+      populateFields:['invoice'],
+      filters:{
+      }
+    };
+    Common.find(model, form, extraParams)
+      .then(function(result){
+        res.ok(result);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
+  },  
+
 
   findById: function(req, res){
     var form = req.params.all();
