@@ -126,10 +126,21 @@ module.exports = {
     var orderDetails;
     var errLog;
     var quotationId = form.quotationId;
+    var clientId = UserService.getCurrentUserClientId(req);
 
     sails.log.info('init order creation', new Date());
     sails.log.info('quotationId', form.quotationId);
-    OrderService.createFromQuotation(form, req)
+
+
+    QuotationWeb.findOne({id: quotationId, select:['Client']})
+      .then(function(quotation){
+
+        if(quotation.Client != clientId){
+          return Promise.reject(new Error('No autorizado'));
+        }
+
+        return OrderService.createFromQuotation(form, req);
+      })
       .then(function(orderCreated){
         //RESPONSE
         sails.log.info('end ', new Date());
