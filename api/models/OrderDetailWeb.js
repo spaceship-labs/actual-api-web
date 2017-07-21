@@ -76,7 +76,9 @@ module.exports = {
     shipCompanyFrom: {
       model: 'company',
       required: true
-    }
+    },
+    PurchaseAfter: {type:'boolean'},
+    PurchaseDocument: {type:'string'}    
 
   },
 

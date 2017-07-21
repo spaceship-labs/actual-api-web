@@ -72,6 +72,10 @@ module.exports = {
       model:'company',
       required: true
     },
+    
+    PurchaseAfter: {type:'boolean'},
+    PurchaseDocument: {type:'string'},
+    
     PromotionPackage:{
       model:'ProductGroup'
     },

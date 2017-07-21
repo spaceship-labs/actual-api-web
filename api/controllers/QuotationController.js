@@ -102,7 +102,7 @@ module.exports = {
 
     var query = {
       _id: ObjectId(quotationId),
-      Stroe: ObjectId(req.activeStore.id)
+      Store: ObjectId(req.activeStore.id)
     };
 
     Common.nativeFindOne(query, QuotationWeb)
