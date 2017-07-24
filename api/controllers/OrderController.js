@@ -175,17 +175,18 @@ module.exports = {
       .spread(function(orderSent, freesaleSent, invoice, sapOrderRelated){
         console.log('Email de orden enviado: ' + order.folio);
         console.log('generated invoice', invoice);
+        return Promise.resolve();
       })
       .catch(function(err){
-        console.log(err);
+        console.log('catch general createFromQuotation',err);
         errLog = err;
+        
         if(!responseSent){
           res.negotiate(err);
         }
 
         sails.log.info('start finding quotationWithErr', quotationId);
-        return 
-          QuotationWeb.findOne({id: quotationId, select:['folio']})
+        return QuotationWeb.findOne({id: quotationId, select:['folio']})
           .populate('Client');
       })
       .then(function(quotationWithErr){
