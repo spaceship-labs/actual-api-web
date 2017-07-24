@@ -154,11 +154,14 @@ module.exports = {
           res.negotiate(err);
         }
 
+        sails.log.info('start finding quotationWithErr', quotationId);
         return 
           QuotationWeb.findOne({id: quotationId, select:['folio']})
           .populate('Client');
       })
       .then(function(quotationWithErr){
+
+        sails.log.info('quotationWithErr folio', (quotationWithErr || {}).folio);
 
         if(quotationWithErr){
           var client = quotationWithErr.Client || {};
