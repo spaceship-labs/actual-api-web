@@ -60,11 +60,28 @@ module.exports = {
         'CardCode'
       ],
       selectFields: form.fields,
-      populateFields:['invoice'],
+      populateFields:['Client'],
       filters:{
       }
     };
-    Common.find(model, form, extraParams)
+
+    var clientSearch = form.clientSearch;
+    var clientSearchFields = ['CardName', 'E_Mail', 'CardCode'];
+    var preSearch = Promise.resolve();
+
+    if(clientSearch && form.term){
+      preSearch = ClientService.clientsIdSearch(form.term, clientSearchFields);
+      delete form.term;
+    }
+
+    preSearch.then(function(preSearchResults){
+        //Search by pre clients search
+        if( preSearchResults && _.isArray(preSearchResults) ){
+          extraParams.filters.Client = preSearchResults;
+        }
+
+        return Common.find(model, form, extraParams);
+      })
       .then(function(result){
         res.ok(result);
       })

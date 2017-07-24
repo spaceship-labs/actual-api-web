@@ -423,10 +423,27 @@ module.exports = {
     var extraParams = {
       searchFields: ['folio','id'],
       selectFields: form.fields,
-      filters: form.filters
+      filters: form.filters,
+      populateFields: ['Client']      
     };
 
-    Common.find(model, form, extraParams)
+    var clientSearch = form.clientSearch;
+    var clientSearchFields = ['CardName', 'E_Mail', 'CardCode'];
+    var preSearch = Promise.resolve();
+
+    if(clientSearch && form.term){
+      preSearch = ClientService.clientsIdSearch(form.term, clientSearchFields);
+      delete form.term;
+    }
+
+    preSearch.then(function(preSearchResults){
+        //Search by pre clients search
+        if( preSearchResults && _.isArray(preSearchResults) ){
+          extraParams.Client = preSearchResults;
+        }
+
+        return Common.find(model, form, extraParams);
+      })
       .then(function(result){
         res.ok(result);
       })
@@ -677,25 +694,6 @@ module.exports = {
 
 };
 
-function clientsIdSearch(term, searchFields){
-  var query = {};
-  if(searchFields.length > 0){
-    query.or = [];
-    for(var i=0;i<searchFields.length;i++){
-      var field = searchFields[i];
-      var obj = {};
-      obj[field] = {contains:term};
-      query.or.push(obj);
-    }
-  }
-  return Client.find(query)
-    .then(function(clients){
-      if(!clients){
-        return [];
-      }
-      return clients.map(function(c){return c.id;});
-    });
-}
 
 function tagImmediateDeliveriesDetails(details){
   if(details && details.length > 0){
