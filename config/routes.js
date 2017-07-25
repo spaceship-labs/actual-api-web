@@ -198,6 +198,10 @@ module.exports.routes = {
     controller: 'quotation',
     action:'find'
   },
+  '/quotation/all/find/:page':{
+    controller: 'quotation',
+    action:'findAll'
+  },
 
 
   '/quotation/adddetail/:id':{
@@ -275,6 +279,11 @@ module.exports.routes = {
   '/order/find/:page':{
     controller:'order',
     action:'find'
+  },
+
+  '/order/all/find/:page':{
+    controller:'order',
+    action:'findAll'
   },
 
   '/order/invoicelogs/:orderId':{

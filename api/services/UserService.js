@@ -4,12 +4,19 @@ module.exports = {
 	checkIfUserEmailIsTaken: checkIfUserEmailIsTaken,
 	updateUserFromClient: updateUserFromClient,
 	getCurrentUserClientId: getCurrentUserClientId,
-	getCurrentUserId: getCurrentUserId
+	getCurrentUserId: getCurrentUserId,
+	isUserAdminOrSeller: isUserAdminOrSeller
 };
 
 function getCurrentUserId(req){
   var userId = req.user ? req.user.id : false;
   return userId;
+}
+
+function isUserAdminOrSeller(req){
+	var SELLER_ROLE = 'seller';
+	var ADMIN_ROLE = 'admin';	
+	return (req.user || {}).role === SELLER_ROLE || (req.user || {}).role === ADMIN_ROLE;
 }
 
 

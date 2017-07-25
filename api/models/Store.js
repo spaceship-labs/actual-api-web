@@ -35,7 +35,7 @@ module.exports = {
       collection: 'userweb',
       via: 'Store'
     },    
-    Payments: {
+    PaymentsWeb: {
       collection:'PaymentWeb',
       via:'Store'
     },

@@ -49,6 +49,49 @@ module.exports = {
       });
   },
 
+  findAll: function(req, res){
+    var form = req.params.all();
+    var model = 'orderweb';
+    var clientId = UserService.getCurrentUserClientId(req);
+
+    var extraParams = {
+      searchFields: [
+        'folio',
+        'CardName',
+        'CardCode'
+      ],
+      selectFields: form.fields,
+      populateFields:['Client'],
+      filters:{
+      }
+    };
+
+    var clientSearch = form.clientSearch;
+    var clientSearchFields = ['CardName', 'E_Mail', 'CardCode'];
+    var preSearch = Promise.resolve();
+
+    if(clientSearch && form.term){
+      preSearch = ClientService.clientsIdSearch(form.term, clientSearchFields);
+      delete form.term;
+    }
+
+    preSearch.then(function(preSearchResults){
+        //Search by pre clients search
+        if( preSearchResults && _.isArray(preSearchResults) ){
+          extraParams.filters.Client = preSearchResults;
+        }
+
+        return Common.find(model, form, extraParams);
+      })
+      .then(function(result){
+        res.ok(result);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
+  },  
+
 
   findById: function(req, res){
     var form = req.params.all();
@@ -110,10 +153,21 @@ module.exports = {
     var orderDetails;
     var errLog;
     var quotationId = form.quotationId;
+    var clientId = UserService.getCurrentUserClientId(req);
 
     sails.log.info('init order creation', new Date());
     sails.log.info('quotationId', form.quotationId);
-    OrderService.createFromQuotation(form, req)
+
+
+    QuotationWeb.findOne({id: quotationId, select:['Client']})
+      .then(function(quotation){
+
+        if(quotation.Client != clientId){
+          return Promise.reject(new Error('No autorizado'));
+        }
+
+        return OrderService.createFromQuotation(form, req);
+      })
       .then(function(orderCreated){
         //RESPONSE
         sails.log.info('end ', new Date());
@@ -152,16 +206,9 @@ module.exports = {
           OrderService.relateOrderToSap(order, orderDetails, req)
         ];
 
-        if(order.isSpeiOrder){
-          promises.push(
-            Email.sendSpeiInstructions(order.UserWeb.firstName, order.UserWeb, order.folio, req.activeStore)
-          );
-        }
-
         return promises;
       })
-      .spread(function(orderSent, freesaleSent, invoice, sapOrderRelated){
-        
+      .spread(function(orderSent, freesaleSent, invoice, sapOrderRelated){        
         if(order.isSpeiOrder){
           console.log('Email de cotizacion enviado: ' + order.folio);
         }else{
@@ -169,19 +216,23 @@ module.exports = {
         }
         
         console.log('generated invoice', invoice);
+        return Promise.resolve();
       })
       .catch(function(err){
-        console.log(err);
+        console.log('catch general createFromQuotation',err);
         errLog = err;
+        
         if(!responseSent){
           res.negotiate(err);
         }
 
-        return 
-          QuotationWeb.findOne({id: quotationId, select:['folio']})
+        sails.log.info('start finding quotationWithErr', quotationId);
+        return QuotationWeb.findOne({id: quotationId, select:['folio']})
           .populate('Client');
       })
       .then(function(quotationWithErr){
+
+        sails.log.info('quotationWithErr folio', (quotationWithErr || {}).folio);
 
         if(quotationWithErr){
           var client = quotationWithErr.Client || {};

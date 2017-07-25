@@ -27,7 +27,13 @@ module.exports = {
     },
     ImmediateDelivery:{
       type: 'boolean'
-    }
+    },
+    PurchaseAfter:{
+      type: 'boolean'
+    },
+    PurchaseDocument:{
+      type: 'string'
+    }    
   }
 };
 

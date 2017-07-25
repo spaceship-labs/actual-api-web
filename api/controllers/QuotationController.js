@@ -64,6 +64,11 @@ module.exports = {
 
     Common.nativeFindOne({_id: ObjectId(id)}, QuotationWeb)
       .then(function(quotation){
+
+        if(!quotation){
+          return Promise.reject(new Error('Cotización no encontrada'));
+        }
+
         if(req.user){
           if(quotation.Client !== currentUserClientId && quotation.Client){
             return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
@@ -95,9 +100,18 @@ module.exports = {
     var currentUserClientId = UserService.getCurrentUserClientId(req);
     form.Store =  req.activeStore.id;
 
+    var query = {
+      _id: ObjectId(quotationId),
+      Store: ObjectId(req.activeStore.id)
+    };
 
-    Common.nativeFindOne({_id: ObjectId(quotationId)}, QuotationWeb)
+    Common.nativeFindOne(query, QuotationWeb)
       .then(function(quotation){
+
+        if(!quotation){
+          return Promise.reject(new Error('Cotización no encontrada'));
+        }
+
         if(req.user){
           if(quotation.Client !== currentUserClientId && quotation.Client){
             return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
@@ -124,11 +138,12 @@ module.exports = {
     var id = form.id;
     var query = {
       id: id,
+      Store: req.activeStore.id
     };
     var userId = UserService.getCurrentUserId(req);
     var currentUserClientId = UserService.getCurrentUserClientId(req);
 
-    if(req.user){
+    if(req.user && !UserService.isUserAdminOrSeller(req)){
       query.Client = currentUserClientId;
     }
 
@@ -139,7 +154,7 @@ module.exports = {
           return Promise.reject(new Error('Cotización no encontrada'));
         } 
         if(quotation.Client){
-          if(quotation.Client !== currentUserClientId){
+          if(quotation.Client !== currentUserClientId && !UserService.isUserAdminOrSeller(req)){
             return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
           }              
         }
@@ -159,12 +174,13 @@ module.exports = {
       id = parseInt(id);
     }
     var query = {
-      id: id
+      id: id,
+      Store: req.activeStore.id
     };
     var userId = UserService.getCurrentUserId(req);
     var currentUserClientId = UserService.getCurrentUserClientId(req);
 
-    if(req.user){
+    if(req.user && !UserService.isUserAdminOrSeller(req)){
       query.Client = currentUserClientId;
     }
 
@@ -194,7 +210,7 @@ module.exports = {
         }
   
         if(quotation.Client){
-          if(quotation.Client.id !== currentUserClientId){
+          if(quotation.Client.id !== currentUserClientId && !UserService.isUserAdminOrSeller(req)){
             return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
           }        
         }
@@ -229,8 +245,18 @@ module.exports = {
       currentStoreId: req.activeStore.id
     };
     
-    Common.nativeFindOne({_id: ObjectId(id)}, QuotationWeb)
+    var query = {
+      _id: ObjectId(id),
+      Store: ObjectId(req.activeStore.id)
+    };
+
+    Common.nativeFindOne(query, QuotationWeb)
       .then(function(quotation){
+
+        if(!quotation){
+          return Promise.reject(new Error('Cotización no encontrada'));
+        }
+
         if(req.user){
           if(quotation.Client !== currentUserClientId){
             return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
@@ -279,8 +305,18 @@ module.exports = {
       currentStoreId: req.activeStore.id
     };
 
-    Common.nativeFindOne({_id: ObjectId(id)}, QuotationWeb)
+    var query = {
+      _id: ObjectId(id),
+      Store: ObjectId(req.activeStore.id)
+    };    
+
+    Common.nativeFindOne(query, QuotationWeb)
       .then(function(quotation){
+
+        if(!quotation){
+          return Promise.reject(new Error('Cotización no encontrada'));
+        }
+
         if(quotation.Client){
           if(quotation.Client !== currentUserClientId){
             return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
@@ -316,9 +352,18 @@ module.exports = {
       currentStoreId: req.activeStore.id
     };
 
+    var query = {
+      _id: ObjectId(quotationId),
+      Store: ObjectId(req.activeStore.id)
+    };
 
-    Common.nativeFindOne({_id: ObjectId(quotationId)}, QuotationWeb)
+    Common.nativeFindOne(query, QuotationWeb)
       .then(function(quotation){
+
+        if(!quotation){
+          return Promise.reject(new Error('Cotización no encontrada'));
+        }
+
         if(quotation.Client){
           if(quotation.Client !== currentUserClientId){
             return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
@@ -349,6 +394,7 @@ module.exports = {
     var clientId = UserService.getCurrentUserClientId(req);
     form.filters = form.filters || {};
     form.filters.Client = clientId;
+    //form.filters.Store = req.activeStore.id;
 
     var model = 'quotationweb';
     var extraParams = {
@@ -358,6 +404,46 @@ module.exports = {
     };
 
     Common.find(model, form, extraParams)
+      .then(function(result){
+        res.ok(result);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
+  },
+
+  findAll: function(req, res){
+    var form = req.params.all();
+    var clientId = UserService.getCurrentUserClientId(req);
+    form.filters = form.filters || {};
+    //form.filters.Store = req.activeStore.id;
+
+    var model = 'quotationweb';
+    var extraParams = {
+      searchFields: ['folio','id'],
+      selectFields: form.fields,
+      filters: form.filters,
+      populateFields: ['Client']      
+    };
+
+    var clientSearch = form.clientSearch;
+    var clientSearchFields = ['CardName', 'E_Mail', 'CardCode'];
+    var preSearch = Promise.resolve();
+
+    if(clientSearch && form.term){
+      preSearch = ClientService.clientsIdSearch(form.term, clientSearchFields);
+      delete form.term;
+    }
+
+    preSearch.then(function(preSearchResults){
+        //Search by pre clients search
+        if( preSearchResults && _.isArray(preSearchResults) ){
+          extraParams.Client = preSearchResults;
+        }
+
+        return Common.find(model, form, extraParams);
+      })
       .then(function(result){
         res.ok(result);
       })
@@ -377,9 +463,19 @@ module.exports = {
       currentStoreId: req.activeStore.id
     };
     var calculator = QuotationService.Calculator();
+    
+    var query = {
+      _id: ObjectId(id),
+      Store: ObjectId(req.activeStore.id)
+    };
 
-    Common.nativeFindOne({_id: ObjectId(id)}, QuotationWeb)
+    Common.nativeFindOne(query, QuotationWeb)
       .then(function(quotation){
+
+        if(!quotation){
+          return Promise.reject(new Error('Cotización no encontrada'));
+        }
+
         /*
         if(quotation.User !== req.user.id){
           return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
@@ -401,9 +497,17 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
     var currentUserClientId = UserService.getCurrentUserClientId(req);
+    var query = {
+      _id: ObjectId(id),
+      Store: ObjectId(req.activeStore.id)
+    };
 
-    Common.nativeFindOne({_id: ObjectId(id)}, QuotationWeb)
+    Common.nativeFindOne(query, QuotationWeb)
       .then(function(quotation){
+        if(!quotation){
+          return Promise.reject(new Error('Cotización no encontrada'));
+        }
+
         if(quotation.Client !== currentUserClientId){
           return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
         }      
@@ -422,10 +526,15 @@ module.exports = {
     var quotationId = form.quotationId;
     var details;
     var quotation;
-    var query = {
+    var queryDetails = {
       QuotationWeb: quotationId,
     };
 
+    var queryQuotation = {
+      id:quotationId, 
+      Store: req.activeStore.id, 
+      select:['ZipcodeDelivery']
+    };    
     /*
     if(req.user){
       query.Client = req.user.id;      
@@ -435,8 +544,8 @@ module.exports = {
     */
 
     var promises = [
-      QuotationWeb.findOne({id:quotationId, select:['ZipcodeDelivery']}),
-      QuotationDetailWeb.find(query).populate('Product')
+      QuotationWeb.findOne(queryQuotation),
+      QuotationDetailWeb.find(queryDetails).populate('Product')
     ];
       
       Promise.all(promises)
@@ -444,6 +553,11 @@ module.exports = {
         quotation = results[0];
         details = results[1];
         var whsId = req.activeStore.Warehouse;
+
+        if(!quotation){
+          return Promise.reject(new Error('Cotización no encontrada'));
+        }
+
         return Company.findOne({id: whsId});
       })
       .then(function(warehouse){
@@ -478,12 +592,20 @@ module.exports = {
     var form = req.allParams();
     var quotationId = form.id;
     var currentUserClientId = UserService.getCurrentUserClientId(req);
+    var query = {
+      _id: ObjectId(quotationId),
+      Store: ObjectId(req.activeStore.id)
+    };
 
-    Common.nativeFindOne({_id: ObjectId(quotationId)}, QuotationWeb)
+    Common.nativeFindOne(query, QuotationWeb)
       .then(function(quotation){
+
+        if(!quotation){
+          return Promise.reject(new Error('Cotización no encontrada'));
+        }
         
         if(quotation.Client){
-          if(quotation.Client !== currentUserClientId){
+          if(quotation.Client !== currentUserClientId && !UserService.isUserAdminOrSeller(req)){
             return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
           }   
         }
@@ -541,6 +663,7 @@ module.exports = {
     var id = form.id;
     var query = {
       id: id,
+      Store: req.activeStore.id
     };
     var currentUserClientId = UserService.getCurrentUserClientId(req);
 
@@ -571,25 +694,6 @@ module.exports = {
 
 };
 
-function clientsIdSearch(term, searchFields){
-  var query = {};
-  if(searchFields.length > 0){
-    query.or = [];
-    for(var i=0;i<searchFields.length;i++){
-      var field = searchFields[i];
-      var obj = {};
-      obj[field] = {contains:term};
-      query.or.push(obj);
-    }
-  }
-  return Client.find(query)
-    .then(function(clients){
-      if(!clients){
-        return [];
-      }
-      return clients.map(function(c){return c.id;});
-    });
-}
 
 function tagImmediateDeliveriesDetails(details){
   if(details && details.length > 0){
