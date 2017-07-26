@@ -57,7 +57,18 @@
                                           <table style="border-collapse:collapse;border-spacing:0;color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top;width:100%">
                                              <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
                                                 <th style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left">
-                                                   <p style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:10px;padding:0;text-align:left">Estimado <strong style="color:#6b6b6b;font-size:11px"><%=client.name%>,</strong><br style="color:#6b6b6b;font-size:11px">Gracias por su reciente visita. A continuación encontrará los detalles de su cotización.</p>
+
+                                                   <% if(speiTransferData){ %>
+                                                   
+                                                      <p style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:10px;padding:0;text-align:left">Estimado <strong style="color:#6b6b6b;font-size:11px"><%=client.name%>,</strong><br style="color:#6b6b6b;font-size:11px">Su orden de compra estará EN PROCESO y SUJETA A DISPONIBILIDAD, le sugerimos no volver a generar la misma cotización para evitar una duplicidad.</p>
+                                                   
+                                                   <% }else{ %>
+
+                                                      <p style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:10px;padding:0;text-align:left">Estimado <strong style="color:#6b6b6b;font-size:11px"><%=client.name%>,</strong><br style="color:#6b6b6b;font-size:11px">Gracias por su reciente visita. A continuación encontrará los detalles de su cotización.</p>
+
+
+                                                   <% } %>
+
                                                    <table style="border-collapse:collapse;border-spacing:0;color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top;width:100%">
                                                       <thead style="color:#6b6b6b;font-size:11px">
                                                          <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
@@ -269,6 +280,104 @@
                                     </tr>
                                  </tbody>
                               </table>
+
+                              <hr style="border-style:solid;border-width:1px;color:#6b6b6b;font-size:11px;max-width:550px">
+                              
+                              <% if(speiTransferData){ %>
+                                 <table class="row title" style="border-collapse:collapse;border-spacing:0;color:#6b6b6b;display:table;font-size:11px;padding:0;position:relative;text-align:left;vertical-align:top;width:100%">
+                                    <tbody style="color:#6b6b6b;font-size:11px">
+                                       <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
+                                          <th class="small-12 large-12 columns first last" style="Margin:0 auto;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0 auto;padding:0;padding-bottom:16px;padding-left:16px;padding-right:16px;text-align:left;width:564px">
+                                             <table style="border-collapse:collapse;border-spacing:0;color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top;width:100%">
+                                                <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
+                                                   <th style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left">
+                                                      <p style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:0;padding:0;text-align:left"><img src="<%=company.url%>/icons/transfer.png" style="-ms-interpolation-mode:bicubic;clear:both;color:#6b6b6b;display:inline;font-size:11px;max-width:100%;outline:0;text-decoration:none;width:auto"> <strong style="color:#000;font-size:18px">DATOS PARA TRANSFERENCIAS</strong></p>
+                                                   </th>
+                                                   <th class="expander" style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0!important;text-align:left;visibility:hidden;width:0"></th>
+                                                </tr>
+                                             </table>
+                                          </th>
+                                       </tr>
+                                    </tbody>
+                                 </table>
+
+                                 <section class="spei-card">
+                                   <div class="ps" style="width: 496px; border-radius: 4px; box-sizing: border-box; padding: 0 45px; margin: 40px auto; overflow: hidden; border: 1px solid #b0afb5; font-family: 'Open Sans', sans-serif; color: #4f5365;">
+                                     <div class="ps-header">
+                                       <div class="ps-reminder" style="position: relative; top: -1px; padding: 9px 0 10px; font-size: 11px; text-transform: uppercase; text-align: center; color: #ffffff; background: #000000;">Ficha digital. No es necesario imprimir.</div>
+                                       <div class="ps-info" style="margin-top: 26px; position: relative;">
+                                         <div class="ps-brand" style="width: 45%; float: left;"><img src="<%=company.url%>/logos/spei_brand.png" alt="Banorte" style="max-width: 150px; margin-top: 2px;"></div>
+                                         <div class="ps-amount" style="width: 55%; float: right;">
+                                           <h3 style="margin-bottom: 10px; font-size: 15px; font-weight: 600; text-transform: uppercase;">Monto a pagar</h3>
+                                           <h2 style="font-size: 36px; color: #000000; line-height: 24px; margin-bottom: 15px;"><%=speiTransferData.conektaAmount%><sup style="font-size: 16px; position: relative; top: -2px">MXN</sup></h2>
+                                           <p style="font-size: 10px; line-height: 14px;">Utiliza exactamente esta cantidad al realizar el pago.</p>
+                                         </div>
+                                       </div>
+                                       <div class="ps-reference" style="margin-top: 14px;">
+                                         <h3 style="margin-bottom: 10px; font-size: 15px; font-weight: 600; text-transform: uppercase;">CLABE</h3>
+                                         <h1 style="font-size: 27px; color: #000000; text-align: center; margin-top: -1px; padding: 6px 0 7px; border: 1px solid #b0afb5; border-radius: 4px; background: #f8f9fa;"><%=speiTransferData.receiving_account_number%></h1>
+                                       </div>
+                                     </div>
+                                     <div class="ps-instructions" style="margin: 32px -45px 0; padding: 32px 45px 45px; border-top: 1px solid #b0afb5; background: #f8f9fa;">
+                                       <h3 style="margin-bottom: 10px; font-size: 15px; font-weight: 600; text-transform: uppercase;">Instrucciones</h3>
+                                       <ol style="margin: 17px 0 0 16px;">
+                                         <li>Accede a tu banca en línea.</li>
+                                         <li style="margin-top: 10px; color: #000000;">Da de alta la CLABE en esta ficha. <strong>El banco deberá de ser <%=speiTransferData.receiving_account_bank%></strong>.</li>
+                                         <li style="margin-top: 10px; color: #000000;">Realiza la transferencia correspondiente por la cantidad exacta en esta ficha, <strong>de lo contrario se rechazará el cargo</strong>.</li>
+                                         <li style="margin-top: 10px; color: #000000;">Al confirmar tu pago, el portal de tu banco generará un comprobante digital. <strong>En el podrás verificar que se haya realizado correctamente.</strong> Conserva este comprobante de pago.</li>
+                                       </ol>
+                                       <div class="ps-footnote" style="margin-top: 22px; padding: 22px 20 24px; color: #108f30; text-align: center; border: 1px solid #108f30; border-radius: 4px; background: #ffffff;">Al completar estos pasos recibirás un correo de <strong>Nombre del negocio</strong> confirmando tu pago.</div>
+                                     </div>
+                                   </div>
+
+                                 </section>
+
+                              <% } %>
+
+                              <!--
+                              <table class="row" style="border-collapse:collapse;border-spacing:0;color:#6b6b6b;display:table;font-size:11px;padding:0;position:relative;text-align:left;vertical-align:top;width:100%">
+                                 <tbody style="color:#6b6b6b;font-size:11px">
+                                    <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
+                                       <th class="small-12 large-12 columns first last" style="Margin:0 auto;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0 auto;padding:0;padding-bottom:16px;padding-left:16px;padding-right:16px;text-align:left;width:564px">
+                                          <table style="border-collapse:collapse;border-spacing:0;color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top;width:100%">
+                                             <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
+                                                <th style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left">
+                                                   <p style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:10px;padding:0;text-align:left">Razón social: AH Actual S.A. de C.V</p>
+                                                   <table class="custom-table" style="border-collapse:collapse;border-spacing:0;color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top;width:100%">
+                                                      <thead style="color:#6b6b6b;font-size:11px">
+                                                         <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
+                                                            <th style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left">MONEDA</th>
+                                                            <th style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left">BANCO</th>
+                                                            <th style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left">SUCURSAL</th>
+                                                            <th style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left">CUENTA</th>
+                                                            <th style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left">CLABE</th>
+                                                            <th style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left">SWIFT</th>
+                                                         </tr>
+                                                      </thead>
+                                                      <tbody style="color:#6b6b6b;font-size:11px">
+                                                         <% transfers.forEach(function(transfer) { %>
+                                                         <tr style="border-collapse:collapse;border-top:1px solid #BBB;color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
+                                                            <td style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word"><%=transfer.currency%></td>
+                                                            <td style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word"><%=transfer.bank%></td>
+                                                            <td style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word"><%=transfer.sucursal%></td>
+                                                            <td style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word"><%=transfer.account%></td>
+                                                            <td style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word"><%=transfer.clabe%></td>
+                                                            <td style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word"><%=transfer.swift%></td>
+                                                         </tr>
+                                                         <% }); %>
+                                                      </tbody>
+                                                   </table>
+                                                </th>
+                                                <th class="expander" style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0!important;text-align:left;visibility:hidden;width:0"></th>
+                                             </tr>
+                                          </table>
+                                       </th>
+                                    </tr>
+                                 </tbody>
+                              </table>
+                              -->
+
+
                               <hr style="border-style:solid;border-width:1px;color:#6b6b6b;font-size:11px;max-width:550px">
                               <!-- Venderdor y atencion a clientes -->
                               <table class="row title" style="border-collapse:collapse;border-spacing:0;color:#6b6b6b;display:table;font-size:11px;padding:0;position:relative;text-align:left;vertical-align:top;width:100%">
@@ -352,24 +461,24 @@
                                                    <table style="border-collapse:collapse;border-spacing:0;color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top;width:100%">
                                                       <tbody style="color:#6b6b6b;font-size:11px">
                                                          <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
-                                                            <td style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word"><a href="http://ventas.miactual.com/politicas-de-entrega" style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left;text-decoration:none"><strong style="color:#6b6b6b;font-size:11px">Políticas de entrega:</strong></a></td>
-                                                            <td style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word">http://ventas.miactual.com/politicas-de-entrega</td>
+                                                            <td style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word"><a href="<%= site.url %>/politicas-de-entrega" style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left;text-decoration:none"><strong style="color:#6b6b6b;font-size:11px">Políticas de entrega:</strong></a></td>
+                                                            <td style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word"><%= site.url %>/politicas-de-entrega</td>
                                                          </tr>
                                                          <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
-                                                            <td style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word"><a href="http://ventas.miactual.com/politicas-de-instalacion-y-ensamble" style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left;text-decoration:none"><strong style="color:#6b6b6b;font-size:11px">Políticas de instalación y ensamblaje:</strong></a></td>
-                                                            <td style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word">http://ventas.miactual.com/politicas-de-instalacion-y-ensamble</td>
+                                                            <td style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word"><a href="<%= site.url %>/politicas-de-instalacion-y-ensamble" style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left;text-decoration:none"><strong style="color:#6b6b6b;font-size:11px">Políticas de instalación y ensamblaje:</strong></a></td>
+                                                            <td style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word"><%= site.url %>/politicas-de-instalacion-y-ensamble</td>
                                                          </tr>
                                                          <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
-                                                            <td style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word"><a href="http://ventas.miactual.com/politicas-de-almacenaje" style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left;text-decoration:none"><strong style="color:#6b6b6b;font-size:11px">Políticas de almacenaje:</strong></a></td>
-                                                            <td style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word">http://ventas.miactual.com/politicas-de-almacenaje</td>
+                                                            <td style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word"><a href="<%= site.url %>/politicas-de-almacenaje" style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left;text-decoration:none"><strong style="color:#6b6b6b;font-size:11px">Políticas de almacenaje:</strong></a></td>
+                                                            <td style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word"><%= site.url %>/politicas-de-almacenaje</td>
                                                          </tr>
                                                          <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
-                                                            <td style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word"><a href="http://ventas.miactual.com/politicas-de-garantia" style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left;text-decoration:none"><strong style="color:#6b6b6b;font-size:11px">Políticas de garantía:</strong></a></td>
-                                                            <td style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word">http://ventas.miactual.com/politicas-de-garantia</td>
+                                                            <td style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word"><a href="<%= site.url %>/politicas-de-garantia" style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left;text-decoration:none"><strong style="color:#6b6b6b;font-size:11px">Políticas de garantía:</strong></a></td>
+                                                            <td style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word"><%= site.url %>/politicas-de-garantia</td>
                                                          </tr>
                                                          <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
-                                                            <td style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word"><a href="http://ventas.miactual.com/manual-de-cuidados-y-recomendaciones" style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left;text-decoration:none"><strong style="color:#6b6b6b;font-size:11px">Manual de cuidados y recomendaciones:</strong></a></td>
-                                                            <td style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word">http://ventas.miactual.com/manual-de-cuidados-y-recomendaciones</td>
+                                                            <td style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word"><a href="<%= site.url %>/manual-de-cuidados-y-recomendaciones" style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left;text-decoration:none"><strong style="color:#6b6b6b;font-size:11px">Manual de cuidados y recomendaciones:</strong></a></td>
+                                                            <td style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word"><%= site.url %>/manual-de-cuidados-y-recomendaciones</td>
                                                          </tr>
                                                       </tbody>
                                                    </table>

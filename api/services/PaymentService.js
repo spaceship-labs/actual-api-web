@@ -290,10 +290,10 @@ var paymentGroups = [
         currency: 'mxn',
         min:0,
       },
-      /*
+      
       {
-        label:'Transferencia',
-        name:'Transferencia',
+        label:'Transferencia SPEI',
+        name:'Transferencia SPEI',
         type:'transfer',
         description:'',
         cardsImages:['/cards/banamex.png','/cards/hsbc.png','/cards/santander.png'],
@@ -320,7 +320,7 @@ var paymentGroups = [
           {label:'Santander', value:'santander'}
         ],
       },
-      */
+      
     ]
   },
   {

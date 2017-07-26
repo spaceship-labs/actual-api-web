@@ -35,7 +35,8 @@ module.exports = {
       selectFields: form.fields,
       populateFields:['invoice'],
       filters:{
-        Client: clientId
+        Client: clientId,
+        status: 'completed'
       }
     };
     Common.find(model, form, extraParams)
@@ -112,10 +113,19 @@ module.exports = {
       .populate('OrdersSapWeb')
       .populate('SapOrderConnectionLogWeb')
       .then(function(foundOrder){
+
+        if(!foundOrder){
+          return Promise.reject(new Error('No se encontro la orden'));
+        }
+
         order = foundOrder.toObject();
 
 
-        if(order.Client.id != clientId && currentUser.role !== 'admin'){
+        if(order.Client.id != clientId && currentUser.role !== 'admin'){        
+          return Promise.reject(new Error('No autorizado'));
+        }
+
+        if(currentUser.role !== 'admin' && order.isSpeiOrder && order.status !== 'completed'){
           return Promise.reject(new Error('No autorizado'));
         }
 
@@ -180,8 +190,17 @@ module.exports = {
       .then(function(_orderDetails){
         orderDetails = _orderDetails;
 
+        var emailSendingPromise;
+
+        if(order.isSpeiOrder){
+          emailSendingPromise = Email.sendSpeiQuotation(order.QuotationWeb, req.activeStore);
+        }else{
+          emailSendingPromise = Email.sendOrderConfirmation(order.id);
+        }
+
+
         var promises = [
-          Email.sendOrderConfirmation(order.id),
+          emailSendingPromise,
           Email.sendFreesale(order.id),
           InvoiceService.createOrderInvoice(order.id, req),
           OrderService.relateOrderToSap(order, orderDetails, req)
@@ -189,8 +208,13 @@ module.exports = {
 
         return promises;
       })
-      .spread(function(orderSent, freesaleSent, invoice, sapOrderRelated){
-        console.log('Email de orden enviado: ' + order.folio);
+      .spread(function(orderSent, freesaleSent, invoice, sapOrderRelated){        
+        if(order.isSpeiOrder){
+          console.log('Email de cotizacion enviado: ' + order.folio);
+        }else{
+          console.log('Email de orden enviado: ' + order.folio);          
+        }
+        
         console.log('generated invoice', invoice);
         return Promise.resolve();
       })
