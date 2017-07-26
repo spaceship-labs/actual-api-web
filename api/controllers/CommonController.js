@@ -1,6 +1,10 @@
 module.exports = {
   getStates: function(req, res){
-    State.find({}).then(function(states){
+    var query = {
+      Code: {'!':'DF'}
+    };
+
+    State.find(query).then(function(states){
       res.json(states);
     })
     .catch(function(err){

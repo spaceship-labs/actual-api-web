@@ -75,7 +75,7 @@ function updateQuotationToLatestData(quotationId, options){
         return Promise.reject(new Error('Cotización no encontrada'));
       }
 
-      return setQuotationZipcodeDeliveryByContactId(quotation.id, quotation.Address);
+      return setQuotationZipcodeDeliveryByContactId(quotation.id, quotation.Address, quotation.ZipcodeDelivery);
     })
     .then(function(){
       var calculator = Calculator();
@@ -611,7 +611,7 @@ function nativeQuotationUpdate(quotationId,params){
   });
 }
 
-function setQuotationZipcodeDeliveryByContactId(quotationId,contactId){
+function setQuotationZipcodeDeliveryByContactId(quotationId,contactId,zipcodeDeliveryId){
 
   if(!contactId){
     return Promise.resolve();
@@ -619,6 +619,11 @@ function setQuotationZipcodeDeliveryByContactId(quotationId,contactId){
 
   return ClientContact.findOne({id:contactId})
     .then(function(contact){
+
+      if(!contact){
+        return Promise.resolve({id:zipcodeDeliveryId});
+      }
+
       var cp = contact.U_CP;
       if(!cp){
         return Promise.reject(new Error("La dirección de entrega no tiene un código postal asignado"));
@@ -630,7 +635,7 @@ function setQuotationZipcodeDeliveryByContactId(quotationId,contactId){
       var findCriteria = {_id: ObjectId(quotationId)};
       var params = {ZipcodeDelivery: ObjectId(zipcodeDeliveryId)};
       return Common.nativeUpdateOne(findCriteria, params, QuotationWeb);
-    })
+    });
 }
 
 function getMultipleUsersTotals(options){

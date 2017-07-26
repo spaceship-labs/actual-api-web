@@ -182,7 +182,7 @@ module.exports = {
         sails.log.info('contactsCreated or fiscalAddressCreated', contactsCreated);
         sails.log.info('fiscalAddressCreated', fiscalAddressCreated);
 
-        if(contactsCreated && contacts){
+        if(contactsCreated && contacts.length > 0){
           createdClient.Contacts = contactsCreated;
         }
 
