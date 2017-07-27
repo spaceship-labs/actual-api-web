@@ -21,6 +21,8 @@ module.exports = {
     discountPg4: 'float',
     discountPg5: 'float',
 
+    isSpeiOrderDetail: 'boolean',
+    speiExpirationPayment: {type:'datetime'},    
 
     financingCostPercentage: 'float',
     discountPercentPromos: 'float', //by unit (does not include big ticket or FF discount)    

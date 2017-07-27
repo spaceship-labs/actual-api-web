@@ -220,6 +220,12 @@ function createOrder(form, req){
       orderToCreate.receiving_account_bank = form.conektaOrder.receiving_account_bank || false;
       orderToCreate.receiving_account_number = form.conektaOrder.receiving_account_number || false;
       orderToCreate.conektaAmount = form.conektaOrder.amount;
+      orderToCreate.speiExpirationPayment = form.conektaOrder.speiExpirationPayment;
+
+      if( orderToCreate.speiExpirationPayment && moment(orderToCreate.speiExpirationPayment).isValid()  ){
+        var HOURS_TO_SEND_REMIND = 6;
+        orderToCreate.speiExpirationReminderStartDate = moment(orderToCreate.speiExpirationPayment).subtract(HOURS_TO_SEND_REMIND,'hours');
+      }
 
       return OrderWeb.create(orderToCreate);
     })
@@ -234,6 +240,11 @@ function createOrder(form, req){
         delete detail.id;
 
         detail.inSapWriteProgress = true;
+        if(orderFound.isSpeiOrder){
+          detail.isSpeiOrderDetail = true;
+          detail.speiExpirationPayment = form.conektaOrder.speiExpirationPayment;
+        }
+
         orderFound.Details.add(detail);
       });
       return orderFound.save();

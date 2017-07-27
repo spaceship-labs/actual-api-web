@@ -25,6 +25,9 @@ module.exports = {
     discountPg5: {type:'float'},
 
     isSpeiOrder: {type:'boolean'},
+    speiExpirationPayment: {type:'datetime'},
+    speiExpirationReminderDate: {type:'datetime'},
+    paymentReminderSent:{type:'boolean'},
 
     subtotal:{type:'float'},
     discount:{type:'float'},

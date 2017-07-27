@@ -18,12 +18,14 @@ module.exports = {
 
 function isConektaSpeiOrder(conektaOrder){
 	var speiOrder = false;
+	//sails.log.info('conektaOrder', JSON.stringify(conektaOrder));
 	if(conektaOrder.charges){
 		var payment_method = conektaOrder.charges.data[0].payment_method;
 		if(payment_method.receiving_account_number){
 			speiOrder = {
 				receiving_account_bank: payment_method.receiving_account_bank,
-				receiving_account_number: payment_method.receiving_account_number
+				receiving_account_number: payment_method.receiving_account_number,
+				speiExpirationPayment: getTransferExportationFromUnixTime(payment_method.expires_at)
 			};
 		}
 	}
@@ -164,6 +166,10 @@ function getOrderCharges(order, orderPayments){
 
 		return charge;
 	});
+}
+
+function getTransferExportationFromUnixTime(expirationUnixDate){
+	return moment.unix(expirationUnixDate).toDate();
 }
 
 function getTransferExpirationUnixTime(order,payment){

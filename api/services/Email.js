@@ -18,6 +18,9 @@ var fiscalDataTemplate    = fs.readFileSync(sails.config.appPath + '/views/email
 var contactTemplate       = fs.readFileSync(sails.config.appPath + '/views/email/contact.html').toString();
 var quotationLogTemplate  = fs.readFileSync(sails.config.appPath + '/views/email/quotation-log.html').toString();
 var speiInstructionsTemplate  = fs.readFileSync(sails.config.appPath + '/views/email/spei-instructions.html').toString();
+var speiReminderTemplate  = fs.readFileSync(sails.config.appPath + '/views/email/spei-reminder.html').toString();
+var speiExpirationTemplate  = fs.readFileSync(sails.config.appPath + '/views/email/spei-expiration.html').toString();
+
 
 passwordTemplate          = ejs.compile(passwordTemplate);
 orderTemplate             = ejs.compile(orderTemplate);
@@ -28,6 +31,8 @@ fiscalDataTemplate        = ejs.compile(fiscalDataTemplate);
 contactTemplate           = ejs.compile(contactTemplate);
 quotationLogTemplate      = ejs.compile(quotationLogTemplate);
 speiInstructionsTemplate  = ejs.compile(speiInstructionsTemplate);
+speiReminderTemplate      = ejs.compile(speiReminderTemplate);
+speiExpirationTemplate    = ejs.compile(speiExpirationTemplate);
 
 
 module.exports = {
@@ -40,6 +45,8 @@ module.exports = {
   sendContact: sendContact,
   sendQuotationLog: sendQuotationLog,
   sendSpeiInstructions: sendSpeiInstructions,
+  sendSpeiReminder: sendSpeiReminder,
+  sendSpeiExpiration: sendSpeiExpiration,
   sendSpeiQuotation: sendSpeiQuotation,
 };
 
@@ -50,7 +57,7 @@ function password(userName, userEmail, recoveryUrl, cb) {
   var requestBody     = undefined;
   var mail            = new helper.Mail();
   var personalization = new helper.Personalization();
-  var from            = new helper.Email("noreply@actualgroup.com", "actualgroup");
+  var from            = new helper.Email("noreply@actualgroup.com", "Actual Group");
   var to              = new helper.Email(userEmail, userName);
   var subject         = 'Recuperar contraseña';
   var res             = passwordTemplate({
@@ -90,7 +97,7 @@ function sendRegister(userName, userEmail, store, cb) {
   var requestBody     = undefined;
   var mail            = new helper.Mail();
   var personalization = new helper.Personalization();
-  var from            = new helper.Email("noreply@actualgroup.com", "actualgroup");
+  var from            = new helper.Email("noreply@actualgroup.com", "Actual Group");
   //var to = new helper.Email('luisperez@spaceshiplabs.com', 'Luis');
   var to              = new helper.Email(userEmail, userName);
   var subject         = '¡Bienvenido a Actual Group!';
@@ -248,7 +255,7 @@ function sendSpeiInstructions(clientName, clientEmail, folio, store) {
   var requestBody     = undefined;
   var mail            = new helper.Mail();
   var personalization = new helper.Personalization();
-  var from            = new helper.Email("noreply@actualgroup.com", "actualgroup");
+  var from            = new helper.Email("noreply@actualgroup.com", "Actual Group");
   var to = new helper.Email('luisperez@spaceshiplabs.com', 'Luis');
   //var to              = new helper.Email(clientEmail, clientName);
   var subject         = 'Cómo funciona SPEI ' + ((store || {}).name || '');
@@ -260,7 +267,107 @@ function sendSpeiInstructions(clientName, clientEmail, folio, store) {
       logo:  baseURL+'/logos/group.png',
     },
     store: store,
-    logo: baseURL+store.logo || baseURL+'/logos/group.png'
+    logo: store.logo || baseURL+'/logos/group.png'
+  });
+
+  var content         = new helper.Content("text/html", res);
+  personalization.addTo(to);
+  personalization.setSubject(subject);
+  mail.setFrom(from);
+  mail.addContent(content);
+  mail.addPersonalization(personalization);
+  requestBody = mail.toJSON();
+  request.method = 'POST';
+  request.path = '/v3/mail/send';
+  request.body = requestBody;
+  
+  return new Promise(function(resolve, reject){
+    sendgrid.API(request, function (response) {
+      if (response.statusCode >= 200 && response.statusCode <= 299) {
+        //cb();
+        resolve();
+      } else {
+        resolve(response);
+        //cb(response);
+      }
+    });
+  });
+}
+
+function sendSpeiReminder(clientName, clientEmail, folio, store) {
+
+  if(process.env.MODE !== 'production'){
+    //cb();
+    //return;
+  }
+
+  var request         = sendgrid.emptyRequest();
+  var requestBody     = undefined;
+  var mail            = new helper.Mail();
+  var personalization = new helper.Personalization();
+  var from            = new helper.Email("noreply@actualgroup.com", "Actual Group");
+  var to = new helper.Email('luisperez@spaceshiplabs.com', 'Luis');
+  //var to              = new helper.Email(clientEmail, clientName);
+  var subject         = 'Cotización Recordatorio Pendiente de Pago SPEI ' + ((store || {}).name || '');
+  var res             = speiReminderTemplate({
+    clientName: clientName, 
+    folio: folio,
+    company: {
+      url: baseURL,
+      logo:  baseURL+'/logos/group.png',
+    },
+    store: store,
+    logo: store.logo || baseURL+'/logos/group.png'
+  });
+
+  var content         = new helper.Content("text/html", res);
+  personalization.addTo(to);
+  personalization.setSubject(subject);
+  mail.setFrom(from);
+  mail.addContent(content);
+  mail.addPersonalization(personalization);
+  requestBody = mail.toJSON();
+  request.method = 'POST';
+  request.path = '/v3/mail/send';
+  request.body = requestBody;
+  
+  return new Promise(function(resolve, reject){
+    sendgrid.API(request, function (response) {
+      if (response.statusCode >= 200 && response.statusCode <= 299) {
+        //cb();
+        resolve(folio);
+      } else {
+        resolve(response);
+        //cb(response);
+      }
+    });
+  });
+}
+
+function sendSpeiExpiration(clientName, clientEmail, folio, store) {
+
+  if(process.env.MODE !== 'production'){
+    //cb();
+    //return;
+  }
+
+  var request         = sendgrid.emptyRequest();
+  var requestBody     = undefined;
+  var mail            = new helper.Mail();
+  var personalization = new helper.Personalization();
+  var from            = new helper.Email("noreply@actualgroup.com", "Actual Group");
+  var to = new helper.Email('luisperez@spaceshiplabs.com', 'Luis');
+  //var to              = new helper.Email(clientEmail, clientName);
+  var subject         = 'Cotización vencimiento de tiempo límite de pago ' + ((store || {}).name || '');
+  var res             = speiExpirationTemplate({
+    clientName: clientName, 
+    folio: folio,
+    company: {
+      url: baseURL,
+      logo:  baseURL+'/logos/group.png',
+    },
+    store: store,
+    logo: store.logo || baseURL+'/logos/group.png'
   });
 
   var content         = new helper.Content("text/html", res);
@@ -695,7 +802,7 @@ function sendQuotation(client, quotation, products, payments, transfers, store, 
   var requestBody      = undefined;
   var mail             = new helper.Mail();
   var personalization  = new helper.Personalization();
-  var from             = new helper.Email('noreply@actualg.com', 'Web Actual Group');
+  var from             = new helper.Email('noreply@actualg.com', 'Actual Group');
   var clientEmail      = client.E_Mail;
   var to               = new helper.Email(clientEmail, client.CardName);
   var subject          = 'Cotización | Folio #' + quotation.folio;
@@ -813,7 +920,7 @@ function sendFreesale(order, products, store) {
   var requestBody      = undefined;
   var mail             = new helper.Mail();
   var personalization  = new helper.Personalization();
-  var from             = new helper.Email('no-reply@actualg.com', 'no-reply');
+  var from             = new helper.Email('no-reply@actualg.com', 'Actual Group');
   //var to               = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
   var to               = new helper.Email('gmarrero@actualg.com', 'Gustavo Marrero');
   var subject          = 'Artículos freesale | Confirmación de compra Folio #' + order.folio;
@@ -861,7 +968,7 @@ function sendQuotationLog(form, store, cb) {
   var requestBody     = undefined;
   var mail            = new helper.Mail();
   var personalization = new helper.Personalization();
-  var from            = new helper.Email("noreply@actualgroup.com", "actualgroup");
+  var from            = new helper.Email("noreply@actualgroup.com", "Actual Group");
   var to = new helper.Email('luisperez@spaceshiplabs.com', 'Luis');
   var toAux = new helper.Email('cpavia@actualg.com', 'Cesar');
   var toAux2 = new helper.Email('eebalams@gmail.com', 'Ernesto');

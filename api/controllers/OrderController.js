@@ -206,6 +206,12 @@ module.exports = {
           OrderService.relateOrderToSap(order, orderDetails, req)
         ];
 
+        if(order.isSpeiOrder){
+          promises.push(
+            Email.sendSpeiInstructions(order.UserWeb.firstName, order.UserWeb, order.folio, req.activeStore)
+          );
+        }        
+
         return promises;
       })
       .spread(function(orderSent, freesaleSent, invoice, sapOrderRelated){        
@@ -234,7 +240,7 @@ module.exports = {
 
         sails.log.info('quotationWithErr folio', (quotationWithErr || {}).folio);
 
-        if(quotationWithErr){
+        if(quotationWithErr && errLog){
           var client = quotationWithErr.Client || {};
           var formArr = [
             {label:'Folio', value:quotationWithErr.folio},

@@ -12,6 +12,7 @@ module.exports = {
     responseData:{type:'text'},
     receiving_account_bank:{type:'string'},
     receiving_account_number:{type:'string'},
+    speiExpirationPayment:{type:'datetime'},    
 
     UserWeb:{
       model:'UserWeb'
