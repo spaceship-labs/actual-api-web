@@ -1,4 +1,5 @@
 var Promise = require('bluebird');
+var moment = require('moment');
 var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
 
 module.exports = {
@@ -11,6 +12,7 @@ function sendUnpaidOrdersReminder(){
 	var query = {
 		isSpeiOrder: true,
 		speiExpirationReminderStartDate: {'<=': currentDate},
+		status: 'pending-payment',
 		paymentReminderSent: {'!':true},
 	};
 	return OrderWeb.find(query)
@@ -19,7 +21,7 @@ function sendUnpaidOrdersReminder(){
 		.populate('QuotationWeb')
 		.then(function(orders){
 			
-			sails.log.info('orders ids', ordersIds);
+			sails.log.info('orders ids reminder', ordersIds);
 			ordersIds = orders.map(function(order){return order.id;});
 
 			return Promise.all(orders, function(order){

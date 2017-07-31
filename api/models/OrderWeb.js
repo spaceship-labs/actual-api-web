@@ -26,7 +26,7 @@ module.exports = {
 
     isSpeiOrder: {type:'boolean'},
     speiExpirationPayment: {type:'datetime'},
-    speiExpirationReminderDate: {type:'datetime'},
+    speiExpirationReminderStartDate: {type:'datetime'},
     paymentReminderSent:{type:'boolean'},
 
     subtotal:{type:'float'},

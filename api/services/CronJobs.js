@@ -4,25 +4,13 @@ var Promise = require('bluebird');
 module.exports.init = function(){
   console.log('initing cronJobs');
   var cronJobs = [
-    {
-      fn: function(d){
-        getPromos();
-      },
-      time:'0 0 */4 * * *'
       //time: '0 */4 * * * *'
       //s,m,h,d del mes,m,d de la semana
-    },
     {
       fn: function(d){
-        //CategoryService.cacheCategoriesProducts();
+        SpeiService.sendUnpaidOrdersReminder();
       },
-      time:'0 0 */1 * * *'
-    },
-    {
-      fn: function(d){
-        //ProductService.cacheProductDiscountPrices();
-      },
-      time:'0 0 */1 * * *'
+      time:'0 */8 * * * *'
     }
 
   ].forEach(function(v){

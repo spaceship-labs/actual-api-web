@@ -1,5 +1,6 @@
 var _ = require('underscore');
 var Promise = require('bluebird');
+var moment = require('moment');
 
 var EWALLET_POSITIVE = 'positive';
 var INVOICE_SAP_TYPE = 'Invoice';
@@ -222,9 +223,13 @@ function createOrder(form, req){
       orderToCreate.conektaAmount = form.conektaOrder.amount;
       orderToCreate.speiExpirationPayment = form.conektaOrder.speiExpirationPayment;
 
-      if( orderToCreate.speiExpirationPayment && moment(orderToCreate.speiExpirationPayment).isValid()  ){
-        var HOURS_TO_SEND_REMIND = 6;
-        orderToCreate.speiExpirationReminderStartDate = moment(orderToCreate.speiExpirationPayment).subtract(HOURS_TO_SEND_REMIND,'hours');
+      if( orderToCreate.speiExpirationPayment && orderToCreate.speiExpirationPayment instanceof Date /*&& moment(orderToCreate.speiExpirationPayment).isValid()*/  ){
+        //var HOURS_TO_SEND_REMIND = 6;
+        //var TIME_LAPSE = 'hours';
+        var HOURS_TO_SEND_REMIND = 715;
+        var TIME_LAPSE = 'minutes';        
+        orderToCreate.speiExpirationReminderStartDate = moment(orderToCreate.speiExpirationPayment).subtract(HOURS_TO_SEND_REMIND, TIME_LAPSE).toDate();
+        console.log('speiExpirationReminderStartDate', orderToCreate.speiExpirationReminderStartDate);
       }
 
       return OrderWeb.create(orderToCreate);
