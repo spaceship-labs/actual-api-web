@@ -15,8 +15,10 @@ module.exports = {
 };
 
 function createOrderInvoice(orderId, req) {
-  var userId = UserService.getCurrentUserId(req);
-  var clientId = UserService.getCurrentUserClientId(req);
+  if(req){
+    var userId = UserService.getCurrentUserId(req);
+    var clientId = UserService.getCurrentUserClientId(req);
+  }
 
   return new Promise(function(resolve, reject){
     
@@ -67,8 +69,8 @@ function createOrderInvoice(orderId, req) {
         var invoiceToCreate = {
           alegraId: alegraInvoice.id, 
           OrderWeb: orderId,
-          UserWeb: userId,
-          Client: clientId
+          UserWeb: userId || null,
+          Client: clientId || null
         };
 
         resolve(

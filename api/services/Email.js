@@ -294,7 +294,7 @@ function sendSpeiInstructions(clientName, clientEmail, folio, store) {
   });
 }
 
-function sendSpeiReminder(clientName, clientEmail, folio, store) {
+function sendSpeiReminder(clientName, clientEmail, expirationDateTime, folio, store) {
 
   if(process.env.MODE !== 'production'){
     //cb();
@@ -309,6 +309,7 @@ function sendSpeiReminder(clientName, clientEmail, folio, store) {
   var to = new helper.Email('luisperez@spaceshiplabs.com', 'Luis');
   //var to              = new helper.Email(clientEmail, clientName);
   var subject         = 'Cotización Recordatorio Pendiente de Pago SPEI ' + ((store || {}).name || '');
+  moment.locale('es');
   var res             = speiReminderTemplate({
     clientName: clientName, 
     folio: folio,
@@ -317,6 +318,8 @@ function sendSpeiReminder(clientName, clientEmail, folio, store) {
       logo:  baseURL+'/logos/group.png',
     },
     store: store,
+    expirationDate: moment(expirationDateTime).format('DD/MMM/YYYY'),
+    expirationTime: moment(expirationDateTime).format('HH:mm a'),
     logo: store.logo || baseURL+'/logos/group.png'
   });
 

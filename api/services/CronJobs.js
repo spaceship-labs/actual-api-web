@@ -8,14 +8,16 @@ module.exports.init = function(){
       //s,m,h,d del mes,m,d de la semana
     {
       fn: function(d){
+        //sails.log.info('sendUnpaidOrdersReminder');
         SpeiService.sendUnpaidOrdersReminder();
+        SpeiService.sendExpirationOrders();
       },
-      time:'0 */8 * * * *'
+      time:'*/30 * * * *'
     }
 
   ].forEach(function(v){
     
-    if(process.env.NODE_ENV === 'production'){
+    if(process.env.NODE_ENV === 'production' || true){
       new cron(v.time,v.fn, true, true);
     }
   

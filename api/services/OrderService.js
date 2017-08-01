@@ -224,10 +224,10 @@ function createOrder(form, req){
       orderToCreate.speiExpirationPayment = form.conektaOrder.speiExpirationPayment;
 
       if( orderToCreate.speiExpirationPayment && orderToCreate.speiExpirationPayment instanceof Date /*&& moment(orderToCreate.speiExpirationPayment).isValid()*/  ){
-        //var HOURS_TO_SEND_REMIND = 6;
-        //var TIME_LAPSE = 'hours';
-        var HOURS_TO_SEND_REMIND = 715;
-        var TIME_LAPSE = 'minutes';        
+        var HOURS_TO_SEND_REMIND = 6;
+        var TIME_LAPSE = 'hours';
+        //var HOURS_TO_SEND_REMIND = 715;
+        //var TIME_LAPSE = 'minutes';        
         orderToCreate.speiExpirationReminderStartDate = moment(orderToCreate.speiExpirationPayment).subtract(HOURS_TO_SEND_REMIND, TIME_LAPSE).toDate();
         console.log('speiExpirationReminderStartDate', orderToCreate.speiExpirationReminderStartDate);
       }

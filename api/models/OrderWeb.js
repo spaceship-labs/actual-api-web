@@ -28,6 +28,7 @@ module.exports = {
     speiExpirationPayment: {type:'datetime'},
     speiExpirationReminderStartDate: {type:'datetime'},
     paymentReminderSent:{type:'boolean'},
+    paymentExpirationSent:{type:'boolean'},
 
     subtotal:{type:'float'},
     discount:{type:'float'},

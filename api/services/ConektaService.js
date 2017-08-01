@@ -337,12 +337,17 @@ function processSpeiNotification(req, createdHookLog){
 	      order.hookLogId = createdHookLog.id;
 	      order.relatingViaConektaNotification = true;
 	      return OrderService.relateOrderToSap(order, orderDetails, req);
-	    });
-	    /*
+	    })
 	    .then(function(related){
 	    	sails.log.info('Sending order ' + order.id + ' email notification after spei pay');
 	    	//return Promise.resolve('Done');
-	    	return Email.sendOrderConfirmation(order.id);
+	    	return [
+		    	Email.sendOrderConfirmation(order.id),
+		    	InvoiceService.createOrderInvoice(order.id)
+		    ];
+	    })
+	    .spread(function(email, invoice){
+	    	sails.log.info('Invoice genereated', invoice);
+	    	return Promise.resolve();
 	    });
-	    */
  }

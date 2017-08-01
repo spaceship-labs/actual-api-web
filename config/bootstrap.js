@@ -22,6 +22,7 @@ module.exports.bootstrap = function(cb) {
 	}
 
   sails.log.info('Lifted ' + msgMode + ' mode');  
+  SpeiService.sendExpirationOrders();
 
   sails.config.timezone = {label:'America/Cancun', offset:-6};
   //moment.tz.setDefault(sails.config.timezone.label);

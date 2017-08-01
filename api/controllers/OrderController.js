@@ -191,18 +191,21 @@ module.exports = {
         orderDetails = _orderDetails;
 
         var emailSendingPromise;
+        var invoiceCreationPromise;
 
         if(order.isSpeiOrder){
           emailSendingPromise = Email.sendSpeiQuotation(order.QuotationWeb, req.activeStore);
+          invoiceCreationPromise = Promise.resolve();
         }else{
           emailSendingPromise = Email.sendOrderConfirmation(order.id);
+          invoiceCreationPromise = InvoiceService.createOrderInvoice(order.id, req);
         }
 
 
         var promises = [
           emailSendingPromise,
           Email.sendFreesale(order.id),
-          InvoiceService.createOrderInvoice(order.id, req),
+          invoiceCreationPromise,
           OrderService.relateOrderToSap(order, orderDetails, req)
         ];
 

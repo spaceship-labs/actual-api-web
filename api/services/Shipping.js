@@ -2,7 +2,7 @@ var Promise = require('bluebird');
 var _       = require('underscore');
 var moment = require('moment');
 var CEDIS_QROO_CODE = '01';
-var CEDISQ_QROO_ID = '576acfee5280c21ef87ea5b5';
+var CEDIS_QROO_ID = '576acfee5280c21ef87ea5b5';
 var DELIVERY_AVAILABLE = 'SI';
 var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
 
@@ -84,7 +84,7 @@ function productShipping(product, storeWarehouse, options) {
           whsCode: CEDIS_QROO_CODE,
           OpenCreQty: product.freeSaleStock,
           ItemCode: product.ItemCode,
-          warehouseId: CEDISQ_QROO_ID,
+          warehouseId: CEDIS_QROO_ID,
           ShipDate: shipDate
         };
 
