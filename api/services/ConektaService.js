@@ -304,6 +304,8 @@ function processSpeiNotification(req, createdHookLog){
   var payment_method = reqData.object.payment_method;
   var conektaOrderPromise;
   var order;
+  var quotationWithErr;
+  var errLog;
 
   if(payment_method.type != "spei"){
   	return Promise.resolve("No es una notification de pago SPEI");  	
@@ -349,5 +351,45 @@ function processSpeiNotification(req, createdHookLog){
 	    .spread(function(email, invoice){
 	    	sails.log.info('Invoice genereated', invoice);
 	    	return Promise.resolve();
-	    });
+	    })
+      .catch(function(err){
+        console.log('catch conekta notification',err);
+        errLog = err;
+        
+        sails.log.info('start finding quotationWithErr', order.QuotationWeb);
+        if(!order){
+        	return Promise.reject(errLog);
+        }
+
+        return QuotationWeb.findOne({id: order.QuotationWeb, select:['folio']})
+          .populate('Client')
+          .populate('Store');
+      })
+      .then(function(quotationWithErr){
+
+        sails.log.info('quotationWithErr folio', (quotationWithErr || {}).folio);
+
+        if(quotationWithErr && errLog){
+          var client = quotationWithErr.Client || {};
+          var formArr = [
+            {label:'Folio', value:quotationWithErr.folio},
+            {label:'Id', value: quotationWithErr.id},
+            {label:'Cliente ID', value: client.CardCode},
+            {label:'Cliente Nombre', value: client.CardName},
+            {label:'Cliente Email', value: client.E_Mail},
+            {label:'Cliente Telefono', value: client.Phone1},
+
+            {label:'Log', value: JSON.stringify(errLog)}
+
+          ];
+
+          Email.sendQuotationLog(formArr, quotationWithErr.Store, function(){
+            sails.log.info('Log de error enviado');
+          });
+
+          return Promise.reject(errLog);
+        }
+
+      });
+
  }

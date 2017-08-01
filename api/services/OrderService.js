@@ -363,7 +363,7 @@ function relateOrderToSap(order, orderDetails,req){
         console.log('err relateOrderToSap', err);
         var params = {inSapWriteProgress:false};
         if(order.hookLogId){
-          params.HookLog = hookLogId; 
+          params.HookLog = order.hookLogId; 
         }
         return OrderWeb.update({id: order.id}, params);
       })
