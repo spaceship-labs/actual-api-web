@@ -160,7 +160,7 @@ function getOrderCharges(order, orderPayments){
 		}
 
 		if(payment.type === 'transfer'){
-			charge.payment_method.expires_at = getTransferExpirationUnixTime(order,payment);
+			charge.payment_method.expires_at = getTransferExpirationUnixTime(payment);
 			sails.log.info('expiration unix', charge.payment_method.expires_at);
 		}
 
@@ -172,8 +172,8 @@ function getTransferExportationFromUnixTime(expirationUnixDate){
 	return moment.unix(expirationUnixDate).toDate();
 }
 
-function getTransferExpirationUnixTime(order,payment){
-	var orderDateTime = order.createdAt;
+function getTransferExpirationUnixTime(payment){
+	var orderDateTime = new Date();
 	var paymentExpirationDateTime = moment(orderDateTime).add(12,'h');
 
 	//Conekta manipulates time by unix format
