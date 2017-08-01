@@ -611,7 +611,8 @@ module.exports = {
         }
 
         var options = {
-          financingTotals: form.financingTotals || false
+          financingTotals: form.financingTotals || false,
+          rateLimitReported: quotation.rateLimitReported
         };
         
         return PaymentService.getMethodGroupsWithTotals(quotationId, req.activeStore, options);

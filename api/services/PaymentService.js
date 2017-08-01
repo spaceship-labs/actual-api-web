@@ -209,6 +209,13 @@ function getMethodGroupsWithTotals(quotationId, activeStore, options){
 
           return m;
         });
+
+        if(options.rateLimitReported){
+          mG.methods = mG.methods.filter(function(m){
+            return m.type === 'transfer';
+          });
+        }
+
         return mG;
       });
       return methodsGroups;
@@ -241,7 +248,7 @@ function getPaymentGroupsForEmail(quotation, activeStore) {
     .then(function(res) {
       var cash = [{
         name: 'Pago único',
-        cards: 'Efectivo, cheque, deposito, transferencia, Visa, Mastercard, American Express',
+        cards: 'Tarjeta de crédito, débito, transferencia via SPEI',
         total: numeral(res[0].total).format('0,0.00'),
       }];
       res = res.slice(1);

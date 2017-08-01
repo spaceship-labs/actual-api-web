@@ -154,6 +154,7 @@ module.exports = {
     var errLog;
     var quotationId = form.quotationId;
     var clientId = UserService.getCurrentUserClientId(req);
+    var conektaLimitErrorThrown;
 
     sails.log.info('init order creation', new Date());
     sails.log.info('quotationId', form.quotationId);
@@ -230,8 +231,13 @@ module.exports = {
       .catch(function(err){
         console.log('catch general createFromQuotation',err);
         errLog = err;
+
+        conektaLimitErrorThrown = ConektaService.substractConektaLimitError(err);
+        sails.log.info('conektaLimitError', conektaLimitErrorThrown);
         
         if(!responseSent){
+          err = err || {};
+          err.conektaLimitErrorThrown = conektaLimitErrorThrown;
           res.negotiate(err);
         }
 
@@ -260,6 +266,19 @@ module.exports = {
           Email.sendQuotationLog(formArr, req.activeStore, function(){
             sails.log.info('Log de error enviado');
           });
+
+          if(conektaLimitErrorThrown){
+            QuotationWeb.update({id:quotationId},{rateLimitReported:true})
+              .then(function(quotationUpdated){
+                sails.log.info('quoation updated with rateLimitReported', quotationId);
+                //sails.log.info('quotationUpdated', quotationUpdated);
+                return Email.sendSpeiQuotation(quotationId, req.activeStore);
+              })
+              .then(function(){
+                sails.log.info('quoation rate limit email sent', quotationId);
+              });
+          }
+
         }
 
       });

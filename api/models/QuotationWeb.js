@@ -90,6 +90,9 @@ module.exports = {
     },
     tracing: {
       type:'datetime'
+    },
+    rateLimitReported: {
+      type:'boolean'
     }
   },
 

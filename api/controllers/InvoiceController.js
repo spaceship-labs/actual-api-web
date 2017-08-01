@@ -112,11 +112,10 @@ module.exports = {
     ];
 
     Email.sendFiscalData(
-      name,
-      email,
       formArr,
       req.activeStore,
       function(){
+        Email.sendFiscalDataMessageToClient(name, email, req.activeStore, function(){});
         res.ok({success:true});
       }
     );

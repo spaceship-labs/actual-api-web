@@ -20,6 +20,7 @@ var quotationLogTemplate  = fs.readFileSync(sails.config.appPath + '/views/email
 var speiInstructionsTemplate  = fs.readFileSync(sails.config.appPath + '/views/email/spei-instructions.html').toString();
 var speiReminderTemplate  = fs.readFileSync(sails.config.appPath + '/views/email/spei-reminder.html').toString();
 var speiExpirationTemplate  = fs.readFileSync(sails.config.appPath + '/views/email/spei-expiration.html').toString();
+var fiscalDataClientMessageTemplate  = fs.readFileSync(sails.config.appPath + '/views/email/fiscal-data-client-message.html').toString();
 
 
 passwordTemplate          = ejs.compile(passwordTemplate);
@@ -33,6 +34,7 @@ quotationLogTemplate      = ejs.compile(quotationLogTemplate);
 speiInstructionsTemplate  = ejs.compile(speiInstructionsTemplate);
 speiReminderTemplate      = ejs.compile(speiReminderTemplate);
 speiExpirationTemplate    = ejs.compile(speiExpirationTemplate);
+fiscalDataClientMessageTemplate = ejs.compile(fiscalDataClientMessageTemplate);
 
 
 module.exports = {
@@ -42,6 +44,7 @@ module.exports = {
   sendQuotation: quotation,
   sendRegister: sendRegister,
   sendFiscalData: sendFiscalData,
+  sendFiscalDataMessageToClient: sendFiscalDataMessageToClient,
   sendContact: sendContact,
   sendQuotationLog: sendQuotationLog,
   sendSpeiInstructions: sendSpeiInstructions,
@@ -128,7 +131,7 @@ function sendRegister(userName, userEmail, store, cb) {
   });
 }
 
-function sendFiscalData(name, email, form, store, cb) {
+function sendFiscalData(form, store, cb) {
 
   if(process.env.MODE !== 'production'){
     //cb();
@@ -140,25 +143,8 @@ function sendFiscalData(name, email, form, store, cb) {
   var mail            = new helper.Mail();
   var personalization = new helper.Personalization();
 
-  var getFromSenderByStore = function(store){
-    var sender = new helper.Email('facturacion@actualstudio.com', 'Facturacion actualstudio.com');
-    switch(store.name){
-      case 'actualhome.com':
-        sender = new helper.Email('facturacion@actualhome.com', 'Facturacion actualhome.com');
-        break;
-      case 'actualstudio.com':
-        sender = new helper.Email('facturacion@actualstudio.com', 'Facturacion actualstudio.com');
-        break;
-      case 'actualkids.com':
-        sender = new helper.Email('facturacion@actualkids.com', 'Facturacion actualkids.com');
-        break;
-    }
-    return sender;
-  };
-
-
   //var from            = new helper.Email(email, name);
-  var from = getFromSenderByStore(store);
+  var from = getSenderByStore(store);
   var to = new helper.Email('luisperez@spaceshiplabs.com', 'Luis');
   var toAux = new helper.Email('facturacionsitios@actualg.com', 'Facturacion Actual');
   var toAux2 = new helper.Email('cpavia@actualg.com', 'Cesar');
@@ -178,6 +164,61 @@ function sendFiscalData(name, email, form, store, cb) {
   if(process.env.MODE == 'production'){
     personalization.addTo(toAux);
     personalization.addTo(toAux2);
+  }
+
+  personalization.setSubject(subject);
+  mail.setFrom(from);
+  mail.addContent(content);
+  mail.addPersonalization(personalization);
+  requestBody = mail.toJSON();
+  request.method = 'POST';
+  request.path = '/v3/mail/send';
+  request.body = requestBody;
+  sendgrid.API(request, function (response) {
+    if (response.statusCode >= 200 && response.statusCode <= 299) {
+      cb();
+    } else {
+      cb(response);
+    }
+  });
+}
+
+function sendFiscalDataMessageToClient(name, email, store, cb) {
+
+  if(process.env.MODE !== 'production'){
+    //cb();
+    //return;
+  }
+
+  var request         = sendgrid.emptyRequest();
+  var requestBody     = undefined;
+  var mail            = new helper.Mail();
+  var personalization = new helper.Personalization();
+
+  //var from            = new helper.Email(email, name);
+  var from = getSenderByStore(store);
+  var to = new helper.Email('luisperez@spaceshiplabs.com', 'Luis');
+  var toAux = new helper.Email('facturacionsitios@actualg.com', 'Facturacion Actual');
+  var toAux2 = new helper.Email('cpavia@actualg.com', 'Cesar');
+  var toAux3 = new helper.Email(email, name);
+
+  var subject         = 'Datos de facturación ' + ((store || {}).name || '');
+  var res             = fiscalDataClientMessageTemplate({
+    client_email: email,
+    client_name: name,
+    company: {
+      url: baseURL,
+      logo:  baseURL+'/logos/group.png',
+    },
+    store: store
+  });
+  var content         = new helper.Content("text/html", res);
+  personalization.addTo(to);
+
+  if(process.env.MODE == 'production'){
+    personalization.addTo(toAux);
+    personalization.addTo(toAux2);
+    personalization.addTo(toAux3);
   }
 
   personalization.setSubject(subject);
@@ -768,6 +809,7 @@ function sendQuotation(client, quotation, products, payments, transfers, store, 
     },
     quotation: {
       folio: quotation.folio,
+      rateLimitReported: quotation.rateLimitReported,
       subtotal: numeral(quotation.subtotal).format('0,0.00'),
       discount: numeral(quotation.discount).format('0,0.00'),
       total: numeral(quotation.total).format('0,0.00'),
@@ -787,7 +829,8 @@ function sendQuotation(client, quotation, products, payments, transfers, store, 
     transfers: transfers,
     ewallet: {
       balance: numeral(client.ewallet).format('0,0.00')
-    }
+    },
+    speiTransferData: false
   };
 
   if(order && order.isSpeiOrder){
@@ -1135,3 +1178,19 @@ function materials(product) {
       return filters[0].split(' ')[0];
     });
 }
+
+function getSenderByStore(store){
+  var sender = new helper.Email('facturacion@actualstudio.com', 'Facturacion actualstudio.com');
+  switch(store.name){
+    case 'actualhome.com':
+      sender = new helper.Email('facturacion@actualhome.com', 'Facturacion actualhome.com');
+      break;
+    case 'actualstudio.com':
+      sender = new helper.Email('facturacion@actualstudio.com', 'Facturacion actualstudio.com');
+      break;
+    case 'actualkids.com':
+      sender = new helper.Email('facturacion@actualkids.com', 'Facturacion actualkids.com');
+      break;
+  }
+  return sender;
+};

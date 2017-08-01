@@ -1,6 +1,7 @@
 var Promise = require('bluebird');
 var conekta = require('conekta');
 var moment = require('moment');
+var _ = require('underscore');
 
 var LOCAL_CURRENCY = 'MXN';
 var CONEKTA_PAYMENT_TYPE_CARD = 'card';
@@ -13,7 +14,8 @@ conekta.api_version = '2.0.0';
 module.exports = {
 	createOrder: createOrder,
 	isConektaSpeiOrder: isConektaSpeiOrder,
-	processNotification: processNotification
+	processNotification: processNotification,
+	substractConektaLimitError: substractConektaLimitError
 };
 
 function isConektaSpeiOrder(conektaOrder){
@@ -52,7 +54,7 @@ function createOrder(orderId, payment, req) {
 			order = orderFound;
 
 			if(!orderFound.Address){
-				return Promise.reject(new Error('Asigna una dirección de envio para continuar'));
+				//return Promise.reject(new Error('Asigna una dirección de envio para continuar'));
 			}
 
 			var promises = [
@@ -220,17 +222,24 @@ function getOrderCustomerAddress(addressId){
 			};
 			return customerInfo;
 			*/
+			/*TODO: Reestablecer valores con variables*/
 			var customerAddress = {
-				receiver: contact.FirstName + ' ' + contact.LastName,
+				receiver: 'Nombre prueba',
+				//receiver: contact.FirstName + ' ' + contact.LastName,
 				phone: "+5215555555555",
 				between_streets: "Placeholder streets",
 				//between_streets: contact.U_Entrecalle + ' y ' + contact.U_Ycalle,
 				address: {
 						street1: "Placeholder street",
 						//street1: contact.Address,
+						/*
 						city: contact.U_Ciudad,
 						state: contact.U_Estado,
 						postal_code: contact.U_CP,
+						*/
+						city:'Cancun',
+						state: 'Quintana Roo',
+						postal_code: "77500",
 						country: "MX"
 				}
 			};
@@ -392,4 +401,24 @@ function processSpeiNotification(req, createdHookLog){
 
       });
 
- }
+}
+
+function substractConektaLimitError(err){
+	var RATE_LIMIT_ERROR_CODE = 'conekta.errors.parameter_validation.combo.order.currency_type.card.maximum';
+	if(!err){
+		return false;
+	}
+
+	if(err.details && err.object === 'error'){
+		if (err.details.length > 0){
+			var limitErrorThrown = _.some(err.details, function(detailErr){
+				var detailErrCode = (detailErr || {}).code;
+				return (detailErrCode === RATE_LIMIT_ERROR_CODE);
+			});
+			return limitErrorThrown;
+		}
+	}
+
+	return false;
+}
+
