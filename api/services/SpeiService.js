@@ -3,6 +3,7 @@ var moment = require('moment');
 var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
 
 module.exports = {
+	freeSpeiUnpaidOrderDetails: freeSpeiUnpaidOrderDetails,
 	sendUnpaidOrdersReminder: sendUnpaidOrdersReminder,
 	sendExpirationOrders: sendExpirationOrders
 };
@@ -85,5 +86,65 @@ function sendExpirationOrders(){
 			}else{
 				return Promise.resolve();
 			}
+		});
+}
+
+function freeSpeiUnpaidOrderDetails(){
+	console.log('freeSpeiUnpaidOrderDetails' , new Date());
+	var currentDate = new Date();
+	var orderDetailsIds;
+	var paymentsIds;
+	var ordersIds;
+	var query = {
+		isSpeiOrder: true,
+		speiExpirationPayment: {'<=': currentDate},
+		status: 'pending-payment',
+	};
+	return OrderWeb.find(query)
+		.populate('Details')
+		.populate('Payments')
+		.then(function(orders){
+
+			if(!orders){
+				return Promise.resolve();
+			}
+
+			ordersIds = orders.map(function(order){
+				return order.id;
+			});
+
+			orderDetailsIds = orders.reduce(function(ids,order){
+				var detailsIds = (order.Details || []).map(function(detail){
+					return detail.id;
+				});
+				ids = ids.concat(detailsIds);
+				return ids;
+			},[]);
+
+			paymentsIds = orders.reduce(function(ids,order){
+				var _auxIds = (order.Payments || []).map(function(payment){
+					return payment.id;
+				});
+				ids = ids.concat(_auxIds);
+				return ids;
+			},[]);
+
+			
+			sails.log.info('ordersIds spei cancelled', ordersIds);
+			//sails.log.info('orderDetailsIds spei cancelled', orderDetailsIds);
+			//sails.log.info('paymentsIds spei cancelled', paymentsIds);
+
+			//return;
+
+			
+			return [
+				OrderDetailWeb.update({id: orderDetailsIds}, {inSapWriteProgress: false}),
+				OrderWeb.update({id:ordersIds},{status:'cancelled'}),
+				PaymentWeb.update({id:paymentsIds},{status:'cancelled'})
+			];
+		})
+		.spread(function(orderDetailsUpdated, ordersWebUpdated, paymentsWebUpdated){
+			sails.log.info('update freeSpeiUnpaidOrderDetails done');
+			return Promise.resolve();
 		});
 }

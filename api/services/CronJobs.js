@@ -11,6 +11,7 @@ module.exports.init = function(){
         //sails.log.info('sendUnpaidOrdersReminder');
         SpeiService.sendUnpaidOrdersReminder();
         SpeiService.sendExpirationOrders();
+        SpeiService.freeSpeiUnpaidOrderDetails();
       },
       time:'*/30 * * * *'
     }

@@ -37,7 +37,17 @@ module.exports = {
     WhsCode:{type:'string'},
     status:{
       type:'string',
-      enum:['lost','pending','on-delivery','minimum-paid','paid','pending-sap', 'pending-payment','completed']
+      enum:[
+        'lost',
+        'pending',
+        'on-delivery',
+        'minimum-paid',
+        'paid',
+        'pending-sap', 
+        'pending-payment',
+        'completed',
+        'cancelled'
+      ]
     },
     inSapWriteProgress:{type:'boolean'},
     QuotationWeb:{
