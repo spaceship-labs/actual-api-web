@@ -9,7 +9,6 @@ module.exports = {
 };
 
 function sendUnpaidOrdersReminder(){
-	console.log('sendUnpaidOrdersReminder' , new Date());
 	var currentDate = new Date();
 	var ordersIds;
 	var query = {
@@ -24,10 +23,11 @@ function sendUnpaidOrdersReminder(){
 		.populate('QuotationWeb')
 		.then(function(orders){
 
-			if(!orders){
+			if(!orders || orders.length <= 0){
 				return Promise.resolve();
 			}
 
+			console.log('sendUnpaidOrdersReminder' , new Date());
 			ordersIds = orders.map(function(order){return order.id;});
 
 			return Promise.map(orders, function(order){
@@ -50,7 +50,6 @@ function sendUnpaidOrdersReminder(){
 }
 
 function sendExpirationOrders(){
-	console.log('sendExpirationOrders' , new Date());
 	var currentDate = new Date();
 	var ordersIds;
 	var query = {
@@ -65,10 +64,11 @@ function sendExpirationOrders(){
 		.populate('QuotationWeb')
 		.then(function(orders){
 
-			if(!orders){
+			if(!orders || orders.length <= 0){
 				return Promise.resolve();
 			}
 
+			console.log('sendExpirationOrders' , new Date());
 			ordersIds = orders.map(function(order){return order.id;});
 
 			return Promise.map(orders, function(order){
@@ -90,7 +90,6 @@ function sendExpirationOrders(){
 }
 
 function freeSpeiUnpaidOrderDetails(){
-	console.log('freeSpeiUnpaidOrderDetails' , new Date());
 	var currentDate = new Date();
 	var orderDetailsIds;
 	var paymentsIds;
@@ -105,9 +104,11 @@ function freeSpeiUnpaidOrderDetails(){
 		.populate('Payments')
 		.then(function(orders){
 
-			if(!orders){
+			if(!orders || orders.length <= 0){
 				return Promise.resolve();
 			}
+
+			console.log('freeSpeiUnpaidOrderDetails' , new Date());
 
 			ordersIds = orders.map(function(order){
 				return order.id;

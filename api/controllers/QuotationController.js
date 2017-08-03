@@ -226,7 +226,7 @@ module.exports = {
 
 
   addDetail: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     var currentUserClientId = UserService.getCurrentUserClientId(req);
 
@@ -234,6 +234,8 @@ module.exports = {
     form.Details = formatProductsIds(form.Details);
     form.shipDate = moment(form.shipDate).startOf('day').toDate();
     
+    console.log('form.ZipcodeDelivery', form.ZipcodeDelivery);
+
     if(req.user){
       form.Client = currentUserClientId;
     }
@@ -266,6 +268,15 @@ module.exports = {
       })
       .then(function(created){
          var calculator = QuotationService.Calculator();
+         if(form.ZipcodeDelivery){
+          console.log('form.ZipcodeDelivery', form.ZipcodeDelivery);
+          //opts.updateParams = ObjectId(form.ZipcodeDelivery);
+          opts.updateParams = {
+            ZipcodeDelivery: ObjectId(form.ZipcodeDelivery)
+          };
+          console.log('opts.updateParams.ZipcodeDelivery', opts.updateParams.ZipcodeDelivery);
+         }
+
          return calculator.updateQuotationTotals(id, opts);
       })
       .then(function(updatedQuotation){
@@ -326,6 +337,10 @@ module.exports = {
       })
       .then(function(created){
          var calculator = QuotationService.Calculator();
+         if(form.ZipcodeDelivery){
+          opts.updateParams = ObjectId(form.ZipcodeDelivery);
+         }
+
          return calculator.updateQuotationTotals(id, opts);
       })
       .then(function(updatedQuotation){
