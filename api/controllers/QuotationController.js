@@ -112,6 +112,11 @@ module.exports = {
           return Promise.reject(new Error('Cotización no encontrada'));
         }
 
+        if(quotation.OrderWeb){
+          return Promise.reject(new Error('Operación no permitida'));
+        }
+        
+
         if(req.user){
           if(quotation.Client !== currentUserClientId && quotation.Client){
             return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
@@ -259,6 +264,10 @@ module.exports = {
           return Promise.reject(new Error('Cotización no encontrada'));
         }
 
+        if(quotation.OrderWeb){
+          return Promise.reject(new Error('Operación no permitida'));
+        }
+
         if(req.user){
           if(quotation.Client !== currentUserClientId){
             return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
@@ -328,6 +337,10 @@ module.exports = {
           return Promise.reject(new Error('Cotización no encontrada'));
         }
 
+        if(quotation.OrderWeb){
+          return Promise.reject(new Error('Operación no permitida'));
+        }        
+
         if(quotation.Client){
           if(quotation.Client !== currentUserClientId){
             return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
@@ -378,6 +391,11 @@ module.exports = {
         if(!quotation){
           return Promise.reject(new Error('Cotización no encontrada'));
         }
+
+        if(quotation.OrderWeb){
+          return Promise.reject(new Error('Operación no permitida'));
+        }
+
 
         if(quotation.Client){
           if(quotation.Client !== currentUserClientId){
