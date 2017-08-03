@@ -1,5 +1,6 @@
 var Promise = require('bluebird');
 var numeral = require('numeral');
+var _ = require('underscore');
 var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
 
 var EWALLET_TYPE = 'ewallet';
@@ -157,7 +158,7 @@ function getExchangeRate(){
 
 function getMethodGroupsWithTotals(quotationId, activeStore, options){
   options = options || {};
-  var methodsGroups = paymentGroups;
+  var methodsGroups = _.clone(paymentGroups);
   var discountKeys = [
     'discountPg1',
     'discountPg2',
