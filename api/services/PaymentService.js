@@ -211,11 +211,13 @@ function getMethodGroupsWithTotals(quotationId, activeStore, options){
           return m;
         });
 
+        /*
         if(options.rateLimitReported){
           mG.methods = mG.methods.filter(function(m){
             return m.type === 'transfer';
           });
         }
+        */
 
         return mG;
       });
