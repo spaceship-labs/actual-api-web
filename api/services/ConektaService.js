@@ -54,7 +54,7 @@ function createOrder(orderId, payment, req) {
 			order = orderFound;
 
 			if(!orderFound.Address){
-				//return Promise.reject(new Error('Asigna una dirección de envio para continuar'));
+				return Promise.reject(new Error('Asigna una dirección de envio para continuar'));
 			}
 
 			var promises = [
