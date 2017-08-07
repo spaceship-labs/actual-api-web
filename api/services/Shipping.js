@@ -9,7 +9,8 @@ var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
 module.exports = {
   product: productShipping,
   isDateImmediateDelivery: isDateImmediateDelivery,
-  isValidZipcode: isValidZipcode
+  isValidZipcode: isValidZipcode,
+  DELIVERY_AVAILABLE: DELIVERY_AVAILABLE
 };
 
 function productShipping(product, storeWarehouse, options) {
@@ -19,12 +20,16 @@ function productShipping(product, storeWarehouse, options) {
 
   var defaultZipcodeQuery = {
     cp: SAMPLE_ZIPCODE,
+    entrega:DELIVERY_AVAILABLE    
   };
 
   var zipcodeDeliveryQuery = defaultZipcodeQuery;
 
   if(options.zipcodeDeliveryId){
-    zipcodeDeliveryQuery = {id: options.zipcodeDeliveryId};
+    zipcodeDeliveryQuery = {
+      id: options.zipcodeDeliveryId,
+      entrega:DELIVERY_AVAILABLE
+    };
   }
 
   return Promise.all([

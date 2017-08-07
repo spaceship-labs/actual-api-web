@@ -36,7 +36,7 @@ module.exports = {
     var form = req.allParams();
     var zipcode = form.zipcode;
 
-    ZipcodeDelivery.findOne({cp: zipcode})
+    ZipcodeDelivery.findOne({cp: zipcode, entrega: Shipping.DELIVERY_AVAILABLE})
       .then(function(zipcodeDelivery){
         res.json(zipcodeDelivery);
       })
@@ -50,7 +50,7 @@ module.exports = {
     var form = req.allParams();
     var id = form.id;
 
-    ZipcodeDelivery.findOne({id: id})
+    ZipcodeDelivery.findOne({id: id, entrega: Shipping.DELIVERY_AVAILABLE})
       .then(function(zipcodeDelivery){
         res.json(zipcodeDelivery);
       })

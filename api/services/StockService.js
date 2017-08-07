@@ -249,3 +249,10 @@ function findValidDelivery(detail,deliveryDates){
 
 	return detailDelivery;
 }
+
+
+function moveDetailShippingDate(detail, deliveries){
+	var validDeliveries = deliveries.filter(function(delivery){
+		return (detail.quantity <= delivery.available);
+	});
+}
