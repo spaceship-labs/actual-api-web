@@ -51,6 +51,7 @@ module.exports = {
   sendSpeiReminder: sendSpeiReminder,
   sendSpeiExpiration: sendSpeiExpiration,
   sendSpeiQuotation: sendSpeiQuotation,
+  sendSuggestions: sendSuggestions
 };
 
 function password(userName, userEmail, recoveryUrl, cb) {
@@ -253,6 +254,53 @@ function sendContact(name, email, form, store, cb) {
   var to              = new helper.Email('luisperez@spaceshiplabs.com', 'Luis');
   var toAux           = new helper.Email('cpavia@actualg.com', 'Cesar');
   var subject         = 'Contacto ' + ((store || {}).name || '');
+  var res             = contactTemplate({
+    form: form,
+    company: {
+      url: baseURL,
+      logo:  baseURL+'/logos/group.png',
+    },
+    store: store
+  });
+  var content         = new helper.Content("text/html", res);
+  personalization.addTo(to);
+
+  if(process.env.MODE == 'production'){
+    personalization.addTo(toAux);
+  }
+
+  personalization.setSubject(subject);
+  mail.setFrom(from);
+  mail.addContent(content);
+  mail.addPersonalization(personalization);
+  requestBody = mail.toJSON();
+  request.method = 'POST';
+  request.path = '/v3/mail/send';
+  request.body = requestBody;
+  sendgrid.API(request, function (response) {
+    if (response.statusCode >= 200 && response.statusCode <= 299) {
+      cb();
+    } else {
+      cb(response);
+    }
+  });
+}
+
+function sendSuggestions(name, email, form, store, cb) {
+
+  if(process.env.MODE !== 'production'){
+    //cb();
+    //return;
+  }
+
+  var request         = sendgrid.emptyRequest();
+  var requestBody     = undefined;
+  var mail            = new helper.Mail();
+  var personalization = new helper.Personalization();
+  var from            = new helper.Email(email, name);
+  var to              = new helper.Email('luisperez@spaceshiplabs.com', 'Luis');
+  var toAux           = new helper.Email('cpavia@actualg.com', 'Cesar');
+  var subject         = 'Quejas y sugerencias ' + ((store || {}).name || '');
   var res             = contactTemplate({
     form: form,
     company: {

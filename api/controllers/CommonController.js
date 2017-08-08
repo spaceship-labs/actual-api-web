@@ -40,6 +40,35 @@ module.exports = {
         res.ok({success:true});
       }
     );
-  }
+  },
+
+  sendSuggestions: function(req, res){
+    var params = req.allParams();
+    var form = params.form;
+    var email = params.email;
+    var name = params.name;
+
+    if( !Common.validateEmail(email) ){
+      res.negotiate(new Error('Email invalido'));
+      return;
+    }
+
+    var formArr = [
+      {label: 'Nombre', value: form.name},
+      {label: 'Email', value: form.email},
+      {label: 'Télefono', value: form.phone},
+      {label: 'Mensaje', value:form.message}
+    ];
+
+    Email.sendSuggestions(
+      name,
+      email,
+      formArr,
+      req.activeStore,
+      function(){
+        res.ok({success:true});
+      }
+    );
+  }  
 
 };

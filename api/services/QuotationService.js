@@ -628,11 +628,11 @@ function setQuotationZipcodeDeliveryByContactId(quotationId,contactId,zipcodeDel
       if(!cp){
         return Promise.reject(new Error("La dirección de entrega no tiene un código postal asignado"));
       }
-      return ZipcodeDelivery.findOne({cp:cp});  
+      return ZipcodeDelivery.findOne({cp:cp, entrega:Shipping.DELIVERY_AVAILABLE});  
     })
     .then(function(zipcodeDelivery){
       var zipcodeDeliveryId = zipcodeDelivery.id;
-      var findCriteria = {_id: ObjectId(quotationId)};
+      var findCriteria = {_id: ObjectId(quotationId), entrega:Shipping.DELIVERY_AVAILABLE};
       var params = {ZipcodeDelivery: ObjectId(zipcodeDeliveryId)};
       return Common.nativeUpdateOne(findCriteria, params, QuotationWeb);
     });

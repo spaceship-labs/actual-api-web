@@ -36,7 +36,7 @@ module.exports = {
       populateFields:['invoice'],
       filters:{
         Client: clientId,
-        status: 'completed'
+        status: {'!': 'pending-payment'}
       }
     };
     Common.find(model, form, extraParams)

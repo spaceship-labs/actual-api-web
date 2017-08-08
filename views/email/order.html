@@ -292,40 +292,6 @@
                               </table>
                               <hr style="border-style:solid;border-width:1px;color:#6b6b6b;font-size:11px;max-width:550px">
 
-                              <%if (order.isSpeiOrder) { %>
-
-                                 <section class="spei-card">
-                                   <div class="ps" style="width: 496px; border-radius: 4px; box-sizing: border-box; padding: 0 45px; margin: 40px auto; overflow: hidden; border: 1px solid #b0afb5; font-family: 'Open Sans', sans-serif; color: #4f5365;">
-                                     <div class="ps-header">
-                                       <div class="ps-reminder" style="position: relative; top: -1px; padding: 9px 0 10px; font-size: 11px; text-transform: uppercase; text-align: center; color: #ffffff; background: #000000;">Ficha digital. No es necesario imprimir.</div>
-                                       <div class="ps-info" style="margin-top: 26px; position: relative;">
-                                         <div class="ps-brand" style="width: 45%; float: left;"><img src="<%=company.url%>/logos/spei_brand.png" alt="Banorte" style="max-width: 150px; margin-top: 2px;"></div>
-                                         <div class="ps-amount" style="width: 55%; float: right;">
-                                           <h3 style="margin-bottom: 10px; font-size: 15px; font-weight: 600; text-transform: uppercase;">Monto a pagar</h3>
-                                           <h2 style="font-size: 36px; color: #000000; line-height: 24px; margin-bottom: 15px;"><%=order.conektaAmount%><sup style="font-size: 16px; position: relative; top: -2px">MXN</sup></h2>
-                                           <p style="font-size: 10px; line-height: 14px;">Utiliza exactamente esta cantidad al realizar el pago.</p>
-                                         </div>
-                                       </div>
-                                       <div class="ps-reference" style="margin-top: 14px;">
-                                         <h3 style="margin-bottom: 10px; font-size: 15px; font-weight: 600; text-transform: uppercase;">CLABE</h3>
-                                         <h1 style="font-size: 27px; color: #000000; text-align: center; margin-top: -1px; padding: 6px 0 7px; border: 1px solid #b0afb5; border-radius: 4px; background: #f8f9fa;"><%=order.receiving_account_number%></h1>
-                                       </div>
-                                     </div>
-                                     <div class="ps-instructions" style="margin: 32px -45px 0; padding: 32px 45px 45px; border-top: 1px solid #b0afb5; background: #f8f9fa;">
-                                       <h3 style="margin-bottom: 10px; font-size: 15px; font-weight: 600; text-transform: uppercase;">Instrucciones</h3>
-                                       <ol style="margin: 17px 0 0 16px;">
-                                         <li>Accede a tu banca en línea.</li>
-                                         <li style="margin-top: 10px; color: #000000;">Da de alta la CLABE en esta ficha. <strong>El banco deberá de ser <%=order.receiving_account_bank%></strong>.</li>
-                                         <li style="margin-top: 10px; color: #000000;">Realiza la transferencia correspondiente por la cantidad exacta en esta ficha, <strong>de lo contrario se rechazará el cargo</strong>.</li>
-                                         <li style="margin-top: 10px; color: #000000;">Al confirmar tu pago, el portal de tu banco generará un comprobante digital. <strong>En el podrás verificar que se haya realizado correctamente.</strong> Conserva este comprobante de pago.</li>
-                                       </ol>
-                                       <div class="ps-footnote" style="margin-top: 22px; padding: 22px 20 24px; color: #108f30; text-align: center; border: 1px solid #108f30; border-radius: 4px; background: #ffffff;">Al completar estos pasos recibirás un correo de <strong>Nombre del negocio</strong> confirmando tu pago.</div>
-                                     </div>
-                                   </div>
-
-                                 </section>
-
-                              <% } %>
                               
                               <!-- Monedero 
                                  <row class="title">

@@ -453,6 +453,10 @@ module.exports.routes = {
     action:'sendContact'
   },
 
+  '/sendsuggestions':{
+    controller:'common',
+    action:'sendSuggestions'
+  },
 
   /*
   '/fixorders':{
