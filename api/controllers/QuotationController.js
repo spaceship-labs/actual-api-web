@@ -84,7 +84,7 @@ module.exports = {
         }
       })
       .catch(function(err){
-        console.log(err);
+        console.log('err update quotation', err);
         res.negotiate(err);
       });
   },
@@ -133,7 +133,7 @@ module.exports = {
         res.json(updatedQuotation);
       })
       .catch(function(err){
-        console.log(err);
+        console.log('err updateQuotationAddress',err);
         res.negotiate(err);
       });
   },  
@@ -239,8 +239,6 @@ module.exports = {
     form.Details = formatProductsIds(form.Details);
     form.shipDate = moment(form.shipDate).startOf('day').toDate();
     
-    console.log('form.ZipcodeDelivery', form.ZipcodeDelivery);
-
     if(req.user){
       form.Client = currentUserClientId;
     }
@@ -278,12 +276,10 @@ module.exports = {
       .then(function(created){
          var calculator = QuotationService.Calculator();
          if(form.ZipcodeDelivery){
-          console.log('form.ZipcodeDelivery', form.ZipcodeDelivery);
           //opts.updateParams = ObjectId(form.ZipcodeDelivery);
           opts.updateParams = {
             ZipcodeDelivery: ObjectId(form.ZipcodeDelivery)
           };
-          console.log('opts.updateParams.ZipcodeDelivery', opts.updateParams.ZipcodeDelivery);
          }
 
          return calculator.updateQuotationTotals(id, opts);
@@ -416,7 +412,7 @@ module.exports = {
         res.json(quotation);
       })
       .catch(function(err){
-        console.log(err);
+        console.log('err removeDetailsGroup',err);
         res.negotiate(err);
       });
   },
@@ -441,7 +437,7 @@ module.exports = {
         res.ok(result);
       })
       .catch(function(err){
-        console.log(err);
+        console.log('err find quotation',err);
         res.negotiate(err);
       });
   },
@@ -602,7 +598,7 @@ module.exports = {
         res.json(results);
       })
       .catch(function(err){
-        console.log('err', err);
+        console.log('err getCurrentStock', err);
         res.negotiate(err);
       });
 
@@ -616,7 +612,7 @@ module.exports = {
         return res.json({isValid: isValid});
       })
       .catch(function(err){
-        console.log('err', err);
+        console.log('err validateStock', err);
         res.negotiate(err);
       });
   },
@@ -654,7 +650,7 @@ module.exports = {
         res.json(paymentOptions);
       })
       .catch(function(err){
-        console.log(err);
+        console.log('err getQuotationPaymentOptions',err);
         res.negotiate(err);
       });
   },
@@ -670,7 +666,7 @@ module.exports = {
         res.json(payments);
       })
       .catch(function(err){
-        console.log('err',err)
+        console.log('err getQuotationPayments',err)
         res.negotiate(err);
       });
   },
@@ -687,7 +683,7 @@ module.exports = {
         res.json(logs);
       })
       .catch(function(err){
-        console.log(err);
+        console.log('err getQuotationSapLogs',err);
         res.negotiate(err);
       });
   },
@@ -720,7 +716,7 @@ module.exports = {
         res.json(quotation.ZipcodeDelivery);
       })
       .catch(function(err){
-        console.log('err', err);
+        console.log('err getQuotationZipcodeDelivery', err);
         res.negotiate(err);
       });
   }

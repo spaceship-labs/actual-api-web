@@ -333,7 +333,7 @@ function sendSuggestions(name, email, form, store, cb) {
   });
 }
 
-function sendSpeiInstructions(clientName, clientEmail, folio, store) {
+function sendSpeiInstructions(clientName, clientEmail, quotationFolio, order, store) {
 
   if(process.env.MODE !== 'production'){
     //cb();
@@ -347,16 +347,22 @@ function sendSpeiInstructions(clientName, clientEmail, folio, store) {
   var from            = new helper.Email("noreply@actualgroup.com", "Actual Group");
   var to = new helper.Email('luisperez@spaceshiplabs.com', 'Luis');
   //var to              = new helper.Email(clientEmail, clientName);
-  var subject         = 'Cómo funciona SPEI ' + ((store || {}).name || '');
+  var subject         = 'Ficha de pago SPEI ' + ((store || {}).name || '');
+  
   var res             = speiInstructionsTemplate({
     clientName: clientName, 
-    folio: folio,
+    folio: quotationFolio,
     company: {
       url: baseURL,
       logo:  baseURL+'/logos/group.png',
     },
     store: store,
-    logo: store.logo || baseURL+'/logos/group.png'
+    logo: store.logo || baseURL+'/logos/group.png',
+    speiTransferData: {
+      conektaAmount: order.conektaAmount,
+      receiving_account_number: order.receiving_account_number,
+      receiving_account_bank: order.receiving_account_bank
+    }  
   });
 
   var content         = new helper.Content("text/html", res);
@@ -878,9 +884,11 @@ function sendQuotation(client, quotation, products, payments, transfers, store, 
     ewallet: {
       balance: numeral(client.ewallet).format('0,0.00')
     },
-    speiTransferData: false
+    isSpeiOrder: (order || {}).isSpeiOrder
+    //speiTransferData: false
   };
 
+  /*
   if(order && order.isSpeiOrder){
     emailParams.speiTransferData = {
       conektaAmount: order.conektaAmount,
@@ -888,6 +896,7 @@ function sendQuotation(client, quotation, products, payments, transfers, store, 
       receiving_account_bank: order.receiving_account_bank
     };
   }
+  */
 
   var emailBody = quotationTemplate(emailParams);
 

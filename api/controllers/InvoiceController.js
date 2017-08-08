@@ -14,7 +14,7 @@ module.exports = {
       .findOne({ order: order })
       .then(function(exists) {
         if (exists) throw new Error('invoice already exists');
-        return  InvoiceService.create(order);
+        return  InvoiceService.createOrderInvoice(order,req);
       })
       .then(function(invoice) {
         return InvoiceWeb.create({ id: invoice.id, order: order });

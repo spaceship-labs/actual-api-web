@@ -289,7 +289,7 @@ module.exports = {
     var form = req.params.all();
     var cardCode = req.user.CardCode;
 
-    ClientContact.find({CardCode:cardCode})
+    ClientContact.find({CardCode:cardCode}).sort({createdAt:-1})
       .then(function(contacts){
         res.json(contacts);
       })

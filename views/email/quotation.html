@@ -58,7 +58,7 @@
                                              <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
                                                 <th style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left">
 
-                                                   <% if(speiTransferData || quotation.rateLimitReported){ %>
+                                                   <% if(isSpeiOrder){ %>
                                                    
                                                       <p style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:10px;padding:0;text-align:left">Estimado <strong style="color:#6b6b6b;font-size:11px"><%=client.name%>,</strong><br style="color:#6b6b6b;font-size:11px">Su orden de compra estará EN PROCESO y SUJETA A DISPONIBILIDAD, le sugerimos no volver a generar la misma cotización para evitar una duplicidad.</p>
                                                    
@@ -282,91 +282,7 @@
                               </table>
 
                               <hr style="border-style:solid;border-width:1px;color:#6b6b6b;font-size:11px;max-width:550px">
-                              
-                              <% if(speiTransferData){ %>
-                                 <table class="row title" style="border-collapse:collapse;border-spacing:0;color:#6b6b6b;display:table;font-size:11px;padding:0;position:relative;text-align:left;vertical-align:top;width:100%">
-                                    <tbody style="color:#6b6b6b;font-size:11px">
-                                       <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
-                                          <th class="small-12 large-12 columns first last" style="Margin:0 auto;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0 auto;padding:0;padding-bottom:16px;padding-left:16px;padding-right:16px;text-align:left;width:564px">
-                                             <table style="border-collapse:collapse;border-spacing:0;color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top;width:100%">
-                                                <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
-                                                   <th style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left">
-                                                      <p style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:0;padding:0;text-align:left"><img src="<%=company.url%>/icons/transfer.png" style="-ms-interpolation-mode:bicubic;clear:both;color:#6b6b6b;display:inline;font-size:11px;max-width:100%;outline:0;text-decoration:none;width:auto"> <strong style="color:#000;font-size:18px">DATOS PARA TRANSFERENCIAS</strong></p>
-                                                   </th>
-                                                   <th class="expander" style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0!important;text-align:left;visibility:hidden;width:0"></th>
-                                                </tr>
-                                             </table>
-                                          </th>
-                                       </tr>
-                                    </tbody>
-                                 </table>
-
-                                 <section class="spei-card">
-                                  <div class="spei-card-inner" style="width: 500px; margin: 0 auto;">    
-                                    <div class="ps-reminder" style="  position: relative; top: -1px; padding: 9px 0 10px; font-size: 11px; text-transform: uppercase; text-align: center; color: #ffffff; background: #000000;">Ficha digital. No es necesario imprimir.</div>
-                                    <div class="ps" style=" /*width: 496px;*/ box-sizing: border-box; /*padding: 0 45px;*/ margin: 0 auto; /*margin: 40px auto;*/ overflow: hidden; border: 1px solid #b0afb5; border-top: 0; border-radius: 0 0 4px 4px; font-family: 'Open Sans', sans-serif; color: #4f5365;">
-                                      <div class="ps-header">
-                                        <div class="ps-info" style="  margin-top: 26px; position: relative;">
-                                          <div class="ps-actual-logo"><img src="<%=company.url%>/logos/group.png" alt="Actual Group" style="max-width: 80%; margin: 0 auto; display: block;"></div>
-                                          <div class="ps-amount" style="  background: #f5f5f5; text-align: center; padding: 20px 0;">
-                                            <h3 style="margin-bottom: 10px; font-size: 15px; color: #000; text-transform: uppercase;  font-weight: 300; color: #000; margin: 0; " class="amount-to-pay">Monto a pagar</h3>
-                                            <h2 style=" font-size: 36px; color: #000000; line-height: 24px; margin: 0;"><%=speiTransferData.conektaAmount%> <sup style="  font-size: 16px; position: relative; top: -2px ">MXN</sup></h2>
-                                          </div>
-                                          <div class="ps-alert" style=" background: #33BA2C; padding: 6px 0; color: #fff; text-align: center; font-size: 14px;">
-                                            <p style="margin: 0;">Utiliza exactamente esta cantidad al realizar el pago.</p>
-                                          </div>
-                                          <div class="ps-spei-brand" style="  margin: 20px 0; text-align: center; ">
-                                            <img src="<%=company.url%>/logos/spei_brand.png" alt="" style="max-width: 60px">
-                                          </div>
-                                        </div>
-
-                                        <div class="ps-block" style="padding: 0 45px;">
-                                          <p class="ps-company-data-title" style="color: #000; margin: 0;">
-                                            <span style=" background: #f5f5f5; font-size: 12px; font-weight: 700; padding: 10px; ">Datos de la empresa</span>
-                                          </p>
-                                          <div class="ps-company-data" style="  color: #000; border: 15px solid #f5f5f5; padding: 10px; ">
-
-                                            <table style="  font-size: 14px; width: 100%; ">
-                                              <tr>
-                                                <td>Nombre de la empresa:</td>
-                                                <td><strong>AH ACTUAL S.A DE C.V</strong></td>
-                                              </tr>
-                                              <tr>
-                                                <td>RFC de la empresa:</td>
-                                                <td><strong>AAC130902PR7</strong></td>
-                                              </tr>
-                                              <tr>
-                                                <td>Concepto del pago:</td>
-                                                <td><strong>Muebles y Decoración</strong></td>
-                                              </tr>
-                                            </table>
-
-                                            <div class="ps-reference" style="margin-top: 14px;">
-                                              <h3 style="margin-bottom: 10px; font-size: 15px; font-weight: 600; color: #000; text-transform: uppercase;">CLABE</h3>
-                                              <h1 style=" font-size: 27px; color: #000000; text-align: center; margin-top: -1px; padding: 6px 0 7px; border: 1px solid #000;"><%=speiTransferData.receiving_account_number%></h1>
-                                            </div>
-
-                                          </div>
-                                        </div>
-
-                                      </div>
-                                      <div class="ps-block" style="padding: 0 45px;">
-                                        <div class="ps-instructions" style="  margin: 0 -45px 0; padding: 0 45px 45px; border-top: 1px solid #b0afb5;">
-                                          <h3 style="margin-bottom: 10px; font-size: 15px; font-weight: 600; color: #000; text-transform: uppercase;">Instrucciones</h3>
-                                          <ol style=" padding-left: 0;margin: 17px 0 0 16px;">
-                                            <li style=" font-size: 14px; color: #000;">Accede a tu banca en línea.</li>
-                                            <li style=" font-size: 14px; color: #000;">Da de alta la CLABE en esta ficha. <strong>El banco deberá de ser <%=speiTransferData.receiving_account_bank%></strong>.</li>
-                                            <li style=" font-size: 14px; color: #000;">Realiza la transferencia correspondiente por la cantidad exacta en esta ficha, <strong>de lo contrario se rechazará el cargo</strong>.</li>
-                                            <li style=" font-size: 14px; color: #000;">Al confirmar tu pago, el portal de tu banco generará un comprobante digital. <strong>En el podrás verificar que se haya realizado correctamente.</strong> Conserva este comprobante de pago.</li>
-                                          </ol>
-                                          <div class="ps-footnote" style="margin-top: 22px; padding: 22px 20 24px; color: #108f30; text-align: center; border: 1px solid #108f30; /*border-radius: 4px;*/ background: #ffffff;">Al completar estos pasos recibirás un correo de <strong>AH ACTUAL S.A DE C.V.</strong> confirmando tu pago.</div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                 </section>
-
-                              <% } %>
+                           
 
                               <!--
                               <table class="row" style="border-collapse:collapse;border-spacing:0;color:#6b6b6b;display:table;font-size:11px;padding:0;position:relative;text-align:left;vertical-align:top;width:100%">

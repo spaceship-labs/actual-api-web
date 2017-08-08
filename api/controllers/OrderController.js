@@ -153,16 +153,18 @@ module.exports = {
     var orderDetails;
     var errLog;
     var quotationId = form.quotationId;
+    var quotation;
     var clientId = UserService.getCurrentUserClientId(req);
     var conektaLimitErrorThrown;
+    var invoiceCreationPromise;
 
     sails.log.info('init order creation', new Date());
     sails.log.info('quotationId', form.quotationId);
 
 
-    QuotationWeb.findOne({id: quotationId, select:['Client']})
-      .then(function(quotation){
-
+    QuotationWeb.findOne({id: quotationId, select:['folio','Client']})
+      .then(function(_quotation){
+        quotation = _quotation;
         if(quotation.Client != clientId){
           return Promise.reject(new Error('No autorizado'));
         }
@@ -192,7 +194,6 @@ module.exports = {
         orderDetails = _orderDetails;
 
         var emailSendingPromise;
-        var invoiceCreationPromise;
 
         if(order.isSpeiOrder){
           emailSendingPromise = Email.sendSpeiQuotation(order.QuotationWeb, req.activeStore);
@@ -206,27 +207,37 @@ module.exports = {
         var promises = [
           emailSendingPromise,
           Email.sendFreesale(order.id),
-          invoiceCreationPromise,
           OrderService.relateOrderToSap(order, orderDetails, req)
         ];
 
         if(order.isSpeiOrder){
+          sails.log.info('quotation', quotation);
+
           promises.push(
-            Email.sendSpeiInstructions(order.UserWeb.firstName, order.UserWeb, order.folio, req.activeStore)
+            Email.sendSpeiInstructions(
+              order.Client.CardName, 
+              order.Client.E_Mail, 
+              quotation.folio, 
+              order, 
+              req.activeStore
+            )
           );
         }        
 
         return promises;
       })
-      .spread(function(orderSent, freesaleSent, invoice, sapOrderRelated){        
+      .spread(function(orderSent, freesaleSent, sapOrderRelated){        
         if(order.isSpeiOrder){
-          console.log('Email de cotizacion enviado: ' + order.folio);
+          console.log('Email de cotizacion enviado: ' + quotation.folio);
         }else{
           console.log('Email de orden enviado: ' + order.folio);          
         }
         
-        console.log('generated invoice', invoice);
-        return Promise.resolve();
+        return invoiceCreationPromise;
+      })
+      .then(function(invoice){
+        console.log('generated invoice', invoice);  
+        return Promise.resolve();      
       })
       .catch(function(err){
         console.log('catch general createFromQuotation',err);

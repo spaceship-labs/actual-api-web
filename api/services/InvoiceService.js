@@ -24,6 +24,7 @@ function createOrderInvoice(orderId, req) {
     
     var orderFound;
     var errInvoice;
+    var invoiceCreated;
 
     if(process.env.MODE !== 'production'){
       resolve({});
@@ -73,9 +74,21 @@ function createOrderInvoice(orderId, req) {
           Client: clientId || null
         };
 
+        /*
         resolve(
           InvoiceWeb.create(invoiceToCreate)
         );
+        */
+        return InvoiceWeb.create(invoiceToCreate);
+      })
+      .then(function(result){
+        invoiceCreated = result;
+        console.log('create invoice result', result);
+        return send(orderId);
+      })
+      .then(function(sendResult){
+        console.log('send invoice result', sendResult);
+        resolve(invoiceCreated);
       })
       .catch(function(err){
         errInvoice = err;
@@ -98,16 +111,24 @@ function createOrderInvoice(orderId, req) {
 }
 
 function send(orderID) {
+  var order;
   return OrderWeb
     .findOne(orderID)
     .populate('Client')
-    .then(function(order) {
+    .then(function(_order) {
+      order = _order;
+
       return [
         InvoiceWeb.findOne({ order: orderID }),
         FiscalAddress.findOne({ CardCode: order.Client.CardCode, AdresType: ClientService.ADDRESS_TYPE }),
       ];
     })
     .spread(function(invoice, address) {
+      var client = (order || {}).Client;
+      if(!invoice || (client || {}).LicTradNum === RFCPUBLIC){
+        return false;
+      }
+
       var emails = [];
       sails.log.info('address', address.U_Correos);
 
@@ -115,18 +136,21 @@ function send(orderID) {
         emails = [
           address.U_Correos,
           'luisperez@spaceshiplabs.com',
-          'informatica@actualg.com',
           'cgarcia@actualg.com',
-          'facturar@actualg.com'
+          'facturacion@actualg.com'
         ];
       }else{
-        emails = ['tugorez@gmail.com', 'luisperez@spaceshiplabs.com'];
+        emails = ['luisperez@spaceshiplabs.com'];
       }
 
       var id = invoice.alegraId;
       return { id: id, emails: emails };
     })
     .then(function(data) {
+      if(!data){
+        return Promise.resolve({});
+      }
+
       var options = {
         method: 'POST',
         uri: 'https://app.alegra.com/api/v1/invoices/' + data.id + '/email',
