@@ -219,6 +219,11 @@ module.exports.routes = {
     action:'removeDetailsGroup'
   },
 
+  'DELETE /quotation/:quotation/removedetail/:detailId':{
+    controller:'quotation',
+    action:'removeDetail'
+  },
+
   '/quotation/totals/:id':{
     controller: 'quotation',
     action: 'getQuotationTotals'

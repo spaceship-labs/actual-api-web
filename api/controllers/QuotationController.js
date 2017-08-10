@@ -365,6 +365,59 @@ module.exports = {
 
   },  
 
+  removeDetail: function(req, res){
+    var form = req.params.all();
+    var detailId = form.detailId;
+    var quotationId = form.quotation;
+    var currentUserClientId = UserService.getCurrentUserClientId(req);
+    var opts = {
+      paymentGroup:1,
+      updateDetails: true,
+      currentStoreId: req.activeStore.id
+    };
+
+    var query = {
+      _id: ObjectId(quotationId),
+      Store: ObjectId(req.activeStore.id)
+    };
+
+    Common.nativeFindOne(query, QuotationWeb)
+      .then(function(quotation){
+
+        if(!quotation){
+          return Promise.reject(new Error('Cotización no encontrada'));
+        }
+
+        if(quotation.OrderWeb){
+          return Promise.reject(new Error('Operación no permitida'));
+        }
+
+
+        if(quotation.Client){
+          if(quotation.Client !== currentUserClientId){
+            return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
+          }
+        }
+
+        return QuotationDetailWeb.destroy({id:detailId});
+      })
+      .then(function(){
+        var calculator = QuotationService.Calculator();
+        return calculator.updateQuotationTotals(quotationId, opts);
+      })
+      .then(function(updatedQuotationResult){
+        return QuotationWeb.findOne({id: quotationId}).populate('Details');
+      })
+      .then(function(quotation){
+        res.json(quotation);
+      })
+      .catch(function(err){
+        console.log('err removeDetailsGroup',err);
+        res.negotiate(err);
+      });
+  },
+
+
   removeDetailsGroup: function(req, res){
     var form = req.params.all();
     var detailsIds = form.detailsIds;
