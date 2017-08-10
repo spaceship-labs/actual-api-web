@@ -10,7 +10,9 @@ module.exports = {
   product: productShipping,
   isDateImmediateDelivery: isDateImmediateDelivery,
   isValidZipcode: isValidZipcode,
-  DELIVERY_AVAILABLE: DELIVERY_AVAILABLE
+  DELIVERY_AVAILABLE: DELIVERY_AVAILABLE,
+  moveMultipleDetailsShippingDate: moveMultipleDetailsShippingDate,
+  moveDetailShippingDate: moveDetailShippingDate
 };
 
 function productShipping(product, storeWarehouse, options) {
@@ -267,4 +269,46 @@ function getPendingProductDetailsSum(product){
       );
     });
   });  
+}
+
+//Details must be populated with Product
+function moveMultipleDetailsShippingDate(details, allDeliveries){
+  return details.map(function(detail){
+    var detailDeliveries = allDeliveries.filter(function(delivery){
+      return delivery.itemCode === detail.Product.ItemCode;
+    });
+    sails.log.info('detailDeliveries', detailDeliveries);
+    return moveDetailShippingDate(detail, detailDeliveries);
+  });
+}
+
+function moveDetailShippingDate(detail, detailDeliveries){
+  var validDeliveries = detailDeliveries.filter(function(delivery){
+    return (detail.quantity <= delivery.available);
+  });
+
+  //Sorted by most closer to farthest
+  var sortedDeliveries = detailDeliveries.sort(function(deliveryA, deliveryB){
+    return new Date(deliveryA.date) - new Date(deliveryB.date);
+  });
+
+  console.log('sortedDeliveries', sortedDeliveries);
+
+
+  if(sortedDeliveries.length > 0){
+
+    sails.log.info('sortedDeliveries[0].date', sortedDeliveries[0].date);
+    sails.log.info(' sortedDeliveries[ sortedDeliveries.length -1 ]',  sortedDeliveries[ sortedDeliveries.length -1 ].date);
+
+    //Discard all passed calculated dates
+    if(detail.shipDate > sortedDeliveries[0].date && detail.shipDate < sortedDeliveries[ sortedDeliveries.length -1 ].date){
+      sortedDeliveries = sortedDeliveries.filter(function(delivery){
+        return delivery.date > detail.shipDate;
+      });
+      console.log('sortedDeliveries discard', sortedDeliveries);
+
+    }
+  }
+
+  return sortedDeliveries;
 }

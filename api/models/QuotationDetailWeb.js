@@ -20,7 +20,6 @@ module.exports = {
     discountPg4: 'float',
     discountPg5: 'float',
 
-
     financingCostPercentage: 'float',
     discountPercentPromos: 'float', //by unit (does not include big ticket or FF discount)
     discountPercent: 'float', //by unit (includes big ticket or FF discount)
@@ -52,6 +51,12 @@ module.exports = {
       model:'Client'
     },
     //ship
+    changedShipDate:{
+      type:'boolean'
+    },
+    creationShipDate:{
+      type:'date'
+    },
     shipDate: {
       type: 'date',
       required: true

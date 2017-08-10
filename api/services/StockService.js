@@ -182,20 +182,22 @@ function getDetailsStock(details, warehouse, zipcodeDeliveryId, activeStore){
 
 	return Promise.all(promises)
 		.then(function(results){
-			var deliveryDates = results.reduce(function(arr, group){
+			var groupedDeliveryDates = results.reduce(function(arr, group){
 				arr = arr.concat(group);
 				return arr;
 			}, []);	
-			var finalDetails = mapDetailsWithDeliveryDates(details, deliveryDates,activeStore);
+
+			var finalDetails = mapDetailsWithDeliveryDates(details, groupedDeliveryDates,activeStore);
 			return finalDetails;
 		});
 }
 
-function mapDetailsWithDeliveryDates(details, deliveryDates,activeStore){
+function mapDetailsWithDeliveryDates(details, groupedDeliveryDates,activeStore){
 	var societyCodes   = SiteService.getSocietyCodesByActiveStore(activeStore);
 
 	for(var i = 0; i<details.length; i++){
-		var detailDelivery = findValidDelivery(details[i], deliveryDates);
+
+		var detailDelivery = findValidDelivery(details[i], groupedDeliveryDates);
 
 		if(
 				detailDelivery && 
@@ -218,12 +220,12 @@ function checkIfProductHasSocietyCodes(product, societyCodes){
 	return societyCodes.indexOf(productSociety) > -1;
 }
 
-function findValidDelivery(detail,deliveryDates){
+function findValidDelivery(detail,groupedDeliveryDates){
 	if(!detail.originalShipDate){
 		return false;
 	}
 
-	var detailDelivery = _.find(deliveryDates, function(delivery){
+	var detailDelivery = _.find(groupedDeliveryDates, function(delivery){
 		if(!delivery.date){
 			return false;
 		}
@@ -232,11 +234,14 @@ function findValidDelivery(detail,deliveryDates){
 		var deliveryDate = moment(delivery.date).startOf('day').format('DD-MM-YYYY');
 		var isValidDelivery;
 
-		if( detailShipDate === deliveryDate && 
+		if( 
+				detail.Product.ItemCode === delivery.itemCode &&
+				detailShipDate === deliveryDate && 
 			  detail.quantity <= delivery.available &&
 			  detail.immediateDelivery === delivery.ImmediateDelivery &&
 				detail.shipCompanyFrom === delivery.companyFrom &&
 				detail.shipCompany === delivery.company
+				
 			){	
 			isValidDelivery = true;
 		}else{
@@ -250,9 +255,3 @@ function findValidDelivery(detail,deliveryDates){
 	return detailDelivery;
 }
 
-
-function moveDetailShippingDate(detail, deliveries){
-	var validDeliveries = deliveries.filter(function(delivery){
-		return (detail.quantity <= delivery.available);
-	});
-}
