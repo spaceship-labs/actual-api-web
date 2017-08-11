@@ -37,6 +37,7 @@ module.exports.policies = {
     addDetail:['setupDefaultData'],
     addMultipleDetails:['setupDefaultData'],
     update: ['setupDefaultData'],
+    updateDetails: ['setupDefaultData'],
     getQuotationZipcodeDelivery:['setupDefaultData'],
     removeDetailsGroup:['setupDefaultData'],
     removeDetail:['setupDefaultData']    

@@ -194,10 +194,11 @@ function getDetailsStock(details, warehouse, zipcodeDeliveryId, activeStore){
 
 function mapDetailsWithDeliveryDates(details, groupedDeliveryDates,activeStore){
 	var societyCodes   = SiteService.getSocietyCodesByActiveStore(activeStore);
+	var validatedDetails = [];
 
 	for(var i = 0; i<details.length; i++){
 
-		var detailDelivery = findValidDelivery(details[i], groupedDeliveryDates);
+		var detailDelivery = findValidDelivery(details[i], groupedDeliveryDates, validatedDetails);
 
 		if(
 				detailDelivery && 
@@ -207,9 +208,12 @@ function mapDetailsWithDeliveryDates(details, groupedDeliveryDates,activeStore){
 				details[i].Product[activeStore.code] > 0
 		){
 			details[i].validStock = true;
-		}else{
+		}
+		else{
 			details[i].validStock = false;			
 		}
+	
+		validatedDetails.push(details[i]);
 	}
 
 	return details;
@@ -220,7 +224,7 @@ function checkIfProductHasSocietyCodes(product, societyCodes){
 	return societyCodes.indexOf(productSociety) > -1;
 }
 
-function findValidDelivery(detail,groupedDeliveryDates){
+function findValidDelivery(detail,groupedDeliveryDates, validatedDetails){
 	if(!detail.originalShipDate){
 		return false;
 	}
@@ -230,14 +234,28 @@ function findValidDelivery(detail,groupedDeliveryDates){
 			return false;
 		}
 
+		var isValidDelivery;
 		var detailShipDate = moment(detail.originalShipDate).startOf('day').format('DD-MM-YYYY');
 		var deliveryDate = moment(delivery.date).startOf('day').format('DD-MM-YYYY');
-		var isValidDelivery;
+		var validatedProductStock = validatedDetails.reduce(function(stock,validatedDetail){
+			
+			if(
+				validatedDetail.shipCompanyFrom === delivery.companyFrom && 
+				validatedDetail.Product.ItemCode === delivery.itemCode
+			){
+				return stock += validatedDetail.quantity;
+			}else{
+				return stock;
+			}
+		
+		}, 0);
+
+		var deliveryAvailable = delivery.available - validatedProductStock;
 
 		if( 
 				detail.Product.ItemCode === delivery.itemCode &&
 				detailShipDate === deliveryDate && 
-			  detail.quantity <= delivery.available &&
+			  detail.quantity <= deliveryAvailable &&
 			  detail.immediateDelivery === delivery.ImmediateDelivery &&
 				detail.shipCompanyFrom === delivery.companyFrom &&
 				detail.shipCompany === delivery.company

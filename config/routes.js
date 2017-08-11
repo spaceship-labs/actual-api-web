@@ -184,6 +184,11 @@ module.exports.routes = {
     action: 'update'
   },
 
+  '/quotation/updatedetails/:id':{
+    controller: 'quotation',
+    action: 'updateDetails'
+  },
+
   '/quotation/findbyid/:id':{
     controller: 'quotation',
     action:'findById'

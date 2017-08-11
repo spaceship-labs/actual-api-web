@@ -458,6 +458,7 @@ function Calculator(){
       var subtotalPg = unitPrice * quantity;
       acum['totalPg' + group] = totalPg;
       acum['discountPg' + group] = totalPg - subtotalPg;
+      acum['unitPriceWithDiscountPg' + group] = _unitPriceWithDiscount;
       return acum;
     },{});
 
@@ -584,7 +585,8 @@ function Calculator(){
 
   return {
     getQuotationTotals: getQuotationTotals,
-    updateQuotationTotals: updateQuotationTotals
+    updateQuotationTotals: updateQuotationTotals,
+    updateDetails: updateDetails
   };
 }
 

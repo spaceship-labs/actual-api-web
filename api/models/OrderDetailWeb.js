@@ -30,6 +30,14 @@ module.exports = {
     discountName: 'string',    
     originalDiscountPercent: 'float',   
     unitPriceWithDiscount: 'float',
+
+    unitPriceWithDiscountPg1: 'float',
+    unitPriceWithDiscountPg2: 'float',
+    unitPriceWithDiscountPg3: 'float',
+    unitPriceWithDiscountPg4: 'float',
+    unitPriceWithDiscountPg5: 'float',
+
+
     bigticketDiscountPercentage: {
       type: 'integer',
       enum:[0,1,2,3,4,5]

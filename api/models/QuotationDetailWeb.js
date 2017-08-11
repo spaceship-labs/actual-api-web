@@ -31,7 +31,15 @@ module.exports = {
     },
     paymentGroup: 'integer',
     unitPrice: 'float',
+
     unitPriceWithDiscount: 'float',
+    unitPriceWithDiscountPg1: 'float',
+    unitPriceWithDiscountPg2: 'float',
+    unitPriceWithDiscountPg3: 'float',
+    unitPriceWithDiscountPg4: 'float',
+    unitPriceWithDiscountPg5: 'float',
+
+    
     ewallet: 'float',
     immediateDelivery: 'boolean',
     isFreeSale: 'boolean',

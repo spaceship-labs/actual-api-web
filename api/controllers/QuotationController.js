@@ -89,6 +89,42 @@ module.exports = {
       });
   },
 
+  updateDetails: function(req, res){
+    var form = req.params.all();
+    var id = form.id;
+    var userId = UserService.getCurrentUserId(req);
+    var currentUserClientId = UserService.getCurrentUserClientId(req);
+    var details = form.Details;
+
+    form.Store =  req.activeStore.id;
+
+    Common.nativeFindOne({_id: ObjectId(id)}, QuotationWeb)
+      .then(function(quotation){
+
+        if(!quotation){
+          return Promise.reject(new Error('Cotización no encontrada'));
+        }
+
+        if(req.user){
+          if(quotation.Client !== currentUserClientId && quotation.Client){
+            return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
+          }
+        }
+
+        var calculator = QuotationService.Calculator();
+        return calculator.updateDetails(details);
+        //return QuotationWeb.update({id:id}, form);
+      })
+      .then(function(updatedDetails){
+        res.json(true);
+      })
+      .catch(function(err){
+        console.log('err update quotation', err);
+        res.negotiate(err);
+      });
+  },
+
+
   updateQuotationAddress: function(req, res){
     var form = req.params.all();
     var quotationId = form.id;
