@@ -21,6 +21,7 @@ var speiInstructionsTemplate  = fs.readFileSync(sails.config.appPath + '/views/e
 var speiReminderTemplate  = fs.readFileSync(sails.config.appPath + '/views/email/spei-reminder.html').toString();
 var speiExpirationTemplate  = fs.readFileSync(sails.config.appPath + '/views/email/spei-expiration.html').toString();
 var fiscalDataClientMessageTemplate  = fs.readFileSync(sails.config.appPath + '/views/email/fiscal-data-client-message.html').toString();
+var _ = require('underscore');
 
 
 passwordTemplate          = ejs.compile(passwordTemplate);

@@ -58,9 +58,9 @@
                                              <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
                                                 <th style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left">
 
-                                                   <% if(isSpeiOrder){ %>
+                                                   <% if(isSpeiOrder || quotation.rateLimitReported){ %>
                                                    
-                                                      <p style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:10px;padding:0;text-align:left">Estimado <strong style="color:#6b6b6b;font-size:11px"><%=client.name%>,</strong><br style="color:#6b6b6b;font-size:11px">Su orden de compra estará EN PROCESO y SUJETA A DISPONIBILIDAD, le sugerimos no volver a generar la misma cotización para evitar una duplicidad.</p>
+                                                      <p style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:10px;padding:0;text-align:left">Estimado <strong style="color:#6b6b6b;font-size:11px"><%=client.name%>,</strong><br style="color:#6b6b6b;font-size:11px">Su orden de compra estará EN PROCESO, le sugerimos no volver a generar la misma cotización para evitar una duplicidad.</p>
                                                    
                                                    <% }else{ %>
 

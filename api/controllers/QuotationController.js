@@ -111,8 +111,17 @@ module.exports = {
           }
         }
 
+        var detailsParamsMap = details.map(function(detail){
+          return {
+            id: detail.id,
+            shipDate: detail.shipDate,
+            originalShipDate: detail.originalShipDate,
+            quantity: detail.quantity
+          };
+        });
+
         var calculator = QuotationService.Calculator();
-        return calculator.updateDetails(details);
+        return calculator.updateDetails(detailsParamsMap);
         //return QuotationWeb.update({id:id}, form);
       })
       .then(function(updatedDetails){
