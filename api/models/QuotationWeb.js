@@ -93,6 +93,10 @@ module.exports = {
     },
     rateLimitReported: {
       type:'boolean'
+    },
+    paymentAttempts:{
+      type:'integer',
+      defaultsTo: 0
     }
   },
 

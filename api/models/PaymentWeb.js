@@ -50,6 +50,7 @@ module.exports = {
     cardName: {type:'string'},
     cardToken: {type:'string'},
     phone: {type:'string'},
+    mobilePhone:{type:'string'},
     email:{type:'email'},
     group:{type:'integer'},
     description:{type:'string'},

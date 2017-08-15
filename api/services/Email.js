@@ -702,7 +702,7 @@ function sendOrder(client, order, products, payments, ewallet, store) {
   });
 }
 
-function quotation(quotationId, activeStore) {
+function quotation(quotationId, activeStore, isCardProcessingError) {
   return QuotationWeb
     .findOne(quotationId)
     .populate('Client')
@@ -770,7 +770,7 @@ function quotation(quotationId, activeStore) {
           mats.forEach(function(m, i) {
             products[i].material = m;
           });
-          return sendQuotation(client, quotation, products, payments, transfers, store);
+          return sendQuotation(client, quotation, products, payments, transfers, store, false, isCardProcessingError);
         });
     });
 }
@@ -850,7 +850,7 @@ function sendSpeiQuotation(quotationId, activeStore) {
     });
 }
 
-function sendQuotation(client, quotation, products, payments, transfers, store, order) {
+function sendQuotation(client, quotation, products, payments, transfers, store, order, isCardProcessingError) {
   var date = moment(quotation.updatedAt);
   moment.locale('es');
   date.locale(false);
@@ -885,7 +885,8 @@ function sendQuotation(client, quotation, products, payments, transfers, store, 
     ewallet: {
       balance: numeral(client.ewallet).format('0,0.00')
     },
-    isSpeiOrder: (order || {}).isSpeiOrder
+    isSpeiOrder: (order || {}).isSpeiOrder,
+    isCardProcessingError: isCardProcessingError
     //speiTransferData: false
   };
 
@@ -909,8 +910,19 @@ function sendQuotation(client, quotation, products, payments, transfers, store, 
   var from             = new helper.Email('noreply@actualg.com', 'Actual Group');
   var clientEmail      = client.E_Mail;
   var to               = new helper.Email(clientEmail, client.CardName);
-  var subject          = 'Cotización | Folio #' + quotation.folio;
+  var subject          = 'Cotización | Folio #' + quotation.folio + ' ' + store.name;
   var content          = new helper.Content("text/html", emailBody);
+
+  if(quotation.rateLimitReported){
+    subject += ' RL';
+  }
+  else if(isCardProcessingError){
+    subject += ' EP';    
+  }
+  else if((order || {}).isSpeiOrder){
+    subject += ' SO';
+  }
+
   /*
     var to2 = new helper.Email('oreinhart@actualg.com', 'Oliver Reinhart');
     var to3 = new helper.Email('tugorez@gmail.com', 'Juanjo Tugorez');

@@ -15,7 +15,8 @@ module.exports = {
 	createOrder: createOrder,
 	isConektaSpeiOrder: isConektaSpeiOrder,
 	processNotification: processNotification,
-	substractConektaLimitError: substractConektaLimitError
+	substractConektaLimitError: substractConektaLimitError,
+	substractConektaCardProcessingError: substractConektaCardProcessingError
 };
 
 function isConektaSpeiOrder(conektaOrder){
@@ -422,3 +423,11 @@ function substractConektaLimitError(err){
 	return false;
 }
 
+function substractConektaCardProcessingError(err){
+	var PROCESSING_ERR_TYPE = 'processing_error';
+	if(!err){
+		return false;
+	}
+
+	return (err.type === PROCESSING_ERR_TYPE && err.object === 'error');
+}

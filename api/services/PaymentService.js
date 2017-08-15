@@ -32,6 +32,7 @@ function addPayment(payment, quotationId, req){
   payment.Store = req.activeStore.id;
   payment.UserWeb = UserService.getCurrentUserId(req);
   payment.Client = UserService.getCurrentUserClientId(req);
+  payment.terminal = 'banorte';
 
   var stockValidationPromise;
   if(payment.stockValidated){

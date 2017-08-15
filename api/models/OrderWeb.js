@@ -137,7 +137,12 @@ module.exports = {
     invoice: {
       //factura sat
       model: 'invoiceweb',
-    }
+    },
+
+    paymentAttempts:{
+      type:'integer',
+      defaultsTo: 0
+    }    
   },
 
   beforeCreate: function(val,cb){

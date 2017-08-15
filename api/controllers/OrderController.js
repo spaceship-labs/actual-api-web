@@ -156,6 +156,7 @@ module.exports = {
     var quotation;
     var clientId = UserService.getCurrentUserClientId(req);
     var conektaLimitErrorThrown;
+    var conektaProcessingErrorThrown;
     var invoiceCreationPromise;
 
     sails.log.info('init order creation', new Date());
@@ -246,6 +247,9 @@ module.exports = {
         conektaLimitErrorThrown = ConektaService.substractConektaLimitError(err);
         sails.log.info('conektaLimitError', conektaLimitErrorThrown);
         
+        conektaProcessingErrorThrown = ConektaService.substractConektaCardProcessingError(err);
+        sails.log.info('conektaProcessingErrorThrown', conektaProcessingErrorThrown);
+
         if(!responseSent){
           err = err || {};
           err.conektaLimitErrorThrown = conektaLimitErrorThrown;
@@ -283,12 +287,27 @@ module.exports = {
               .then(function(quotationUpdated){
                 sails.log.info('quoation updated with rateLimitReported', quotationId);
                 //sails.log.info('quotationUpdated', quotationUpdated);
-                return Email.sendSpeiQuotation(quotationId, req.activeStore);
+                return Email.sendQuotation(quotationId, req.activeStore);
               })
               .then(function(){
                 sails.log.info('quoation rate limit email sent', quotationId);
               });
           }
+
+          if(conektaProcessingErrorThrown){
+            var paymentAttempts = quotationWithErr.paymentAttempts + 1;
+            QuotationWeb.update({id:quotationId},{paymentAttempts: paymentAttempts})
+              .then(function(quotationUpdated){
+                sails.log.info('quoation updated with paymentAttempts', quotationId);
+                //sails.log.info('quotationUpdated', quotationUpdated);
+                return Email.sendQuotation(quotationId, req.activeStore, true);
+              })
+              .then(function(){
+                sails.log.info('quoation processing err email sent', quotationId);
+              });
+          }
+
+
 
         }
 
