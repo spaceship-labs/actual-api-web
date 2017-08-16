@@ -255,6 +255,13 @@ module.exports.routes = {
     action:'getQuotationPayments'
   },
 
+
+  'GET /quotation/:id/paymentattempts':{
+    controller: 'quotation',
+    action: 'getQuotationPaymentsAttempts'
+  },
+
+
   'GET /quotation/:id/zipcodedelivery':{
     controller: 'quotation',
     action: 'getQuotationZipcodeDelivery'

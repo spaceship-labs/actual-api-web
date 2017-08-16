@@ -10,7 +10,7 @@ var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
 module.exports = {
 
   create: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var createdId;
     
     form.Details = formatProductsIds(form.Details);
@@ -56,7 +56,7 @@ module.exports = {
 
 
   update: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     var userId = UserService.getCurrentUserId(req);
     var currentUserClientId = UserService.getCurrentUserClientId(req);
@@ -90,7 +90,7 @@ module.exports = {
   },
 
   updateDetails: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     var userId = UserService.getCurrentUserId(req);
     var currentUserClientId = UserService.getCurrentUserClientId(req);
@@ -135,7 +135,7 @@ module.exports = {
 
 
   updateQuotationAddress: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var quotationId = form.id;
     var params = {
       Address: form.addressId
@@ -184,7 +184,7 @@ module.exports = {
   },  
 
   findByIdQuickRead: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     var query = {
       id: id,
@@ -217,7 +217,7 @@ module.exports = {
   },
 
   findById: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     var getPayments = form.payments;
     if( !isNaN(id) ){
@@ -343,7 +343,7 @@ module.exports = {
   },
 
   addMultipleDetails: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     var currentUserClientId = UserService.getCurrentUserClientId(req);
     form.QuotationWeb = id;
@@ -411,7 +411,7 @@ module.exports = {
   },  
 
   removeDetail: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var detailId = form.detailId;
     var quotationId = form.quotation;
     var currentUserClientId = UserService.getCurrentUserClientId(req);
@@ -464,7 +464,7 @@ module.exports = {
 
 
   removeDetailsGroup: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var detailsIds = form.detailsIds;
     var quotationId = form.quotation;
     var currentUserClientId = UserService.getCurrentUserClientId(req);
@@ -517,7 +517,7 @@ module.exports = {
 
 
   find: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var clientId = UserService.getCurrentUserClientId(req);
     form.filters = form.filters || {};
     form.filters.Client = clientId;
@@ -541,7 +541,7 @@ module.exports = {
   },
 
   findAll: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var clientId = UserService.getCurrentUserClientId(req);
     form.filters = form.filters || {};
     //form.filters.Store = req.activeStore.id;
@@ -581,7 +581,7 @@ module.exports = {
   },
 
   getQuotationTotals: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     var paymentGroup = form.paymentGroup || 1;
     var params = {
@@ -621,7 +621,7 @@ module.exports = {
 
 
   sendEmail: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     var currentUserClientId = UserService.getCurrentUserClientId(req);
     var query = {
@@ -787,7 +787,7 @@ module.exports = {
   },
 
   getQuotationZipcodeDelivery: function(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     var id = form.id;
     var query = {
       id: id,
@@ -797,7 +797,7 @@ module.exports = {
 
 
     if(req.user){
-      query.Client = req.user.id;
+      query.Client = currentUserClientId;
     }
 
     QuotationWeb.findOne(query)
@@ -817,6 +817,41 @@ module.exports = {
         console.log('err getQuotationZipcodeDelivery', err);
         res.negotiate(err);
       });
+  },
+
+
+  getQuotationPaymentsAttempts: function(req, res){
+    var form = req.allParams();
+    var id = form.id;
+    var query = {
+      id: id,
+      Store: req.activeStore.id,
+      select: ['paymentAttempts']
+    };
+    var currentUserClientId = UserService.getCurrentUserClientId(req);
+
+
+    if(req.user){
+      query.Client = currentUserClientId;
+    }
+
+    QuotationWeb.findOne(query)
+      .then(function(quotation){
+        if(!quotation){
+          return Promise.reject(new Error('Cotización no encontrada'));
+        } 
+        if(quotation.Client){
+          if(quotation.Client !== currentUserClientId){
+            return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
+          }              
+        }
+        res.json(quotation.paymentAttempts);
+      })
+      .catch(function(err){
+        console.log('err getQuotationZipcodeDelivery', err);
+        res.negotiate(err);
+      });
+
   }
   
 
