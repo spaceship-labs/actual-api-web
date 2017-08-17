@@ -49,6 +49,7 @@ module.exports = {
     cardLastDigits: {type:'string'},
     cardName: {type:'string'},
     cardToken: {type:'string'},
+    cardState:{type:'string'},
     phone: {type:'string'},
     mobilePhone:{type:'string'},
     email:{type:'email'},

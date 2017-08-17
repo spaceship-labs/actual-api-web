@@ -74,10 +74,6 @@ function updateQuotationToLatestData(quotationId, options){
       if(!quotation){
         return Promise.reject(new Error('Cotización no encontrada'));
       }
-
-      console.log('setQuotationZipcodeDeliveryByContactId');
-      sails.log.info('address id ', quotation.Address);
-      sails.log.info('zipcode id ', quotation.ZipcodeDelivery);
       return setQuotationZipcodeDeliveryByContactId(quotation.id, quotation.Address, quotation.ZipcodeDelivery);
     })
     .then(function(){
@@ -639,9 +635,6 @@ function setQuotationZipcodeDeliveryByContactId(quotationId,contactId,zipcodeDel
       var zipcodeDeliveryId = zipcodeDelivery.id;
       var findCriteria = {_id: ObjectId(quotationId)};
       var params = {ZipcodeDelivery: ObjectId(zipcodeDeliveryId)};
-      sails.log.info('actualizando findCriteria:' ,findCriteria);
-      sails.log.info('actualizando params:' ,params);
-
       return Common.nativeUpdateOne(findCriteria, params, QuotationWeb);
     });
 }

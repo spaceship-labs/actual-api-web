@@ -220,9 +220,8 @@ module.exports = {
     var form = req.allParams();
     var id = form.id;
     var getPayments = form.payments;
-    if( !isNaN(id) ){
-      id = parseInt(id);
-    }
+    var getAddress = form.address;
+
     var query = {
       id: id,
       Store: req.activeStore.id
@@ -243,6 +242,10 @@ module.exports = {
 
     if(getPayments){
       quotationQuery.populate('Payments');
+    }
+
+    if(getAddress){
+      quotationQuery.populate('Address');
     }
 
     var updateToLatest = QuotationService.updateQuotationToLatestData(id, {
@@ -273,6 +276,41 @@ module.exports = {
       });
   },
 
+  getQuotationAddress: function(req, res){
+    var form = req.allParams();
+    var id = form.id;
+    var query = {
+      id: id,
+      Store: req.activeStore.id,
+      select:['id','Client']
+    };
+    var userId = UserService.getCurrentUserId(req);
+    var currentUserClientId = UserService.getCurrentUserClientId(req);
+
+    if(req.user && !UserService.isUserAdminOrSeller(req)){
+      query.Client = currentUserClientId;
+    }
+
+    QuotationWeb.findOne(query).populate('Address')
+      .then(function(quotation){
+
+        if(!quotation){
+          return Promise.reject(new Error('Cotización no encontrada'));
+        }
+  
+        if(quotation.Client){
+          if(quotation.Client !== currentUserClientId && !UserService.isUserAdminOrSeller(req)){
+            return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
+          }        
+        }
+  
+        return res.json(quotation.Address);
+      })
+      .catch(function(err){
+        console.log('err getQuotationAddress quotation', err);
+        return res.negotiate(err);
+      });
+  },
 
 
   addDetail: function(req, res){
