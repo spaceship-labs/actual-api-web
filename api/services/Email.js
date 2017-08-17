@@ -93,8 +93,8 @@ function password(userName, userEmail, recoveryUrl, cb) {
 
 function sendRegister(userName, userEmail, store, cb) {
   if(process.env.MODE !== 'production'){
-    cb();
-    return;
+    //cb();
+    //return;
   }
 
   var user_name       = userName;
@@ -103,11 +103,11 @@ function sendRegister(userName, userEmail, store, cb) {
   var mail            = new helper.Mail();
   var personalization = new helper.Personalization();
   var from            = new helper.Email("noreply@actualgroup.com", "Actual Group");
-  //var to = new helper.Email('luisperez@spaceshiplabs.com', 'Luis');
-  var to              = new helper.Email(userEmail, userName);
+  var toAux           = new helper.Email('luisperez@spaceshiplabs.com', 'Luis');
+  //var to              = new helper.Email(userEmail, userName);
   var subject         = '¡Bienvenido a Actual Group!';
   var res             = registerTemplate({
-    user_name: user_name,
+    clientName: user_name,
     company: {
       url: baseURL,
       logo:  baseURL+'/logos/group.png',
@@ -115,7 +115,8 @@ function sendRegister(userName, userEmail, store, cb) {
     },
   });
   var content         = new helper.Content("text/html", res);
-  personalization.addTo(to);
+  //personalization.addTo(to);
+  personalization.addTo(toAux);
   personalization.setSubject(subject);
   mail.setFrom(from);
   mail.addContent(content);
