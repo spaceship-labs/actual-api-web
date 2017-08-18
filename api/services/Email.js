@@ -875,7 +875,8 @@ function sendQuotation(client, quotation, products, payments, transfers, store, 
     company: {
       url: baseURL,
       logo: store.logo || baseURL+'/logos/group.png',
-      image: store.logo
+      image: store.logo,
+      name: store.name
     },
     site:{
       url: store.url || 'https://ventas.miactual.com'

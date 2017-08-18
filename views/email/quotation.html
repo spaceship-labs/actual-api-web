@@ -63,9 +63,27 @@
                                                       <p style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:10px;padding:0;text-align:left">Estimado <strong style="color:#6b6b6b;font-size:11px"><%=client.name%>,</strong><br style="color:#6b6b6b;font-size:11px">Su orden de compra estará EN PROCESO, le sugerimos no volver a generar la misma cotización para evitar una duplicidad.</p>
 
                                                    <% }
-                                                      else if(quotation.rateLimitReported || isCardProcessingError){ %>
+                                                      else if(quotation.rateLimitReported){ %>
                                                    
-                                                      <p style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:10px;padding:0;text-align:left">Estimado <strong style="color:#6b6b6b;font-size:11px"><%=client.name%>,</strong><br style="color:#6b6b6b;font-size:11px">Su orden de compra estará EN PROCESO Y SUJETA A DISPONIBILIDAD, le sugerimos no volver a generar la misma cotización para evitar una duplicidad.</p>                                                      
+                                                      <p style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:10px;padding:0;text-align:left">Estimado <strong style="color:#6b6b6b;font-size:11px"><%=client.name%>,</strong>
+                                                      <br style="color:#6b6b6b;font-size:11px">
+                                                      Muchas gracias por haber elegido <%= company.name %>
+                                                      <br style="color:#6b6b6b;font-size:11px">
+                                                      Su ORDEN DE COMPRA está EN PROCESO, por prevención y garantía le pedimos no volver a generar la misma cotización para evitar una duplicidad.
+                                                      <br style="color:#6b6b6b;font-size:11px">
+                                                      En breve, uno de nuestros asesores de interiores se pondrá en contacto con usted vía telefónica con la finalidad de darle seguimiento y asistencia.
+                                                      </p>                                                   
+                                                   <% }
+                                                      else if(isCardProcessingError){ %>
+                                                   
+                                                      <p style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:10px;padding:0;text-align:left">Estimado <strong style="color:#6b6b6b;font-size:11px"><%=client.name%>,</strong>
+                                                      <br style="color:#6b6b6b;font-size:11px">
+                                                      Muchas gracias por haber elegido <%= company.name %>
+                                                      <br style="color:#6b6b6b;font-size:11px">
+                                                      Su cotización está EN PROCESO y su ORDEN DE VENTA está en estatus <strong>PENDIENTE DE PAGO</strong>, la tarjeta de crédito fue declinada por el banco. le pedimos no volver a generar la misma cotización para evitar una duplicidad.
+                                                      <br style="color:#6b6b6b;font-size:11px">
+                                                      En breve, uno de nuestros asesores de interiores se pondrá en contacto con usted vía telefónica con la finalidad de darle seguimiento y asistencia.
+                                                      </p>                                                            
                                                    
                                                    <% }
                                                       else{ %>
@@ -237,6 +255,7 @@
                               </table>
                               <hr style="border-style:solid;border-width:1px;color:#6b6b6b;font-size:11px;max-width:550px">
                               <!-- Opciones de pago -->
+
                               <table class="row title" style="border-collapse:collapse;border-spacing:0;color:#6b6b6b;display:table;font-size:11px;padding:0;position:relative;text-align:left;vertical-align:top;width:100%">
                                  <tbody style="color:#6b6b6b;font-size:11px">
                                     <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
@@ -253,40 +272,98 @@
                                     </tr>
                                  </tbody>
                               </table>
-                              <table class="row" style="border-collapse:collapse;border-spacing:0;color:#6b6b6b;display:table;font-size:11px;padding:0;position:relative;text-align:left;vertical-align:top;width:100%">
-                                 <tbody style="color:#6b6b6b;font-size:11px">
-                                    <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
-                                       <th class="small-12 large-12 columns first last" style="Margin:0 auto;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0 auto;padding:0;padding-bottom:16px;padding-left:16px;padding-right:16px;text-align:left;width:564px">
-                                          <table style="border-collapse:collapse;border-spacing:0;color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top;width:100%">
-                                             <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
-                                                <th style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left">
-                                                   <table class="custom-table" style="border-collapse:collapse;border-spacing:0;color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top;width:100%">
-                                                      <thead style="color:#6b6b6b;font-size:11px">
-                                                         <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
-                                                            <th class="align-center" style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:center">FORMA DE PAGO</th>
-                                                            <th class="align-center" style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:center">TIPO DE PAGO PARTICIPANTE</th>
-                                                            <th class="align-center" style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:center">TOTALES</th>
-                                                         </tr>
-                                                      </thead>
-                                                      <tbody style="color:#6b6b6b;font-size:11px">
-                                                         <% payments.forEach(function(payment) { %>
-                                                         <tr style="border-collapse:collapse;border-top:1px solid #BBB;color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
-                                                            <td style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word"><%=payment.name%></td>
-                                                            <td class="multi" style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;width:350px;word-wrap:break-word"><%=payment.cards%></td>
-                                                            <td class="red" style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:red;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word">$<%=payment.total%> MXN</td>
-                                                         </tr>
-                                                         <% }); %>
-                                                      </tbody>
-                                                   </table>
-                                                </th>
-                                                <th class="expander" style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0!important;text-align:left;visibility:hidden;width:0"></th>
-                                             </tr>
-                                          </table>
-                                       </th>
-                                    </tr>
-                                 </tbody>
-                              </table>
 
+                              <% if(isSpeiOrder){ %>
+
+                                 <table class="row" style="border-collapse:collapse;border-spacing:0;color:#6b6b6b;display:table;font-size:11px;padding:0;position:relative;text-align:left;vertical-align:top;width:100%">
+                                    <tbody style="color:#6b6b6b;font-size:11px">
+                                       <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
+                                          <th class="small-12 large-12 columns first last" style="Margin:0 auto;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0 auto;padding:0;padding-bottom:0px;padding-left:16px;padding-right:16px;text-align:left;width:564px">
+                                             <table style="border-collapse:collapse;border-spacing:0;color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top;width:100%">
+                                                <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
+                                                   <th style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left">
+                                                      <p style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:10px;padding:0;text-align:left">
+                                                         <strong>¿Cómo funciona elegir pagar con SPEI? </strong>
+                                                      </p>
+                                                      <p style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:10px;padding:0;text-align:left">
+                                                         Su orden de compra estará EN PROCESO, Usted recibirá un correo electrónico de su cotización detallada, le sugerimos no volver a generar la misma cotización para evitar una duplicidad.
+                                                      </p>                                                   
+                                                   </th>
+                                                </tr>
+                                             </table>
+                                          </th>
+                                       </tr>
+                                    </tbody>
+                                 </table>  
+                                 <table class="row" style="border-collapse:collapse;border-spacing:0;color:#6b6b6b;display:table;font-size:11px;padding:0;position:relative;text-align:left;vertical-align:top;width:100%">
+                                    <tbody style="color:#6b6b6b;font-size:11px">
+                                       <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
+                                          <th class="small-12 large-12 columns first last" style="Margin:0 auto;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0 auto;padding:0;padding-bottom:16px;padding-left:16px;padding-right:16px;text-align:left;width:564px">
+                                             <table style="border-collapse:collapse;border-spacing:0;color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top;width:100%">
+                                                <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
+                                                   <th style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left">
+                                                      <ul>
+                                                         <li>Al dar clic en COMPRAR obtendrá los 18 dígitos únicos para realizar el pago total cotizado.</li>
+                                                         <li>Dar de alta en su banca electrónica la CLABE de 18 dígitos proporcionados.</li>
+                                                         <li>Seleccionar el BANCO STP (Sistema de Transferencia de Pago).</li>
+                                                         <li>Realizar la trasferencia correspondiente por la cantidad exacta de su COMPRA, de lo contrario se rechazará su cargo.</li>
+                                                         <li>Al realizar y confirmar el pago electrónico interbancario (SPEI) el portal de tu banco generará un comprobante digital.</li>
+                                                         <li>El pago se aplicará de inmediato y podrás verificar que se haya realizado correctamente.</li>
+                                                         <li>Los artículos estarán APARTADOS hasta que el pago sea acreditado.</li>
+                                                         <li>El tiempo MÁXIMO para acreditar el pago es de 12 horas hábiles.</li>
+                                                      </ul>
+
+                                                      <p>SPEI es un sistema de pago desarrollado por el Banco de México que permite enviar y recibir transferencias electrónicas interbancarias en cuestión de segundos dentro de México. Actual Group utiliza este sistema de pago y añade funcionalidades extras para ofrecer un mejor servicio.</p>
+
+                                                      <p>El proceso de alta de la CLABE Interbancaria puede variar entre una institución bancaria y otra, favor de llamar a su banco para cualquier duda o aclaración</p>
+
+                                                   </th>
+                                                   <th class="expander" style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0!important;text-align:left;visibility:hidden;width:0"></th>
+                                                </tr>
+                                             </table>
+                                          </th>
+                                       </tr>
+                                    </tbody>
+                                 </table>    
+
+                              <% }else{ %>
+
+                                 <table class="row" style="border-collapse:collapse;border-spacing:0;color:#6b6b6b;display:table;font-size:11px;padding:0;position:relative;text-align:left;vertical-align:top;width:100%">
+                                    <tbody style="color:#6b6b6b;font-size:11px">
+                                       <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
+                                          <th class="small-12 large-12 columns first last" style="Margin:0 auto;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0 auto;padding:0;padding-bottom:16px;padding-left:16px;padding-right:16px;text-align:left;width:564px">
+                                             <table style="border-collapse:collapse;border-spacing:0;color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top;width:100%">
+                                                <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
+                                                   <th style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left">
+                                                      <table class="custom-table" style="border-collapse:collapse;border-spacing:0;color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top;width:100%">
+                                                         <thead style="color:#6b6b6b;font-size:11px">
+                                                            <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
+                                                               <th class="align-center" style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:center">FORMA DE PAGO</th>
+                                                               <th class="align-center" style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:center">TIPO DE PAGO PARTICIPANTE</th>
+                                                               <th class="align-center" style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:center">TOTALES</th>
+                                                            </tr>
+                                                         </thead>
+                                                         <tbody style="color:#6b6b6b;font-size:11px">
+                                                            <% payments.forEach(function(payment) { %>
+                                                            <tr style="border-collapse:collapse;border-top:1px solid #BBB;color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
+                                                               <td style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word"><%=payment.name%></td>
+                                                               <td class="multi" style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;width:350px;word-wrap:break-word"><%=payment.cards%></td>
+                                                               <td class="red" style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:red;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word">$<%=payment.total%> MXN</td>
+                                                            </tr>
+                                                            <% }); %>
+                                                         </tbody>
+                                                      </table>
+                                                   </th>
+                                                   <th class="expander" style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0!important;text-align:left;visibility:hidden;width:0"></th>
+                                                </tr>
+                                             </table>
+                                          </th>
+                                       </tr>
+                                    </tbody>
+                                 </table>
+
+                              <% } %>
+      
                               <hr style="border-style:solid;border-width:1px;color:#6b6b6b;font-size:11px;max-width:550px">
                            
 

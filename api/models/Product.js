@@ -143,6 +143,7 @@ module.exports = {
       actual_home_merida:{type:'integer'},
       proyectos:{type:'integer'},
       actual_proyect:{type:'integer'},
+      actual_puerto_cancun:{type:'integer'},
       excludeWeb:{type:'boolean'},
 
       //RELATIONS
