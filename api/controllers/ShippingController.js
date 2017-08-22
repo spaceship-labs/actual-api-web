@@ -13,7 +13,8 @@ module.exports = {
     var storeId = SiteService.getDefaultActiveStoreId(req);
     var zipcodeDeliveryId = form.zipcodeDeliveryId;
     var options = {
-      zipcodeDeliveryId: zipcodeDeliveryId
+      zipcodeDeliveryId: zipcodeDeliveryId,
+      activeStore: req.activeStore
     };
 
     Store.findOne({id:storeId}).populate('Warehouse')

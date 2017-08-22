@@ -2,7 +2,8 @@ module.exports = {
 	getDefaultActiveStoreId: getDefaultActiveStoreId,
 	getSiteDisplayProperty: getSiteDisplayProperty,
 	getConektaKeyBySite: getConektaKeyBySite,
-	getSocietyCodesByActiveStore: getSocietyCodesByActiveStore
+	getSocietyCodesByActiveStore: getSocietyCodesByActiveStore,
+	getSiteKeyByRequest: getSiteKeyByRequest
 };
 
 function getDefaultActiveStoreId(req){
@@ -31,6 +32,10 @@ function getDefaultActiveStoreId(req){
 	return activeStoreId;
 }
 
+function getSiteKeyByRequest(req){
+	var siteKey = req.headers.site;
+	return siteKey;
+}
 
 function getConektaKeyBySite(req){
 	//sails.log.info('req.headers', req.headers);

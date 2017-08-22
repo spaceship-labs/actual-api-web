@@ -175,7 +175,8 @@ function getDetailsStock(details, warehouse, zipcodeDeliveryId, activeStore){
 	
 	for(var i=0;i<products.length; i++){
 		var options = {
-			zipcodeDeliveryId: zipcodeDeliveryId
+			zipcodeDeliveryId: zipcodeDeliveryId,
+			activeStore: activeStore
 		};
 		promises.push( Shipping.product(products[i], warehouse, options) );
 	}

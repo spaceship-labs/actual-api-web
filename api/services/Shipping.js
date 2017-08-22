@@ -54,6 +54,11 @@ function productShipping(product, storeWarehouse, options) {
         return Promise.reject(new Error("Envios no disponibles para ese código postal"));
       }
 
+
+      if(!isDeliveryValidForActualKids(product, zipcodeDelivery, options.activeStore)){
+        return Promise.reject( new Error("PRODUCT_NOT_AVAILABLE_IN_ZONE") );
+      }
+
       var codes = stockItems.map(function(p){return p.whsCode;});
       return Company
         .find({WhsCode: codes})
@@ -114,6 +119,25 @@ function productShipping(product, storeWarehouse, options) {
       return result;
     });
 
+}
+
+function isDeliveryValidForActualKids(product, zipcodeDelivery, activeStore){
+  sails.log.info('product.ItmsGrpNam', product.ItmsGrpNam);
+  sails.log.info('zipcodeDelivery.cp', zipcodeDelivery.cp);
+  var STATES_EXCLUDED_KIDS_PETIT_CORNIER = [
+    'JALISCO',
+    'QUERETARO',
+    'NUEVO LEON'
+  ];  
+
+  var inExcludedStates = STATES_EXCLUDED_KIDS_PETIT_CORNIER.indexOf(zipcodeDelivery.estado) > -1;
+  sails.log.info('inExcludedStates', inExcludedStates);
+
+  if(product.ItmsGrpNam === 'Petit Corner' && inExcludedStates && activeStore.name === 'actualkids.com'){
+    return false;
+  }
+
+  return true;
 }
 
 function buildShippingItem(stockItem, storeWarehouseId, zipcodeDelivery, product, pendingProductDetailsSum){

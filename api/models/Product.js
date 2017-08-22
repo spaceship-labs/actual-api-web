@@ -16,6 +16,7 @@ module.exports = {
           type:'integer',
           model:'productbrand'
       },
+      ItmsGrpNam:{type:'string'},
       SuppCatNum:{type:'string',size:17},
       CodeBars:{type:'string'},
       OnHand:{type:'float'},
