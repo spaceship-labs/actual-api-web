@@ -371,7 +371,7 @@ module.exports = {
           return Promise.reject(new Error(err));
         }
 
-        return ClientContact.update({CntctCode: contactCode}, form);
+        return ClientContact.update({CardCode:cardCode,CntctCode: contactCode}, form);
       })
       .then(function(updatedApp){
         sails.log.info('contact updatedApp', updatedApp);
