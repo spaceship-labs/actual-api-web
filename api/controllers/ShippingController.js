@@ -14,7 +14,8 @@ module.exports = {
     var zipcodeDeliveryId = form.zipcodeDeliveryId;
     var options = {
       zipcodeDeliveryId: zipcodeDeliveryId,
-      activeStore: req.activeStore
+      activeStore: req.activeStore,
+      singleProductCalc: true
     };
 
     Store.findOne({id:storeId}).populate('Warehouse')

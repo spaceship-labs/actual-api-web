@@ -48,9 +48,9 @@ function updateUserFromClient(client){
 		firstName: client.FirstName,
 		lastName: client.LastName
 	};
-	var clientId = client.UserWeb;
+	var userId = client.UserWeb;
 
-	return UserWeb.update({id: clientId}, updateParams);	
+	return UserWeb.update({id: userId}, updateParams);	
 }
 
 function checkIfUserEmailIsTaken(email, userId){
@@ -62,7 +62,7 @@ function checkIfUserEmailIsTaken(email, userId){
 
 	return UserWeb.findOne(query)
 		.then(function(user){
-			sails.log.info('checkIfUserEmailIsTaken', user);
+			//sails.log.info('checkIfUserEmailIsTaken', user);
 			if( !_.isUndefined(user) ){
 				return true;
 			}else{
