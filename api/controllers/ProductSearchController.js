@@ -4,7 +4,7 @@ var Promise = require('bluebird');
 module.exports = {
   
   searchByFilters: function(req, res){
-    var form           = req.params.all();
+    var form           = req.allParams();
     var terms          = [].concat(form.keywords || []);
     var filtervalues   = [].concat(form.ids || []);
     var minPrice       = form.minPrice;
@@ -44,10 +44,12 @@ module.exports = {
     query.Active     = 'Y';
     //query[displayProperty] = true;
     query.excludeWeb = {'!':true};
-    //query.excludeWeb = null;
 
-    
-    Search.getProductsByFilterValue(filtervalues)
+    return processQueryForDeliveryValidationActualKids(query, form.zipcodeDeliveryId, activeStore)
+      .then(function(newQuery){
+        query = newQuery;
+        return Search.getProductsByFilterValue(filtervalues);        
+      })
       .then(function(result) {
         productsIds = result;
 
@@ -79,6 +81,7 @@ module.exports = {
           ]
         };
 
+        //sails.log.info('searchQuery', searchQuery);
         var find = Product.find(searchQuery);
         var sortValue = 'DiscountPrice ASC';
 
@@ -105,7 +108,7 @@ module.exports = {
 
 
   searchByCategory: function(req, res) {
-    var form           = req.params.all();
+    var form           = req.allParams();
     var handle         = [].concat(form.category);
     var filtervalues   = _.isArray(form.filtervalues) ? [].concat(form.filtervalues) : [];
     var queryPromos    = Search.getPromotionsQuery();
@@ -144,7 +147,10 @@ module.exports = {
       limit: form.limit || 10
     };
 
-    Search.getProductsByCategory({Handle:handle})
+    return processQueryForDeliveryValidationActualKids(query, form.zipcodeDeliveryId, activeStore)
+      .then(function(newQuery){
+        return Search.getProductsByCategory({Handle:handle});
+      })
       .then(function(results) {
         var categoryProducts = results;
         return [
@@ -201,6 +207,8 @@ module.exports = {
           sortValue = Search.getSortValueBySortOption(sortOption, activeStore);
         }
 
+        //sails.log.info('searchQuery', searchQuery);
+
         return [
           Product.count(searchQuery),
           Product.find(searchQuery)
@@ -223,3 +231,32 @@ module.exports = {
   }
 
 };
+
+
+function processQueryForDeliveryValidationActualKids(query, zipcodeDeliveryId, activeStore){
+  var STATES_EXCLUDED_KIDS_PETIT_CORNIER = [
+    'JALISCO',
+    'QUERETARO',
+    'NUEVO LEON'
+  ];  
+
+  if(activeStore.name !== 'actualkids.com'){
+    return Promise.resolve(query);
+  }
+
+  return ZipcodeDelivery.findOne({id:zipcodeDeliveryId})
+    .then(function(zipcodeDelivery){
+      //sails.log.info('zipcodeDelivery', zipcodeDelivery);
+      if(!zipcodeDelivery){
+        return query;
+      }
+
+      var inExcludedStates = STATES_EXCLUDED_KIDS_PETIT_CORNIER.indexOf(zipcodeDelivery.estado) > -1;
+      //sails.log.info('excluding Petit Corner');
+      if(inExcludedStates){
+        query.ItmsGrpNam = {'!': 'Petit Corner'};
+      }
+
+      return query;
+    });
+}
