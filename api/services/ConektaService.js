@@ -89,6 +89,9 @@ function createOrder(orderId, payment, req) {
 
 			return new Promise(function(resolve, reject){
 
+				var cardCode = _.clone(customerInfo.CardCode);
+				delete customerInfo.CardCode;
+
 				var conektaOrderParams = {
 					currency: LOCAL_CURRENCY,
 					customer_info: customerInfo,
@@ -99,7 +102,11 @@ function createOrder(orderId, payment, req) {
 						amount: 0,
 						carrier: 'Fedex'
 					}],
-					shipping_contact: customerAddress
+					shipping_contact: customerAddress,
+					metadata:{
+						quotation_folio: order.folio,
+						cardCode: cardCode
+					}
 				};
 
 				conekta.Order.create(conektaOrderParams, function(err, res) {
@@ -205,7 +212,8 @@ function getOrderCustomerInfo(clientId){
 				phone: "+5215555555555",
 				//phone: client.Phone1,
 				//phone: user.phone,
-				email: client.E_Mail
+				email: client.E_Mail,
+				CardCode: client.CardCode
 			};
 			return customerInfo;
 		});
