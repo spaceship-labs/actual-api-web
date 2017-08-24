@@ -100,6 +100,7 @@ module.exports = {
       OnAmueble:{type:'boolean'},
       ImagesOrder:{type:'string'},
       Conservation: {type:'text'},
+      Service:{type:'boolean'},
 
       CheckedPhotos : {type:'boolean'},
       CheckedStructure : {type:'boolean'},

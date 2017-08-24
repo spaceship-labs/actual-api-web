@@ -204,6 +204,7 @@ function mapDetailsWithDeliveryDates(details, groupedDeliveryDates,activeStore){
 		if(
 				detailDelivery && 
 				(details[i].Product.Active === 'Y' || details[i].isFreeSale ) &&
+				details[i].Product.Service !== 'Y' &&
 				checkIfProductHasSocietyCodes(details[i].Product, societyCodes) &&
 				!details[i].Product.excludeWeb &&
 				details[i].Product[activeStore.code] > 0
