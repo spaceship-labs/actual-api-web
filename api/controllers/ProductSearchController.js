@@ -44,6 +44,7 @@ module.exports = {
     query.Active     = 'Y';
     //query[displayProperty] = true;
     query.excludeWeb = {'!':true};
+    query.Service = {'!': 'Y'};
     //query.excludeWeb = null;
 
     
@@ -169,7 +170,8 @@ module.exports = {
         query = _.extend(query,{
           id: productsIds,
           Active: 'Y',
-          excludeWeb: {'!':true}
+          excludeWeb: {'!':true},
+          Service: {'!':'Y'}
         });
 
         if(filterByStore && activeStore.code){

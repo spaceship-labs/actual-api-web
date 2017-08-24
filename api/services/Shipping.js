@@ -34,6 +34,10 @@ function productShipping(product, storeWarehouse, options) {
     };
   }
 
+  if(product.Service === 'Y'){
+    return Promise.resolve([]);
+  }
+
   return Promise.all([
       DatesDelivery.find({
         ItemCode: product.ItemCode,
