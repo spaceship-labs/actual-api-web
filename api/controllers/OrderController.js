@@ -163,11 +163,49 @@ module.exports = {
     sails.log.info('quotationId', form.quotationId);
 
 
-    QuotationWeb.findOne({id: quotationId, select:['folio','Client']})
+    OrderWeb.findOne({QuotationWeb: quotationId})
+      .then(function(order){
+        if(order){
+          return Promise.reject(
+            new Error('Ya se ha creado un pedido sobre esta cotización')
+          );
+        }
+        return StockService.validateQuotationStockById(quotationId, req);
+      })
+      .then(function(isValidStock){
+        if(!isValidStock){
+          return Promise.reject(
+            new Error('Inventario no suficiente para crear la orden')
+          );
+        }
+
+        return QuotationWeb.findOne({id: quotationId})
+          .populate('Address')
+          .populate('ZipcodeDelivery');
+      
+      })
       .then(function(_quotation){
         quotation = _quotation;
         if(quotation.Client != clientId){
           return Promise.reject(new Error('No autorizado'));
+        }
+
+        if(!quotation.ZipcodeDelivery || !quotation.Address){
+          return Promise.reject(
+            new Error('No hay una dirección de entrega asignada')
+          );          
+        }
+
+        if( (quotation.ZipcodeDelivery || {}).cp !== (quotation.Address || {}).U_CP ){
+          return Promise.reject(
+            new Error('El código postal no es valido de acuerdo a la dirección de entrega asignada')
+          );                    
+        }
+
+        if(quotation.totalProducts <= 0){
+          return Promise.reject(
+            new Error('No hay productos en esta cotización')
+          );
         }
 
         return OrderService.createFromQuotation(form, req);

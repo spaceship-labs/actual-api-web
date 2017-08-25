@@ -138,7 +138,8 @@ module.exports = {
     var form = req.allParams();
     var quotationId = form.id;
     var params = {
-      Address: form.addressId
+      Address: form.addressId,
+      ignoreContactZipcode: false
     };
     var contactId;
     var updatedQuotation;
@@ -361,7 +362,8 @@ module.exports = {
          if(form.ZipcodeDelivery){
           //opts.updateParams = ObjectId(form.ZipcodeDelivery);
           opts.updateParams = {
-            ZipcodeDelivery: ObjectId(form.ZipcodeDelivery)
+            ZipcodeDelivery: ObjectId(form.ZipcodeDelivery),
+            ignoreContactZipcode: true
           };
          }
 

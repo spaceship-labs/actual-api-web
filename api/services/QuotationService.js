@@ -74,7 +74,13 @@ function updateQuotationToLatestData(quotationId, options){
       if(!quotation){
         return Promise.reject(new Error('Cotización no encontrada'));
       }
-      return setQuotationZipcodeDeliveryByContactId(quotation.id, quotation.Address, quotation.ZipcodeDelivery);
+
+      if(quotation.ignoreContactZipcode){
+        return Promise.resolve();
+      }
+      else{
+        return setQuotationZipcodeDeliveryByContactId(quotation.id, quotation.Address, quotation.ZipcodeDelivery);
+      }
     })
     .then(function(){
       var calculator = Calculator();

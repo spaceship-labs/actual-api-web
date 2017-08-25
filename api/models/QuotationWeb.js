@@ -37,6 +37,10 @@ module.exports = {
       via: 'QuotationWeb'
     },
 
+    ignoreContactZipcode:{
+      defaultsTo:true,
+      type:'boolean'
+    },
     CardName: {type:'string'},
     CardCode:{type:'string'},
     isWeb:{type:'boolean'},
