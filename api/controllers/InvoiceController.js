@@ -96,6 +96,7 @@ module.exports = {
 
       {label: 'Folio de compra', value: form.orderFolio},
       {label: 'Fecha de compra', value: moment(form.orderDate || new Date()).format('DD/MM/YYYY') },
+      {label: 'Total de la compra', value: form.orderAmount},
       {label: 'RFC', value: form.LicTradNum},
       {label: 'Razón social', value: form.companyName},
       {label: 'Nombre de la empresa', value: form.companyPublicName},
