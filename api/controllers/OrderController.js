@@ -170,9 +170,11 @@ module.exports = {
             new Error('Ya se ha creado un pedido sobre esta cotización')
           );
         }
+        //sails.log.info('starting validating from controller', new Date());
         return StockService.validateQuotationStockById(quotationId, req);
       })
       .then(function(isValidStock){
+        //sails.log.info('ending validating from controller', new Date());
         if(!isValidStock){
           return Promise.reject(
             new Error('Inventario no suficiente para crear la orden')

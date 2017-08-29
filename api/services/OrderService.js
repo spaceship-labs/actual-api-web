@@ -124,12 +124,19 @@ function createOrder(form, req){
           new Error('Ya se ha creado un pedido sobre esta cotización')
         );
       }
+
+      //sails.log.info('starting validating from service', new Date());
+
+
       return [
           StockService.validateQuotationStockById(quotationId, req),
           PaymentWeb.find({QuotationWeb: quotationId}).sort('createdAt ASC')
         ];
     })
     .spread(function(isValidStock, quotationPayments){
+      //sails.log.info('ending validating from service', new Date());
+
+
       if(!isValidStock){
         return Promise.reject(
           new Error('Inventario no suficiente para crear la orden')
