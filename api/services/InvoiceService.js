@@ -250,11 +250,11 @@ function createInvoice(data) {
     json: true,
   };
 
-  sails.log.info('orderObject', JSON.stringify(orderObject));
+  //sails.log.info('orderObject', JSON.stringify(orderObject));
 
 
   var log = {
-    Client: orderObject.client.id,
+    Client: orderObject.Client.id,
     OrderWeb: orderObject.id,
     Store: orderObject.Store,
     requestData: JSON.stringify(data),
