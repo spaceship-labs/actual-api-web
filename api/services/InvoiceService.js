@@ -360,6 +360,11 @@ function prepareItems(details) {
       discount: parseFloat((discount).toFixed(4)),
       tax: [ {id: alegraIVAID} ],
       quantity: detail.quantity,
+      inventory:{
+        unit:'piece',
+        unitCost: detail.unitPrice,
+        initialQuantity: detail.quantity
+      }      
     };
   });
   return Promise.all(createItems(items));
