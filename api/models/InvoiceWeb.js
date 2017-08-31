@@ -11,8 +11,7 @@ module.exports = {
       type:'integer'
     },
     OrderWeb: {
-      model: 'OrderWeb',
-      required: true,
+      model: 'OrderWeb'
     },
     Client:{
     	model:'Client'
