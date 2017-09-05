@@ -60,7 +60,7 @@
 
                                                    <% if(isSpeiOrder){ %>
                                                    
-                                                      <p style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:10px;padding:0;text-align:left">Estimado <strong style="color:#6b6b6b;font-size:11px"><%=client.name%>,</strong><br style="color:#6b6b6b;font-size:11px">Su orden de compra estará EN PROCESO, le sugerimos no volver a generar la misma cotización para evitar una duplicidad.</p>
+                                                      <p style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:10px;padding:0;text-align:left">Estimado <strong style="color:#6b6b6b;font-size:11px"><%=client.name%>,</strong><br style="color:#6b6b6b;font-size:11px">Su ORDEN DE COMPRA está CONFIRMADA y EN PROCESO, su estatus de pago es PENIDIENTE DE PAGO, le pedimos no volver a generar la misma cotización para evitar una duplicidad.</p>
 
                                                    <% }
                                                       else if(quotation.rateLimitReported){ %>
@@ -80,11 +80,11 @@
                                                       <br style="color:#6b6b6b;font-size:11px">
                                                       Muchas gracias por haber elegido <%= company.name %>
                                                       <br style="color:#6b6b6b;font-size:11px">
-                                                      Su cotización está EN PROCESO y su ORDEN DE VENTA está en estatus <strong>PENDIENTE DE PAGO</strong>, la tarjeta de crédito fue declinada por el banco. le pedimos no volver a generar la misma cotización para evitar una duplicidad.
-                                                      <br style="color:#6b6b6b;font-size:11px">
-                                                      En breve, uno de nuestros asesores de interiores se pondrá en contacto con usted vía telefónica con la finalidad de darle seguimiento y asistencia.
+                                                      La <strong>tarjeta de crédito/débito</strong> fue <strong>declinada</strong> por el banco. Su cotización está <strong>sujeta a disponibilidad</strong> y su <strong>orden de venta</strong> está en estatus <strong>pendiente de pago</strong>, le pedimos no volver a generar la misma cotización para evitar una duplicidad.
                                                       </p>                                                            
-                                                   
+                                                      <p style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:10px;padding:0;text-align:left">
+                                                         En breve, uno de nuestros asesores de interiores se pondrá en contacto con usted vía telefónica con la finalidad de darle seguimiento y asistencia.
+                                                      </p>                                                   
                                                    <% }
                                                       else{ %>
 
