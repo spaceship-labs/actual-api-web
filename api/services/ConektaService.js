@@ -59,7 +59,8 @@ function createOrder(orderId, payment, req) {
 			}
 
 			var promises = [
-				getOrderCustomerInfo(order.Client),
+				//getOrderCustomerInfo(order.Client),
+				getOrderCustomerInfo(payment, clientId),
 				getOrderCustomerAddress(order.Address),
 				getOrderLineItems(order.id),
 			];
@@ -77,7 +78,7 @@ function createOrder(orderId, payment, req) {
 					return acum;
 				},0);
 				totalLines = totalLines - discountLine.amount;
-				return totalLinesAmount;
+				return totalLines;
 			};
 
 			//TODO: check how to match original payment amount instead of using the same order total.
@@ -108,6 +109,10 @@ function createOrder(orderId, payment, req) {
 						cardCode: cardCode
 					}
 				};
+
+				//sails.log.info('conektaOrderParams', conektaOrderParams);
+				//return reject(new Error('Fuera'));
+
 
 				conekta.Order.create(conektaOrderParams, function(err, res) {
 					if(err){
@@ -150,6 +155,8 @@ function getOrderCharges(order, orderPayments){
 	return orderPayments.map(function(payment){
 
 		var amount = order['totalPg' + paymentGroup];
+		//sails.log.info('amount', amount);
+		//sails.log.info('convertToCents(amount)', convertToCents(amount));
 		var type = (payment.type === 'transfer') ? CONEKTA_PAYMENT_TYPE_SPEI : CONEKTA_PAYMENT_TYPE_CARD;
 
 		var charge = {
@@ -173,6 +180,8 @@ function getOrderCharges(order, orderPayments){
 			charge.payment_method.expires_at = getTransferExpirationUnixTime(payment);
 			sails.log.info('expiration unix', charge.payment_method.expires_at);
 		}
+
+		//sails.log.info('charge', charge);
 
 		return charge;
 	});
@@ -203,7 +212,19 @@ function getOrderDiscountLine(order, payments){
 	return discountLine;
 }
 
+function getOrderCustomerInfo(payment, clientId){
+	return Client.findOne({id: clientId, select:['CardCode']})
+		.then(function(client){
+			return {
+				name: payment.cardName,
+				phone: payment.phone,
+				email: payment.email,
+				CardCode: client.CardCode 
+			};
+		});
+}
 
+/*
 function getOrderCustomerInfo(clientId){
 	return Client.findOne({id: clientId})
 		.then(function(client){
@@ -218,6 +239,7 @@ function getOrderCustomerInfo(clientId){
 			return customerInfo;
 		});
 }
+*/
 
 function getOrderCustomerAddress(addressId){
 	return ClientContact.findOne({id: addressId})
