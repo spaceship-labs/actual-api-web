@@ -394,6 +394,11 @@ module.exports.routes = {
     action:'findByHandle'
   },
 
+  '/site/banners/:handle':{
+    controller:'site',
+    action:'findBannersByHandle'
+  },
+
   '/store/find':{
     controller:'store',
     action:'find'
