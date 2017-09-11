@@ -111,21 +111,32 @@ module.exports = {
           }
         }
 
-        var detailsParamsMap = details.map(function(detail){
+        var detailsParamsMaps = details.map(function(detail){
           return {
             id: detail.id,
             shipDate: detail.shipDate,
             originalShipDate: detail.originalShipDate,
+            //originalShipDate: detail.originalShipDate,
             quantity: detail.quantity
           };
         });
 
         var calculator = QuotationService.Calculator();
-        return calculator.updateDetails(detailsParamsMap);
+        return calculator.updateDetails(detailsParamsMaps);
         //return QuotationWeb.update({id:id}, form);
       })
       .then(function(updatedDetails){
-        res.json(true);
+        var opts = {
+          paymentGroup:1,
+          updateDetails: true,
+          currentStoreId: req.activeStore.id
+        };        
+        var calculator = QuotationService.Calculator();
+        return calculator.updateQuotationTotals(id, opts);
+        //res.json(true);
+      })
+      .then(function(updated){
+        res.json(true);        
       })
       .catch(function(err){
         console.log('err update quotation', err);
