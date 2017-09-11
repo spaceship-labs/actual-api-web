@@ -421,6 +421,7 @@ function Calculator(){
           isFreeSale                  : StockService.isFreeSaleProduct(product),
           paymentGroup                : options.paymentGroup,
           PromotionPackageApplied     : null,
+          promotionPackageRuleQuantity: 0,
           quantity                    : quantity,
           subtotal                    : subtotal,
           subtotal2                   : subtotal2,
@@ -439,6 +440,7 @@ function Calculator(){
         else if(mainPromo.PromotionPackage){
           mainPromo.discountApplied = true;
           detailTotals.PromotionPackageApplied = mainPromo.PromotionPackage;
+          detailTotals.promotionPackageRuleQuantity = mainPromo.quantity;
         }
         
         else if(mainPromo.clientDiscountReference){

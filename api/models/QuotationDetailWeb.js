@@ -43,6 +43,8 @@ module.exports = {
     ewallet: 'float',
     immediateDelivery: 'boolean',
     isFreeSale: 'boolean',
+    promotionPackageRuleQuantity:{type:'integer'},
+
     Promotion:{
       model:'Promotion'
     },
@@ -94,7 +96,7 @@ module.exports = {
     },
     PromotionPackageApplied:{
       model:'ProductGroup'
-    },
+    }
   },
 
 };
