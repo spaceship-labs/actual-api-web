@@ -209,6 +209,8 @@ module.exports = {
       query.Client = currentUserClientId;
     }
 
+    //sails.log.info('query', query);
+
     QuotationWeb.findOne(query)
       .populate('Details')
       .then(function(quotation){
@@ -443,7 +445,10 @@ module.exports = {
       .then(function(created){
          var calculator = QuotationService.Calculator();
          if(form.ZipcodeDelivery){
-          opts.updateParams = ObjectId(form.ZipcodeDelivery);
+          opts.updateParams = {
+            ZipcodeDelivery: ObjectId(form.ZipcodeDelivery),
+            ignoreContactZipcode: true
+          };
          }
 
          return calculator.updateQuotationTotals(id, opts);
@@ -455,7 +460,7 @@ module.exports = {
         res.json(quotation);
       })
       .catch(function(err){
-        console.log('err addDetail quotation', err);
+        console.log('err addMultipleDetails quotation', err);
         res.negotiate(err);
       });
 

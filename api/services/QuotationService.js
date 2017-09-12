@@ -112,6 +112,7 @@ function Calculator(){
           totals = _.extend(totals, options.updateParams);
         }
         quotationTotals = totals;
+        //console.log('quotationTotals', quotationTotals);
         return nativeQuotationUpdate(quotationId, quotationTotals);
       });
   }
@@ -601,7 +602,7 @@ function nativeQuotationUpdate(quotationId,params){
   return new Promise(function(resolve, reject){
     QuotationWeb.native(function(err, collection){
       if(err){
-        console.log('err updating quotation',err);
+        console.log('err updating quotation service',err);
         reject(err);
       }
       var findCrieria = {_id: new ObjectId(quotationId)};
@@ -609,11 +610,13 @@ function nativeQuotationUpdate(quotationId,params){
       var updateParams = {
         $set: _.omit(params, ['id'])
       };
+      //console.log('updateParams', JSON.stringify(updateParams));
       collection.updateOne(findCrieria, updateParams, function(errUpdate, result){
         if(errUpdate){
-          console.log('errUpdate updating product',errUpdate);
+          console.log('errUpdate updating quotation collection',errUpdate);
           reject(errUpdate);
         }
+        //console.log('termino nativeQuotationUpdate');
         resolve(result);
       });
     });
