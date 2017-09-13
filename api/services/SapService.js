@@ -209,6 +209,11 @@ function buildSaleOrderRequestParams(params){
     saleOrderRequest.SalesPersonCode = -1;
   }
 
+  if(process.env.MODE === 'production'){
+    var WEB_SELLER_SLPCODE = 148; //Daniela Torres
+    saleOrderRequest.SalesPersonCode = WEB_SELLER_SLPCODE;
+  }
+
   return getAllWarehouses()
     .then(function(warehouses){
       products = params.quotationDetails.map(function(detail){
