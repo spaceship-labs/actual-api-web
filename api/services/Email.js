@@ -986,7 +986,6 @@ function sendQuotation(client, quotation, products, payments, transfers, store, 
   if(lead){
     clientEmail = lead.email;
   }
-  console.log('clientEmail', clientEmail);
 
   var to               = new helper.Email(clientEmail, client.CardName);
   var subject          = 'Cotización | Folio #' + quotation.folio + ' ' + store.name;
