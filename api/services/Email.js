@@ -751,7 +751,7 @@ function sendOrder(client, order, products, payments, ewallet, store) {
   });
 }
 
-function quotation(quotationId, activeStore, isCardProcessingError) {
+function quotation(quotationId, activeStore, isCardProcessingError, lead) {
   return QuotationWeb
     .findOne(quotationId)
     .populate('Client')
@@ -819,7 +819,19 @@ function quotation(quotationId, activeStore, isCardProcessingError) {
           mats.forEach(function(m, i) {
             products[i].material = m;
           });
-          return sendQuotation(client, quotation, products, payments, transfers, store, false, isCardProcessingError);
+
+          var order = false;
+          return sendQuotation(
+            client, 
+            quotation, 
+            products, 
+            payments, 
+            transfers, 
+            store, 
+            order, 
+            isCardProcessingError,
+            lead
+          );
         });
     });
 }
@@ -899,8 +911,10 @@ function sendSpeiQuotation(quotationId, activeStore) {
     });
 }
 
-function sendQuotation(client, quotation, products, payments, transfers, store, order, isCardProcessingError) {
+function sendQuotation(client, quotation, products, payments, transfers, store, order, isCardProcessingError, lead) {
   var date = moment(quotation.updatedAt);
+  client = client || {};
+
   moment.locale('es');
   date.locale(false);
 
@@ -932,13 +946,22 @@ function sendQuotation(client, quotation, products, payments, transfers, store, 
     products: products,
     payments: payments,
     transfers: transfers,
+    /*
     ewallet: {
       balance: numeral(client.ewallet).format('0,0.00')
     },
+    */
     isSpeiOrder: (order || {}).isSpeiOrder,
     isCardProcessingError: isCardProcessingError
     //speiTransferData: false
   };
+
+  if(lead){
+    emailParams.client = {
+      name: lead.name,
+      phone: lead.phone,
+    };
+  }
 
   /*
   if(order && order.isSpeiOrder){
@@ -959,6 +982,12 @@ function sendQuotation(client, quotation, products, payments, transfers, store, 
   var personalization  = new helper.Personalization();
   var from             = new helper.Email('noreply@actualg.com', 'Actual Group');
   var clientEmail      = client.E_Mail;
+  
+  if(lead){
+    clientEmail = lead.email;
+  }
+  console.log('clientEmail', clientEmail);
+
   var to               = new helper.Email(clientEmail, client.CardName);
   var subject          = 'Cotización | Folio #' + quotation.folio + ' ' + store.name;
   var content          = new helper.Content("text/html", emailBody);

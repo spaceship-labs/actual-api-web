@@ -908,6 +908,20 @@ module.exports = {
         res.negotiate(err);
       });
 
+  },
+
+  getQuotationLeads: function(req, res){
+    var form = req.allParams();
+    var quotationId  = form.quotationId;
+
+    Lead.find({QuotationWeb: quotationId})
+      .then(function(leads){
+        res.json(leads);
+      })
+      .catch(function(err){
+        console.log('getQuotationLeads err', err);
+        res.negotiate(err);
+      });
   }
   
 

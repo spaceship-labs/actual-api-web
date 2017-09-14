@@ -273,6 +273,11 @@ module.exports.routes = {
     action:'getQuotationSapLogs'
   },
 
+  'GET /quotation/:quotationId/leads':{
+    controller: 'quotation',
+    action: 'getQuotationLeads'
+  },
+
   'PUT /quotation/:id/address':{
     controller:'quotation',
     action:'updateQuotationAddress'
@@ -479,6 +484,11 @@ module.exports.routes = {
     controller:'common',
     action:'sendSuggestions'
   },
+
+  'POST /lead/quotation/:quotationId':{
+    controller: 'lead',
+    action: 'createLeadAndSendQuotation'
+  }
 
   /*
   '/fixorders':{

@@ -40,7 +40,8 @@ module.exports.policies = {
     updateDetails: ['setupDefaultData'],
     getQuotationZipcodeDelivery:['setupDefaultData'],
     removeDetailsGroup:['setupDefaultData'],
-    removeDetail:['setupDefaultData']    
+    removeDetail:['setupDefaultData'],
+    getQuotationLeads:['setupDefaultData']    
   },
   PaymentController:{
     add: ['setupDefaultData','isAuthenticated']
@@ -108,7 +109,10 @@ module.exports.policies = {
   },
   StoreController:{
     '*':['setupDefaultData']    
-  }
+  },
+  LeadController:{
+    '*':['setupDefaultData']    
+  }  
 
   /***************************************************************************
   *                                                                          *
