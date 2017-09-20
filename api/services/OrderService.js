@@ -24,7 +24,7 @@ function getOrderStatusMapper(){
     //'pending-sap': 'Pagado y procesando',
     //'completed': 'Pagado',
     'pending-payment': 'Pendiente de pago',
-    'cancelled': 'Cancelado'
+    'canceled': 'Cancelado'
   };        
   return statusMap;
 }

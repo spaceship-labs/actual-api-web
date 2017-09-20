@@ -4,7 +4,7 @@ var moment = require('moment');
 var EWALLET_TYPE = 'ewallet';
 var CLIENT_BALANCE_TYPE = 'client-balance';
 var EWALLET_NEGATIVE = 'negative';
-var CANCELLED_STATUS = 'cancelled';
+var CANCELLED_STATUS = 'canceled';
 var PAYMENT_CANCEL_TYPE = 'cancellation';
 module.exports = {
 

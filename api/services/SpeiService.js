@@ -140,8 +140,8 @@ function freeSpeiUnpaidOrderDetails(){
 			
 			return [
 				OrderDetailWeb.update({id: orderDetailsIds}, {inSapWriteProgress: false}),
-				OrderWeb.update({id:ordersIds},{status:'cancelled'}),
-				PaymentWeb.update({id:paymentsIds},{status:'cancelled'})
+				OrderWeb.update({id:ordersIds},{status:'canceled'}),
+				PaymentWeb.update({id:paymentsIds},{status:'canceled'})
 			];
 		})
 		.spread(function(orderDetailsUpdated, ordersWebUpdated, paymentsWebUpdated){

@@ -46,7 +46,7 @@ module.exports = {
         'pending-sap', 
         'pending-payment',
         'completed',
-        'cancelled'
+        'canceled'
       ]
     },
     inSapWriteProgress:{type:'boolean'},
