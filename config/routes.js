@@ -278,6 +278,11 @@ module.exports.routes = {
     action: 'getQuotationLeads'
   },
 
+  'GET /quotation/:id/address':{
+    controller:'quotation',
+    action:'getQuotationAddress'
+  },  
+
   'PUT /quotation/:id/address':{
     controller:'quotation',
     action:'updateQuotationAddress'
