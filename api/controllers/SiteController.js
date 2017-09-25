@@ -16,7 +16,10 @@ module.exports = {
     var handle = form.handle;
     Site.findOne({handle:handle}).populate('Banners')
       .then(function(site){
-        res.json(site);
+        if(!site){
+          return res.json([]);
+        }
+        res.json(site.Banners);
       }).catch(function(err){
         console.log(err);
         res.negotiate(err);
