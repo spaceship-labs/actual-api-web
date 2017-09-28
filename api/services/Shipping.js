@@ -162,7 +162,7 @@ function buildShippingItem(stockItem, storeWarehouseId, zipcodeDelivery, product
 
   return Season.findOne(seasonQuery)
     .then(function(season){
-      var LOW_SEASON_DAYS = 10; //Original: 7
+      var LOW_SEASON_DAYS = 8; //Original: 7
       var seasonDays   = (season && season.Days) || LOW_SEASON_DAYS;
       var days = productDays + zipcodeDays;
       //var days = productDays + seasonDays + zipcodeDays;
