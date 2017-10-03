@@ -101,7 +101,8 @@ module.exports = {
     paymentAttempts:{
       type:'integer',
       defaultsTo: 0
-    }
+    },
+    paymentType: {type:'string'}
   },
 
   beforeCreate: function(val,cb){

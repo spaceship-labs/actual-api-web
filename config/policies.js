@@ -45,7 +45,8 @@ module.exports.policies = {
     getQuotationAddress: ['setupDefaultData'],    
   },
   PaymentController:{
-    add: ['setupDefaultData','isAuthenticated']
+    add: ['setupDefaultData','isAuthenticated'],
+    getPaymentTypes: ['setupDefaultData','isAuthenticated']    
   },
   OrderController:{
     '*': ['isAuthenticated', 'setupDefaultData'],
@@ -63,7 +64,8 @@ module.exports.policies = {
     register: ['setupDefaultData']
   },
   ClientController:{
-    create:['setupDefaultData']
+    create:['setupDefaultData'],
+    find: ['setupDefaultData', 'isAdmin']
   },
   MeController: {
     activeStore: ['setupDefaultData']

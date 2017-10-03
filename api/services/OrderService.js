@@ -222,6 +222,7 @@ function createOrder(form, req){
         orderToCreate = _.extend(orderToCreate,quotation.Address);
       }
 
+      orderToCreate.paymentType = getPaymentTypeByPayments(quotation.Payments);
       orderToCreate.ConektaOrderId = form.conektaOrder.conektaId;
       orderToCreate.ConektaPaymentStatus = form.conektaOrder.payment_status;
       orderToCreate.ConektaOrder = form.conektaOrder;
@@ -267,7 +268,8 @@ function createOrder(form, req){
         OrderWeb: orderCreated.id,
         status: 'to-order',
         isClosed: true,
-        isClosedReason: 'Order created'
+        isClosedReason: 'Order created',
+        paymentType: getPaymentTypeByPayments(quotation.Payments)
       };
 
       return QuotationWeb.update({id:quotation.id} , updateFields);
@@ -277,6 +279,17 @@ function createOrder(form, req){
       orderCreated.Details = orderDetails;
       return orderCreated;
     });
+}
+
+function getPaymentTypeByPayments(payments){
+  var paymentType = '';
+  if(payments){
+    if(payments.length > 0){
+      paymentType = payments[0].type;
+    }
+  }
+
+  return paymentType;
 }
 
 //@params

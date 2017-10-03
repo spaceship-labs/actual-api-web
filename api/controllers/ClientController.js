@@ -6,6 +6,33 @@ var ADDRESS_TYPE_B = 'B';
 
 module.exports = {
 
+  find: function(req, res){
+    var form           = req.params.all();
+    var model          = 'client';
+    var extraParams = {
+      searchFields: [
+        'id',
+        'CardName',
+        'CardCode',
+        'firstName',
+        'lastName',
+        'E_Mail',
+        'phone'
+      ],
+      filters: {
+        'UserWeb': {'!':null}
+      }      
+    };
+    Common.find(model, form, extraParams)
+      .then(function(result){
+        res.ok(result);
+      })
+      .catch(function(err){
+        console.log(err);
+        res.negotiate(err);
+      });
+  },
+
   findById: function(req, res){
     var form        = req.params.all();
     var id          = form.id;

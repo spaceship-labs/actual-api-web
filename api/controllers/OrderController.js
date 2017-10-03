@@ -62,8 +62,7 @@ module.exports = {
       ],
       selectFields: form.fields,
       populateFields:['Client'],
-      filters:{
-      }
+      filters:form.filters
     };
 
     var clientSearch = form.clientSearch;

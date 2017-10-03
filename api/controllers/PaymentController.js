@@ -27,12 +27,16 @@ module.exports = {
       })
   },
 
-
-
   getPaymentGroups: function(req, res){
     var paymentGroups = PaymentService.getPaymentGroups();
     res.json(paymentGroups);
-  }	
+  },
+
+  getPaymentTypes: function(req, res){
+    var paymentTypes = sails.models.paymentweb.definition.type.enum;
+    res.json(paymentTypes);
+  }
+
 };
 
 function formatProductsIds(details){
