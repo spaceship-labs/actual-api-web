@@ -34,7 +34,7 @@ function productShipping(product, storeWarehouse, options) {
     };
   }
 
-  if(product.Service === 'Y'){
+  if(product.Service === 'Y' || product.U_FAMILIA !== 'SI'){
     return Promise.resolve([]);
   }
 
