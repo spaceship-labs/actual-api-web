@@ -23,6 +23,18 @@ function formatMongoRecord(record){
 
 module.exports = {
 
+  removeUnusedFilters: function(filters){
+    if(filters){
+      for(var key in filters){
+        if(filters[key] === ''){
+          delete filters[key];
+        }
+      }
+    }  
+    return filters;
+  },
+
+
   nativeFindOne: function(findCrieria, model){
     return new Promise(function(resolve, reject){
       
@@ -268,8 +280,8 @@ module.exports = {
       read = model.find(query);
     }
 
-    sails.log.info('Query common: ');
-    sails.log.info(JSON.stringify(query));
+    //sails.log.info('Query common: ');
+    //sails.log.info(JSON.stringify(query));
 
     if(populateFields.length > 0){
       populateFields.forEach(function(populateF){

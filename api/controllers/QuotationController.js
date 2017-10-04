@@ -610,6 +610,8 @@ module.exports = {
       populateFields: ['Client']      
     };
 
+    extraParams.filters = Common.removeUnusedFilters(extraParams.filters);
+
     var clientSearch = form.clientSearch;
     var clientSearchFields = ['CardName', 'E_Mail', 'CardCode'];
     var preSearch = Promise.resolve();
@@ -619,10 +621,19 @@ module.exports = {
       delete form.term;
     }
 
+    if(form.clientSearchTerm){
+      console.log('clientSearch', form.clientSearchTerm);
+      preSearch = ClientService.clientsIdSearch(form.clientSearchTerm, clientSearchFields);
+      delete form.clientSearchTerm;      
+    }    
+
+    console.log('preSearch', preSearch);
+
     preSearch.then(function(preSearchResults){
+        console.log('preSearchResults', preSearchResults);
         //Search by pre clients search
         if( preSearchResults && _.isArray(preSearchResults) ){
-          extraParams.Client = preSearchResults;
+          extraParams.filters.Client = preSearchResults;
         }
 
         return Common.find(model, form, extraParams);
