@@ -622,15 +622,12 @@ module.exports = {
     }
 
     if(form.clientSearchTerm){
-      console.log('clientSearch', form.clientSearchTerm);
       preSearch = ClientService.clientsIdSearch(form.clientSearchTerm, clientSearchFields);
       delete form.clientSearchTerm;      
     }    
 
-    console.log('preSearch', preSearch);
 
     preSearch.then(function(preSearchResults){
-        console.log('preSearchResults', preSearchResults);
         //Search by pre clients search
         if( preSearchResults && _.isArray(preSearchResults) ){
           extraParams.filters.Client = preSearchResults;
