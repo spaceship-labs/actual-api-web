@@ -382,6 +382,11 @@ module.exports.routes = {
   'PUT /me/client/fiscaladdress':{
     controller:'client',
     action: 'updateFiscalAddress'
+  },
+
+  '/client/find':{
+    controller:'client',
+    action: 'find'
   },  
 
   '/promotion/find/:page':{
@@ -454,9 +459,9 @@ module.exports.routes = {
     action:'getPaymentGroups'
   },
 
-  '/payment/test':{
+  'GET /payment/types':{
     controller: 'payment',
-    action: 'test'
+    action: 'getPaymentTypes'
   },
 
   'GET /shipping/zipcodedelivery':{

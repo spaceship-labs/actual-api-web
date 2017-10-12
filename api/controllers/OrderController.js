@@ -62,9 +62,10 @@ module.exports = {
       ],
       selectFields: form.fields,
       populateFields:['Client'],
-      filters:{
-      }
+      filters:form.filters
     };
+
+    extraParams.filters = Common.removeUnusedFilters(extraParams.filters);
 
     var clientSearch = form.clientSearch;
     var clientSearchFields = ['CardName', 'E_Mail', 'CardCode'];
@@ -73,6 +74,11 @@ module.exports = {
     if(clientSearch && form.term){
       preSearch = ClientService.clientsIdSearch(form.term, clientSearchFields);
       delete form.term;
+    }
+
+    if(form.clientSearchTerm){
+      preSearch = ClientService.clientsIdSearch(form.clientSearchTerm, clientSearchFields);
+      delete form.clientSearchTerm;      
     }
 
     preSearch.then(function(preSearchResults){
@@ -444,4 +450,3 @@ module.exports = {
   }
 
 };
-

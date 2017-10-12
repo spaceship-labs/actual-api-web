@@ -23,6 +23,18 @@ function formatMongoRecord(record){
 
 module.exports = {
 
+  removeUnusedFilters: function(filters){
+    if(filters){
+      for(var key in filters){
+        if(filters[key] === ''){
+          delete filters[key];
+        }
+      }
+    }  
+    return filters;
+  },
+
+
   nativeFindOne: function(findCrieria, model){
     return new Promise(function(resolve, reject){
       
