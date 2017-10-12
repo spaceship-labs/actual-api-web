@@ -42,7 +42,8 @@ module.exports.policies = {
     removeDetailsGroup:['setupDefaultData'],
     removeDetail:['setupDefaultData'],
     getQuotationLeads:['setupDefaultData'],
-    getQuotationAddress: ['setupDefaultData'],    
+    getQuotationAddress: ['setupDefaultData'],
+    findAll: ['setupDefaultData', 'isAdmin']        
   },
   PaymentController:{
     add: ['setupDefaultData','isAuthenticated'],
@@ -51,6 +52,7 @@ module.exports.policies = {
   OrderController:{
     '*': ['isAuthenticated', 'setupDefaultData'],
     'receiveSpeiNotification': ['setupDefaultData'],
+    findAll: ['setupDefaultData', 'isAdmin'],
     sendOrderEmail:false
   },
   UserController:{
