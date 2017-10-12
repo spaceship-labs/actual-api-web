@@ -58,7 +58,7 @@ function createOrderInvoice(orderId, req) {
       .spread(function(order, payments, details, address, client) {
         return [
           order,
-          preparePayments(payments),
+          payments,
           prepareClient(order, client, address),
           prepareItems(details)
         ];
