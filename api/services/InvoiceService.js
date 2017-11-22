@@ -373,7 +373,8 @@ function prepareItems(details) {
   });
 
   //Uncomment to use instant requests instead of delaying the requests
-  //return Promise.all(createItems(items));}
+  //return Promise.all(createItems(items));
+}
 
 function createItemWithDelay(item){
   var options = {
