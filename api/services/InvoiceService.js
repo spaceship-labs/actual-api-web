@@ -360,6 +360,7 @@ function prepareItems(details) {
       price: detail.unitPrice / 1.16,
       discount: parseFloat((discount).toFixed(4)),
       tax: [ {id: alegraIVAID} ],
+      productKey: detail.Product.U_ClaveProdServ,      
       quantity: detail.quantity,
       inventory:{
         unit:'piece',
