@@ -300,7 +300,7 @@ function prepareClient(order, client, address) {
   if (!generic) {
     data = {
       name: address.companyName,
-      identification: client.LicTradNum,
+      identification: (client.LicTradNum || "").toUpperCase(),
       email: address.U_Correos,
       address: {
         street: address.Street,
@@ -317,7 +317,7 @@ function prepareClient(order, client, address) {
   } else {
     data = {
       name: order.CardName,
-      identification: RFCPUBLIC,
+      identification: (RFCPUBLIC || "").toUpperCase(),
       email: order.E_Mail,
       address: {
         country: 'México',
