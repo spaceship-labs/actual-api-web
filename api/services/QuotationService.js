@@ -398,8 +398,8 @@ function Calculator(){
     var copy =  _.clone(detail);
 
     console.log('detail id', detail.id);
-    console.log('detail. deliveryPriceMode', detail.deliveryFeeConfig.deliveryPriceMode);
-    console.log('detail deliveryPriceValue', detail.deliveryFeeConfig.deliveryPriceValue);
+    //console.log('detail. deliveryPriceMode', detail.deliveryFeeConfig.deliveryPriceMode);
+    //console.log('detail deliveryPriceValue', detail.deliveryFeeConfig.deliveryPriceValue);
 
     return Product.findOne({id:productId})
       .then(function(productResult){
@@ -415,8 +415,9 @@ function Calculator(){
         var subtotal                  = quantity * unitPrice;
         var subtotal2                 = quantity * unitPriceWithDiscount;
         var deliveryFee               = Shipping.calculateDetailDeliveryFee(subtotal2,detail.deliveryFeeConfig);
+        console.log('subtotal2', subtotal2);
         console.log('deliveryFee', deliveryFee);
-        var total                     = subtotal2 /*+ deliveryFee*/;
+        var total                     = subtotal2 + deliveryFee;
         var totalPg1                  = total;
         var financingCostPercentage   = 0;
         var discountName              = mainPromo ? getPromotionOrPackageName(mainPromo) : null;
