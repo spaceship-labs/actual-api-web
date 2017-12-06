@@ -9,6 +9,7 @@ var promiseDelay = require('promise-delay');
 var alegraIVAID = 2;
 var alegraACCOUNTID = 1;
 var RFCPUBLIC = 'XAXX010101000';
+var DEFAULT_CFDI_USE = 'P01';
 
 module.exports = {
   createOrderInvoice: createOrderInvoice,
@@ -176,6 +177,7 @@ function prepareInvoice(order, payments, client, items) {
     dueDate: dueDate,
     client: client,
     items: items,
+    cfdiUse: client.cfdiUse,
     paymentMethod: getPaymentMethodBasedOnPayments(payments),
     anotation: order.folio + '-web',
     stamp: {
@@ -302,6 +304,7 @@ function prepareClient(order, client, address) {
       name: address.companyName,
       identification: (client.LicTradNum || "").toUpperCase(),
       email: address.U_Correos,
+      cfdiUse: client.cfdiUse || DEFAULT_CFDI_USE,
       address: {
         street: address.Street,
         exteriorNumber: address.U_NumExt,
@@ -319,6 +322,7 @@ function prepareClient(order, client, address) {
       name: order.CardName,
       identification: (RFCPUBLIC || "").toUpperCase(),
       email: order.E_Mail,
+      cfdiUse: DEFAULT_CFDI_USE,
       address: {
         country: 'México',
         state: order.U_Estado || 'Quintana Roo',
