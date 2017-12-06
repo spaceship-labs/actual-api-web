@@ -367,7 +367,8 @@ function prepareItems(details) {
       productKey: detail.Product.U_ClaveProdServ,      
       quantity: detail.quantity,
       inventory:{
-        unit:'piece',
+        //unit:'piece',
+        getUnitTypeByProduct(detail.Product),
         unitCost: detail.unitPrice,
         initialQuantity: detail.quantity
       }      
@@ -380,6 +381,24 @@ function prepareItems(details) {
   //Uncomment to use instant requests instead of delaying the requests
   //return Promise.all(createItems(items));
 }
+
+function getUnitTypeByProduct(product){
+  var unitType = 'piece';
+  switch(product.U_ClaveUnidad){
+    case 'H87':
+      unitType = 'piece';
+      break;
+    case 'SET':
+      unitType = 'piece';
+      break;
+    case 'E48':
+      unitType = 'service';
+      break;
+  }
+
+  return unitType;
+}
+
 
 function createItemWithDelay(item){
   var options = {
