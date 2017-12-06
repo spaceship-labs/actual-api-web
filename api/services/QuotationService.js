@@ -4,14 +4,6 @@ var assign  = require('object-assign');
 var moment  = require('moment');
 var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
 
-
-var BIGTICKET_TABLE = [
-  {min:100000, max:199999.99, maxPercentage:2},
-  {min:200000, max:349999.99, maxPercentage:3},
-  {min:350000, max:499999.99, maxPercentage:4},
-  {min:500000, max:Infinity, maxPercentage:5},
-];
-
 var DISCOUNT_KEYS = [
   'discountPg1',
   'discountPg2',
@@ -130,7 +122,38 @@ function Calculator(){
       })
       .then(function(quotationFound){
         quotation = quotationFound; 
-        details = quotation.Details;
+
+        var DEFAULT_DELIVERY_FEE_CONFIG = {
+          deliveryPriceValue: 0,
+          deliveryPriceMode: Shipping.DELIVERY_AMOUNT_MODE
+        };
+        var promiseToReturn;
+
+        if(quotation.ZipcodeDelivery){          
+          return ZipcodeDelivery.findOne({id: quotation.ZipcodeDelivery})
+            .populate('ZipcodeState')
+            .then(function(zipcodeDelivery){
+              if(zipcodeDelivery && zipcodeDelivery.ZipcodeState){
+                return zipcodeDelivery.ZipcodeState;
+              }
+              return DEFAULT_DELIVERY_FEE_CONFIG;
+            });
+        }
+        else{
+          return DEFAULT_DELIVERY_FEE_CONFIG;
+        }
+
+        return promiseToReturn;
+      })
+      .then(function(deliveryFeeConfig){
+
+        details = ( quotation.Details || [] ).map(function(detail){
+          detail.deliveryFeeConfig = {
+            deliveryPriceValue: deliveryFeeConfig.deliveryPriceValue,
+            deliveryPriceMode: deliveryFeeConfig.deliveryPriceMode
+          };
+          return detail;
+        });
         var packagesIds = getQuotationPackagesIds(details);
 
         if(packagesIds.length > 0){
@@ -196,6 +219,7 @@ function Calculator(){
     var totals = {
       subtotal :0,
       subtotal2:0,
+      deliveryFee: 0,
       total:0,
       totalPg1: 0,
       totalPg2: 0,
@@ -227,6 +251,7 @@ function Calculator(){
       totals.discountPg5      += (pd.subtotal - pd.totalPg5);
 
       totals.total         += pd.total;
+      totals.deliveryFee   += pd.deliveryFee;
       totals.subtotal      += pd.subtotal;
       totals.subtotal2     += pd.subtotal2;
       totals.discount      += (pd.subtotal - pd.total);
@@ -361,6 +386,7 @@ function Calculator(){
 
   //@params: detail Object from model Detail
   //Must contain a Product object populated
+  //Must contain deliveryPriceValue and deliveryPriceMode properties
   function getDetailTotals(detail, options){
     options = options || {};
     var paymentGroup = options.paymentGroup || 1;
@@ -369,6 +395,12 @@ function Calculator(){
     var quotationId = detail.Quotation;
     var product;
     
+    var copy =  _.clone(detail);
+
+    console.log('detail id', detail.id);
+    console.log('detail. deliveryPriceMode', detail.deliveryFeeConfig.deliveryPriceMode);
+    console.log('detail deliveryPriceValue', detail.deliveryFeeConfig.deliveryPriceValue);
+
     return Product.findOne({id:productId})
       .then(function(productResult){
         product = productResult;
@@ -382,17 +414,17 @@ function Calculator(){
         var unitPriceWithDiscount     = calculateAfterDiscount(unitPrice, discountPercent);
         var subtotal                  = quantity * unitPrice;
         var subtotal2                 = quantity * unitPriceWithDiscount;
-        var total                     = quantity * unitPriceWithDiscount;
+        var deliveryFee               = Shipping.calculateDetailDeliveryFee(subtotal2,detail.deliveryFeeConfig);
+        console.log('deliveryFee', deliveryFee);
+        var total                     = subtotal2 /*+ deliveryFee*/;
         var totalPg1                  = total;
         var financingCostPercentage   = 0;
         var discountName              = mainPromo ? getPromotionOrPackageName(mainPromo) : null;
 
-        //var total                 = quantity * unitPriceWithDiscount;
         var discount                  = total - subtotal;
 
-        //TODO: Reactivate ewallet 
-        var ewallet                   = 0;
-
+        //TODO: Reactivate ewallet when its necesary 
+        var ewallet = 0;
 
         //Calculate financing
         if(mainPromo){
@@ -426,6 +458,7 @@ function Calculator(){
           quantity                    : quantity,
           subtotal                    : subtotal,
           subtotal2                   : subtotal2,
+          deliveryFee                 : deliveryFee,
           total                       : total,
           totalPg1                    : totalPg1,
           financingCostPercentage     : financingCostPercentage,

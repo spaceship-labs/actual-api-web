@@ -39,6 +39,7 @@ module.exports = {
     var zipcode = form.zipcode;
 
     ZipcodeDelivery.findOne({cp: zipcode, entrega: Shipping.DELIVERY_AVAILABLE})
+      .populate('ZipcodeState')
       .then(function(zipcodeDelivery){
         res.json(zipcodeDelivery);
       })
@@ -53,6 +54,7 @@ module.exports = {
     var id = form.id;
 
     ZipcodeDelivery.findOne({id: id, entrega: Shipping.DELIVERY_AVAILABLE})
+      .populate('ZipcodeState')
       .then(function(zipcodeDelivery){
         res.json(zipcodeDelivery);
       })

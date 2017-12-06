@@ -11,6 +11,9 @@ module.exports = {
     immediateDelivery:{type:'float'},
     ammountPaid: {type:'float'},
     ammountPaidPg1:{type:'float'},
+
+    deliveryFee: {type: 'float'},
+
     total:{type:'float'},
     totalPg1: {type:'float'},
     totalPg2: {type:'float'},

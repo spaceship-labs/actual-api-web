@@ -6,13 +6,20 @@ var CEDIS_QROO_ID = '576acfee5280c21ef87ea5b5';
 var DELIVERY_AVAILABLE = 'SI';
 var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
 
+var DELIVERY_AMOUNT_MODE = 'amount';
+var DELIVERY_PERCENTAGE_MODE = 'percentage';
+
+
 module.exports = {
   product: productShipping,
+  calculateDetailDeliveryFee: calculateDetailDeliveryFee,
   isDateImmediateDelivery: isDateImmediateDelivery,
   isValidZipcode: isValidZipcode,
   DELIVERY_AVAILABLE: DELIVERY_AVAILABLE,
   moveMultipleDetailsShippingDate: moveMultipleDetailsShippingDate,
-  moveDetailShippingDate: moveDetailShippingDate
+  moveDetailShippingDate: moveDetailShippingDate,
+  DELIVERY_PERCENTAGE_MODE: DELIVERY_PERCENTAGE_MODE,
+  DELIVERY_AMOUNT_MODE: DELIVERY_AMOUNT_MODE
 };
 
 function productShipping(product, storeWarehouse, options) {
@@ -34,7 +41,7 @@ function productShipping(product, storeWarehouse, options) {
     };
   }
 
-  if(product.Service === 'Y' || product.U_FAMILIA !== 'SI'){
+  if(product.Service === 'Y' /*|| product.U_FAMILIA !== 'SI'*/){
     return Promise.resolve([]);
   }
 
@@ -308,6 +315,27 @@ function getPendingProductDetailsSum(product){
     });
   });  
 }
+
+function calculateDetailDeliveryFee(detailTotal, zipcodedeliveryConfig){
+  var fee = 0;
+  var AMOUNT_MODE = 'amount';
+  var PERCENTAGE_MODE = 'percentage';
+
+  if(detailTotal && zipcodedeliveryConfig){    
+    var feeMode = zipcodedeliveryConfig.deliveryPriceMode;
+    var feeValue = zipcodedeliveryConfig.deliveryPriceValue;
+
+    if(feeMode === AMOUNT_MODE){
+      fee = feeValue;
+    }
+    else if(feeMode === PERCENTAGE_MODE){
+      fee = detailTotal * (feeValue / 100);
+    }
+  }
+
+  return fee;
+}
+
 
 //Details must be populated with Product
 function moveMultipleDetailsShippingDate(details, allDeliveries){

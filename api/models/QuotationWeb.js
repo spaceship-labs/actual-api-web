@@ -50,6 +50,9 @@ module.exports = {
     immediateDelivery:{type:'boolean'},
     clientName: {type:'string'},
     folio:{type:'string'},
+
+    deliveryFee: {type: 'float'},
+
     total:{type:'float'},
     totalPg1: {type:'float'},
     totalPg2: {type:'float'},

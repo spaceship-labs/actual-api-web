@@ -21,6 +21,8 @@ module.exports = {
     discountPg4: 'float',
     discountPg5: 'float',
 
+    deliveryFee: 'float',
+
     isSpeiOrderDetail: 'boolean',
     speiExpirationPayment: {type:'datetime'},    
 

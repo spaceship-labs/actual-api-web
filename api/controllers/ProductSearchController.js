@@ -42,7 +42,7 @@ module.exports = {
 
 
     query.Active     = 'Y';
-    query.U_FAMILIA  = 'SI';
+    //query.U_FAMILIA  = 'SI';
     //query[displayProperty] = true;
     query.excludeWeb = {'!':true};
     query.Service = {'!': 'Y'};
@@ -177,7 +177,7 @@ module.exports = {
         query = _.extend(query,{
           id: productsIds,
           Active: 'Y',
-          U_FAMILIA: 'SI',
+          //U_FAMILIA: 'SI',
           excludeWeb: {'!':true},
           Service: {'!':'Y'}
         });
