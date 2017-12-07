@@ -4,6 +4,8 @@ var assign  = require('object-assign');
 var moment  = require('moment');
 var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
 
+var PAYMENT_GROUPS_KEYS = ['Pg1', 'Pg2', 'Pg3', 'Pg4', 'Pg5']; 
+
 var DISCOUNT_KEYS = [
   'discountPg1',
   'discountPg2',
@@ -32,6 +34,7 @@ var defaultQuotationTotals = {
     subtotal :0,
     subtotal2:0,
     total:0,
+    deliveryFee: 0,
     discount:0,
     totalProducts: 0,
     paymentGroup: 1,
@@ -221,47 +224,42 @@ function Calculator(){
       subtotal2:0,
       deliveryFee: 0,
       total:0,
-      totalPg1: 0,
-      totalPg2: 0,
-      totalPg3: 0,
-      totalPg4: 0,
-      totalPg5: 0,
-      discountPg1: 0,
-      discountPg2: 0,
-      discountPg3: 0,
-      discountPg4: 0,
-      discountPg5: 0,
-
       discount:0,
       totalProducts: 0,
       paymentGroup: options.paymentGroup,
     };
 
+    //Init values on 0
+    totals = PAYMENT_GROUPS_KEYS.reduce(function(t, groupKey){
+      t['total' + groupKey] = 0;
+      t['discount' + groupKey] = 0;
+      t['deliveryFee' + groupKey] = 0;
+      return t;
+    }, totals);
+
     processedDetails.forEach(function(pd){
-      totals.totalPg1      += pd.totalPg1;
-      totals.totalPg2      += pd.totalPg2;
-      totals.totalPg3      += pd.totalPg3;
-      totals.totalPg4      += pd.totalPg4;
-      totals.totalPg5      += pd.totalPg5;
+  
+      totals = PAYMENT_GROUPS_KEYS.reduce(function(t, groupKey){
+        t['total' + groupKey] += (pd["total"+groupKey] + pd["deliveryFee"+groupKey]);
+        t['discount' + groupKey] += pd.subtotal - (pd["total"+groupKey] + pd["deliveryFee"+groupKey]);
+        t['deliveryFee' + groupKey] += pd["deliveryFee"+groupKey];
+        return t;
+      }, totals);
 
-      totals.discountPg1      += (pd.subtotal - pd.totalPg1);
-      totals.discountPg2      += (pd.subtotal - pd.totalPg2);
-      totals.discountPg3      += (pd.subtotal - pd.totalPg3);
-      totals.discountPg4      += (pd.subtotal - pd.totalPg4);
-      totals.discountPg5      += (pd.subtotal - pd.totalPg5);
-
-      totals.total         += pd.total;
-      totals.deliveryFee   += pd.deliveryFee;
       totals.subtotal      += pd.subtotal;
       totals.subtotal2     += pd.subtotal2;
-      totals.discount      += (pd.subtotal - pd.total);
+      totals.discount      += (pd.subtotal - (pd.total + pd.deliveryFee));
+      totals.deliveryFee   += pd.deliveryFee;
+      totals.total         += pd.total + pd.deliveryFee;
       totals.totalProducts += pd.quantity;
     });    
 
-    totals.financingCostPercentage = calculateFinancingPercentage(totals.totalPg1, totals.total);
-    totals.total    += totals.deliveryFee;
-    totals.totalPg1 += totals.deliveryFee;
+    if(processedDetails && processedDetails.length > 0){
+      totals.deliveryPriceMode = processedDetails[0].deliveryPriceMode;
+      totals.deliveryPriceValue = processedDetails[0].deliveryPriceValue;
+    }
 
+    totals.financingCostPercentage = calculateFinancingPercentage(totals.totalPg1, totals.total);
     return totals;
   }
 
@@ -431,14 +429,6 @@ function Calculator(){
           financingCostPercentage = calculateFinancingPercentage(totalPg1, total);
         }
 
-        /*
-        var ewallet = getEwalletEntryByDetail({
-          Promotion: mainPromo,
-          paymentGroup: options.paymentGroup,
-          total: total
-        });
-        */
-
         var detailTotals = {
           discount                    : discount,
           discountKey                 : discountKey, //Payment group discountKey
@@ -455,6 +445,8 @@ function Calculator(){
           subtotal                    : subtotal,
           subtotal2                   : subtotal2,
           deliveryFee                 : deliveryFee,
+          deliveryPriceMode           : detail.deliveryFeeConfig.deliveryPriceMode,
+          deliveryPriceValue          : detail.deliveryFeeConfig.deliveryPriceValue,
           total                       : total,
           totalPg1                    : totalPg1,
           financingCostPercentage     : financingCostPercentage,
@@ -477,7 +469,8 @@ function Calculator(){
           detailTotals.clientDiscountReference = mainPromo.clientDiscountReference;
         }
 
-        var totalsGroups = calculateAllTotalsGroups(mainPromo, unitPrice, quantity);
+        //For pg1, pg2, pg3, pg4
+        var totalsGroups = calculateAllTotalsGroups(mainPromo, unitPrice, quantity, detail.deliveryFeeConfig);
         //sails.log.info('totalsGroups', totalsGroups);
         detailTotals = _.extend(detailTotals, totalsGroups);
 
@@ -485,7 +478,7 @@ function Calculator(){
       });
   }
 
-  function calculateAllTotalsGroups(mainPromo, unitPrice, quantity){
+  function calculateAllTotalsGroups(mainPromo, unitPrice, quantity, deliveryFeeConfig){
 
     var totalsGroups = _.reduce([1,2,3,4,5], function(acum,group){
       var _discountKey = getDiscountKey(group);
@@ -493,9 +486,11 @@ function Calculator(){
       var _unitPriceWithDiscount = calculateAfterDiscount(unitPrice, _discountPercent);
       var totalPg = _unitPriceWithDiscount * quantity;
       var subtotalPg = unitPrice * quantity;
-      acum['totalPg' + group] = totalPg;
-      acum['discountPg' + group] = totalPg - subtotalPg;
+
       acum['unitPriceWithDiscountPg' + group] = _unitPriceWithDiscount;
+      acum['deliveryFeePg' + group] = Shipping.calculateDetailDeliveryFee(totalPg,deliveryFeeConfig);
+      acum['discountPg' + group] = totalPg - subtotalPg;
+      acum['totalPg' + group] = totalPg;
       return acum;
     },{});
 

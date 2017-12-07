@@ -21,7 +21,18 @@ module.exports = {
     discountPg4: 'float',
     discountPg5: 'float',
 
+    deliveryPriceValue: 'float',
+    deliveryPriceMode: {
+      type: 'string',
+      enum : ['percentage', 'amount']
+    },
+
     deliveryFee: 'float',
+    deliveryFeePg1: 'float',
+    deliveryFeePg2: 'float',
+    deliveryFeePg3: 'float',
+    deliveryFeePg4: 'float',
+    deliveryFeePg5: 'float',    
 
     isSpeiOrderDetail: 'boolean',
     speiExpirationPayment: {type:'datetime'},    
