@@ -259,6 +259,8 @@ function Calculator(){
     });    
 
     totals.financingCostPercentage = calculateFinancingPercentage(totals.totalPg1, totals.total);
+    totals.total    += totals.deliveryFee;
+    totals.totalPg1 += totals.deliveryFee;
 
     return totals;
   }
@@ -409,7 +411,8 @@ function Calculator(){
         var subtotal                  = quantity * unitPrice;
         var subtotal2                 = quantity * unitPriceWithDiscount;
         var deliveryFee               = Shipping.calculateDetailDeliveryFee(subtotal2,detail.deliveryFeeConfig);
-        var total                     = subtotal2 + deliveryFee;
+        //var total                     = subtotal2 + deliveryFee;
+        var total                     = subtotal2;
         var totalPg1                  = total;
         var financingCostPercentage   = 0;
         var discountName              = mainPromo ? getPromotionOrPackageName(mainPromo) : null;
