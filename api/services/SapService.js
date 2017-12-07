@@ -437,9 +437,9 @@ function buildAddressContactEndpoint(fields, cardcode){
 
 function getDeliveryItemCode(){
   if(process.env.MODE === 'production'){
-    return '';
+    return 'EN000001';
   }else{
-    return '';
+    return 'EN000001';
   }
 }
 
