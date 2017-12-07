@@ -316,7 +316,7 @@ function getPendingProductDetailsSum(product){
   });  
 }
 
-function calculateDetailDeliveryFee(detailTotal, zipcodedeliveryConfig){
+function calculateDetailDeliveryFee(detailTotal, zipcodedeliveryConfig, quantity){
   var fee = 0;
   var AMOUNT_MODE = 'amount';
   var PERCENTAGE_MODE = 'percentage';
@@ -326,7 +326,7 @@ function calculateDetailDeliveryFee(detailTotal, zipcodedeliveryConfig){
     var feeValue = zipcodedeliveryConfig.deliveryPriceValue;
 
     if(feeMode === AMOUNT_MODE){
-      fee = feeValue;
+      fee = feeValue * quantity;
     }
     else if(feeMode === PERCENTAGE_MODE){
       fee = detailTotal * (feeValue / 100);

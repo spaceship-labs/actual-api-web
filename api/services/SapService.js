@@ -232,6 +232,20 @@ function buildSaleOrderRequestParams(params){
         return product;
       });
 
+      var deliveryProductItem = {
+        ItemCode: getDeliveryItemCode(),
+        OpenCreQty: 1,
+        WhsCode: '01',
+        ShipDate: moment().format(SAP_DATE_FORMAT),
+        DiscountPercent: 0,
+        Company: (COMPANY_BOTH_CODE, params.currentStore.group),
+        Price: params.deliveryFee,
+        ImmediateDelivery: true,
+        DetailId: 'deliveryFee'
+      };
+
+      products.push(deliveryProductItem);
+
       saleOrderRequest.WhsCode = getWhsCodeById(params.currentStore.Warehouse, warehouses);
       requestParams += encodeURIComponent(JSON.stringify(saleOrderRequest));
       requestParams += '&products=' + encodeURIComponent(JSON.stringify(products));
@@ -419,5 +433,13 @@ function buildAddressContactEndpoint(fields, cardcode){
   path += '?address=' + encodeURIComponent(JSON.stringify(fields));
   path += '&contact='+ encodeURIComponent(JSON.stringify(contact));
   return baseUrl + path;
+}
+
+function getDeliveryItemCode(){
+  if(process.env.MODE === 'production'){
+    return '';
+  }else{
+    return '';
+  }
 }
 

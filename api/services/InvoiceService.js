@@ -61,7 +61,7 @@ function createOrderInvoice(orderId, req) {
           order,
           payments,
           prepareClient(order, client, address),
-          prepareItems(details)
+          prepareItems(details, order)
         ];
       })
       .spread(function(order, payments, client, items) {
@@ -350,7 +350,7 @@ function createClient(client) {
   return request(options);
 }
 
-function prepareItems(details) {
+function prepareItems(details, order) {
   var items = details.map(function(detail) {
     var discount = detail.discountPercent ? detail.discountPercent : 0;
     discount = Math.abs(discount);
@@ -368,6 +368,22 @@ function prepareItems(details) {
       }      
     };
   });
+
+  var deliveryServiceItem = {
+    name: 'Gastos de envío',
+    price: order.deliveryFee,
+    discount: 0,
+    tax: [ {id: alegraIVAID} ],
+    quantity: 1,
+    inventory: {
+      unit:'service',
+      unitCost: order.deliveryFee,
+      initialQuantity: 1
+    }
+  };
+
+  items.push(deliveryServiceItem);
+
   return Promise.mapSeries(items, function(item){
     return createItemWithDelay(item);
   });

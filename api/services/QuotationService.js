@@ -408,10 +408,9 @@ function Calculator(){
         var unitPriceWithDiscount     = calculateAfterDiscount(unitPrice, discountPercent);
         var subtotal                  = quantity * unitPrice;
         var subtotal2                 = quantity * unitPriceWithDiscount;
-        var deliveryFee               = Shipping.calculateDetailDeliveryFee(subtotal2,detail.deliveryFeeConfig);
-        //var total                     = subtotal2 + deliveryFee;
         var total                     = subtotal2;
         var totalPg1                  = total;
+        var deliveryFee               = Shipping.calculateDetailDeliveryFee(total,detail.deliveryFeeConfig, detail.quantity);
         var financingCostPercentage   = 0;
         var discountName              = mainPromo ? getPromotionOrPackageName(mainPromo) : null;
 
@@ -488,7 +487,7 @@ function Calculator(){
       var subtotalPg = unitPrice * quantity;
 
       acum['unitPriceWithDiscountPg' + group] = _unitPriceWithDiscount;
-      acum['deliveryFeePg' + group] = Shipping.calculateDetailDeliveryFee(totalPg,deliveryFeeConfig);
+      acum['deliveryFeePg' + group] = Shipping.calculateDetailDeliveryFee(totalPg, deliveryFeeConfig, quantity);
       acum['discountPg' + group] = totalPg - subtotalPg;
       acum['totalPg' + group] = totalPg;
       return acum;
