@@ -241,14 +241,14 @@ function Calculator(){
   
       totals = PAYMENT_GROUPS_KEYS.reduce(function(t, groupKey){
         t['total' + groupKey] += (pd["total"+groupKey] + pd["deliveryFee"+groupKey]);
-        t['discount' + groupKey] += pd.subtotal - (pd["total"+groupKey] + pd["deliveryFee"+groupKey]);
+        t['discount' + groupKey] += pd.subtotal - (pd["total"+groupKey]);
         t['deliveryFee' + groupKey] += pd["deliveryFee"+groupKey];
         return t;
       }, totals);
 
       totals.subtotal      += pd.subtotal;
       totals.subtotal2     += pd.subtotal2;
-      totals.discount      += (pd.subtotal - (pd.total + pd.deliveryFee));
+      totals.discount      += pd.subtotal - pd.total;
       totals.deliveryFee   += pd.deliveryFee;
       totals.total         += pd.total + pd.deliveryFee;
       totals.totalProducts += pd.quantity;
