@@ -176,7 +176,7 @@ function getMethodGroupsWithTotals(quotationId, activeStore, options){
       update: false,
       paymentGroup: mG.group,
     };
-    params.currentStore = activeStore.id;
+    params.currentStoreId = activeStore.id;
     var calculator = QuotationService.Calculator();
     return calculator.getQuotationTotals(id, params);
   });
