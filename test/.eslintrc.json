@@ -1,0 +1,8 @@
+{
+  "globals": {
+    "app": true,
+    "expect": true,
+    "assert": true,
+    "should": true
+  }
+}
