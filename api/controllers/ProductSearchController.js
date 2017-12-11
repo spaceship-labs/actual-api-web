@@ -42,7 +42,7 @@ module.exports = {
 
 
     query.Active     = 'Y';
-    //query.U_FAMILIA  = 'SI';
+    query.U_FAMILIA  = 'SI';
     //query[displayProperty] = true;
     query.excludeWeb = {'!':true};
     query.Service = {'!': 'Y'};
