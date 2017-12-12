@@ -6,28 +6,29 @@ var fixtures = require('sails-fixtures');
 
 before(function(done){
   // Increase the Mocha timeout so that Sails has enough time to lift.
-  this.timeout(15000);
+  this.timeout(18000);
 
   sails.lift({
   	//config for testing purposes
     connections:{
       mongodb: {
-        adapter: 'sails-mongo',
-        host: 'localhost',
-        port: 27017,
-        user: '',
-        password: '',
-        database: 'actual-web-test',
+        host: process.env.MONGO_SANDBOX_HOST,
+        port: process.env.MONGO_SANDBOX_PORT,
+        user: process.env.MONGO_SANDBOX_USER,
+        password: process.env.MONGO_SANDBOX_PASSWORD,
+        database: process.env.MONGO_SANDBOX_DB,
         url: null
+        //url:process.env.MONGO_SANDBOX_URL
       }
     },
+    /*
     fixtures: {
       order:['Store','Site', 'Company'],
       Store: require('./fixtures/stores.json'),
       Site: require('./fixtures/sites.json'),
       Company: require('./fixtures/warehouses.json')
     }
-
+    */
   }, function(err){
   	if(err) return done(err);
 
@@ -35,9 +36,20 @@ before(function(done){
     global.assert = chai.assert;
     global.expect = chai.expect;
     global.should = chai.should();
+    global.loggedInData = false;
+    global.currentSiteKey = 'actual-studio';
+
+    UserWeb.findOne({email: process.env.SAMPLE_ADMIN_USER_EMAIL})
+      .then(function(user){
+        global.loggedInData = {
+          token: CipherService.createToken(user),
+          user: user
+        };
+        done(err, sails);
+      });
 
     // here you can load fixtures, etc.
-  	done(err, sails);
+  	//done(err, sails);
   });
 
 });

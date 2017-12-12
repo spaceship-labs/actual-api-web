@@ -118,3 +118,5 @@ nbproject
 .node_history
 assets/uploads/*
 .eslintrc.js
+
+test/mocha.env.js

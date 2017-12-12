@@ -1,4 +1,3 @@
-console.log('test confing file')
 module.exports = {
   connections:{
     mongodb: {

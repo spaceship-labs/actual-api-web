@@ -20,4 +20,23 @@ describe('Auth controller', function(){
 		});
 	});
 
+	describe('login process', function(){
+		it('should return a token after a valid login', function(done){
+			var url = '/auth/signin';
+			app.post(url)
+				.send({
+					email: process.env.SAMPLE_ADMIN_USER_EMAIL,
+					password: process.env.SAMPLE_ADMIN_USER_PASSWORD,
+				})
+			  .set('site', currentSiteKey)
+			  .set('accept', 'json')
+			  .then(function(res){
+					expect(res.body).to.have.property("token");
+			  	done();
+			  });
+
+		});
+
+	});
+
 });
