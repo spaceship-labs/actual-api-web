@@ -4,13 +4,7 @@ var assign  = require('object-assign');
 var moment  = require('moment');
 var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
 
-
-var BIGTICKET_TABLE = [
-  {min:100000, max:199999.99, maxPercentage:2},
-  {min:200000, max:349999.99, maxPercentage:3},
-  {min:350000, max:499999.99, maxPercentage:4},
-  {min:500000, max:Infinity, maxPercentage:5},
-];
+var PAYMENT_GROUPS_KEYS = ['Pg1', 'Pg2', 'Pg3', 'Pg4', 'Pg5']; 
 
 var DISCOUNT_KEYS = [
   'discountPg1',
@@ -40,6 +34,7 @@ var defaultQuotationTotals = {
     subtotal :0,
     subtotal2:0,
     total:0,
+    deliveryFee: 0,
     discount:0,
     totalProducts: 0,
     paymentGroup: 1,
@@ -130,7 +125,38 @@ function Calculator(){
       })
       .then(function(quotationFound){
         quotation = quotationFound; 
-        details = quotation.Details;
+
+        var DEFAULT_DELIVERY_FEE_CONFIG = {
+          deliveryPriceValue: 0,
+          deliveryPriceMode: Shipping.DELIVERY_AMOUNT_MODE
+        };
+        var promiseToReturn;
+
+        if(quotation.ZipcodeDelivery){          
+          return ZipcodeDelivery.findOne({id: quotation.ZipcodeDelivery})
+            .populate('ZipcodeState')
+            .then(function(zipcodeDelivery){
+              if(zipcodeDelivery && zipcodeDelivery.ZipcodeState){
+                return zipcodeDelivery.ZipcodeState;
+              }
+              return DEFAULT_DELIVERY_FEE_CONFIG;
+            });
+        }
+        else{
+          return DEFAULT_DELIVERY_FEE_CONFIG;
+        }
+
+        return promiseToReturn;
+      })
+      .then(function(deliveryFeeConfig){
+
+        details = ( quotation.Details || [] ).map(function(detail){
+          detail.deliveryFeeConfig = {
+            deliveryPriceValue: deliveryFeeConfig.deliveryPriceValue,
+            deliveryPriceMode: deliveryFeeConfig.deliveryPriceMode
+          };
+          return detail;
+        });
         var packagesIds = getQuotationPackagesIds(details);
 
         if(packagesIds.length > 0){
@@ -196,45 +222,44 @@ function Calculator(){
     var totals = {
       subtotal :0,
       subtotal2:0,
+      deliveryFee: 0,
       total:0,
-      totalPg1: 0,
-      totalPg2: 0,
-      totalPg3: 0,
-      totalPg4: 0,
-      totalPg5: 0,
-      discountPg1: 0,
-      discountPg2: 0,
-      discountPg3: 0,
-      discountPg4: 0,
-      discountPg5: 0,
-
       discount:0,
       totalProducts: 0,
       paymentGroup: options.paymentGroup,
     };
 
+    //Init values on 0
+    totals = PAYMENT_GROUPS_KEYS.reduce(function(t, groupKey){
+      t['total' + groupKey] = 0;
+      t['discount' + groupKey] = 0;
+      t['deliveryFee' + groupKey] = 0;
+      return t;
+    }, totals);
+
     processedDetails.forEach(function(pd){
-      totals.totalPg1      += pd.totalPg1;
-      totals.totalPg2      += pd.totalPg2;
-      totals.totalPg3      += pd.totalPg3;
-      totals.totalPg4      += pd.totalPg4;
-      totals.totalPg5      += pd.totalPg5;
+  
+      totals = PAYMENT_GROUPS_KEYS.reduce(function(t, groupKey){
+        t['total' + groupKey] += (pd["total"+groupKey] + pd["deliveryFee"+groupKey]);
+        t['discount' + groupKey] += pd.subtotal - (pd["total"+groupKey]);
+        t['deliveryFee' + groupKey] += pd["deliveryFee"+groupKey];
+        return t;
+      }, totals);
 
-      totals.discountPg1      += (pd.subtotal - pd.totalPg1);
-      totals.discountPg2      += (pd.subtotal - pd.totalPg2);
-      totals.discountPg3      += (pd.subtotal - pd.totalPg3);
-      totals.discountPg4      += (pd.subtotal - pd.totalPg4);
-      totals.discountPg5      += (pd.subtotal - pd.totalPg5);
-
-      totals.total         += pd.total;
       totals.subtotal      += pd.subtotal;
       totals.subtotal2     += pd.subtotal2;
-      totals.discount      += (pd.subtotal - pd.total);
+      totals.discount      += pd.subtotal - pd.total;
+      totals.deliveryFee   += pd.deliveryFee;
+      totals.total         += pd.total + pd.deliveryFee;
       totals.totalProducts += pd.quantity;
     });    
 
-    totals.financingCostPercentage = calculateFinancingPercentage(totals.totalPg1, totals.total);
+    if(processedDetails && processedDetails.length > 0){
+      totals.deliveryPriceMode = processedDetails[0].deliveryPriceMode;
+      totals.deliveryPriceValue = processedDetails[0].deliveryPriceValue;
+    }
 
+    totals.financingCostPercentage = calculateFinancingPercentage(totals.totalPg1, totals.total);
     return totals;
   }
 
@@ -361,6 +386,7 @@ function Calculator(){
 
   //@params: detail Object from model Detail
   //Must contain a Product object populated
+  //Must contain deliveryPriceValue and deliveryPriceMode properties
   function getDetailTotals(detail, options){
     options = options || {};
     var paymentGroup = options.paymentGroup || 1;
@@ -382,17 +408,16 @@ function Calculator(){
         var unitPriceWithDiscount     = calculateAfterDiscount(unitPrice, discountPercent);
         var subtotal                  = quantity * unitPrice;
         var subtotal2                 = quantity * unitPriceWithDiscount;
-        var total                     = quantity * unitPriceWithDiscount;
+        var total                     = subtotal2;
         var totalPg1                  = total;
+        var deliveryFee               = Shipping.calculateDetailDeliveryFee(total,detail.deliveryFeeConfig, detail.quantity);
         var financingCostPercentage   = 0;
         var discountName              = mainPromo ? getPromotionOrPackageName(mainPromo) : null;
 
-        //var total                 = quantity * unitPriceWithDiscount;
         var discount                  = total - subtotal;
 
-        //TODO: Reactivate ewallet 
-        var ewallet                   = 0;
-
+        //TODO: Reactivate ewallet when its necesary 
+        var ewallet = 0;
 
         //Calculate financing
         if(mainPromo){
@@ -402,14 +427,6 @@ function Calculator(){
           totalPg1 = _unitPriceWithDiscount * quantity;
           financingCostPercentage = calculateFinancingPercentage(totalPg1, total);
         }
-
-        /*
-        var ewallet = getEwalletEntryByDetail({
-          Promotion: mainPromo,
-          paymentGroup: options.paymentGroup,
-          total: total
-        });
-        */
 
         var detailTotals = {
           discount                    : discount,
@@ -426,6 +443,9 @@ function Calculator(){
           quantity                    : quantity,
           subtotal                    : subtotal,
           subtotal2                   : subtotal2,
+          deliveryFee                 : deliveryFee,
+          deliveryPriceMode           : detail.deliveryFeeConfig.deliveryPriceMode,
+          deliveryPriceValue          : detail.deliveryFeeConfig.deliveryPriceValue,
           total                       : total,
           totalPg1                    : totalPg1,
           financingCostPercentage     : financingCostPercentage,
@@ -448,7 +468,8 @@ function Calculator(){
           detailTotals.clientDiscountReference = mainPromo.clientDiscountReference;
         }
 
-        var totalsGroups = calculateAllTotalsGroups(mainPromo, unitPrice, quantity);
+        //For pg1, pg2, pg3, pg4
+        var totalsGroups = calculateAllTotalsGroups(mainPromo, unitPrice, quantity, detail.deliveryFeeConfig);
         //sails.log.info('totalsGroups', totalsGroups);
         detailTotals = _.extend(detailTotals, totalsGroups);
 
@@ -456,7 +477,7 @@ function Calculator(){
       });
   }
 
-  function calculateAllTotalsGroups(mainPromo, unitPrice, quantity){
+  function calculateAllTotalsGroups(mainPromo, unitPrice, quantity, deliveryFeeConfig){
 
     var totalsGroups = _.reduce([1,2,3,4,5], function(acum,group){
       var _discountKey = getDiscountKey(group);
@@ -464,9 +485,11 @@ function Calculator(){
       var _unitPriceWithDiscount = calculateAfterDiscount(unitPrice, _discountPercent);
       var totalPg = _unitPriceWithDiscount * quantity;
       var subtotalPg = unitPrice * quantity;
-      acum['totalPg' + group] = totalPg;
-      acum['discountPg' + group] = totalPg - subtotalPg;
+
       acum['unitPriceWithDiscountPg' + group] = _unitPriceWithDiscount;
+      acum['deliveryFeePg' + group] = Shipping.calculateDetailDeliveryFee(totalPg, deliveryFeeConfig, quantity);
+      acum['discountPg' + group] = totalPg - subtotalPg;
+      acum['totalPg' + group] = totalPg;
       return acum;
     },{});
 

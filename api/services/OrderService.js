@@ -189,6 +189,9 @@ function createOrder(form, req){
         subtotal: quotation.subtotal,
         total: quotation.total,
         totalProducts: quotation.totalProducts,
+        deliveryFee: quotation.deliveryFee,
+        deliveryPriceValue: quotation.deliveryPriceValue,
+        deliveryPriceMode: quotation.deliveryPriceMode
       };
 
       var minPaidPercentage = 100;
@@ -334,7 +337,8 @@ function relateOrderToSap(order, orderDetails,req){
           payments:         order.Payments,
           exchangeRate:     site.exchangeRate,
           currentStore:     req.activeStore,
-          quotationDetails: orderDetails
+          quotationDetails: orderDetails,
+          deliveryFee:      order.deliveryFee
         };
 
         return SapService.createSaleOrder(sapOrderParams);

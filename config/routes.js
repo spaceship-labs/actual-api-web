@@ -78,7 +78,7 @@ module.exports.routes = {
     action: 'search'
   },
 
-  'GET /product/findbyid/:id':{
+  '/product/findbyid/:id':{
     controller: 'product',
     action: 'findById'
   },

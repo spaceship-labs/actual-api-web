@@ -1,0 +1,116 @@
+[{
+    "id" : "57bf585889c75aed0825c3ef",
+    "name" : "Actual Studio Malecon",
+    "group" : "studio",
+    "code" : "actual_studio_malecon",
+    "Warehouse" : "576acfee5280c21ef87ea5b6",
+    "logo" : "http://actual-api.herokuapp.com/logos/studio.png",
+    "GroupCode" : 1
+}
+,{
+    "id" : "57bf589289c75aed0825c3f0",
+    "name" : "Actual Studio Playa del Carmen",
+    "group" : "studio",
+    "code" : "actual_studio_playa_del_carmen",
+    "Warehouse" : "576acfee5280c21ef87ea5b7",
+    "logo" : "http://actual-api.herokuapp.com/logos/studio.png",
+    "GroupCode" : 2
+}
+,{
+    "id" : "57bf58d589c75aed0825c3f1",
+    "name" : "Actual Studio Cumbres",
+    "group" : "studio",
+    "code" : "actual_studio_cumbres",
+    "Warehouse" : "576acfee5280c21ef87ea5b8",
+    "logo" : "http://actual-api.herokuapp.com/logos/studio.png",
+    "GroupCode" : 4
+}
+,{
+    "id" : "57bf590089c75aed0825c3f2",
+    "name" : "Actual Home Xcaret",
+    "group" : "home",
+    "code" : "actual_home_xcaret",
+    "Warehouse" : "576acfee5280c21ef87ea5c0",
+    "logo" : "http://actual-api.herokuapp.com/logos/home.png",
+    "GroupCode" : 8
+}
+
+,{
+    "id" : "57bf593189c75aed0825c3f3",
+    "name" : "Actual Home Merida",
+    "group" : "home",
+    "code" : "actual_home_merida",
+    "Warehouse" : "576acfee5280c21ef87ea5c1",
+    "logo" : "http://actual-api.herokuapp.com/logos/home.png",
+    "GroupCode" : 9
+}
+
+,{
+    "id" : "57bf595c89c75aed0825c3f4",
+    "name" : "Actual Studio Merida",
+    "group" : "studio",
+    "code" : "actual_studio_merida",
+    "Warehouse" : "576acfee5280c21ef87ea5bc",
+    "logo" : "http://actual-api.herokuapp.com/logos/studio.png",
+    "GroupCode" : 3
+}
+
+,{
+    "id" : "57bf598989c75aed0825c3f5",
+    "name" : "Proyectos",
+    "group" : "proyectos",
+    "code" : "actual_proyect",
+    "Warehouse" : "576acfee5280c21ef87ea5c0",
+    "logo" : "http://actual-api.herokuapp.com/logos/group.png",
+    "GroupCode" : 6
+}
+
+,{
+    "id" : "58ab5fa9d21cb61c6ec4473c",
+    "name" : "actualkids.com",
+    "group" : "home",
+    "code" : "actual_kids",
+    "url" : "https://actualkids.com",
+    "url_sandbox" : "https://sandbox.actualkids.com",
+    "Warehouse" : "576acfee5280c21ef87ea5b5",
+    "logo" : "https://sandboxapi.actualstudio.com/logos/kids.png",
+    "GroupCode" : 11,
+    "seriesNum" : 336
+}
+
+,{
+    "id" : "589b5fdd24b5055c104fd5b8",
+    "name" : "actualstudio.com",
+    "group" : "studio",
+    "code" : "actual_studio",
+    "url" : "https://actualstudio.com",
+    "url_sandbox" : "https://sandbox.actualstudio.com",
+    "Warehouse" : "576acfee5280c21ef87ea5b5",
+    "logo" : "https://api.actualstudio.com/logos/studio.png",
+    "GroupCode" : 11,
+    "seriesNum" : 332
+}
+
+,{
+    "id" : "59555b80be1fd28120eb5af1",
+    "name" : "Actual Home Puerto Cancun",
+    "group" : "home",
+    "code" : "actual_puerto_cancun",
+    "Warehouse" : "59972da6b7dccab7b8cf753a",
+    "logo" : "https://sandboxapi.actualstudio.com/logos/home.png",
+    "GroupCode" : 10
+}
+
+,{
+    "id" : "5876b417d21cb61c6e57db63",
+    "name" : "actualhome.com",
+    "group" : "home",
+    "code" : "actual_home",
+    "url" : "https://actualhome.com",
+    "url_sandbox" : "https://sandbox.actualhome.com",
+    "Warehouse" : "576acfee5280c21ef87ea5b5",
+    "logo" : "https://api.actualstudio.com/logos/home.png",
+    "GroupCode" : 11,
+    "seriesNum" : 335
+}
+]

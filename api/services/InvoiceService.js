@@ -5,6 +5,7 @@ var Promise = require('bluebird');
 var ALEGRAUSER = process.env.ALEGRAUSER;
 var ALEGRATOKEN = process.env.ALEGRATOKEN;
 var token = new Buffer(ALEGRAUSER + ":" + ALEGRATOKEN).toString('base64');
+var promiseDelay = require('promise-delay');
 var alegraIVAID = 2;
 var alegraACCOUNTID = 1;
 var RFCPUBLIC = 'XAXX010101000';
@@ -60,7 +61,7 @@ function createOrderInvoice(orderId, req) {
           order,
           payments,
           prepareClient(order, client, address),
-          prepareItems(details)
+          prepareItems(details, order)
         ];
       })
       .spread(function(order, payments, client, items) {
@@ -299,7 +300,7 @@ function prepareClient(order, client, address) {
   if (!generic) {
     data = {
       name: address.companyName,
-      identification: client.LicTradNum,
+      identification: (client.LicTradNum || "").toUpperCase(),
       email: address.U_Correos,
       address: {
         street: address.Street,
@@ -316,7 +317,7 @@ function prepareClient(order, client, address) {
   } else {
     data = {
       name: order.CardName,
-      identification: RFCPUBLIC,
+      identification: (RFCPUBLIC || "").toUpperCase(),
       email: order.E_Mail,
       address: {
         country: 'México',
@@ -349,7 +350,7 @@ function createClient(client) {
   return request(options);
 }
 
-function prepareItems(details) {
+function prepareItems(details, order) {
   var items = details.map(function(detail) {
     var discount = detail.discountPercent ? detail.discountPercent : 0;
     discount = Math.abs(discount);
@@ -367,7 +368,44 @@ function prepareItems(details) {
       }      
     };
   });
-  return Promise.all(createItems(items));
+
+  var deliveryServiceItem = {
+    name: 'Gastos de envío',
+    price: order.deliveryFee,
+    discount: 0,
+    tax: [ {id: alegraIVAID} ],
+    quantity: 1,
+    inventory: {
+      unit:'service',
+      unitCost: order.deliveryFee,
+      initialQuantity: 1
+    }
+  };
+
+  items.push(deliveryServiceItem);
+
+  return Promise.mapSeries(items, function(item){
+    return createItemWithDelay(item);
+  });
+
+  //Uncomment to use instant requests instead of delaying the requests
+  //return Promise.all(createItems(items));
+}
+
+function createItemWithDelay(item){
+  var options = {
+    method: 'POST',
+    uri: 'https://app.alegra.com/api/v1/items',
+    body: item,
+    headers: {
+      Authorization: 'Basic ' + token,
+    },
+    json: true,
+  };
+  return promiseDelay(600,request(options)).then(function(ic) {
+    //console.log('item delayed ' + item.name, new Date());
+    return _.assign({}, item, { id: ic.id});
+  });  
 }
 
 function createItems(items) {

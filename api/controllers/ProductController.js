@@ -35,6 +35,7 @@ module.exports = {
     var form = req.params.all();
     var id = form.id;
     var currentDate = new Date();
+    var populateFields = form.populateFields;
     var queryPromo = {
       startDate: {'<=': currentDate},
       endDate: {'>=': currentDate},
@@ -48,14 +49,21 @@ module.exports = {
     //query[displayProperty] = true;
     //query = Search.applySocietiesQuery(query, societyCodes);
 
-    Product.findOne(query)
+    var findPromise = Product.findOne(query)
       .populate('files')
       .populate('Categories')
       .populate('FilterValues')
       .populate('Sizes')
       .populate('Groups')
-      .populate('Promotions', queryPromo)
-      .then(function(product){
+      .populate('Promotions', queryPromo);
+
+    if(populateFields && populateFields.length > 0){
+      populateFields.forEach(function(populateF){
+        findPromise = findPromise.populate(populateF);
+      });
+    }
+
+    findPromise.then(function(product){
         res.ok({data:product});
       })
       .catch(function(err){

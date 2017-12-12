@@ -177,7 +177,7 @@ module.exports = {
         query = _.extend(query,{
           id: productsIds,
           Active: 'Y',
-          U_FAMILIA: 'SI',
+          //U_FAMILIA: 'SI',
           excludeWeb: {'!':true},
           Service: {'!':'Y'}
         });

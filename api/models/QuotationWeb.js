@@ -2,8 +2,8 @@ var moment = require('moment');
 
 //APP COLLECTION
 module.exports = {
-  migrate: 'alter',
   schema:true,
+  migrate: 'alter',
   tableName: 'QuotationWeb',
   attributes: {
     Client:{
@@ -50,6 +50,21 @@ module.exports = {
     immediateDelivery:{type:'boolean'},
     clientName: {type:'string'},
     folio:{type:'string'},
+
+    deliveryPriceValue: 'float',
+    deliveryPriceMode: {
+      type: 'string',
+      enum : ['percentage', 'amount']
+    },
+
+    deliveryFee: {type: 'float'},
+    deliveryFeePg1: 'float',
+    deliveryFeePg2: 'float',
+    deliveryFeePg3: 'float',
+    deliveryFeePg4: 'float',
+    deliveryFeePg5: 'float',
+
+
     total:{type:'float'},
     totalPg1: {type:'float'},
     totalPg2: {type:'float'},
