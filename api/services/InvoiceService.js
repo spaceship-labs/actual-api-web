@@ -357,18 +357,19 @@ function createClient(client) {
 function prepareItems(details) {
   var items = details.map(function(detail) {
     var discount = detail.discountPercent ? detail.discountPercent : 0;
+    var product = detail.Product;
     discount = Math.abs(discount);
     return {
       id: detail.id,
-      name: detail.Product.ItemName,
+      name: product.ItemName,
       price: detail.unitPrice / 1.16,
       discount: parseFloat((discount).toFixed(4)),
       tax: [ {id: alegraIVAID} ],
-      productKey: detail.Product.U_ClaveProdServ,      
+      productKey: product.U_ClaveProdServ,      
       quantity: detail.quantity,
       inventory:{
         //unit:'piece',
-        getUnitTypeByProduct(detail.Product),
+        unit: getUnitTypeByProduct(product),
         unitCost: detail.unitPrice,
         initialQuantity: detail.quantity
       }      
