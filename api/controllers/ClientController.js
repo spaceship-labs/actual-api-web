@@ -419,7 +419,7 @@ module.exports = {
     };
 
     var promises = [
-      Client.findOne({CardCode:CardCode, select:['LicTradNum']}),
+      Client.findOne({CardCode:CardCode, select:['LicTradNum', 'cfdiUse']}),
       FiscalAddress.findOne(query)
     ];      
     
@@ -428,6 +428,7 @@ module.exports = {
         var client = results[0];
         var fiscalAddress = results[1];
         fiscalAddress.LicTradNum = client.LicTradNum;
+        fiscalAddress.cfdiUse = client.cfdiUse;
 
         res.json(fiscalAddress);
       })
@@ -467,7 +468,7 @@ module.exports = {
 
         return [
           FiscalAddress.update({CardCode:CardCode}, fiscalAddress),
-          Client.update({CardCode: CardCode}, {LicTradNum: form.LicTradNum})
+          Client.update({CardCode: CardCode}, {LicTradNum: form.LicTradNum, cfdiUse: form.cfdiUse})
         ];
       })
       .spread(function(fiscalAddressUpdated){
