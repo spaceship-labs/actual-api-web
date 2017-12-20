@@ -116,14 +116,11 @@ module.exports = {
       if(!areValid){
         return Promise.reject(new Error('El código postal no es valido para tu dirección de entrega'));
       }
-
-      return [
-        Client.findOne({E_Mail:email}),
-        UserService.checkIfUserEmailIsTaken(email)
-      ];
+      
+      return UserService.checkIfUserEmailIsTaken(email);
     })
-    .spread(function(usedEmail, isUserMailTaken){
-        if(usedEmail || isUserMailTaken){
+    .then(function(isUserMailTaken){
+        if(isUserMailTaken){
           return Promise.reject(new Error('Email previamente utilizado'));
         }
         return SapService.createClient(params);
