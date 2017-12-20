@@ -111,19 +111,16 @@ module.exports = {
     delete params.client.password;
 
     ClientService.validateContactsZipcode(params.clientContacts)
-    .then(function(areValid){
+      .then(function(areValid){
 
-      if(!areValid){
-        return Promise.reject(new Error('El código postal no es valido para tu dirección de entrega'));
-      }
+        if(!areValid){
+          return Promise.reject(new Error('El código postal no es valido para tu dirección de entrega'));
+        }
 
-      return [
-        Client.findOne({E_Mail:email}),
-        UserService.checkIfUserEmailIsTaken(email)
-      ];
-    })
-    .spread(function(usedEmail, isUserMailTaken){
-        if(usedEmail || isUserMailTaken){
+        return UserService.checkIfUserEmailIsTaken(email);
+      })
+      .then(function(isUserMailTaken){
+        if(isUserMailTaken){
           return Promise.reject(new Error('Email previamente utilizado'));
         }
         return SapService.createClient(params);
