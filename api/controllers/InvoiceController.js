@@ -98,6 +98,7 @@ module.exports = {
       {label: 'Fecha de compra', value: moment(form.orderDate || new Date()).format('DD/MM/YYYY') },
       {label: 'Total de la compra', value: form.orderAmount},
       {label: 'RFC', value: form.LicTradNum},
+      {label: 'Uso CFDI', value: form.cfdiUse},
       {label: 'Razón social', value: form.companyName},
       {label: 'Nombre de la empresa', value: form.companyPublicName},
       {label: 'Télefono', value: form.Phone1},
