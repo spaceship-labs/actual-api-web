@@ -658,7 +658,19 @@ function orderEmail(orderId) {
 }
 
 function sendOrder(client, order, products, payments, ewallet, store) {
-  var address = 'Número ' + order.U_Noexterior + ' Entre calle ' + order.U_Entrecalle + ' y calle ' + order.U_Ycalle + ' colonia ' + order.U_Colonia + ', ' + order.U_Mpio + ', ' + order.U_Estado + ', ' + order.U_CP;
+    var address = 'Número interior: ' + order.U_Nointerior + '. \n';
+    address += 'Número Exterior: ' + order.U_Noexterior + '. \n';
+    address += 'Calle: ' + order.address + '. \n';
+    address += 'Referencias: ' + order.U_Notes1 + '. \n';
+    address += 'Entre calle: ' + order.U_Entrecalle + ' y calle ' + order.U_Ycalle + '. \n';
+    address += 'Colonia: ' + order.U_Colonia + '. \n';
+    address += 'Municipio: ' + order.U_Mpio + '. \n';
+    address += 'Estado: ' + order.U_Estado + '. \n';
+    address += 'C.P: ' + order.U_CP + '. \n';
+    address += 'Télefono de contacto: ' + order.Tel1 + '. \n';
+    address += 'Celular de contacto: ' + order.Cellolar + '. \n';
+    address += 'Email de contacto: ' + order.E_Mail + '. \n';
+
   var emailBody = orderTemplate({
     client: {
       name: client.CardName,
