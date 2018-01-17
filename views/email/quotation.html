@@ -59,12 +59,12 @@
                                                 <th style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left">
 
                                                    <% if(isSpeiOrder){ %>
-                                                   
+
                                                       <p style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:10px;padding:0;text-align:left">Estimado <strong style="color:#6b6b6b;font-size:11px"><%=client.name%>,</strong><br style="color:#6b6b6b;font-size:11px">Su ORDEN DE COMPRA está CONFIRMADA y EN PROCESO, su estatus de pago es PENIDIENTE DE PAGO, le pedimos no volver a generar la misma cotización para evitar una duplicidad.</p>
 
                                                    <% }
                                                       else if(quotation.rateLimitReported){ %>
-                                                   
+
                                                       <p style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:10px;padding:0;text-align:left">Estimado <strong style="color:#6b6b6b;font-size:11px"><%=client.name%>,</strong>
                                                       <br style="color:#6b6b6b;font-size:11px">
                                                       Muchas gracias por haber elegido <%= company.name %>
@@ -72,19 +72,19 @@
                                                       Su ORDEN DE COMPRA está EN PROCESO, por prevención y garantía le pedimos no volver a generar la misma cotización para evitar una duplicidad.
                                                       <br style="color:#6b6b6b;font-size:11px">
                                                       En breve, uno de nuestros asesores de interiores se pondrá en contacto con usted vía telefónica con la finalidad de darle seguimiento y asistencia.
-                                                      </p>                                                   
+                                                      </p>
                                                    <% }
                                                       else if(isCardProcessingError){ %>
-                                                   
+
                                                       <p style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:10px;padding:0;text-align:left">Estimado <strong style="color:#6b6b6b;font-size:11px"><%=client.name%>,</strong>
                                                       <br style="color:#6b6b6b;font-size:11px">
                                                       Muchas gracias por haber elegido <%= company.name %>
                                                       <br style="color:#6b6b6b;font-size:11px">
                                                       La <strong>tarjeta de crédito/débito</strong> fue <strong>declinada</strong> por el banco. Su cotización está <strong>sujeta a disponibilidad</strong> y su <strong>orden de venta</strong> está en estatus <strong>pendiente de pago</strong>, le pedimos no volver a generar la misma cotización para evitar una duplicidad.
-                                                      </p>                                                            
+                                                      </p>
                                                       <p style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:10px;padding:0;text-align:left">
                                                          En breve, uno de nuestros asesores de interiores se pondrá en contacto con usted vía telefónica con la finalidad de darle seguimiento y asistencia.
-                                                      </p>                                                   
+                                                      </p>
                                                    <% }
                                                       else{ %>
 
@@ -230,7 +230,7 @@
                                                 <th style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left">
                                                    <p class="text-right" style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:4px;padding:0;text-align:right">Vigencia: <%=product.promotionValidity%></p>
                                                 </th>
-                                             </tr>  
+                                             </tr>
                                           </table>
                                        </th>
                                     </tr>
@@ -287,14 +287,14 @@
                                                       </p>
                                                       <p style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:10px;padding:0;text-align:left">
                                                          Su orden de compra estará EN PROCESO, Usted recibirá un correo electrónico de su cotización detallada, le sugerimos no volver a generar la misma cotización para evitar una duplicidad.
-                                                      </p>                                                   
+                                                      </p>
                                                    </th>
                                                 </tr>
                                              </table>
                                           </th>
                                        </tr>
                                     </tbody>
-                                 </table>  
+                                 </table>
                                  <table class="row" style="border-collapse:collapse;border-spacing:0;color:#6b6b6b;display:table;font-size:11px;padding:0;position:relative;text-align:left;vertical-align:top;width:100%">
                                     <tbody style="color:#6b6b6b;font-size:11px">
                                        <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
@@ -324,7 +324,7 @@
                                           </th>
                                        </tr>
                                     </tbody>
-                                 </table>    
+                                 </table>
 
                               <% }else{ %>
 
@@ -363,9 +363,9 @@
                                  </table>
 
                               <% } %>
-      
+
                               <hr style="border-style:solid;border-width:1px;color:#6b6b6b;font-size:11px;max-width:550px">
-                           
+
 
                               <!--
                               <table class="row" style="border-collapse:collapse;border-spacing:0;color:#6b6b6b;display:table;font-size:11px;padding:0;position:relative;text-align:left;vertical-align:top;width:100%">
@@ -426,7 +426,7 @@
 
                                                    <p class="margin-bottom-0" style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:2px;padding:0;text-align:left"><strong style="color:#6b6b6b;font-size:11px">Télefono: </strong>01 (998) 884 1594</p>
 
-                                                   <p class="margin-bottom-0" style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:2px;padding:0;text-align:left"><strong style="color:#6b6b6b;font-size:11px">Email: </strong>dtorres@actualg.com</p>                                                   
+                                                   <p class="margin-bottom-0" style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:2px;padding:0;text-align:left"><strong style="color:#6b6b6b;font-size:11px">Email: </strong>dtorres@actualg.com</p>
 
                                                 </th>
                                              </tr>
@@ -449,7 +449,7 @@
                                                                      </th>
                                                                      <th style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left">
                                                                         <p class="margin-bottom-0" style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:2px;padding:0;text-align:left"><strong style="color:#6b6b6b;font-size:11px">Horarios</strong></p>
-                                                                     </th>                                                                     
+                                                                     </th>
                                                                   </tr>
                                                                   <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
                                                                      <td style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left">
@@ -457,24 +457,24 @@
                                                                      </td>
                                                                      <td style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left">
                                                                         <p class="margin-bottom-0" style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:2px;padding:0;text-align:left">10: 00am - 14:00pm</p>
-                                                                     </td>                                                                     
-                                                                  </tr>    
+                                                                     </td>
+                                                                  </tr>
                                                                   <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
                                                                      <td></td>
                                                                      <td style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left">
-                                                                        <p class="margin-bottom-0" style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:2px;padding:0;text-align:left">16: 00pm - 20:00pm</p>
-                                                                     </td>                                                                      
-                                                                  </tr>                                      
+                                                                        <p class="margin-bottom-0" style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:2px;padding:0;text-align:left">15: 00pm - 19:00pm</p>
+                                                                     </td>
+                                                                  </tr>
                                                                   <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
                                                                      <td style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left">
                                                                         <p class="margin-bottom-0" style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:2px;padding:0;text-align:left">Sab - Dom</p>
                                                                      </td>
                                                                      <td style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left">
-                                                                        <p class="margin-bottom-0" style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:2px;padding:0;text-align:left">10: 00am - 14:00pm</p>
-                                                                     </td>                                                                     
-                                                                  </tr>                                                                                            
+                                                                        <p class="margin-bottom-0" style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:2px;padding:0;text-align:left">10: 00am - 13:00pm</p>
+                                                                     </td>
+                                                                  </tr>
                                                                </table>
-                                                            </th> 
+                                                            </th>
                                                          </tr>
                                                       </tbody>
                                                    </table>
