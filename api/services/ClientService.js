@@ -1,32 +1,36 @@
-var _ 			= require('underscore');
-var moment  = require('moment');
-var Promise = require('bluebird');
-var ADDRESS_TYPE 		= 'B';
-var CLIENT_DATE_FORMAT = 'MM/DD/YYYY';
-var CARDCODE_TYPE = 'CardCode';
-var PERSON_TYPE = 'Person';
-var ERROR_TYPE = 'Error';
+const _ = require('underscore');
+const moment  = require('moment');
+const Promise = require('bluebird');
+const ADDRESS_TYPE 		= 'B';
+const ADDRESS_TYPE_B 		= 'B';
+const ADDRESS_TYPE_S 		= 'S';
+const CLIENT_DATE_FORMAT = 'MM/DD/YYYY';
+const CARDCODE_TYPE = 'CardCode';
+const PERSON_TYPE = 'Person';
+const ERROR_TYPE = 'Error';
 
 module.exports = {
-	ADDRESS_TYPE: ADDRESS_TYPE,
-	areContactsRepeated: areContactsRepeated,
-	filterContacts: filterContacts,
-	getContactIndex: getContactIndex,
-	isValidContactCode: isValidContactCode,
-	isValidFiscalAddress: isValidFiscalAddress,
-	isValidRFC: isValidRFC,
-	isValidSapClientCreation: isValidSapClientCreation,
-	isValidSapClientUpdate: isValidSapClientUpdate,
-	isValidSapContactCreation: isValidSapContactCreation,
-	isValidSapContactUpdate: isValidSapContactUpdate,		
-	isValidSapFiscalClientUpdate: isValidSapFiscalClientUpdate,
-	mapClientFields: mapClientFields,
-	mapContactFields: mapContactFields,
-	mapFiscalFields: mapFiscalFields,
-	populateClientRelations: populateClientRelations,
-	isValidCardCode: isValidCardCode,
-	validateContactsZipcode: validateContactsZipcode,
-	clientsIdSearch: clientsIdSearch
+	ADDRESS_TYPE,
+	ADDRESS_TYPE_B,
+	ADDRESS_TYPE_S,
+	areContactsRepeated,
+	filterContacts,
+	getContactIndex,
+	isValidContactCode,
+	isValidFiscalAddress,
+	isValidRFC,
+	isValidSapClientCreation,
+	isValidSapClientUpdate,
+	isValidSapContactCreation,
+	isValidSapContactUpdate,
+	isValidSapFiscalClientUpdate,
+	mapClientFields,
+	mapContactFields,
+	mapFiscalFields,
+	populateClientRelations,
+	isValidCardCode,
+	validateContactsZipcode,
+	clientsIdSearch,
 };
 
 function clientsIdSearch(term, searchFields){
