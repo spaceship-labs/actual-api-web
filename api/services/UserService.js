@@ -25,7 +25,7 @@ function getCurrentUserClientId(req){
 	return currentUserClientId;
 }
 
-function createUserFromClient(client, req){
+function createUserFromClient(client, password, req){
 	var activeStoreId = req.activeStore.id;
 
 	var userToCreate = {
@@ -34,7 +34,7 @@ function createUserFromClient(client, req){
 		firstName: client.FirstName,
 		lastName: client.LastName,
 		role: 'client',
-		password: client.password,
+		password: password,
 		CardCode: client.CardCode,
 		Client: client.id
 	};

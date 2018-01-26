@@ -90,21 +90,23 @@ module.exports = {
     }
 
     const sapClientParams = _.clone(form);
-    const params = {
+    let sapCreateParams = {
       client: sapClientParams,
       fiscalAddress: sapFiscalAddressParams || {},
       clientContacts: sapContactsParams || [],
       activeStore: req.activeStore
     };
-    //delete params.client.password;
+    const password = _.clone(sapCreateParams.client.password);
+    delete sapCreateParams.client.password;
+
     try{
-      const areValidZipcodes = await ClientService.validateContactsZipcode(params.clientContacts);
+      const areValidZipcodes = await ClientService.validateContactsZipcode(sapCreateParams.clientContacts);
       if(!areValidZipcodes){
         return res.negotiate(new Error('El código postal no es valido para tu dirección de entrega'));
       }
 
       const isUserEmailTaken = await UserService.checkIfUserEmailIsTaken(email);
-      const sapResult = await SapService.createClient(params);
+      const sapResult = await SapService.createClient(sapCreateParams);
       sails.log.info('SAP result createClient', result);
       const sapData = JSON.parse(sapResult.value);
       const isValidSapResponse = ClientService.isValidSapClientCreation(sapData, contacts, fiscalAddress);
@@ -133,7 +135,7 @@ module.exports = {
       sails.log.info('client app', clientCreateParams);
       
       const createdClient = await Client.create(clientCreateParams);
-      const createdUser = await UserService.createUserFromClient(form, req);
+      const createdUser = await UserService.createUserFromClient(createdClient, password, req);
       const updatedClients = await Client.update({id: createdClient.id},{UserWeb: createdUser.id});
       const updatedClient = updatedClients[0];
 
@@ -184,7 +186,6 @@ module.exports = {
     catch(e){
       return res.negotiate(e);
     }
-
   },
 
   update: function(req, res){
