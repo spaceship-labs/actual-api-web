@@ -1,6 +1,19 @@
 module.exports = {
-  updateFiscalAddress
+  updateFiscalAddress,
+  isValidSapFiscalClientUpdate
 };
+
+function isValidSapFiscalClientUpdate(sapData){
+	var result = {error:true};
+	if(sapData.type === ClientService.ERROR_TYPE){
+		result = {error: sapData.result || true};
+	}
+	
+	if(sapData.type === ClientService.CARDCODE_TYPE && ClientService.isValidCardCode(sapData.result)  ){
+		result = {error: false};
+	}	
+	return result;
+}
 
 async function updateFiscalAddress(params, req) {
   var CardCode = req.user.CardCode;

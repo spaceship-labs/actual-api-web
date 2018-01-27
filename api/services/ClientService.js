@@ -15,6 +15,8 @@ module.exports = {
 	ADDRESS_TYPE,
 	ADDRESS_TYPE_B,
 	ADDRESS_TYPE_S,
+	ERROR_TYPE,
+	CARDCODE_TYPE,
 	areContactsRepeated,
 	createClient,
 	updateClient,
@@ -23,11 +25,10 @@ module.exports = {
 	isValidContactCode,
 	isValidFiscalAddress,
 	isValidRFC,
-	isValidSapClientCreation,
+	validateSapClientCreation,
 	isValidSapClientUpdate,
 	isValidSapContactCreation,
 	isValidSapContactUpdate,
-	isValidSapFiscalClientUpdate,
 	mapClientFields,
 	mapContactFields,
 	mapFiscalFields,
@@ -116,19 +117,16 @@ function isValidContactCode(contactCode){
 	return !isNaN(contactCode);
 }
 
-function isValidSapClientCreation(sapData, sapContactsParams, sapFiscalAddressParams){
-	var result = {error:true};
-	if(sapData.type === ERROR_TYPE){
-		result = {error: sapData.result || true};
-	}
-	
+function validateSapClientCreation(sapData, sapContactsParams, sapFiscalAddressParams){
 	if(sapData.type === CARDCODE_TYPE && isValidCardCode(sapData.result) && _.isArray(sapData.pers) ){
 		if(sapContactsParams.length === sapData.pers.length){
-			result = {error: false};
+			return true;
 		}
 	}
-	
-	return result;
+	if(sapData.type === ERROR_TYPE){
+		throw new Error(sapData.result);
+	}	
+	throw new Error('Error al crear cliente en SAP');
 }
 
 function isValidSapClientUpdate(sapData){
@@ -282,21 +280,16 @@ async function createClient(params, req){
 		const sapResult = await SapService.createClient(sapCreateParams);
 		sails.log.info('SAP result createClient', sapResult);
 		const sapData = JSON.parse(sapResult.value);
-		const isValidSapResponse = isValidSapClientCreation(
+		if(!sapData){
+			throw new Error('Error al crear cliente en SAP');	
+		}
+		
+		validateSapClientCreation(
 			sapData, 
 			sapContactsParams, 
 			sapFiscalAddressParams
 		);
 	
-		if(!sapData || isValidSapResponse.error) {
-			const defualtErrMsg = 'Error al crear cliente en SAP';
-			const err = isValidSapResponse.error || defualtErrMsg;
-			if(err === true){
-				err = defualtErrMsg;
-			}
-			throw new Error(err);      
-		}
-
 		const clientCreateParams = Object.assign(sapClientParams,{
 			CardCode: sapData.result,
 			BirthDate: moment(sapClientParams.BirthDate).toDate()
