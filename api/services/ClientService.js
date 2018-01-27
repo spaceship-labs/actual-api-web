@@ -26,7 +26,7 @@ module.exports = {
 	isValidFiscalAddress,
 	isValidRFC,
 	validateSapClientCreation,
-	isValidSapClientUpdate,
+	validateSapClientUpdate,
 	isValidSapContactCreation,
 	isValidSapContactUpdate,
 	mapClientFields,
@@ -129,17 +129,14 @@ function validateSapClientCreation(sapData, sapContactsParams, sapFiscalAddressP
 	throw new Error('Error al crear cliente en SAP');
 }
 
-function isValidSapClientUpdate(sapData){
-	var result = {error:true};
-	if(sapData.type === ERROR_TYPE){
-		result = {error: sapData.result || true};
-	}
-	
+function validateSapClientUpdate(sapData){
 	if(sapData.type === CARDCODE_TYPE && isValidCardCode(sapData.result) ){
-		result = {error: false};
+		return true;
 	}
-	
-	return result;
+	if(sapData.type === ERROR_TYPE){
+		throw new Error(sapData.result);
+	}	
+	throw new Error('Error al actualizar datos personales en SAP');
 }
 
 function isValidSapFiscalClientUpdate(sapData){
@@ -381,17 +378,8 @@ async function updateClient(params, req){
 		const sapResult = await SapService.updateClient(CardCode, params);
 		sails.log.info('update client resultSap', sapResult);
 		var sapData = JSON.parse(sapResult.value);
-		var isValidSapResponse = isValidSapClientUpdate(sapData);
 
-		if( !sapData || isValidSapResponse.error  ) {
-			const defualtErrMsg = 'Error al actualizar datos personales en SAP';
-			var err = isValidSapResponse.error || defualtErrMsg;
-			if(err === true){
-				err = defualtErrMsg;
-			}
-			sails.log.info('err', err);
-			throw new Error(err);
-		}
+		validateSapClientUpdate(sapData);
 
 		const updatedClients = Client.update({CardCode: CardCode}, params);
 		const updatedClient = updated[0];
