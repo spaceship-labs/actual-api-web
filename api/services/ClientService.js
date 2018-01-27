@@ -8,12 +8,16 @@ const CLIENT_DATE_FORMAT = 'MM/DD/YYYY';
 const CARDCODE_TYPE = 'CardCode';
 const PERSON_TYPE = 'Person';
 const ERROR_TYPE = 'Error';
+const ACTUAL_EMAIL_DOMAIN = /@actualgroup.com$/;
+
 
 module.exports = {
 	ADDRESS_TYPE,
 	ADDRESS_TYPE_B,
 	ADDRESS_TYPE_S,
 	areContactsRepeated,
+	createClient,
+	updateClient,
 	filterContacts,
 	getContactIndex,
 	isValidContactCode,
@@ -27,7 +31,6 @@ module.exports = {
 	mapClientFields,
 	mapContactFields,
 	mapFiscalFields,
-	populateClientRelations,
 	isValidCardCode,
 	validateContactsZipcode,
 	clientsIdSearch,
@@ -218,7 +221,6 @@ function isValidContact(contact){
 	return true;
 }
 
-
 function mapContactFields(fields){
   fields.E_MailL = fields.E_Mail;
   fields.Name = fields.FirstName;
@@ -228,24 +230,187 @@ function mapContactFields(fields){
   return fields;
 }
 
-function populateClientRelations(client){
-	var fiscalQuery = {
-		CardCode: client.CardCode, 
-		AdresType: ADDRESS_TYPE
-	};
+async function createClient(params, req){
+	var sapFiscalAddressParams;
+	var sapContactsParams;
+	const email = params.E_Mail;
+	try{
+    if(!email){	
+			throw new Error('Email requerido');
+		}
+    if(email && email.match(ACTUAL_EMAIL_DOMAIN)){
+			throw new Error('Email no valido');
+		}
+    if(params.LicTradNum && !isValidRFC(params.LicTradNum)){
+			throw new Error('RFC no valido');
+    }
 
-	return Promise.join(
-		ClientContact.find({CardCode: client.CardCode}),
-		FiscalAddress.findOne(fiscalQuery)
-	)
-	.then(function(results){
-		var contacts = results[0];
-		var fiscalAddress = results[1];
+    const createParams = mapClientFields(params);
+    const filteredContacts = filterContacts(createParams.contacts)
+    sapContactsParams = filteredContacts.map(mapContactFields);
+    
+    if(sapContactsParams.length > 0 && areContactsRepeated(sapContactsParams)){
+			throw new Error('Nombres de contactos repetidos');
+    }
 
-		client = client.toObject();
-		client.Contacts = contacts;
-		client.FiscalAddress = fiscalAddress;
-		return client;
-	});
+    if(params.fiscalAddress && isValidFiscalAddress(params.fiscalAddress)){
+      const fiscalAddressAux  = _.clone(params.fiscalAddress);
+      sapFiscalAddressParams  = mapFiscalFields(fiscalAddressAux);
+    }
+
+    const sapClientParams = _.clone(params);
+    var sapCreateParams = {
+      client: sapClientParams,
+      fiscalAddress: sapFiscalAddressParams || {},
+      clientContacts: sapContactsParams,
+      activeStore: req.activeStore
+    };
+
+    const password = _.clone(sapCreateParams.client.password);
+    delete sapCreateParams.client.password;
+
+		const areValidZipcodes = await validateContactsZipcode(sapCreateParams.clientContacts);
+		if(!areValidZipcodes){
+			throw new Error('El código postal no es valido para tu dirección de entrega');
+		}
+
+		const isUserEmailTaken = await UserService.checkIfUserEmailIsTaken(email);
+		if(isUserEmailTaken){
+			throw new Error('Email previamente utilizado');
+		}      
+		
+		const sapResult = await SapService.createClient(sapCreateParams);
+		sails.log.info('SAP result createClient', sapResult);
+		const sapData = JSON.parse(sapResult.value);
+		const isValidSapResponse = isValidSapClientCreation(
+			sapData, 
+			sapContactsParams, 
+			sapFiscalAddressParams
+		);
+	
+		if(!sapData || isValidSapResponse.error) {
+			const defualtErrMsg = 'Error al crear cliente en SAP';
+			const err = isValidSapResponse.error || defualtErrMsg;
+			if(err === true){
+				err = defualtErrMsg;
+			}
+			throw new Error(err);      
+		}
+
+		const clientCreateParams = Object.assign(sapClientParams,{
+			CardCode: sapData.result,
+			BirthDate: moment(sapClientParams.BirthDate).toDate()
+		});
+
+		const contactCodes = sapData.pers;
+		const contactsParams = sapContactsParams.map(function(c, i){
+			c.CntctCode = contactCodes[i];
+			c.CardCode = clientCreateParams.CardCode
+		});
+
+		sails.log.info('contacts app', contactsParams);
+		sails.log.info('client app', clientCreateParams);
+		
+		const createdClient = await Client.create(clientCreateParams);
+		const createdUser = await UserService.createUserFromClient(createdClient, password, req);
+		const updatedClients = await Client.update({id: createdClient.id},{UserWeb: createdUser.id});
+		const updatedClient = updatedClients[0];
+
+		if(contactsParams && contactsParams.length > 0){
+			const contactsCreated = await ClientContact.create(contactsParams);
+		}
+
+		//Created automatically, do we need the if validation?
+		if(sapFiscalAddressParams){
+			var fiscalAddressParams = mapFiscalFields(fiscalAddress);
+			fiscalAddressParams = Object.assign(fiscalAddressParams, {
+				CardCode: createdClient.CardCode,
+				AdresType: ADDRESS_TYPE_S
+			});
+
+			var fiscalAddressParams2 = Object.assign(fiscalAddressParams,{
+				AdresType: ADDRESS_TYPE_B
+			});
+
+			const fiscalAddressesCreated = await FiscalAddress.create([
+				fiscalAddressParams,
+				fiscalAddressParams2
+			]);
+		}
+
+		if(fiscalAddressesCreated){
+			sails.log.info('fiscal adresses created', fiscalAddressesCreated);
+		}
+
+		return {
+			createdClient: updatedClient, 
+			contactsCreated, 
+			fiscalAddressesCreated
+		};
+	}
+	catch(err){
+		throw new Error(err);
+	}
+}
+
+async function updateClient(params, req){
+	const CardCode = _.clone(req.user.CardCode);
+	const email = params.E_Mail;
+	const userId = req.user ? req.user.id : false;
+	
+	delete params.FiscalAddress;
+	delete params.Balance;
+
+	const updateParams = mapClientFields(params);
+
+	try{
+		if(!email){
+			throw new Error('Email requerido');
+		}
+		if(!userId){
+			throw new Error('No autorizado');
+		}
+
+		const isUserEmailTaken = await UserService.checkIfUserEmailIsTaken(email, userId);
+		//const isClientEmailTaken = await Client.findOne({E_Mail:email, id: {'!=': params.id}});
+		
+		//if(isUserEmailTaken || isClientEmailTaken){
+		if(isUserEmailTaken){	
+			throw new Error('Email previamente utilizado');
+		}
+		sails.log.info('params', params);
+			
+		const clientAsociated = await Client.findOne({UserWeb: userId, CardCode: CardCode});	
+		if(!clientAsociated){
+			throw new Error('No autorizado');
+		}
+
+		const sapResult = await SapService.updateClient(CardCode, params);
+		sails.log.info('update client resultSap', sapResult);
+		var sapData = JSON.parse(sapResult.value);
+		var isValidSapResponse = ClientService.isValidSapClientUpdate(sapData);
+
+		if( !sapData || isValidSapResponse.error  ) {
+			const defualtErrMsg = 'Error al actualizar datos personales en SAP';
+			var err = isValidSapResponse.error || defualtErrMsg;
+			if(err === true){
+				err = defualtErrMsg;
+			}
+			sails.log.info('err', err);
+			throw new Error(err);
+		}
+
+		const updatedClients = Client.update({CardCode: CardCode}, params);
+		const updatedClient = updated[0];
+		const usersUpdated = await UserService.updateUserFromClient(updateClient);
+		const userUpdated = usersUpdated[0];
+		return {
+			updatedClient,
+			updatedUser
+		}
+	}
+	catch(err){
+		throw new Error(err);
+	}
 
 }
