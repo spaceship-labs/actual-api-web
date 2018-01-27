@@ -112,43 +112,15 @@ module.exports = {
       });
   },
 
-  createContact: function(req, res){
-    var form = req.params.all();
-    var cardCode = req.user.CardCode;
-    form.CardCode = cardCode;
-    form = ClientService.mapContactFields(form);
-
-    ClientService.validateContactsZipcode([form])
-      .then(function(areValid){
-        if(!areValid){
-          return Promise.reject(new Error('El código postal no es valido para tu dirección de entrega'));
-        }
-        return SapService.createContact(cardCode, form);
-      })
-      .then(function(resultSap){
-        sails.log.info('response createContact', resultSap);
-        var sapData = JSON.parse(resultSap.value);
-        var isValidSapResponse = ClientService.isValidSapContactCreation(sapData);
-
-        if( !sapData || isValidSapResponse.error  ) {
-          var defualtErrMsg = 'Error al crear contacto en SAP';
-          var err = isValidSapResponse.error || defualtErrMsg;
-          if(err === true){
-            err = defualtErrMsg;
-          }
-          return Promise.reject(new Error(err));
-        }
-        var CntctCode  = sapData[0].result;
-        form.CntctCode = parseInt(CntctCode);
-        return ClientContact.create(form);
-      })
-      .then(function(createdContact){
-        res.json(createdContact);
-      })
-      .catch(function(err){
-        console.log(err);
-        res.negotiate(err);
-      });
+  async createContact(req, res){
+    var form = req.allParams();
+    try{
+      const createdContact = await ContactService.createContact(form, req);
+      res.json(createdContact);
+    }catch(err){
+      console.log('err', err);
+      res.negotiate(err);
+    }
   },
 
   updateContact: function(req, res){

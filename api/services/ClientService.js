@@ -388,7 +388,7 @@ async function updateClient(params, req){
 		const sapResult = await SapService.updateClient(CardCode, params);
 		sails.log.info('update client resultSap', sapResult);
 		var sapData = JSON.parse(sapResult.value);
-		var isValidSapResponse = ClientService.isValidSapClientUpdate(sapData);
+		var isValidSapResponse = isValidSapClientUpdate(sapData);
 
 		if( !sapData || isValidSapResponse.error  ) {
 			const defualtErrMsg = 'Error al actualizar datos personales en SAP';
