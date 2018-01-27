@@ -58,7 +58,9 @@ module.exports = {
   },
 
   async create(req, res) {
-    let form = req.allParams();
+    var form = req.allParams();
+    var sapFiscalAddressParams;
+    var sapContactsParams;
     const email = form.E_Mail;
     const actualMail = /@actualgroup.com$/;
 
@@ -77,8 +79,8 @@ module.exports = {
     }
 
     const createParams = ClientService.mapClientFields(form);
-    const filteredContacts = ClientService.filterContacts(createParams)
-    const sapContactsParams = filteredContacts.map(ClientService.mapContactFields);
+    const filteredContacts = ClientService.filterContacts(createParams.contacts)
+    sapContactsParams = filteredContacts.map(ClientService.mapContactFields);
     
     if(sapContactsParams.length > 0 && ClientService.areContactsRepeated(sapContactsParams)){
       return res.negotiate(new Error('Nombres de contactos repetidos'));
@@ -86,16 +88,17 @@ module.exports = {
 
     if(form.fiscalAddress && ClientService.isValidFiscalAddress(form.fiscalAddress)){
       const fiscalAddressAux  = _.clone(form.fiscalAddress);
-      const sapFiscalAddressParams  = ClientService.mapFiscalFields(fiscalAddressAux);
+      sapFiscalAddressParams  = ClientService.mapFiscalFields(fiscalAddressAux);
     }
 
     const sapClientParams = _.clone(form);
-    let sapCreateParams = {
+    var sapCreateParams = {
       client: sapClientParams,
       fiscalAddress: sapFiscalAddressParams || {},
-      clientContacts: sapContactsParams || [],
+      clientContacts: sapContactsParams,
       activeStore: req.activeStore
     };
+
     const password = _.clone(sapCreateParams.client.password);
     delete sapCreateParams.client.password;
 
@@ -106,10 +109,18 @@ module.exports = {
       }
 
       const isUserEmailTaken = await UserService.checkIfUserEmailIsTaken(email);
+      if(isUserEmailTaken){
+        return res.negotiate(new Error('Email previamente utilizado'));
+      }      
+      
       const sapResult = await SapService.createClient(sapCreateParams);
-      sails.log.info('SAP result createClient', result);
+      sails.log.info('SAP result createClient', sapResult);
       const sapData = JSON.parse(sapResult.value);
-      const isValidSapResponse = ClientService.isValidSapClientCreation(sapData, contacts, fiscalAddress);
+      const isValidSapResponse = ClientService.isValidSapClientCreation(
+        sapData, 
+        sapContactsParams, 
+        sapFiscalAddressParams
+      );
     
       if(!sapData || isValidSapResponse.error) {
         const defualtErrMsg = 'Error al crear cliente en SAP';
@@ -131,7 +142,7 @@ module.exports = {
         c.CardCode = clientCreateParams.CardCode
       });
 
-      sails.log.info('contacts app', contacts);
+      sails.log.info('contacts app', contactsParams);
       sails.log.info('client app', clientCreateParams);
       
       const createdClient = await Client.create(clientCreateParams);
@@ -145,13 +156,13 @@ module.exports = {
 
       //Created automatically, do we need the if validation?
       if(sapFiscalAddressParams){
-        let fiscalAddressParams = ClientService.mapFiscalFields(fiscalAddress);
+        var fiscalAddressParams = ClientService.mapFiscalFields(fiscalAddress);
         fiscalAddressParams = Object.assign(fiscalAddressParams, {
           CardCode: createdClient.CardCode,
           AdresType: ClientService.ADDRESS_TYPE_S
         });
 
-        let fiscalAddressParams2 = Object.assign(fiscalAddressParams,{
+        var fiscalAddressParams2 = Object.assign(fiscalAddressParams,{
           AdresType: ClientService.ADDRESS_TYPE_B
         });
 
@@ -188,7 +199,7 @@ module.exports = {
     }
   },
 
-  update: function(req, res){
+  async update(req, res){
     var form = req.params.all();
     var CardCode = _.clone(req.user.CardCode);
     var email = form.E_Mail;

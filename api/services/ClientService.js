@@ -113,14 +113,14 @@ function isValidContactCode(contactCode){
 	return !isNaN(contactCode);
 }
 
-function isValidSapClientCreation(sapData, contacts, fiscalAddress){
+function isValidSapClientCreation(sapData, sapContactsParams, sapFiscalAddressParams){
 	var result = {error:true};
 	if(sapData.type === ERROR_TYPE){
 		result = {error: sapData.result || true};
 	}
 	
 	if(sapData.type === CARDCODE_TYPE && isValidCardCode(sapData.result) && _.isArray(sapData.pers) ){
-		if(contacts.length === sapData.pers.length){
+		if(sapContactsParams.length === sapData.pers.length){
 			result = {error: false};
 		}
 	}

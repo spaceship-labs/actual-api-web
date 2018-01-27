@@ -85,17 +85,17 @@ function createClient(params){
 }
 
 function updateClient(cardcode, form){
-  form = _.omit(form, _.isUndefined);
+  var updateParams = _.omit(form, _.isUndefined);
 
   //Important: DONT UPDATE BALANCE IN SAP
-  delete form.Balance;
-  delete form.Currency;
-  delete form.password;
-  delete form._password;
+  delete updateParams.Balance;
+  delete updateParams.Currency;
+  delete updateParams.password;
+  delete updateParams._password;
 
   var path = 'Contact';
   var params = {
-    Client: encodeURIComponent(JSON.stringify(form))
+    Client: encodeURIComponent(JSON.stringify(updateParams))
   };
   var endPoint = buildUrl(baseUrl, {
     path: path,
