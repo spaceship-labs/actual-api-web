@@ -84,7 +84,7 @@ module.exports = {
   },
 
   async update(req, res){
-    var form = req.params.all();
+    var form = req.allParams();
     try{
       const { updatedClient, updatedUser } = await ClientService.updateClient(form, req)
       res.json({
@@ -196,47 +196,14 @@ module.exports = {
       });
   },
 
-  updateFiscalAddress: function(req, res){
-    var form = req.params.all();
-    var CardCode = req.user.CardCode;
-    var fiscalAddress = ClientService.mapFiscalFields(form);
-    delete form.AdresType;
-
-    if(!form.LicTradNum || !ClientService.isValidRFC(form.LicTradNum)){
-      var err = new Error('RFC no valido');
-      return res.negotiate(err);
+  async updateFiscalAddress(req, res){
+    var form = req.allParams();
+    try{
+      const updatedFiscalAddress = await FiscalAddressService.updateFiscalAddress(form, req);
+      res.json(updatedFiscalAddress);
+    }catch(err){
+      res.negotiate(err);
     }
-    
-    SapService.updateFiscalAddress(CardCode, fiscalAddress)
-      .then(function(resultSap){
-        sails.log.info('updateFiscalAddress response', resultSap);
-
-        var sapData = JSON.parse(resultSap.value);
-        var isValidSapResponse = ClientService.isValidSapFiscalClientUpdate(sapData);
-
-        if( !sapData || isValidSapResponse.error  ) {
-          var defualtErrMsg = 'Error al actualizar datos fiscales en SAP';
-          var err = isValidSapResponse.error || defualtErrMsg;
-          if(err === true){
-            err = defualtErrMsg;
-          }
-          sails.log.info('err reject', err);
-          return Promise.reject(new Error(err));
-        }
-
-        return [
-          FiscalAddress.update({CardCode:CardCode}, fiscalAddress),
-          Client.update({CardCode: CardCode}, {LicTradNum: form.LicTradNum, cfdiUse: form.cfdiUse})
-        ];
-      })
-      .spread(function(fiscalAddressUpdated){
-        sails.log.info('updated in sails fiscalAddress', fiscalAddressUpdated);
-        return res.json(fiscalAddressUpdated);
-      })
-      .catch(function(err){
-        console.log(err);
-        res.negotiate(err);
-      });
   },
 
   getEwalletByClient: function(req, res){
