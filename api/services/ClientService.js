@@ -17,6 +17,7 @@ module.exports = {
 	ADDRESS_TYPE_S,
 	ERROR_TYPE,
 	CARDCODE_TYPE,
+	PERSON_TYPE,
 	areContactsRepeated,
 	createClient,
 	updateClient,
@@ -27,7 +28,6 @@ module.exports = {
 	isValidRFC,
 	validateSapClientCreation,
 	validateSapClientUpdate,
-	isValidSapContactCreation,
 	isValidSapContactUpdate,
 	mapClientFields,
 	mapContactFields,
@@ -147,27 +147,6 @@ function isValidSapFiscalClientUpdate(sapData){
 	
 	if(sapData.type === CARDCODE_TYPE && isValidCardCode(sapData.result)  ){
 		result = {error: false};
-	}
-	
-	return result;
-}
-
-function isValidSapContactCreation(sapData){
-	var result = {error:true};
-	var contact;
-
-	if( !_.isArray(sapData) ) {
-		result = {error: true};
-	}
-
-	contact = sapData[0];
-
-	if(contact.type === ERROR_TYPE){
-		result = {error: contact.result || true};
-	}
-	
-	if(contact.type === PERSON_TYPE ){
-		result = {error:false};
 	}
 	
 	return result;
