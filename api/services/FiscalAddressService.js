@@ -25,7 +25,7 @@ async function updateFiscalAddress(params, req) {
       throw new Error('RFC no valido');
     }
     
-    const sapResult = await SapService.updateFiscalAddress(CardCode, fiscalAddress)
+    const sapResult = await SapService.updateFiscalAddress(CardCode, fiscalAddress);
     sails.log.info('updateFiscalAddress response', sapResult);
     const sapData = JSON.parse(sapResult.value);
     const isValidSapResponse = ClientService.isValidSapFiscalClientUpdate(sapData);
@@ -45,7 +45,7 @@ async function updateFiscalAddress(params, req) {
     const clientsUpdated =  await Client.update(
       {CardCode: CardCode}, 
       {LicTradNum: params.LicTradNum, cfdiUse: params.cfdiUse}
-    )
+    );
     return fiscalAddressUpdated;
   }catch(err){
     throw new Error(err);

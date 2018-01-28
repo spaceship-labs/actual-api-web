@@ -74,7 +74,7 @@ function mapClientFields(fields){
     fields.CardName = fields.FirstName + ' ' + fields.LastName;
   }
   if(fields.Birthdate){
-  	fields.Birthdate = moment(fields.Birthdate).format(CLIENT_DATE_FORMAT);
+		fields.Birthdate = moment(fields.Birthdate).format(CLIENT_DATE_FORMAT);
   }
   return fields;
 }
@@ -87,7 +87,7 @@ function mapFiscalFields(fields){
 
 function getContactIndex(contacts, contactCode){
   if(contacts.length === 1){
-  	return 0;
+		return 0;
   }
   var contactCodes = contacts.map(function(c){
     return parseInt(c.CntctCode);
@@ -117,7 +117,7 @@ function isValidContactCode(contactCode){
 	return !isNaN(contactCode);
 }
 
-function validateSapClientCreation(sapData, sapContactsParams, sapFiscalAddressParams){
+function validateSapClientCreation(sapData, sapContactsParams){
 	if(sapData.type === CARDCODE_TYPE && isValidCardCode(sapData.result) && _.isArray(sapData.pers) ){
 		if(sapContactsParams.length === sapData.pers.length){
 			return true;
@@ -137,19 +137,6 @@ function validateSapClientUpdate(sapData){
 		throw new Error(sapData.result);
 	}	
 	throw new Error('Error al actualizar datos personales en SAP');
-}
-
-function isValidSapFiscalClientUpdate(sapData){
-	var result = {error:true};
-	if(sapData.type === ERROR_TYPE){
-		result = {error: sapData.result || true};
-	}
-	
-	if(sapData.type === CARDCODE_TYPE && isValidCardCode(sapData.result)  ){
-		result = {error: false};
-	}
-	
-	return result;
 }
 
 function isValidSapContactUpdate(sapData){
@@ -179,7 +166,7 @@ function areContactsRepeated(contacts){
 		return contact.Name;
 	});
 	var areRepeated = contactsNames.some(function(contact, idx){ 
-	    return contactsNames.indexOf(contact) != idx; 
+		return contactsNames.indexOf(contact) != idx; 
 	});		
 	return areRepeated;
 }
@@ -191,22 +178,20 @@ function isValidCardCode(cardCode){
   return cardCode.length <= 15;
 }
 
-function isValidContact(contact){
-	return true;
-}
-
 function mapContactFields(fields){
   fields.E_MailL = fields.E_Mail;
   fields.Name = fields.FirstName;
   if(fields.LastName){
-  	fields.Name += ' ' + fields.LastName;
+		fields.Name += ' ' + fields.LastName;
   }
   return fields;
 }
 
 async function createClient(params, req){
-	var sapFiscalAddressParams;
-	var sapContactsParams;
+	var sapFiscalAddressParams = {};
+	var sapContactsParams = [];
+	var contactsCreated = [];
+	var fiscalAddressesCreated = [];
 	const email = params.E_Mail;
 	try{
     if(!email){	
@@ -220,7 +205,7 @@ async function createClient(params, req){
     }
 
     const createParams = mapClientFields(params);
-    const filteredContacts = filterContacts(createParams.contacts)
+    const filteredContacts = filterContacts(createParams.contacts);
     sapContactsParams = filteredContacts.map(mapContactFields);
     
     if(sapContactsParams.length > 0 && areContactsRepeated(sapContactsParams)){
@@ -274,7 +259,7 @@ async function createClient(params, req){
 		const contactCodes = sapData.pers;
 		const contactsParams = sapContactsParams.map(function(c, i){
 			c.CntctCode = contactCodes[i];
-			c.CardCode = clientCreateParams.CardCode
+			c.CardCode = clientCreateParams.CardCode;
 		});
 
 		sails.log.info('contacts app', contactsParams);
@@ -286,12 +271,12 @@ async function createClient(params, req){
 		const updatedClient = updatedClients[0];
 
 		if(contactsParams && contactsParams.length > 0){
-			const contactsCreated = await ClientContact.create(contactsParams);
+			contactsCreated = await ClientContact.create(contactsParams);
 		}
 
 		//Created automatically, do we need the if validation?
-		if(sapFiscalAddressParams){
-			var fiscalAddressParams = mapFiscalFields(fiscalAddress);
+		//if(sapFiscalAddressParams){
+			var fiscalAddressParams = mapFiscalFields(sapFiscalAddressParams);
 			fiscalAddressParams = Object.assign(fiscalAddressParams, {
 				CardCode: createdClient.CardCode,
 				AdresType: ADDRESS_TYPE_S
@@ -301,11 +286,11 @@ async function createClient(params, req){
 				AdresType: ADDRESS_TYPE_B
 			});
 
-			const fiscalAddressesCreated = await FiscalAddress.create([
+			fiscalAddressesCreated = await FiscalAddress.create([
 				fiscalAddressParams,
 				fiscalAddressParams2
 			]);
-		}
+		//}
 
 		if(fiscalAddressesCreated){
 			sails.log.info('fiscal adresses created', fiscalAddressesCreated);
@@ -347,7 +332,7 @@ async function updateClient(params, req){
 		if(isUserEmailTaken){	
 			throw new Error('Email previamente utilizado');
 		}
-		sails.log.info('params', params);
+		sails.log.info('updateParams', updateParams);
 			
 		const clientAsociated = await Client.findOne({UserWeb: userId, CardCode: CardCode});	
 		if(!clientAsociated){
@@ -361,13 +346,13 @@ async function updateClient(params, req){
 		validateSapClientUpdate(sapData);
 
 		const updatedClients = Client.update({CardCode: CardCode}, params);
-		const updatedClient = updated[0];
+		const updatedClient = updatedClients[0];
 		const usersUpdated = await UserService.updateUserFromClient(updateClient);
-		const userUpdated = usersUpdated[0];
+		const updatedUser = usersUpdated[0];
 		return {
 			updatedClient,
 			updatedUser
-		}
+		};
 	}
 	catch(err){
 		throw new Error(err);
