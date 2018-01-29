@@ -241,6 +241,8 @@ module.exports = {
     delete form.FiscalAddress;
     //Dont remove
     delete form.Balance;
+    delete form.Orders;
+    delete form.Quotations;
 
     if(!email){
       return res.negotiate(new Error('Email requerido'));
