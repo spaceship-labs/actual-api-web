@@ -10,7 +10,6 @@ const PERSON_TYPE = 'Person';
 const ERROR_TYPE = 'Error';
 const ACTUAL_EMAIL_DOMAIN = /@actualgroup.com$/;
 
-
 module.exports = {
 	ADDRESS_TYPE,
 	ADDRESS_TYPE_B,
@@ -314,6 +313,9 @@ async function updateClient(params, req){
 	
 	delete params.FiscalAddress;
 	delete params.Balance;
+	delete params.Orders;
+	delete params.Quotations;
+
 
 	const updateParams = mapClientFields(params);
 

@@ -6,7 +6,6 @@ module.exports = {
 };
 
 function validateSapContactCreation(sapData){
-	var contact;
   if(_.isArray(sapData)){
     const contact = sapData[0];
     if(contact.type === ClientService.PERSON_TYPE){
