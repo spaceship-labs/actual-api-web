@@ -314,11 +314,10 @@ async function updateClient(params, req){
 	delete params.FiscalAddress;
 	delete params.Balance;
 	delete params.Orders;
+	delete params.EwalletRecords;
 	delete params.Quotations;
 
-
 	const updateParams = mapClientFields(params);
-
 	try{
 		if(!email){
 			throw new Error('Email requerido');
