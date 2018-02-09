@@ -661,12 +661,15 @@ function sendOrder(client, order, products, payments, ewallet, store) {
   personalization.addTo(toAux);
 
   var toAux2 = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
-  personalization.addTo(toAux2);
+  var toAux3 = new helper.Email('auditoria@actualg.com', 'Auditoria ActualGroup');
 
   if(process.env.MODE === 'production'){
     sails.log.info('sending email order ', order.folio);
     personalization.addTo(to);
+    personalization.addTo(toAux2);
+    personalization.addTo(toAux3);
   }
+
   personalization.setSubject(subject);
   mail.setFrom(from);
   mail.addContent(content);
@@ -928,11 +931,13 @@ function sendQuotation(client, quotation, products, payments, transfers, store, 
   personalization.addTo(toAux);
 
   var toAux2 = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
+  var toAux3 = new helper.Email('auditoria@actualg.com', 'Auditoria ActualGroup');
 
   if(process.env.MODE === 'production'){
     sails.log.info('sending email quotation ', quotation.folio);
     personalization.addTo(to);
     personalization.addTo(toAux2); 
+    personalization.addTo(toAux3); 
   }
 
   personalization.setSubject(subject);
