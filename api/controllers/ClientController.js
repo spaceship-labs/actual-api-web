@@ -111,19 +111,16 @@ module.exports = {
     delete params.client.password;
 
     ClientService.validateContactsZipcode(params.clientContacts)
-    .then(function(areValid){
+      .then(function(areValid){
 
-      if(!areValid){
-        return Promise.reject(new Error('El código postal no es valido para tu dirección de entrega'));
-      }
+        if(!areValid){
+          return Promise.reject(new Error('El código postal no es valido para tu dirección de entrega'));
+        }
 
-      return [
-        Client.findOne({E_Mail:email}),
-        UserService.checkIfUserEmailIsTaken(email)
-      ];
-    })
-    .spread(function(usedEmail, isUserMailTaken){
-        if(usedEmail || isUserMailTaken){
+        return UserService.checkIfUserEmailIsTaken(email);
+      })
+      .then(function(isUserMailTaken){
+        if(isUserMailTaken){
           return Promise.reject(new Error('Email previamente utilizado'));
         }
         return SapService.createClient(params);
@@ -244,6 +241,8 @@ module.exports = {
     delete form.FiscalAddress;
     //Dont remove
     delete form.Balance;
+    delete form.Orders;
+    delete form.Quotations;
 
     if(!email){
       return res.negotiate(new Error('Email requerido'));
@@ -419,7 +418,7 @@ module.exports = {
     };
 
     var promises = [
-      Client.findOne({CardCode:CardCode, select:['LicTradNum']}),
+      Client.findOne({CardCode:CardCode, select:['LicTradNum', 'cfdiUse']}),
       FiscalAddress.findOne(query)
     ];      
     
@@ -428,6 +427,7 @@ module.exports = {
         var client = results[0];
         var fiscalAddress = results[1];
         fiscalAddress.LicTradNum = client.LicTradNum;
+        fiscalAddress.cfdiUse = client.cfdiUse;
 
         res.json(fiscalAddress);
       })
@@ -467,7 +467,7 @@ module.exports = {
 
         return [
           FiscalAddress.update({CardCode:CardCode}, fiscalAddress),
-          Client.update({CardCode: CardCode}, {LicTradNum: form.LicTradNum})
+          Client.update({CardCode: CardCode}, {LicTradNum: form.LicTradNum, cfdiUse: form.cfdiUse})
         ];
       })
       .spread(function(fiscalAddressUpdated){

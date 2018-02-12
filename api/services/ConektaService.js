@@ -216,12 +216,12 @@ function getOrderDiscountLine(order, payments){
 }
 
 function getOrderCustomerInfo(payment, clientId){
-	return Client.findOne({id: clientId, select:['CardCode']})
+	return Client.findOne({id: clientId, select:['CardCode','CardName', 'Phone1','E_Mail']})
 		.then(function(client){
 			return {
-				name: payment.cardName,
-				phone: payment.phone,
-				email: payment.email,
+				name: payment.cardName || client.CardName,
+				phone: payment.phone || client.Phone1,
+				email: payment.email || client.E_Mail,
 				CardCode: client.CardCode 
 			};
 		});
