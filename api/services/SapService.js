@@ -56,7 +56,7 @@ function syncProduct(itemCode){
 
 function createClient(params){
   var path           = 'Contact';
-  var client         = _.clone(params.client);
+  var client         = params.client;
   var fiscalAddress  = params.fiscalAddress || {};
   var clientContacts = params.clientContacts || [];
   delete client.Currency;
