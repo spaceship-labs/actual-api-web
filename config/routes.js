@@ -21,16 +21,15 @@
  */
 
 module.exports.routes = {
-
   /***************************************************************************
-  *                                                                          *
-  * Make the view located at `views/homepage.ejs` (or `views/homepage.jade`, *
-  * etc. depending on your default view engine) your home page.              *
-  *                                                                          *
-  * (Alternatively, remove this and add an `index.html` file in your         *
-  * `assets` directory)                                                      *
-  *                                                                          *
-  ***************************************************************************/
+   *                                                                          *
+   * Make the view located at `views/homepage.ejs` (or `views/homepage.jade`, *
+   * etc. depending on your default view engine) your home page.              *
+   *                                                                          *
+   * (Alternatively, remove this and add an `index.html` file in your         *
+   * `assets` directory)                                                      *
+   *                                                                          *
+   ***************************************************************************/
 
   /*
   'OPTIONS /*': function (req, res) {
@@ -43,459 +42,457 @@ module.exports.routes = {
     action: 'homeStatus'
   },
 
-  '/auth/signin':{
+  '/auth/signin': {
     controller: 'auth',
     action: 'signin'
   },
 
-  '/user/findbyid/:id':{
+  '/user/findbyid/:id': {
     controller: 'user',
     action: 'findById'
   },
 
-  '/user/find/:page':{
+  '/user/find/:page': {
     controller: 'user',
     action: 'find'
   },
 
-  '/user/register':{
+  '/user/register': {
     controller: 'user',
     action: 'register'
   },
 
-  '/product/find/:page':{
+  '/product/find/:page': {
     controller: 'product',
     action: 'find'
   },
 
-  '/product/multiplefindbyids':{
+  '/product/multiplefindbyids': {
     controller: 'product',
     action: 'multipleFindByIds'
   },
 
-  '/product/search':{
+  '/product/search': {
     controller: 'product',
     action: 'search'
   },
 
-  '/product/findbyid/:id':{
+  '/product/findbyid/:id': {
     controller: 'product',
     action: 'findById'
   },
 
-  'GET /product/findbyslug/:slug':{
+  'GET /product/findbyslug/:slug': {
     controller: 'product',
     action: 'findBySlug'
   },
 
-  '/product/addseen/:ItemCode':{
-    controller:'product',
-    action:'addSeenTime'
+  '/product/addseen/:ItemCode': {
+    controller: 'product',
+    action: 'addSeenTime'
   },
 
-  '/product/mainpromo/:id':{
-    controller:'product',
+  '/product/mainpromo/:id': {
+    controller: 'product',
     action: 'getProductMainPromo'
   },
 
-  '/productcategory/find/:page':{
+  '/productcategory/find/:page': {
     controller: 'productcategory',
     action: 'find'
   },
 
-  '/productcategory/findbyid/:id':{
+  '/productcategory/findbyid/:id': {
     controller: 'productcategory',
     action: 'findById'
   },
 
-  '/productcategory/findbyhandle/:handle':{
+  '/productcategory/findbyhandle/:handle': {
     controller: 'productcategory',
     action: 'findByHandle'
   },
 
-  '/productcategory/getcategoriestree':{
+  '/productcategory/getcategoriestree': {
     controller: 'productcategory',
     action: 'getCategoriesTree'
   },
 
-  '/productfilter/find/:page':{
+  '/productfilter/find/:page': {
     controller: 'productfilter',
     action: 'find'
   },
 
-  '/productfilter/list':{
-    controller:'productfilter',
+  '/productfilter/list': {
+    controller: 'productfilter',
     action: 'list'
   },
 
-  '/productfilter/findbyid/:id':{
+  '/productfilter/findbyid/:id': {
     controller: 'productfilter',
     action: 'findById'
   },
 
-
-  '/productbrand/getall':{
+  '/productbrand/getall': {
     controller: 'productbrand',
-    action:'getAll'
+    action: 'getAll'
   },
 
-  '/custombrand/find/:page':{
+  '/custombrand/find/:page': {
     controller: 'custombrand',
-    action:'find'
+    action: 'find'
   },
 
-  '/custombrand/getall':{
+  '/custombrand/getall': {
     controller: 'custombrand',
-    action:'getAll'
+    action: 'getAll'
   },
 
-  '/custombrand/findbyid/:id':{
+  '/custombrand/findbyid/:id': {
     controller: 'custombrand',
-    action:'findById'
+    action: 'findById'
   },
 
-  '/productgroup/find/:page':{
+  '/productgroup/find/:page': {
     controller: 'productgroup',
     action: 'find'
   },
 
-  '/productgroup/findbyid/:id':{
+  '/productgroup/findbyid/:id': {
     controller: 'productGroup',
     action: 'findById'
   },
 
-  '/productgroup/search':{
+  '/productgroup/search': {
     controller: 'productgroup',
     action: 'search'
   },
 
-  '/client/:id/ewallet':{
-    controller:'client',
-    action:'getEwalletByClient'
+  '/client/:id/ewallet': {
+    controller: 'client',
+    action: 'getEwalletByClient'
   },
 
-  '/quotation/create':{
+  '/quotation/create': {
     controller: 'quotation',
     action: 'create'
   },
 
-  '/quotation/update/:id':{
+  '/quotation/update/:id': {
     controller: 'quotation',
     action: 'update'
   },
 
-  '/quotation/updatedetails/:id':{
+  '/quotation/updatedetails/:id': {
     controller: 'quotation',
     action: 'updateDetails'
   },
 
-  '/quotation/findbyid/:id':{
+  '/quotation/findbyid/:id': {
     controller: 'quotation',
-    action:'findById'
+    action: 'findById'
   },
 
-  '/quotation/findbyidquickread/:id':{
+  '/quotation/findbyidquickread/:id': {
     controller: 'quotation',
-    action:'findByIdQuickRead'
+    action: 'findByIdQuickRead'
   },
 
-  '/quotation/find/:page':{
+  '/quotation/find/:page': {
     controller: 'quotation',
-    action:'find'
+    action: 'find'
   },
-  '/quotation/all/find/:page':{
+  '/quotation/all/find/:page': {
     controller: 'quotation',
-    action:'findAll'
+    action: 'findAll'
   },
 
-
-  '/quotation/adddetail/:id':{
-    controller:'quotation',
-    action:'addDetail'
+  '/quotation/adddetail/:id': {
+    controller: 'quotation',
+    action: 'addDetail'
   },
 
-  '/quotation/addmultipledetails/:id':{
-    controller:'quotation',
-    action:'addMultipleDetails'
+  '/quotation/addmultipledetails/:id': {
+    controller: 'quotation',
+    action: 'addMultipleDetails'
   },
 
-  '/quotation/removedetailsgroup/:quotation':{
-    controller:'quotation',
-    action:'removeDetailsGroup'
+  '/quotation/removedetailsgroup/:quotation': {
+    controller: 'quotation',
+    action: 'removeDetailsGroup'
   },
 
-  'DELETE /quotation/:quotation/removedetail/:detailId':{
-    controller:'quotation',
-    action:'removeDetail'
+  'DELETE /quotation/:quotation/removedetail/:detailId': {
+    controller: 'quotation',
+    action: 'removeDetail'
   },
 
-  '/quotation/totals/:id':{
+  '/quotation/totals/:id': {
     controller: 'quotation',
     action: 'getQuotationTotals'
   },
 
-  '/quotation/sendemail/:id':{
-    controller:'quotation',
-    action:'sendEmail'
+  '/quotation/sendemail/:id': {
+    controller: 'quotation',
+    action: 'sendEmail'
   },
 
-  '/quotation/:id/validatestock':{
-    controller:'quotation',
+  '/quotation/:id/validatestock': {
+    controller: 'quotation',
     action: 'validateStock'
-  },  
-
-  '/quotation/:id/paymentoptions':{
-    controller: 'quotation',
-    action:'getQuotationPaymentOptions'
   },
 
-
-  '/quotation/:id/payments':{
+  '/quotation/:id/paymentoptions': {
     controller: 'quotation',
-    action:'getQuotationPayments'
+    action: 'getQuotationPaymentOptions'
   },
 
+  '/quotation/:id/payments': {
+    controller: 'quotation',
+    action: 'getQuotationPayments'
+  },
 
-  'GET /quotation/:id/paymentattempts':{
+  'GET /quotation/:id/paymentattempts': {
     controller: 'quotation',
     action: 'getQuotationPaymentsAttempts'
   },
 
-
-  'GET /quotation/:id/zipcodedelivery':{
+  'GET /quotation/:id/zipcodedelivery': {
     controller: 'quotation',
     action: 'getQuotationZipcodeDelivery'
   },
 
-
-  '/quotation/:id/saporderconnectionlogs':{
-    controller:'quotation',
-    action:'getQuotationSapLogs'
+  '/quotation/:id/saporderconnectionlogs': {
+    controller: 'quotation',
+    action: 'getQuotationSapLogs'
   },
 
-  'GET /quotation/:quotationId/leads':{
+  'GET /quotation/:quotationId/leads': {
     controller: 'quotation',
     action: 'getQuotationLeads'
   },
 
-  'GET /quotation/:id/address':{
-    controller:'quotation',
-    action:'getQuotationAddress'
-  },  
-
-  'PUT /quotation/:id/address':{
-    controller:'quotation',
-    action:'updateQuotationAddress'
+  'GET /quotation/:id/address': {
+    controller: 'quotation',
+    action: 'getQuotationAddress'
   },
 
-  '/payment/add/:quotationid':{
+  'PUT /quotation/:id/address': {
+    controller: 'quotation',
+    action: 'updateQuotationAddress'
+  },
+
+  '/payment/add/:quotationid': {
     controller: 'payment',
-    action:'add'
-  }, 
+    action: 'add'
+  },
 
-  '/product/searchbyfilters':{
+  '/product/searchbyfilters': {
     controller: 'productsearch',
-    action:'searchByfilters'
+    action: 'searchByfilters'
   },
 
-  '/product/searchbycategory':{
+  '/product/searchbycategory': {
     controller: 'productsearch',
-    action:'searchByCategory'
+    action: 'searchByCategory'
   },
 
-  '/order/find/:page':{
-    controller:'order',
-    action:'find'
+  '/order/find/:page': {
+    controller: 'order',
+    action: 'find'
   },
 
-  '/order/all/find/:page':{
-    controller:'order',
-    action:'findAll'
+  '/order/all/find/:page': {
+    controller: 'order',
+    action: 'findAll'
   },
 
-  '/order/invoicelogs/:orderId':{
-    controller:'order',
-    action:'getInvoicesLogs'
-  },   
+  '/order/invoicelogs/:orderId': {
+    controller: 'order',
+    action: 'getInvoicesLogs'
+  },
 
-  '/order/createfromquotation/:quotationId':{
-    controller:'order',
-    action:'createFromQuotation',
+  '/order/createfromquotation/:quotationId': {
+    controller: 'order',
+    action: 'createFromQuotation',
     skipAssets: true
   },
 
-  '/order/findbyid/:id':{
-    controller:'order',
-    action:'findById'
-  },
-
-  '/order/user/:userId/totals':{
+  '/order/findbyid/:id': {
     controller: 'order',
-    action:'getTotalsByuser'
+    action: 'findById'
   },
 
-  '/order/user/:userId/count':{
+  '/order/user/:userId/totals': {
     controller: 'order',
-    action:'getCountByUser'
+    action: 'getTotalsByuser'
   },
 
-  'POST /order/:id/ordersap':{
-    controller:'order',
+  '/order/user/:userId/count': {
+    controller: 'order',
+    action: 'getCountByUser'
+  },
+
+  'POST /order/:id/ordersap': {
+    controller: 'order',
     action: 'generateSapOrder'
   },
 
-  'PUT /me/update':{
-    controller:'client',
-    action:'update'
+  'PUT /me/update': {
+    controller: 'client',
+    action: 'update'
   },
 
-  'GET /me':{
+  'GET /me': {
     controller: 'me',
     action: 'getCurrentUser'
   },
 
-  'GET /me/client':{
+  'GET /me/client': {
     controller: 'me',
     action: 'getClient'
   },
 
-  'GET /me/client/contacts':{
-    controller:'client',
+  'GET /me/client/contacts': {
+    controller: 'client',
     action: 'getContactsByClient'
   },
-  
-  'POST /me/client/contacts':{
-    controller:'client',
+
+  'POST /me/client/contacts': {
+    controller: 'client',
     action: 'createContact'
-  },  
+  },
 
-  'PUT /me/client/contacts/:CntctCode':{
-    controller:'client',
+  'PUT /me/client/contacts/:CntctCode': {
+    controller: 'client',
     action: 'updateContact'
-  },  
+  },
 
-  'GET /me/client/fiscaladdress':{
-    controller:'client',
+  'GET /me/client/fiscaladdress': {
+    controller: 'client',
     action: 'getFiscalAddressByClient'
   },
 
-  'PUT /me/client/fiscaladdress':{
-    controller:'client',
+  'PUT /me/client/fiscaladdress': {
+    controller: 'client',
     action: 'updateFiscalAddress'
   },
 
-  '/client/find':{
-    controller:'client',
+  '/client/find': {
+    controller: 'client',
     action: 'find'
-  },  
-
-  '/promotion/find/:page':{
-    controller: 'promotion',
-    action:'find'
   },
 
-  '/promotion/findbyid/:id':{
-    controller: 'promotion',
-    action:'findById'
+  '/client/create': {
+    controller: 'client',
+    action: 'create'
   },
 
-  '/pmperiod/getactive':{
+  '/promotion/find/:page': {
+    controller: 'promotion',
+    action: 'find'
+  },
+
+  '/promotion/findbyid/:id': {
+    controller: 'promotion',
+    action: 'findById'
+  },
+
+  '/pmperiod/getactive': {
     controller: 'pmperiod',
-    action:'getActive'
+    action: 'getActive'
   },
 
-  '/site/findbyhandle/:handle':{
-    controller:'site',
-    action:'findByHandle'
+  '/site/findbyhandle/:handle': {
+    controller: 'site',
+    action: 'findByHandle'
   },
 
-  '/site/banners/:handle':{
-    controller:'site',
-    action:'findBannersByHandle'
+  '/site/banners/:handle': {
+    controller: 'site',
+    action: 'findBannersByHandle'
   },
 
-  '/store/find':{
-    controller:'store',
-    action:'find'
+  '/store/find': {
+    controller: 'store',
+    action: 'find'
   },
 
-  '/store/:id/promotions':{
-    controller:'store',
-    action:'getPromosByStore'
+  '/store/:id/promotions': {
+    controller: 'store',
+    action: 'getPromosByStore'
   },
 
-  '/store/packages':{
-    controller:'store',
-    action:'getPackagesByCurrentStore'
+  '/store/packages': {
+    controller: 'store',
+    action: 'getPackagesByCurrentStore'
   },
 
-  '/common/states':{
-    controller:'common',
-    action:'getStates'
+  '/common/states': {
+    controller: 'common',
+    action: 'getStates'
   },
 
-  '/packages/find/:page':{
-    controller:'package',
-    action:'findPackages'
-  },
-
-  '/packages/:id/products':{
-    controller:'package',
-    action:'getProducts'
-  },
-
-  '/packages/details/:id':{
+  '/packages/find/:page': {
     controller: 'package',
-    action:'getDetailedPackage'
+    action: 'findPackages'
   },
 
-  '/quotation/getcurrentstock/:quotationId':{
-    controller:'quotation',
+  '/packages/:id/products': {
+    controller: 'package',
+    action: 'getProducts'
+  },
+
+  '/packages/details/:id': {
+    controller: 'package',
+    action: 'getDetailedPackage'
+  },
+
+  '/quotation/getcurrentstock/:quotationId': {
+    controller: 'quotation',
     action: 'getCurrentStock'
   },
 
-  '/paymentgroups':{
-    controller:'payment',
-    action:'getPaymentGroups'
+  '/paymentgroups': {
+    controller: 'payment',
+    action: 'getPaymentGroups'
   },
 
-  'GET /payment/types':{
+  'GET /payment/types': {
     controller: 'payment',
     action: 'getPaymentTypes'
   },
 
-  'GET /shipping/zipcodedelivery':{
+  'GET /shipping/zipcodedelivery': {
     controller: 'shipping',
     action: 'getZipcodeDelivery'
   },
- 
-  'GET /shipping/zipcodedelivery/:id':{
+
+  'GET /shipping/zipcodedelivery/:id': {
     controller: 'shipping',
     action: 'getZipcodeDeliveryById'
   },
 
-  '/spei-webhook':{
+  '/spei-webhook': {
     controller: 'order',
     action: 'receiveSpeiNotification'
   },
 
-
-  '/sendfiscaldata':{
-    controller:'invoice',
-    action:'sendFiscalData'
+  '/sendfiscaldata': {
+    controller: 'invoice',
+    action: 'sendFiscalData'
   },
 
-  '/sendcontact':{
-    controller:'common',
-    action:'sendContact'
+  '/sendcontact': {
+    controller: 'common',
+    action: 'sendContact'
   },
 
-  '/sendsuggestions':{
-    controller:'common',
-    action:'sendSuggestions'
+  '/sendsuggestions': {
+    controller: 'common',
+    action: 'sendSuggestions'
   },
 
-  'POST /lead/quotation/:quotationId':{
+  'POST /lead/quotation/:quotationId': {
     controller: 'lead',
     action: 'createLeadAndSendQuotation'
   }
@@ -507,13 +504,12 @@ module.exports.routes = {
   }
   */
   /***************************************************************************
-  *                                                                          *
-  * Custom routes here...                                                    *
-  *                                                                          *
-  * If a request to a URL doesn't match any of the custom routes above, it   *
-  * is matched against Sails route blueprints. See `config/blueprints.js`    *
-  * for configuration options and examples.                                  *
-  *                                                                          *
-  ***************************************************************************/
-
+   *                                                                          *
+   * Custom routes here...                                                    *
+   *                                                                          *
+   * If a request to a URL doesn't match any of the custom routes above, it   *
+   * is matched against Sails route blueprints. See `config/blueprints.js`    *
+   * for configuration options and examples.                                  *
+   *                                                                          *
+   ***************************************************************************/
 };

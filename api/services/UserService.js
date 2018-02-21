@@ -1,72 +1,85 @@
 var _ = require('underscore');
 module.exports = {
-	createUserFromClient: createUserFromClient,
-	checkIfUserEmailIsTaken: checkIfUserEmailIsTaken,
-	updateUserFromClient: updateUserFromClient,
-	getCurrentUserClientId: getCurrentUserClientId,
-	getCurrentUserId: getCurrentUserId,
-	isUserAdminOrSeller: isUserAdminOrSeller
+  createUserFromClient: createUserFromClient,
+  checkIfUserEmailIsTaken: checkIfUserEmailIsTaken,
+  updateUserFromClient: updateUserFromClient,
+  getCurrentUserClientId: getCurrentUserClientId,
+  getCurrentUserId: getCurrentUserId,
+  isUserAdminOrSeller: isUserAdminOrSeller
 };
 
-function getCurrentUserId(req){
+function getCurrentUserId(req) {
   var userId = req.user ? req.user.id : false;
   return userId;
 }
 
-function isUserAdminOrSeller(req){
-	var SELLER_ROLE = 'seller';
-	var ADMIN_ROLE = 'admin';	
-	return (req.user || {}).role === SELLER_ROLE || (req.user || {}).role === ADMIN_ROLE;
+function isUserAdminOrSeller(req) {
+  var SELLER_ROLE = 'seller';
+  var ADMIN_ROLE = 'admin';
+  return (
+    (req.user || {}).role === SELLER_ROLE ||
+    (req.user || {}).role === ADMIN_ROLE
+  );
 }
 
-
-function getCurrentUserClientId(req){
-	var currentUserClientId = req.user ? req.user.Client : false;
-	return currentUserClientId;
+function getCurrentUserClientId(req) {
+  var currentUserClientId = req.user ? req.user.Client : false;
+  return currentUserClientId;
 }
 
-function createUserFromClient(client, password, req){
-	var activeStoreId = req.activeStore.id;
+function createUserFromClient(client, password, req) {
+  var activeStoreId = req.activeStore.id;
 
-	var userToCreate = {
-		Store: activeStoreId,
-		email: client.E_Mail,
-		firstName: client.FirstName,
-		lastName: client.LastName,
-		role: 'client',
-		password: password,
-		CardCode: client.CardCode,
-		Client: client.id
-	};
+  var userToCreate = client.invited
+    ? {
+        Store: activeStoreId,
+        email: client.E_Mail,
+        firstName: client.FirstName,
+        lastName: client.LastName,
+        role: 'client',
+        password: password,
+        CardCode: client.CardCode,
+        Client: client.id,
+        invited: true
+      }
+    : {
+        Store: activeStoreId,
+        email: client.E_Mail,
+        firstName: client.FirstName,
+        lastName: client.LastName,
+        role: 'client',
+        password: password,
+        CardCode: client.CardCode,
+        Client: client.id
+      };
 
-	return UserWeb.create(userToCreate);
+  return UserWeb.create(userToCreate);
 }
 
-function updateUserFromClient(client){
-	var updateParams = {
-		email: client.E_Mail,
-		firstName: client.FirstName,
-		lastName: client.LastName
-	};
-	var userId = client.UserWeb;
+function updateUserFromClient(client) {
+  var updateParams = {
+    email: client.E_Mail,
+    firstName: client.FirstName,
+    lastName: client.LastName
+  };
+  var userId = client.UserWeb;
 
-	return UserWeb.update({id: userId}, updateParams);	
+  return UserWeb.update({ id: userId }, updateParams);
 }
 
-function checkIfUserEmailIsTaken(email, userId){
-	var query = {email: email};
+function checkIfUserEmailIsTaken(email, userId) {
+  var query = { email: email };
 
-	if(userId){
-		query.id = {'!=': userId};
-	}
+  if (userId) {
+    query.id = { '!=': userId };
+  }
 
-	return UserWeb.findOne(query)
-		.then(function(user){
-			//sails.log.info('checkIfUserEmailIsTaken', user);
-			if( !_.isUndefined(user) ){
-				return true;
-			}else{
-				return false;
-			}
-		});
+  return UserWeb.findOne(query).then(function(user) {
+    //sails.log.info('checkIfUserEmailIsTaken', user);
+    if (!_.isUndefined(user)) {
+      return true;
+    } else {
+      return false;
+    }
+  });
 }
