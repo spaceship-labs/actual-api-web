@@ -1,14 +1,16 @@
-var baseURL               = process.env.baseURL;
-var baseURLFRONT          = process.env.baseURLFRONT;
-var surveyURL             = process.env.surveyURL || 'http://cc.actualg.com/s/fc28cff';
-var key                   = process.env.SENDGRIDAPIKEY;
-var Promise               = require('bluebird');
-var moment                = require('moment');
-var numeral               = require('numeral');
-var fs                    = require('fs');
-var ejs                   = require('ejs');
-var sendgrid              = require('sendgrid').SendGrid(key);
-var helper                = require('sendgrid').mail;
+const baseURL = process.env.baseURL;
+const baseURLFRONT = process.env.baseURLFRONT;
+const surveyURL = process.env.surveyURL || 'http://cc.actualg.com/s/fc28cff';
+const key = process.env.SENDGRIDAPIKEY;
+const Promise = require('bluebird');
+const _ = require('underscore');
+const moment = require('moment');
+const numeral = require('numeral');
+const fs = require('fs');
+const ejs = require('ejs');
+const sendgrid = require('sendgrid').SendGrid(key);
+const helper = require('sendgrid').mail;
+
 var passwordTemplate      = fs.readFileSync(sails.config.appPath + '/views/email/password.html').toString();
 var orderTemplate         = fs.readFileSync(sails.config.appPath + '/views/email/order.html').toString();
 var quotationTemplate     = fs.readFileSync(sails.config.appPath + '/views/email/quotation.html').toString();
@@ -21,8 +23,7 @@ var speiInstructionsTemplate  = fs.readFileSync(sails.config.appPath + '/views/e
 var speiReminderTemplate  = fs.readFileSync(sails.config.appPath + '/views/email/spei-reminder.html').toString();
 var speiExpirationTemplate  = fs.readFileSync(sails.config.appPath + '/views/email/spei-expiration.html').toString();
 var fiscalDataClientMessageTemplate  = fs.readFileSync(sails.config.appPath + '/views/email/fiscal-data-client-message.html').toString();
-var _ = require('underscore');
-
+var registerInvitationTemplate = fs.readFileSync(sails.config.appPath + '/views/email/register-invitation.html').toString();
 
 passwordTemplate          = ejs.compile(passwordTemplate);
 orderTemplate             = ejs.compile(orderTemplate);
@@ -43,16 +44,17 @@ module.exports = {
   sendOrderConfirmation: orderEmail,
   sendFreesale: freesaleEmail,
   sendQuotation: quotation,
-  sendRegister: sendRegister,
-  sendFiscalData: sendFiscalData,
-  sendFiscalDataMessageToClient: sendFiscalDataMessageToClient,
-  sendContact: sendContact,
-  sendQuotationLog: sendQuotationLog,
-  sendSpeiInstructions: sendSpeiInstructions,
-  sendSpeiReminder: sendSpeiReminder,
-  sendSpeiExpiration: sendSpeiExpiration,
-  sendSpeiQuotation: sendSpeiQuotation,
-  sendSuggestions: sendSuggestions
+  sendRegister,
+  sendFiscalData,
+  sendFiscalDataMessageToClient,
+  sendContact,
+  sendQuotationLog,
+  sendSpeiInstructions,
+  sendSpeiReminder,
+  sendSpeiExpiration,
+  sendSpeiQuotation,
+  sendSuggestions,
+  sendRegisterInvitation
 };
 
 function password(userName, userEmail, recoveryUrl, cb) {
@@ -88,6 +90,45 @@ function password(userName, userEmail, recoveryUrl, cb) {
     } else {
       cb(response);
     }
+  });
+}
+
+
+function sendRegisterInvitation(userName, userEmail, recoveryUrl, cb) {
+  var user_name       = userName;
+  var user_link       = recoveryUrl;
+  var request         = sendgrid.emptyRequest();
+  var requestBody     = undefined;
+  var mail            = new helper.Mail();
+  var personalization = new helper.Personalization();
+  var from            = new helper.Email("noreply@actualgroup.com", "Actual Group");
+  var to              = new helper.Email(userEmail, userName);
+  var subject         = 'Completa tu registro en ActualGroup';
+  var res             = registerInvitationTemplate({
+    user_name: user_name,
+    user_link: user_link,
+    company: {
+      url: baseURL,
+    },
+  });
+  var content = new helper.Content("text/html", res);
+  personalization.addTo(to);
+  personalization.setSubject(subject);
+  mail.setFrom(from);
+  mail.addContent(content);
+  mail.addPersonalization(personalization);
+  requestBody = mail.toJSON();
+  request.method = 'POST';
+  request.path = '/v3/mail/send';
+  request.body = requestBody;
+  return new Promise(function(resolve, reject){
+    sendgrid.API(request, function (response) {
+      if (response.statusCode >= 200 && response.statusCode <= 299) {
+        resolve();
+      } else {
+        resolve(response);
+      }
+    });
   });
 }
 

@@ -1,11 +1,17 @@
-var _ = require('underscore');
+const _ = require('underscore');
+const bcrypt = require('bcrypt');
+const Promise = require('bluebird');
 module.exports = {
-  createUserFromClient: createUserFromClient,
-  checkIfUserEmailIsTaken: checkIfUserEmailIsTaken,
-  updateUserFromClient: updateUserFromClient,
-  getCurrentUserClientId: getCurrentUserClientId,
-  getCurrentUserId: getCurrentUserId,
-  isUserAdminOrSeller: isUserAdminOrSeller
+  createUserFromClient,
+  checkIfUserEmailIsTaken,
+  updateUserFromClient,
+  getCurrentUserClientId,
+  getCurrentUserId,
+  isUserAdminOrSeller,
+  generateRecoveryToken,
+  validateRecoveryToken,
+  doRegisterInvitation,
+  doPasswordRecovery
 };
 
 function getCurrentUserId(req) {
@@ -54,6 +60,58 @@ function createUserFromClient(client, password, req) {
       };
 
   return UserWeb.create(userToCreate);
+}
+
+function generateRecoveryToken(userId, userEmail, userPassword){
+  const values = userId + userEmail + userPassword;  
+  console.log('values', values);
+  const token = bcrypt.hashSync(values ,bcrypt.genSaltSync(10));  
+  return token;
+}
+
+async function validateRecoveryToken(tokenReceived, email){
+  const user = await UserWeb.findOne({email}, {select: ['id', 'email', 'password']});
+  if(!user){
+    throw new Error("User not found");
+  }
+  var realToken = user.id + user.email + user.password;
+  return new Promise(function(resolve, reject){
+    bcrypt.compare(realToken, tokenReceived, function(err, res){
+      if(err) return reject(err);
+      resolve(res);
+    });
+  });
+}
+
+async function doPasswordRecovery(user, req){
+  const store = req.activeStore || {};  
+  const token = UserService.generateRecoveryToken(user.id, user.email, user.password);
+  var storeUrl = store.url_sandbox;
+  if(process.env.MODE === 'production'){
+    storeUrl = store.url;
+  }
+  const frontendURL =  storeUrl || 'http://actualstudio.com';
+  var recoverURL =  frontendURL + '/reset-password?';
+  recoverURL += 'token='+token;
+  recoverURL += '&email='+user.email;
+  const result = await Email.sendPasswordRecovery(user.firstName, user.email, recoverURL);
+  return true;
+}
+
+
+async function doRegisterInvitation(user, req){
+  const store = req.activeStore || {};  
+  const token = UserService.generateRecoveryToken(user.id, user.email, user.password);
+  var storeUrl = store.url_sandbox;
+  if(process.env.MODE === 'production'){
+    storeUrl = store.url;
+  }
+  const frontendURL =  storeUrl || 'http://actualstudio.com';
+  var recoverURL =  frontendURL + '/reset-password?';
+  recoverURL += 'token='+token;
+  recoverURL += '&email='+user.email;
+  const result = await Email.sendPasswordRecovery(user.firstName, user.email, recoverURL);
+  return true;
 }
 
 function updateUserFromClient(client) {
