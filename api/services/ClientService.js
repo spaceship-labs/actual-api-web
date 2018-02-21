@@ -16,6 +16,7 @@ module.exports = {
   ADDRESS_TYPE_S,
   ERROR_TYPE,
   CARDCODE_TYPE,
+  CLIENT_DATE_FORMAT,
   PERSON_TYPE,
   areContactsRepeated,
   createClient,
@@ -287,20 +288,22 @@ async function createClient(params, req) {
 
   //Created automatically, do we need the if validation?
   //if(sapFiscalAddressParams){
-  var fiscalAddressParams = mapFiscalFields(sapFiscalAddressParams);
-  fiscalAddressParams = Object.assign(fiscalAddressParams, {
-    CardCode: createdClient.CardCode,
-    AdresType: ADDRESS_TYPE_S
-  });
+    var fiscalAddressParams = mapFiscalFields(sapFiscalAddressParams);
+    var fiscalAddressParams1 = {
+      ...fiscalAddressParams,
+      CardCode: createdClient.CardCode,
+      AdresType: ADDRESS_TYPE_S
+    };
 
-  var fiscalAddressParams2 = Object.assign(fiscalAddressParams, {
-    AdresType: ADDRESS_TYPE_B
-  });
+    var fiscalAddressParams2 = {
+      ...fiscalAddressParams1,
+      AdresType: ADDRESS_TYPE_B
+    };
 
-  fiscalAddressesCreated = await FiscalAddress.create([
-    fiscalAddressParams,
-    fiscalAddressParams2
-  ]);
+    fiscalAddressesCreated = await FiscalAddress.create([
+      fiscalAddressParams1,
+      fiscalAddressParams2
+    ]);
   //}
 
   if (fiscalAddressesCreated) {

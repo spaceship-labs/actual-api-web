@@ -12,8 +12,13 @@ var RFCPUBLIC = 'XAXX010101000';
 var DEFAULT_CFDI_USE = 'P01';
 
 module.exports = {
-  createOrderInvoice: createOrderInvoice,
-  send: send,
+  createOrderInvoice,
+  send,
+  getUnitTypeByProduct,
+  getPaymentMethodBasedOnPayments,
+  prepareClientParams,
+  RFCPUBLIC,
+  DEFAULT_CFDI_USE
 };
 
 function createOrderInvoice(orderId, req) {
@@ -207,7 +212,6 @@ function getPaymentMethodBasedOnPayments(payments){
       break;
 
     case 'credit-card':
-    case 'debit-card':
     case '3-msi':
     case '3-msi-banamex':    
     case '6-msi':
@@ -221,16 +225,10 @@ function getPaymentMethodBasedOnPayments(payments){
       paymentMethod = 'credit-card';
       break;
     
-    case 'cheque':
-      paymentMethod = 'check';
-      break;
-
-    case 'client-balance':
-      paymentMethod = 'other';
-      break;
-    case 'client-credit':
-      paymentMethod = 'other';
-      break;      
+    case 'debit-card':
+      paymentMethod = 'debit-card';
+      break;  
+    
     default:
       paymentMethod = 'other';
       break;
@@ -296,8 +294,8 @@ function createInvoice(data) {
   });
 }
 
-function prepareClient(order, client, address) {
-  var generic = !client.LicTradNum || client.LicTradNum == RFCPUBLIC;
+function prepareClientParams(order, client, address){
+  const generic = !client.LicTradNum || client.LicTradNum == RFCPUBLIC;
   var data;
   if (!generic) {
     data = {
@@ -321,23 +319,20 @@ function prepareClient(order, client, address) {
     data = {
       name: order.CardName,
       identification: (RFCPUBLIC || "").toUpperCase(),
-      email: order.E_Mail,
       cfdiUse: DEFAULT_CFDI_USE,
+      //email: order.E_Mail,
       address: {
         country: 'México',
-        state: order.U_Estado || 'Quintana Roo',
-
+        state: order.U_Estado || 'Quintana Roo'
         //TODO; Check default Inovice data for GENERAL PUBLIC
-        //colony: order.U_Colonia,
-        //street: 'entre calle ' + order.U_Entrecalle + ' y calle ' + order.U_Ycalle,
-        //exteriorNumber: order.U_Noexterior,
-        //interiorNumber: order.U_Nointerior,
-        //municipality:  order.U_Mpio,
-        //localitiy: order.U_Ciudad,
-        //zipCode: order.U_CP,
       }
     };
-  }
+  }  
+  return data;
+}
+
+function prepareClient(order, client, address) {
+  const data =  prepareClientParams(order, client, address);
   return createClient(data);
 }
 
@@ -385,6 +380,10 @@ function prepareItems(details) {
 
 function getUnitTypeByProduct(product){
   var unitType = 'piece';
+  if(product.Service === 'Y'){
+    return 'service';
+  }
+  
   switch(product.U_ClaveUnidad){
     case 'H87':
       unitType = 'piece';

@@ -352,8 +352,12 @@ module.exports = {
     return { start: startDate.toDate(), end: endDate.toDate() };
   },
 
-  getFortnightRange: function(){
-    var currentDay = moment().date();
+  getFortnightRange: function(currentDate = moment().toDate()){
+    if(!moment(currentDate).isValid()){
+      throw new Error("Not a valid date");
+    }
+
+    var currentDay = moment(currentDate).date();
     var range = {};
     if(currentDay <= 15){
       range = {
@@ -467,7 +471,9 @@ module.exports = {
 
     return str;
 
-  }
+  },
+
+  numLeftPad: numLeftPad
 };
 
 

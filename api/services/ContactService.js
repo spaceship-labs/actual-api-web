@@ -2,7 +2,9 @@ const _ = require('underscore');
 
 module.exports = {
   createContact,
-  updateContact
+  updateContact,
+  validateSapContactCreation,
+  validateSapContactUpdate
 };
 
 function validateSapContactCreation(sapData){
