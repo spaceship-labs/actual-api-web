@@ -64,7 +64,6 @@ function createUserFromClient(client, password, req) {
 
 function generateRecoveryToken(userId, userEmail, userPassword){
   const values = userId + userEmail + userPassword;  
-  console.log('values', values);
   const token = bcrypt.hashSync(values ,bcrypt.genSaltSync(10));  
   return token;
 }

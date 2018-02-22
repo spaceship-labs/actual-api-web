@@ -49,11 +49,11 @@ module.exports = {
     if(token && email && password && confirmPass && (password == confirmPass) ){
       const isValidToken = await UserService.validateRecoveryToken(token, email);
       if(isValidToken){
-        const resultUpdate = await UserWeb.update({email: email},{new_password: password})
-        return res.ok({success:false});
+        const resultUpdate = await UserWeb.update({email: email},{new_password: password});
+        return res.ok({success:true});
       }
     }
-    throw new Error("Información no valida");
+    return res.negotiate(new Error("Información no valida"));
   },
 
   stores: function(req, res) {

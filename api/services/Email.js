@@ -84,12 +84,14 @@ function password(userName, userEmail, recoveryUrl, cb) {
   request.method = 'POST';
   request.path = '/v3/mail/send';
   request.body = requestBody;
-  sendgrid.API(request, function (response) {
-    if (response.statusCode >= 200 && response.statusCode <= 299) {
-      cb();
-    } else {
-      cb(response);
-    }
+  return new Promise(function(resolve, reject){
+    sendgrid.API(request, function (response) {
+      if (response.statusCode >= 200 && response.statusCode <= 299) {
+        resolve();
+      } else {
+        resolve(response);
+      }
+    });
   });
 }
 
