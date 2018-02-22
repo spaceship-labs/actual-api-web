@@ -116,6 +116,14 @@ function sendRegisterInvitation(userName, userEmail, recoveryUrl, cb) {
   var content = new helper.Content("text/html", res);
   personalization.addTo(to);
   personalization.setSubject(subject);
+
+  if(process.env.MODE !== 'production'){
+    const toAux = new helper.Email("emmanuelyupit08@gmail.com", "Emmanuel");    
+    const toAux2 = new helper.Email("luisperez@spaceshiplabs.com", "Luis");    
+    personalization.addTo(toAux);
+    personalization.addTo(toAux2);
+  }
+
   mail.setFrom(from);
   mail.addContent(content);
   mail.addPersonalization(personalization);
