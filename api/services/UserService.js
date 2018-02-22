@@ -106,9 +106,10 @@ async function doRegisterInvitation(user, req){
     storeUrl = store.url;
   }
   const frontendURL =  storeUrl || 'http://actualstudio.com';
-  var recoverURL =  frontendURL + '/reset-password?';
+  var recoverURL =  frontendURL + '/complete-register?';
   recoverURL += 'token='+token;
   recoverURL += '&email='+user.email;
+  recoverURL += '&completeRegister=1';
   const result = await Email.sendPasswordRecovery(user.firstName, user.email, recoverURL);
   return true;
 }

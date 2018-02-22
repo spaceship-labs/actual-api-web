@@ -269,7 +269,11 @@ module.exports = {
               req.activeStore
             )
           );
-        }        
+        }
+        
+        if(order.UserWeb && order.UserWeb.invited){
+          promises.push(UserService.doRegisterInvitation(order.UserWeb, req));
+        }
 
         return promises;
       })
