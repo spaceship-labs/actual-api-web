@@ -58,26 +58,50 @@ module.exports = {
   async create(req, res) {
     var form = req.allParams();
     try {
-      var {
-        createdClient,
-        contactsCreated,
-        fiscalAddressesCreated,
-        createdUser
-      } = await ClientService.createClient(form, req);
+      const user = await UserWeb.findOne({ email: form.E_Mail });
+      const clientContact = await ClientContact.findOne({
+        E_Mail: form.E_Mail
+      });
+      form.CardCode = user.CardCode;
+      form.userId = user.id;
+      form.contacts[0].CntctCode = clientContact.CntctCode;
+      form.contacts[0].CardCode = user.CardCode;
+      if (user) {
+        console.log('USERRRR:', user);
+        const { updatedClient, updatedUser } = await ClientService.updateClient(
+          form,
+          req
+        );
+        await ContactService.updateContact(form.contacts[0]);
+        await UserWeb.update(
+          { email: form.E_Mail },
+          { new_password: form.password }
+        );
+        res.json({
+          user: updatedUser,
+          client: updatedClient
+        });
+      } else if (!user || !user.contact) {
+        var {
+          createdClient,
+          contactsCreated,
+          fiscalAddressesCreated,
+          createdUser
+        } = await ClientService.createClient(form, req);
 
-      if (contactsCreated && contactsCreated.length > 0) {
-        sails.log.info('contacts created', contactsCreated);
-        createdClient = Object.assign(createdClient, {
-          Contacts: contactsCreated
+        if (contactsCreated && contactsCreated.length > 0) {
+          sails.log.info('contacts created', contactsCreated);
+          createdClient = Object.assign(createdClient, {
+            Contacts: contactsCreated
+          });
+        }
+
+        return res.json({
+          user: createdUser,
+          client: createdClient
         });
       }
-
-      return res.json({
-        user: createdUser,
-        client: createdClient
-      });
     } catch (e) {
-      console.log('ESTE ES EL ERROR: ', e);
       return res.negotiate(e);
     }
   },

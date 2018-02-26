@@ -62,55 +62,73 @@ function createUserFromClient(client, password, req) {
   return UserWeb.create(userToCreate);
 }
 
-function generateRecoveryToken(userId, userEmail, userPassword){
-  const values = userId + userEmail + userPassword;  
-  const token = bcrypt.hashSync(values ,bcrypt.genSaltSync(10));  
+function generateRecoveryToken(userId, userEmail, userPassword) {
+  const values = userId + userEmail + userPassword;
+  const token = bcrypt.hashSync(values, bcrypt.genSaltSync(10));
   return token;
 }
 
-async function validateRecoveryToken(tokenReceived, email){
-  const user = await UserWeb.findOne({email}, {select: ['id', 'email', 'password']});
-  if(!user){
-    throw new Error("User not found");
+async function validateRecoveryToken(tokenReceived, email) {
+  const user = await UserWeb.findOne(
+    { email },
+    { select: ['id', 'email', 'password'] }
+  );
+  if (!user) {
+    throw new Error('User not found');
   }
   var realToken = user.id + user.email + user.password;
-  return new Promise(function(resolve, reject){
-    bcrypt.compare(realToken, tokenReceived, function(err, res){
-      if(err) return reject(err);
+  return new Promise(function(resolve, reject) {
+    bcrypt.compare(realToken, tokenReceived, function(err, res) {
+      if (err) return reject(err);
       resolve(res);
     });
   });
 }
 
-async function doPasswordRecovery(user, req){
-  const store = req.activeStore || {};  
-  const token = UserService.generateRecoveryToken(user.id, user.email, user.password);
+async function doPasswordRecovery(user, req) {
+  const store = req.activeStore || {};
+  const token = UserService.generateRecoveryToken(
+    user.id,
+    user.email,
+    user.password
+  );
   var storeUrl = store.url_sandbox;
-  if(process.env.MODE === 'production'){
+  if (process.env.MODE === 'production') {
     storeUrl = store.url;
   }
-  const frontendURL =  storeUrl || 'http://actualstudio.com';
-  var recoverURL =  frontendURL + '/reset-password?';
-  recoverURL += 'token='+token;
-  recoverURL += '&email='+user.email;
-  const result = await Email.sendPasswordRecovery(user.firstName, user.email, recoverURL);
+  const frontendURL = storeUrl || 'http://actualstudio.com';
+  var recoverURL = frontendURL + '/reset-password?';
+  recoverURL += 'token=' + token;
+  recoverURL += '&email=' + user.email;
+  const result = await Email.sendPasswordRecovery(
+    user.firstName,
+    user.email,
+    recoverURL
+  );
   return true;
 }
 
-
-async function doRegisterInvitation(user, req){
-  const store = req.activeStore || {};  
-  const token = UserService.generateRecoveryToken(user.id, user.email, user.password);
+async function doRegisterInvitation(user, req) {
+  const store = req.activeStore || {};
+  const token = UserService.generateRecoveryToken(
+    user.id,
+    user.email,
+    user.password
+  );
   var storeUrl = store.url_sandbox;
-  if(process.env.MODE === 'production'){
+  if (process.env.MODE === 'production') {
     storeUrl = store.url;
   }
-  const frontendURL =  storeUrl || 'http://actualstudio.com';
-  var recoverURL =  frontendURL + '/complete-register?';
-  recoverURL += 'token='+token;
-  recoverURL += '&email='+user.email;
+  const frontendURL = storeUrl || 'http://actualstudio.com';
+  var recoverURL = frontendURL + '/complete-register?';
+  recoverURL += 'token=' + token;
+  recoverURL += '&email=' + user.email;
   recoverURL += '&completeRegister=1';
-  const result = await Email.sendPasswordRecovery(user.firstName, user.email, recoverURL);
+  const result = await Email.sendPasswordRecovery(
+    user.firstName,
+    user.email,
+    recoverURL
+  );
   return true;
 }
 
@@ -121,7 +139,7 @@ function updateUserFromClient(client) {
     lastName: client.LastName
   };
   var userId = client.UserWeb;
-
+  console.log('UPDATE PARAMS: ', updateParams);
   return UserWeb.update({ id: userId }, updateParams);
 }
 

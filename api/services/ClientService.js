@@ -288,22 +288,22 @@ async function createClient(params, req) {
 
   //Created automatically, do we need the if validation?
   //if(sapFiscalAddressParams){
-    var fiscalAddressParams = mapFiscalFields(sapFiscalAddressParams);
-    var fiscalAddressParams1 = {
-      ...fiscalAddressParams,
-      CardCode: createdClient.CardCode,
-      AdresType: ADDRESS_TYPE_S
-    };
+  var fiscalAddressParams = mapFiscalFields(sapFiscalAddressParams);
+  var fiscalAddressParams1 = {
+    ...fiscalAddressParams,
+    CardCode: createdClient.CardCode,
+    AdresType: ADDRESS_TYPE_S
+  };
 
-    var fiscalAddressParams2 = {
-      ...fiscalAddressParams1,
-      AdresType: ADDRESS_TYPE_B
-    };
+  var fiscalAddressParams2 = {
+    ...fiscalAddressParams1,
+    AdresType: ADDRESS_TYPE_B
+  };
 
-    fiscalAddressesCreated = await FiscalAddress.create([
-      fiscalAddressParams1,
-      fiscalAddressParams2
-    ]);
+  fiscalAddressesCreated = await FiscalAddress.create([
+    fiscalAddressParams1,
+    fiscalAddressParams2
+  ]);
   //}
 
   if (fiscalAddressesCreated) {
@@ -320,9 +320,16 @@ async function createClient(params, req) {
 }
 
 async function updateClient(params, req) {
-  const CardCode = _.clone(req.user.CardCode);
+  const CardCode = params.invited
+    ? params.CardCode
+    : _.clone(req.user.CardCode);
   const email = params.E_Mail;
-  const userId = req.user ? req.user.id : false;
+  let userId;
+  if (params.invited) {
+    userId = params.userId;
+  } else {
+    userId = req.user ? req.user.id : false;
+  }
 
   delete params.FiscalAddress;
   delete params.Balance;
@@ -331,49 +338,46 @@ async function updateClient(params, req) {
   delete params.Quotations;
 
   const updateParams = mapClientFields(params);
-  try {
-    if (!email) {
-      throw new Error('Email requerido');
-    }
-    if (!userId) {
-      throw new Error('No autorizado');
-    }
-
-    const isUserEmailTaken = await UserService.checkIfUserEmailIsTaken(
-      email,
-      userId
-    );
-    //const isClientEmailTaken = await Client.findOne({E_Mail:email, id: {'!=': params.id}});
-
-    //if(isUserEmailTaken || isClientEmailTaken){
-    if (isUserEmailTaken) {
-      throw new Error('Email previamente utilizado');
-    }
-    sails.log.info('updateParams', updateParams);
-
-    const clientAsociated = await Client.findOne({
-      UserWeb: userId,
-      CardCode: CardCode
-    });
-    if (!clientAsociated) {
-      throw new Error('No autorizado');
-    }
-
-    const sapResult = await SapService.updateClient(CardCode, params);
-    sails.log.info('update client resultSap', sapResult);
-    var sapData = JSON.parse(sapResult.value);
-
-    validateSapClientUpdate(sapData);
-
-    const updatedClients = Client.update({ CardCode: CardCode }, params);
-    const updatedClient = updatedClients[0];
-    const usersUpdated = await UserService.updateUserFromClient(updateClient);
-    const updatedUser = usersUpdated[0];
-    return {
-      updatedClient,
-      updatedUser
-    };
-  } catch (err) {
-    throw new Error(err);
+  if (!email) {
+    throw new Error('Email requerido');
   }
+  if (!userId) {
+    throw new Error('No autorizado');
+  }
+
+  const isUserEmailTaken = await UserService.checkIfUserEmailIsTaken(
+    email,
+    userId
+  );
+  //const isClientEmailTaken = await Client.findOne({E_Mail:email, id: {'!=': params.id}});
+
+  //if(isUserEmailTaken || isClientEmailTaken){
+  if (isUserEmailTaken) {
+    throw new Error('Email previamente utilizado');
+  }
+  sails.log.info('updateParams', updateParams);
+
+  const clientAsociated = await Client.findOne({
+    UserWeb: userId,
+    CardCode: CardCode
+  });
+  if (!clientAsociated) {
+    throw new Error('No autorizado');
+  }
+
+  const sapResult = await SapService.updateClient(CardCode, params);
+  sails.log.info('update client resultSap', sapResult);
+  var sapData = JSON.parse(sapResult.value);
+
+  validateSapClientUpdate(sapData);
+
+  const updatedClients = await Client.update({ CardCode: CardCode }, params);
+  console.log('updatedClients: ', updatedClients);
+  const updatedClient = updatedClients[0];
+  const usersUpdated = await UserService.updateUserFromClient(updatedClient);
+  const updatedUser = usersUpdated[0];
+  return {
+    updatedClient,
+    updatedUser
+  };
 }
