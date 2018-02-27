@@ -1,86 +1,96 @@
 module.exports = {
-
-  async send_password_recovery(req, res){
-    var form  = req.params.all();
+  async send_password_recovery(req, res) {
+    var form = req.params.all();
     const email = form.email || false;
-    try{
-      if(email && Common.validateEmail(email) ){
-        const user = await UserWeb.findOne( {email:email}, {select: ['id', 'password', 'email']} );
-        if(!user){
+    try {
+      if (email && Common.validateEmail(email)) {
+        const user = await UserWeb.findOne(
+          { email: email },
+          { select: ['id', 'password', 'email'] }
+        );
+        if (!user) {
           return res.negotiate(new Error('No se encontro el usuario'));
         }
         const result = await UserService.doPasswordRecovery(user, req);
-        res.ok({success:true});
-      }else{
-        return res.notFound();      
+        res.ok({ success: true });
+      } else {
+        return res.notFound();
       }
-    }catch(e){
+    } catch (e) {
       res.negotiate(e);
     }
   },
 
-  findById: function(req, res){
+  findById: function(req, res) {
     var form = req.params.all();
     var id = form.id;
     var quickRead = form.quickRead;
-    
-    var userQuery =  UserWeb.findOne({id: id})
 
-    if(!quickRead){
+    var userQuery = UserWeb.findOne({ id: id });
+
+    if (!quickRead) {
       userQuery.populate('Stores');
     }
 
-    userQuery.then(function(result){
-      res.ok({data:result});
-    })
-    .catch(function(err){
-      console.log(err);
-      res.negotiate(err);
-    });      
+    userQuery
+      .then(function(result) {
+        res.ok({ data: result });
+      })
+      .catch(function(err) {
+        console.log(err);
+        res.negotiate(err);
+      });
   },
 
-
-  async update_password(req, res){
+  async update_password(req, res) {
     var form = req.params.all();
     var token = form.token || false;
     var email = form.email || false;
     var password = form.password || false;
     var confirmPass = form.confirm_pass || false;
-    if(token && email && password && confirmPass && (password == confirmPass) ){
-      const isValidToken = await UserService.validateRecoveryToken(token, email);
-      if(isValidToken){
-        const resultUpdate = await UserWeb.update({email: email},{new_password: password});
-        return res.ok({success:true});
+    if (token && email && password && confirmPass && password == confirmPass) {
+      const isValidToken = await UserService.validateRecoveryToken(
+        token,
+        email
+      );
+      if (isValidToken) {
+        const user = await User.findOne({ email });
+        await UserWeb.update(
+          { email: email },
+          user.invited
+            ? { new_password: password, invited: false }
+            : { new_password: password }
+        );
+        return res.ok({ success: true });
       }
     }
-    return res.negotiate(new Error("Información no valida"));
+    return res.negotiate(new Error('Información no valida'));
   },
 
   stores: function(req, res) {
-    var form  = req.allParams();
+    var form = req.allParams();
     var email = form.email;
-    UserWeb.findOne({email: email})
+    UserWeb.findOne({ email: email })
       .populate('Stores')
       .then(function(user) {
-        var stores = user && user.Stores || [];
+        var stores = (user && user.Stores) || [];
         return res.json(stores);
       })
-      .catch(function(err){
+      .catch(function(err) {
         console.log(err);
         res.negotiate(err);
-      });      
+      });
   },
 
-  register: function(req, res){
+  register: function(req, res) {
     var form = req.allParams();
     UserWeb.create(form)
-      .then(function(_user){
-        return res.ok({user: _user});
+      .then(function(_user) {
+        return res.ok({ user: _user });
       })
-      .catch(function(err){
+      .catch(function(err) {
         console.log(err);
         res.negotiate(err);
-      });     
-  },
-
+      });
+  }
 };
