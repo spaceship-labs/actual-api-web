@@ -62,11 +62,11 @@ module.exports = {
       const clientContact = await ClientContact.findOne({
         E_Mail: form.E_Mail
       });
-      form.CardCode = user.CardCode;
-      form.userId = user.id;
-      form.contacts[0].CntctCode = clientContact.CntctCode;
-      form.contacts[0].CardCode = user.CardCode;
       if (user) {
+        form.CardCode = user.CardCode;
+        form.userId = user.id;
+        form.contacts[0].CntctCode = clientContact.CntctCode;
+        form.contacts[0].CardCode = user.CardCode;
         console.log('USERRRR:', user);
         const { updatedClient, updatedUser } = await ClientService.updateClient(
           form,

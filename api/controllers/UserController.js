@@ -54,7 +54,7 @@ module.exports = {
         email
       );
       if (isValidToken) {
-        const user = await User.findOne({ email });
+        const user = await UserWeb.findOne({ email });
         await UserWeb.update(
           { email: email },
           user.invited
