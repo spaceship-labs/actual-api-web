@@ -55,33 +55,42 @@ module.exports = {
     }
   },
 
-  async create(req, res) {
+  async register(req, res) {
     var form = req.allParams();
     try {
       const user = await UserWeb.findOne({ email: form.E_Mail });
       const clientContact = await ClientContact.findOne({
         E_Mail: form.E_Mail
       });
-      if (user) {
+      if (user && user.invited) {
         form.CardCode = user.CardCode;
         form.userId = user.id;
-        form.contacts[0].CntctCode = clientContact.CntctCode;
-        form.contacts[0].CardCode = user.CardCode;
-        console.log('USERRRR:', user);
+        form.invited = false;
+        
         const { updatedClient, updatedUser } = await ClientService.updateClient(
           form,
           req
         );
-        await ContactService.updateContact(form.contacts[0]);
+
+        if(form.contacts && form.contacts.length > 0){
+          form.contacts[0].CntctCode = clientContact.CntctCode;
+          form.contacts[0].CardCode = user.CardCode;
+          await ContactService.updateContact(form.contacts[0]);
+        }
+
         await UserWeb.update(
           { email: form.E_Mail },
-          { new_password: form.password }
+          { 
+            new_password: form.password,
+            invited: false
+          }
         );
-        res.json({
+        return res.json({
           user: updatedUser,
           client: updatedClient
         });
-      } else if (!user || !user.contact) {
+      } 
+      else {
         var {
           createdClient,
           contactsCreated,

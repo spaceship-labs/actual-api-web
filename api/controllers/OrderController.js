@@ -271,7 +271,6 @@ module.exports = {
           );
         }
         
-        console.log('order.userweb', order.UserWeb);
         if(order.UserWeb && order.UserWeb.invited){
           promises.push(UserService.doRegisterInvitation(order.UserWeb, req));
         }

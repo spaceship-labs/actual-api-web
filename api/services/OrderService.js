@@ -305,7 +305,7 @@ function relateOrderToSap(order, orderDetails,req){
   var error;
   var clientId = UserService.getCurrentUserClientId(req);
   var userId = UserService.getCurrentUserId(req);
-
+  var sapResponse;
   //sails.log.info('relatingViaConektaNotification', order.relatingViaConektaNotification);
 
   //return Promise.reject(new Error('Error forzado sap'));
@@ -353,9 +353,7 @@ function relateOrderToSap(order, orderDetails,req){
         return SapOrderConnectionLogWeb.create(log);
       })
       .then(function(sapLogCreated){
-        sapLog = sapLogCreated;
-
-        sapResult = JSON.parse(sapResponse.value);
+        var sapResult = JSON.parse(sapResponse.value);
         var isValidSapResponse = isValidOrderCreated(sapResponse, sapResult, order.Payments);
         if( isValidSapResponse.error ){
           var defaultErrMsg = 'Error en la respuesta de SAP';

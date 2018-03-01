@@ -129,6 +129,10 @@ function updateUserFromClient(client) {
     firstName: client.FirstName,
     lastName: client.LastName
   };
+
+  if(client.invited){
+    updateParams.invited = true;
+  }  
   var userId = client.UserWeb;
   return UserWeb.update({ id: userId }, updateParams);
 }

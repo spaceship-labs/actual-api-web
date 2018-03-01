@@ -102,7 +102,8 @@ module.exports = {
       enum: ['client', 'admin']
     },
     invited: {
-      type: 'boolean'
+      type: 'boolean',
+      defaultsTo: false
     },
     toJSON: function() {
       var obj = this.toObject();

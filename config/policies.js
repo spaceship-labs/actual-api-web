@@ -66,7 +66,7 @@ module.exports.policies = {
     register: ['setupDefaultData']
   },
   ClientController:{
-    create:['setupDefaultData'],
+    register:['setupDefaultData'],
     find: ['setupDefaultData', 'isAdmin']
   },
   MeController: {

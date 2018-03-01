@@ -382,9 +382,9 @@ module.exports.routes = {
     action: 'find'
   },
 
-  '/client/create': {
+  '/client/register': {
     controller: 'client',
-    action: 'create'
+    action: 'register'
   },
 
   '/promotion/find/:page': {
