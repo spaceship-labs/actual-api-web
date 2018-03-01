@@ -22,10 +22,7 @@ function getCurrentUserId(req) {
 function isUserAdminOrSeller(req) {
   var SELLER_ROLE = 'seller';
   var ADMIN_ROLE = 'admin';
-  return (
-    (req.user || {}).role === SELLER_ROLE ||
-    (req.user || {}).role === ADMIN_ROLE
-  );
+  return (req.user || {}).role === SELLER_ROLE || (req.user || {}).role === ADMIN_ROLE;
 }
 
 function getCurrentUserClientId(req) {
@@ -47,7 +44,7 @@ function createUserFromClient(client, password, req) {
     Client: client.id
   };
 
-  if(client.invited){
+  if (client.invited) {
     userToCreate.invited = true;
   }
   return UserWeb.create(userToCreate);
@@ -60,10 +57,7 @@ function generateRecoveryToken(userId, userEmail, userPassword) {
 }
 
 async function validateRecoveryToken(tokenReceived, email) {
-  const user = await UserWeb.findOne(
-    { email },
-    { select: ['id', 'email', 'password'] }
-  );
+  const user = await UserWeb.findOne({ email }, { select: ['id', 'email', 'password'] });
   if (!user) {
     throw new Error('User not found');
   }
@@ -78,11 +72,7 @@ async function validateRecoveryToken(tokenReceived, email) {
 
 async function doPasswordRecovery(user, req) {
   const store = req.activeStore || {};
-  const token = generateRecoveryToken(
-    user.id,
-    user.email,
-    user.password
-  );
+  const token = generateRecoveryToken(user.id, user.email, user.password);
   var storeUrl = store.url_sandbox;
   if (process.env.MODE === 'production') {
     storeUrl = store.url;
@@ -91,21 +81,13 @@ async function doPasswordRecovery(user, req) {
   var recoverURL = frontendURL + '/reset-password?';
   recoverURL += 'token=' + token;
   recoverURL += '&email=' + user.email;
-  await Email.sendPasswordRecovery(
-    user.firstName,
-    user.email,
-    recoverURL
-  );
+  await Email.sendPasswordRecovery(user.firstName, user.email, recoverURL);
   return true;
 }
 
 async function doRegisterInvitation(user, req) {
   const store = req.activeStore || {};
-  const token = generateRecoveryToken(
-    user.id,
-    user.email,
-    user.password
-  );
+  const token = generateRecoveryToken(user.id, user.email, user.password);
   var storeUrl = store.url_sandbox;
   if (process.env.MODE === 'production') {
     storeUrl = store.url;
@@ -115,13 +97,11 @@ async function doRegisterInvitation(user, req) {
   recoverURL += 'token=' + token;
   recoverURL += '&email=' + user.email;
   recoverURL += '&completeRegister=1';
-  await Email.sendRegisterInvitation(
-    user.firstName,
-    user.email,
-    recoverURL
-  );
+  await Email.sendRegisterInvitation(user.firstName, user.email, recoverURL);
   return true;
 }
+
+var d = 'dedede';
 
 function updateUserFromClient(client) {
   var updateParams = {
@@ -130,9 +110,9 @@ function updateUserFromClient(client) {
     lastName: client.LastName
   };
 
-  if(client.invited){
+  if (client.invited) {
     updateParams.invited = true;
-  }  
+  }
   var userId = client.UserWeb;
   return UserWeb.update({ id: userId }, updateParams);
 }

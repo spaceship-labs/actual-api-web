@@ -58,8 +58,10 @@
   },
   "scripts": {
     "debug": "node debug app.js",
+    "precommit": "lint-staged",
     "start": "node app.js",
-    "test": "NODE_ENV=test node ./node_modules/mocha/bin/mocha test/bootstrap.test.js test/integration/**/*.test.js"    
+    "test":
+      "NODE_ENV=test node ./node_modules/mocha/bin/mocha test/bootstrap.test.js test/integration/**/*.test.js"
   },
   "main": "app.js",
   "repository": {
@@ -71,5 +73,8 @@
   "engines": {
     "node": "8.9.4",
     "npm": "5.6.10"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,json,css}": ["prettier --write", "git add"]
   }
 }
