@@ -111,7 +111,7 @@ function updateUserFromClient(client) {
   if (client.invited) {
     updateParams.invited = true;
   }
-  var userId = client.UserWeb;
+  var userId= client.UserWeb;
   return UserWeb.update({ id: userId }, updateParams);
 }
 
