@@ -101,8 +101,6 @@ async function doRegisterInvitation(user, req) {
   return true;
 }
 
-var d = 'dedede';
-
 function updateUserFromClient(client) {
   var updateParams = {
     email: client.E_Mail,
