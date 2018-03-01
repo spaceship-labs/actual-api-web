@@ -37,6 +37,7 @@ speiInstructionsTemplate  = ejs.compile(speiInstructionsTemplate);
 speiReminderTemplate      = ejs.compile(speiReminderTemplate);
 speiExpirationTemplate    = ejs.compile(speiExpirationTemplate);
 fiscalDataClientMessageTemplate = ejs.compile(fiscalDataClientMessageTemplate);
+registerInvitationTemplate = ejs.compile(registerInvitationTemplate);
 
 
 module.exports = {
@@ -96,7 +97,7 @@ function password(userName, userEmail, recoveryUrl, cb) {
 }
 
 
-function sendRegisterInvitation(userName, userEmail, recoveryUrl, cb) {
+function sendRegisterInvitation(userName, userEmail, recoveryUrl) {
   var user_name       = userName;
   var user_link       = recoveryUrl;
   var request         = sendgrid.emptyRequest();
@@ -119,9 +120,10 @@ function sendRegisterInvitation(userName, userEmail, recoveryUrl, cb) {
 
   if(process.env.MODE !== 'production'){
     const toAux = new helper.Email("emmanuelyupit08@gmail.com", "Emmanuel");    
-    const toAux2 = new helper.Email("luisperez@spaceshiplabs.com", "Luis");    
     personalization.addTo(toAux);
-    personalization.addTo(toAux2);
+
+    const toAux3 = new helper.Email("luisperez@spaceshiplabs.com", "Luis");    
+    personalization.addTo(toAux3);    
   }
 
   mail.setFrom(from);

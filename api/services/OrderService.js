@@ -372,11 +372,11 @@ function relateOrderToSap(order, orderDetails,req){
         return [
           OrderWeb.update({id: order.id},{status:'completed', inSapWriteProgress:false}),
           OrderDetailWeb.update({OrderWeb:order.id},{inSapWriteProgress: false}),
-          StockService.syncOrderDetailsProducts(orderDetails)
+          //StockService.syncOrderDetailsProducts(orderDetails)
         ];
       })
-      .spread(function(updateOrder, updateDetails, syncResults){
-        sails.log.info('syncResults', syncResults);
+      .spread(function(updateOrder, updateDetails, /*syncResults*/){
+        //sails.log.info('syncResults', syncResults);
         resolve(updateOrder);        
       })
       .catch(function(err){

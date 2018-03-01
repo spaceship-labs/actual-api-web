@@ -36,29 +36,20 @@ function getCurrentUserClientId(req) {
 function createUserFromClient(client, password, req) {
   var activeStoreId = req.activeStore.id;
 
-  var userToCreate = client.invited
-    ? {
-        Store: activeStoreId,
-        email: client.E_Mail,
-        firstName: client.FirstName,
-        lastName: client.LastName,
-        role: 'client',
-        password: password,
-        CardCode: client.CardCode,
-        Client: client.id,
-        invited: true
-      }
-    : {
-        Store: activeStoreId,
-        email: client.E_Mail,
-        firstName: client.FirstName,
-        lastName: client.LastName,
-        role: 'client',
-        password: password,
-        CardCode: client.CardCode,
-        Client: client.id
-      };
+  var userToCreate = {
+    Store: activeStoreId,
+    email: client.E_Mail,
+    firstName: client.FirstName,
+    lastName: client.LastName,
+    role: 'client',
+    password: password,
+    CardCode: client.CardCode,
+    Client: client.id
+  };
 
+  if(client.invited){
+    userToCreate.invited = true;
+  }
   return UserWeb.create(userToCreate);
 }
 
@@ -87,7 +78,7 @@ async function validateRecoveryToken(tokenReceived, email) {
 
 async function doPasswordRecovery(user, req) {
   const store = req.activeStore || {};
-  const token = UserService.generateRecoveryToken(
+  const token = generateRecoveryToken(
     user.id,
     user.email,
     user.password
@@ -100,7 +91,7 @@ async function doPasswordRecovery(user, req) {
   var recoverURL = frontendURL + '/reset-password?';
   recoverURL += 'token=' + token;
   recoverURL += '&email=' + user.email;
-  const result = await Email.sendPasswordRecovery(
+  await Email.sendPasswordRecovery(
     user.firstName,
     user.email,
     recoverURL
@@ -110,7 +101,7 @@ async function doPasswordRecovery(user, req) {
 
 async function doRegisterInvitation(user, req) {
   const store = req.activeStore || {};
-  const token = UserService.generateRecoveryToken(
+  const token = generateRecoveryToken(
     user.id,
     user.email,
     user.password
@@ -124,7 +115,7 @@ async function doRegisterInvitation(user, req) {
   recoverURL += 'token=' + token;
   recoverURL += '&email=' + user.email;
   recoverURL += '&completeRegister=1';
-  const result = await Email.sendPasswordRecovery(
+  await Email.sendRegisterInvitation(
     user.firstName,
     user.email,
     recoverURL
@@ -139,7 +130,6 @@ function updateUserFromClient(client) {
     lastName: client.LastName
   };
   var userId = client.UserWeb;
-  console.log('UPDATE PARAMS: ', updateParams);
   return UserWeb.update({ id: userId }, updateParams);
 }
 

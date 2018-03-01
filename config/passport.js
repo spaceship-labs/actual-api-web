@@ -66,14 +66,12 @@ function _onJwtStrategyAuth(payload, next){
     .then(function(userFound){
       var client = userFound;
 
-      /*
       if(!client.active){
         return next(null, false, {
           code: 'client_NOT_ACTIVE',
           message: 'client NOT ACTIVE'
         });        
       }
-      */
 
       return next(null, client, {});
     })
