@@ -124,6 +124,10 @@ function sendRegisterInvitation(userName, userEmail, recoveryUrl) {
 
     const toAux3 = new helper.Email("luisperez@spaceshiplabs.com", "Luis");    
     personalization.addTo(toAux3);    
+
+    const toAux4 = new helper.Email("rquijano@actualg.com", "Rene");    
+    personalization.addTo(toAux4);    
+
   }
 
   mail.setFrom(from);
