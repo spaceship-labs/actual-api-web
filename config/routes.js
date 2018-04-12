@@ -387,6 +387,11 @@ module.exports.routes = {
     action: 'updateFiscalAddress'
   },
 
+  'POST /client/create': {
+    controller: 'client',
+    action: 'create'
+  },
+
   '/client/find': {
     controller: 'client',
     action: 'find'
