@@ -5,7 +5,7 @@
  * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
  */
 
-var passport = require("passport");
+var passport = require('passport');
 
 function _onPassportAuth(req, res, error, user, info) {
   if (error) return res.serverError(error);
@@ -28,10 +28,10 @@ function _onPassportAuth(req, res, error, user, info) {
       /*Logging stuff*/
       var message =
         userUpdated.firstName +
-        " " +
+        ' ' +
         userUpdated.lastName +
-        " ingresó al sistema";
-      var action = "login";
+        ' ingresó al sistema';
+      var action = 'login';
       return Logger.log(userUpdated.id, message, action);
     })
     .then(function(log) {
@@ -48,13 +48,13 @@ function _onPassportAuth(req, res, error, user, info) {
 
 module.exports = {
   signin: function(req, res) {
-    passport.authenticate("local", _onPassportAuth.bind(this, req, res))(
+    passport.authenticate('local', _onPassportAuth.bind(this, req, res))(
       req,
       res
     );
   },
 
   homeStatus: function(req, res) {
-    res.ok({ status: "ok!", version: "1.0.1" });
+    res.ok({ status: 'ok!', version: '1.0.2' });
   }
 };
