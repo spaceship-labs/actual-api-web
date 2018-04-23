@@ -226,7 +226,7 @@ module.exports.routes = {
     action: 'removeDetail'
   },
 
-  'DELETE /quotation/:quotation/removealldetails/:id': {
+  'DELETE /quotation/:quotation/removealldetails': {
     controller: 'quotation',
     action: 'removeAllDetails'
   },
