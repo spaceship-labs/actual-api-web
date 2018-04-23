@@ -24,6 +24,7 @@ module.exports = {
     /*-----/
     FIELDS APP
     /*-----*/
+    cfdiUse: {type:'string'},
     FirstName: {type:'string'},
     LastName: {type:'string'},
     //password:{type:'string'},

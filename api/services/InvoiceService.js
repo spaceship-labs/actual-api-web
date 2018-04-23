@@ -9,6 +9,7 @@ var promiseDelay = require('promise-delay');
 var alegraIVAID = 2;
 var alegraACCOUNTID = 1;
 var RFCPUBLIC = 'XAXX010101000';
+var DEFAULT_CFDI_USE = 'P01';
 
 module.exports = {
   createOrderInvoice: createOrderInvoice,
@@ -176,6 +177,7 @@ function prepareInvoice(order, payments, client, items) {
     dueDate: dueDate,
     client: client,
     items: items,
+    cfdiUse: client.cfdiUse,
     paymentMethod: getPaymentMethodBasedOnPayments(payments),
     anotation: order.folio + '-web',
     stamp: {
@@ -302,6 +304,7 @@ function prepareClient(order, client, address) {
       name: address.companyName,
       identification: (client.LicTradNum || "").toUpperCase(),
       email: address.U_Correos,
+      cfdiUse: client.cfdiUse || DEFAULT_CFDI_USE,
       address: {
         street: address.Street,
         exteriorNumber: address.U_NumExt,
@@ -319,6 +322,7 @@ function prepareClient(order, client, address) {
       name: order.CardName,
       identification: (RFCPUBLIC || "").toUpperCase(),
       email: order.E_Mail,
+      cfdiUse: DEFAULT_CFDI_USE,
       address: {
         country: 'México',
         state: order.U_Estado || 'Quintana Roo',
@@ -353,16 +357,19 @@ function createClient(client) {
 function prepareItems(details, order) {
   var items = details.map(function(detail) {
     var discount = detail.discountPercent ? detail.discountPercent : 0;
+    var product = detail.Product;
     discount = Math.abs(discount);
     return {
       id: detail.id,
-      name: detail.Product.ItemName,
+      name: product.ItemName,
       price: detail.unitPrice / 1.16,
       discount: parseFloat((discount).toFixed(4)),
       tax: [ {id: alegraIVAID} ],
+      productKey: product.U_ClaveProdServ,      
       quantity: detail.quantity,
       inventory:{
-        unit:'piece',
+        //unit:'piece',
+        unit: getUnitTypeByProduct(product),
         unitCost: detail.unitPrice,
         initialQuantity: detail.quantity
       }      
@@ -391,6 +398,24 @@ function prepareItems(details, order) {
   //Uncomment to use instant requests instead of delaying the requests
   //return Promise.all(createItems(items));
 }
+
+function getUnitTypeByProduct(product){
+  var unitType = 'piece';
+  switch(product.U_ClaveUnidad){
+    case 'H87':
+      unitType = 'piece';
+      break;
+    case 'SET':
+      unitType = 'piece';
+      break;
+    case 'E48':
+      unitType = 'service';
+      break;
+  }
+
+  return unitType;
+}
+
 
 function createItemWithDelay(item){
   var options = {
