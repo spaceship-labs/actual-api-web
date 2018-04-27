@@ -221,7 +221,11 @@ function buildSaleOrderRequestParams(params) {
           params.currentStore.group
         ),
         Price: detail.total,
-        ImmediateDelivery: isImmediateDelivery(detail.shipDate),
+        Service: detail.Product.Service, //FOR SR SERVICES
+        ImmediateDelivery:
+          detail.Product.ItemCode === 'SR00078'
+            ? true
+            : isImmediateDelivery(detail.shipDate),
         DetailId: detail.id
         //unitPrice: detail.Product.Price
       };
