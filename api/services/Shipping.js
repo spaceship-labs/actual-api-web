@@ -21,7 +21,7 @@ module.exports = {
 
 function productShipping(product, storeWarehouse, options) {
   options = options || {};
-  var SAMPLE_ZIPCODE = '01000';
+  var SAMPLE_ZIPCODE = '77500';
   var pendingProductDetailsSum = 0;
 
   var defaultZipcodeQuery = {

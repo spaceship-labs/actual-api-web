@@ -55,6 +55,6 @@ module.exports = {
   },
 
   homeStatus: function(req, res) {
-    res.ok({ status: 'ok!', version: '1.0.6' });
+    res.ok({ status: 'ok!', version: '1.0.7' });
   }
 };
