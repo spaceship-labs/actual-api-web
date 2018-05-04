@@ -9,8 +9,7 @@ var passport = require('passport');
 
 function _onPassportAuth(req, res, error, user, info) {
   if (error) return res.serverError(error);
-  if (!user)
-    return res.unauthorized(null, info && info.code, info && info.message);
+  if (!user) return res.unauthorized(null, info && info.code, info && info.message);
 
   /*Active store*/
   var form = req.allParams();
@@ -26,11 +25,7 @@ function _onPassportAuth(req, res, error, user, info) {
     })
     .then(function(userUpdated) {
       /*Logging stuff*/
-      var message =
-        userUpdated.firstName +
-        ' ' +
-        userUpdated.lastName +
-        ' ingresó al sistema';
+      var message = userUpdated.firstName + ' ' + userUpdated.lastName + ' ingresó al sistema';
       var action = 'login';
       return Logger.log(userUpdated.id, message, action);
     })
@@ -48,13 +43,10 @@ function _onPassportAuth(req, res, error, user, info) {
 
 module.exports = {
   signin: function(req, res) {
-    passport.authenticate('local', _onPassportAuth.bind(this, req, res))(
-      req,
-      res
-    );
+    passport.authenticate('local', _onPassportAuth.bind(this, req, res))(req, res);
   },
 
   homeStatus: function(req, res) {
-    res.ok({ status: 'ok!', version: '1.0.7' });
+    res.ok({ status: 'ok!', version: '1.0.8' });
   }
 };
