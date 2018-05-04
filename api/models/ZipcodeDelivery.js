@@ -16,5 +16,7 @@ module.exports = {
     dias_ent_bigticket:{type:'integer'},
     entrega_pta:{type:'integer'},
     dias_ent_softline:{type:'integer'},
+
+    ZipcodeState: {model: 'ZipcodeState'}
   }
 };

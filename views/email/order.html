@@ -156,7 +156,7 @@
                                           <table style="border-collapse:collapse;border-spacing:0;color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top;width:100%">
                                              <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
                                                 <th style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left">
-                                                   <center data-parsed="" style="color:#6b6b6b;font-size:11px;min-width:97px;width:100%"><strong align="center" class="float-center" style="color:#6b6b6b;font-size:11px">Total</strong></center>
+                                                   <center data-parsed="" style="color:#6b6b6b;font-size:11px;min-width:97px;width:100%"><strong align="center" class="float-center" style="color:#6b6b6b;font-size:11px">Subtotal</strong></center>
                                                    <center class="red" data-parsed="" style="color:red;font-size:11px;font-weight:700;min-width:97px;width:100%">$<%=product.total%> MXN</center>
                                                 </th>
                                              </tr>
@@ -171,6 +171,11 @@
                                     <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
                                        <th class="small-2 large-2 columns first last" style="Margin:0 auto;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0 auto;padding:0;padding-bottom:16px;padding-left:16px;padding-right:16px;text-align:left;width:80.67px">
                                           <table style="border-collapse:collapse;border-spacing:0;color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top;width:100%">
+                                             <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
+                                                <th style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left">
+                                                   <p class="text-right" style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:4px;padding:0;text-align:right">Costo de envío: $<%=product.deliveryFee%> MXN</p>
+                                                </th>
+                                             </tr>                                             
                                              <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
                                                 <th style="Margin:0;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;padding:0;text-align:left">
                                                    <p class="text-right" style="Margin:0;Margin-bottom:10px;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;line-height:1.3;margin:0;margin-bottom:4px;padding:0;text-align:right">Promoción: <%=product.promo%></p>
@@ -260,6 +265,11 @@
                                                             <td colspan="3" style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word"></td>
                                                             <td style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word">DESCUENTO DE COMPRA:</td>
                                                             <td class="align-right" style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:right;vertical-align:top;word-wrap:break-word">$<%=order.discount%> MXN</td>
+                                                         </tr>
+                                                         <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
+                                                            <td colspan="3" style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word"></td>
+                                                            <td style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word">COSTO DE ENVÍO:</td>
+                                                            <td class="align-right" style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:right;vertical-align:top;word-wrap:break-word">$<%=order.deliveryFee%> MXN</td>
                                                          </tr>
                                                          <tr style="color:#6b6b6b;font-size:11px;padding:0;text-align:left;vertical-align:top">
                                                             <td colspan="3" style="-moz-hyphens:auto;-webkit-hyphens:auto;Margin:0;border-collapse:collapse!important;color:#6b6b6b;font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:400;hyphens:auto;line-height:1.3;margin:0;padding:0;text-align:left;vertical-align:top;word-wrap:break-word"></td>

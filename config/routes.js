@@ -226,6 +226,11 @@ module.exports.routes = {
     action: 'removeDetail'
   },
 
+  'DELETE /quotation/:quotation/removealldetails': {
+    controller: 'quotation',
+    action: 'removeAllDetails'
+  },
+
   '/quotation/totals/:id': {
     controller: 'quotation',
     action: 'getQuotationTotals'
@@ -279,6 +284,16 @@ module.exports.routes = {
   'PUT /quotation/:id/address': {
     controller: 'quotation',
     action: 'updateQuotationAddress'
+  },
+
+  '/quotation/addrecord/:id': {
+    controller: 'quotationrecord',
+    action: 'create'
+  },
+
+  '/quotation/:id/records': {
+    controller: 'quotationrecord',
+    action: 'index'
   },
 
   '/payment/add/:quotationid': {

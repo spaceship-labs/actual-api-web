@@ -4,7 +4,7 @@ var request = require('request-promise');
 var Promise = require('bluebird');
 var ALEGRAUSER = process.env.ALEGRAUSER;
 var ALEGRATOKEN = process.env.ALEGRATOKEN;
-var token = new Buffer(ALEGRAUSER + ":" + ALEGRATOKEN).toString('base64');
+var token = new Buffer(ALEGRAUSER + ':' + ALEGRATOKEN).toString('base64');
 var promiseDelay = require('promise-delay');
 var alegraIVAID = 2;
 var alegraACCOUNTID = 1;
@@ -22,22 +22,21 @@ module.exports = {
 };
 
 function createOrderInvoice(orderId, req) {
-  if(req){
+  if (req) {
     var userId = UserService.getCurrentUserId(req);
     var clientId = UserService.getCurrentUserClientId(req);
   }
 
-  return new Promise(function(resolve, reject){
-    
+  return new Promise(function(resolve, reject) {
     var orderFound;
     var errInvoice;
     var invoiceCreated;
 
-    if(process.env.MODE !== 'production'){
+    if (process.env.MODE !== 'production') {
       resolve({});
       return;
     }
-    
+
     OrderWeb.findOne(orderId)
       .populate('Client')
       .populate('Details')
@@ -52,14 +51,19 @@ function createOrderInvoice(orderId, req) {
         */
 
         var client = order.Client;
-        var details = order.Details.map(function(d) { return d.id; });
+        var details = order.Details.map(function(d) {
+          return d.id;
+        });
         var payments = order.Payments;
         return [
           order,
           payments,
           OrderDetailWeb.find(details).populate('Product'),
-          FiscalAddress.findOne({ CardCode: client.CardCode, AdresType: ClientService.ADDRESS_TYPE }),
-          client,
+          FiscalAddress.findOne({
+            CardCode: client.CardCode,
+            AdresType: ClientService.ADDRESS_TYPE
+          }),
+          client
         ];
       })
       .spread(function(order, payments, details, address, client) {
@@ -67,15 +71,15 @@ function createOrderInvoice(orderId, req) {
           order,
           payments,
           prepareClient(order, client, address),
-          prepareItems(details)
+          prepareItems(details, order)
         ];
       })
       .spread(function(order, payments, client, items) {
         return prepareInvoice(order, payments, client, items);
       })
-      .then(function(alegraInvoice){
+      .then(function(alegraInvoice) {
         var invoiceToCreate = {
-          alegraId: alegraInvoice.id, 
+          alegraId: alegraInvoice.id,
           OrderWeb: orderId,
           UserWeb: userId || null,
           Client: clientId || null
@@ -88,16 +92,16 @@ function createOrderInvoice(orderId, req) {
         */
         return InvoiceWeb.create(invoiceToCreate);
       })
-      .then(function(result){
+      .then(function(result) {
         invoiceCreated = result;
         console.log('create invoice result', result);
         return send(orderId);
       })
-      .then(function(sendResult){
+      .then(function(sendResult) {
         console.log('send invoice result', sendResult);
         resolve(invoiceCreated);
       })
-      .catch(function(err){
+      .catch(function(err) {
         errInvoice = err;
 
         var log = {
@@ -111,42 +115,44 @@ function createOrderInvoice(orderId, req) {
 
         return AlegraLogWeb.create(log);
       })
-      .then(function(logCreated){
-        reject(errInvoice);        
+      .then(function(logCreated) {
+        reject(errInvoice);
       });
   });
 }
 
 function send(orderID) {
   var order;
-  return OrderWeb
-    .findOne(orderID)
+  return OrderWeb.findOne(orderID)
     .populate('Client')
     .then(function(_order) {
       order = _order;
 
       return [
         InvoiceWeb.findOne({ order: orderID }),
-        FiscalAddress.findOne({ CardCode: order.Client.CardCode, AdresType: ClientService.ADDRESS_TYPE }),
+        FiscalAddress.findOne({
+          CardCode: order.Client.CardCode,
+          AdresType: ClientService.ADDRESS_TYPE
+        })
       ];
     })
     .spread(function(invoice, address) {
       var client = (order || {}).Client;
-      if(!invoice || (client || {}).LicTradNum === RFCPUBLIC){
+      if (!invoice || (client || {}).LicTradNum === RFCPUBLIC) {
         return false;
       }
 
       var emails = [];
       sails.log.info('address', address.U_Correos);
 
-      if(process.env.MODE === 'production'){
+      if (process.env.MODE === 'production') {
         emails = [
           address.U_Correos,
           'luisperez@spaceshiplabs.com',
           'cgarcia@actualg.com',
           'facturacion@actualg.com'
         ];
-      }else{
+      } else {
         emails = ['luisperez@spaceshiplabs.com'];
       }
 
@@ -154,7 +160,7 @@ function send(orderID) {
       return { id: id, emails: emails };
     })
     .then(function(data) {
-      if(!data){
+      if (!data) {
         return Promise.resolve({});
       }
 
@@ -163,17 +169,16 @@ function send(orderID) {
         uri: 'https://app.alegra.com/api/v1/invoices/' + data.id + '/email',
         body: data,
         headers: {
-          Authorization: 'Basic ' + token,
+          Authorization: 'Basic ' + token
         },
-        json: true,
+        json: true
       };
       return request(options);
     });
 }
 
 function prepareInvoice(order, payments, client, items) {
-  var date = moment(order.createdAt)
-    .format('YYYY-MM-DD');
+  var date = moment(order.createdAt).format('YYYY-MM-DD');
   var dueDate = moment(order.createdAt)
     .add(7, 'days')
     .format('YYYY-MM-DD');
@@ -186,38 +191,37 @@ function prepareInvoice(order, payments, client, items) {
     paymentMethod: getPaymentMethodBasedOnPayments(payments),
     anotation: order.folio + '-web',
     stamp: {
-      generateStamp: true,
+      generateStamp: true
     },
     orderObject: order
   };
   return createInvoice(data);
 }
 
-function getPaymentMethodBasedOnPayments(payments){
-  if(payments.length > 1){
+function getPaymentMethodBasedOnPayments(payments) {
+  if (payments.length > 1) {
     return 'other';
   }
 
   var paymentMethod = 'other';
   var uniquePaymentMethod = payments[0];
 
-  switch(uniquePaymentMethod.type){
-
+  switch (uniquePaymentMethod.type) {
     case 'transfer':
       paymentMethod = 'transfer';
       break;
-    
+
     case 'ewallet':
       paymentMethod = 'electronic-wallet';
       break;
 
     case 'credit-card':
     case '3-msi':
-    case '3-msi-banamex':    
+    case '3-msi-banamex':
     case '6-msi':
-    case '6-msi-banamex':    
+    case '6-msi-banamex':
     case '9-msi':
-    case '9-msi-banamex':    
+    case '9-msi-banamex':
     case '12-msi':
     case '12-msi-banamex':
     case '13-msi':
@@ -246,13 +250,12 @@ function createInvoice(data) {
     uri: 'https://app.alegra.com/api/v1/invoices',
     body: data,
     headers: {
-      Authorization: 'Basic ' + token,
+      Authorization: 'Basic ' + token
     },
-    json: true,
+    json: true
   };
 
   //sails.log.info('orderObject', JSON.stringify(orderObject));
-
 
   var log = {
     Client: orderObject.Client.id,
@@ -265,32 +268,35 @@ function createInvoice(data) {
   var resultAlegra;
   var requestError;
 
-  return new Promise(function(resolve, reject){
-
+  return new Promise(function(resolve, reject) {
     AlegraLogWeb.create(log)
-      .then(function(logCreated){
+      .then(function(logCreated) {
         log.id = logCreated.id;
         return request(options);
       })
-      .then(function(result){
+      .then(function(result) {
         resultAlegra = result;
-        return AlegraLogWeb.update({id:log.id}, {responseData: JSON.stringify(result)});
+        return AlegraLogWeb.update(
+          { id: log.id },
+          { responseData: JSON.stringify(result) }
+        );
       })
-      .then(function(logUpdated){
+      .then(function(logUpdated) {
         resolve(resultAlegra);
       })
-      .catch(function(err){
+      .catch(function(err) {
         requestError = err;
-        return AlegraLogWeb.update({id:log.id}, {
-          responseData: JSON.stringify(err),
-          isError: true
-        });
-
+        return AlegraLogWeb.update(
+          { id: log.id },
+          {
+            responseData: JSON.stringify(err),
+            isError: true
+          }
+        );
       })
-      .then(function(logUpdated){
+      .then(function(logUpdated) {
         reject(requestError);
       });
-
   });
 }
 
@@ -300,7 +306,7 @@ function prepareClientParams(order, client, address){
   if (!generic) {
     data = {
       name: address.companyName,
-      identification: (client.LicTradNum || "").toUpperCase(),
+      identification: (client.LicTradNum || '').toUpperCase(),
       email: address.U_Correos,
       cfdiUse: client.cfdiUse || DEFAULT_CFDI_USE,
       address: {
@@ -310,15 +316,16 @@ function prepareClientParams(order, client, address){
         colony: address.Block,
         country: 'México',
         state: address.State,
-        municipality:  address.U_Localidad,
+        municipality: address.U_Localidad,
         localitiy: address.City,
-        zipCode: address.ZipCode,
+        zipCode: address.ZipCode
       }
     };
   } else {
     data = {
       name: order.CardName,
-      identification: (RFCPUBLIC || "").toUpperCase(),
+      identification: (RFCPUBLIC || '').toUpperCase(),
+      email: order.E_Mail,
       cfdiUse: DEFAULT_CFDI_USE,
       //email: order.E_Mail,
       address: {
@@ -342,14 +349,14 @@ function createClient(client) {
     uri: 'https://app.alegra.com/api/v1/contacts',
     body: client,
     headers: {
-      Authorization: 'Basic ' + token,
+      Authorization: 'Basic ' + token
     },
-    json: true,
+    json: true
   };
   return request(options);
 }
 
-function prepareItems(details) {
+function prepareItems(details, order) {
   var items = details.map(function(detail) {
     var discount = detail.discountPercent ? detail.discountPercent : 0;
     var product = detail.Product;
@@ -358,19 +365,37 @@ function prepareItems(details) {
       id: detail.id,
       name: product.ItemName,
       price: detail.unitPrice / 1.16,
-      discount: parseFloat((discount).toFixed(4)),
-      tax: [ {id: alegraIVAID} ],
-      productKey: product.U_ClaveProdServ,      
+      discount: parseFloat(discount.toFixed(4)),
+      tax: [{ id: alegraIVAID }],
+      productKey: product.U_ClaveProdServ,
       quantity: detail.quantity,
-      inventory:{
+      inventory: {
         //unit:'piece',
         unit: getUnitTypeByProduct(product),
         unitCost: detail.unitPrice,
         initialQuantity: detail.quantity
-      }      
+      }
     };
   });
-  return Promise.mapSeries(items, function(item){
+
+  /*
+  var deliveryServiceItem = {
+    name: 'Gastos de envío',
+    price: order.deliveryFee,
+    discount: 0,
+    tax: [ {id: alegraIVAID} ],
+    quantity: 1,
+    inventory: {
+      unit:'service',
+      unitCost: order.deliveryFee,
+      initialQuantity: 1
+    }
+  };
+
+  items.push(deliveryServiceItem);
+  */
+
+  return Promise.mapSeries(items, function(item) {
     return createItemWithDelay(item);
   });
 
@@ -378,7 +403,7 @@ function prepareItems(details) {
   //return Promise.all(createItems(items));
 }
 
-function getUnitTypeByProduct(product){
+function getUnitTypeByProduct(product) {
   var unitType = 'piece';
   if(product.Service === 'Y'){
     return 'service';
@@ -399,21 +424,20 @@ function getUnitTypeByProduct(product){
   return unitType;
 }
 
-
-function createItemWithDelay(item){
+function createItemWithDelay(item) {
   var options = {
     method: 'POST',
     uri: 'https://app.alegra.com/api/v1/items',
     body: item,
     headers: {
-      Authorization: 'Basic ' + token,
+      Authorization: 'Basic ' + token
     },
-    json: true,
+    json: true
   };
-  return promiseDelay(600,request(options)).then(function(ic) {
+  return promiseDelay(600, request(options)).then(function(ic) {
     //console.log('item delayed ' + item.name, new Date());
-    return _.assign({}, item, { id: ic.id});
-  });  
+    return _.assign({}, item, { id: ic.id });
+  });
 }
 
 function createItems(items) {
@@ -423,28 +447,26 @@ function createItems(items) {
       uri: 'https://app.alegra.com/api/v1/items',
       body: item,
       headers: {
-        Authorization: 'Basic ' + token,
+        Authorization: 'Basic ' + token
       },
-      json: true,
+      json: true
     };
     return request(options).then(function(ic) {
-      return _.assign({}, item, { id: ic.id});
+      return _.assign({}, item, { id: ic.id });
     });
   });
 }
 
 function preparePayments(payments) {
   return payments.map(function(payment) {
-    var date = moment(payment.createdAt)
-      .format('YYYY-MM-DD');
+    var date = moment(payment.createdAt).format('YYYY-MM-DD');
     return {
       date: date,
       account: { id: alegraACCOUNTID },
       amount: payment.ammount,
       bankAccount: { id: 1 },
       type: 'in',
-      paymentMethod: 'cash',
+      paymentMethod: 'cash'
     };
   });
 }
-

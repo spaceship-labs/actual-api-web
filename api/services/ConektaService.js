@@ -71,6 +71,7 @@ function createOrder(orderId, payment, req) {
 			var payments = [payment];
 			var charges = getOrderCharges(order, payments);
 			var discountLine = getOrderDiscountLine(order, payments);
+			var paymentGroup = OrderService.getGroupByQuotationPayments(payments);
 
 			var getTotalLinesAmount = function (lineItems, discountLine){
 				var totalLines = lineItems.reduce(function(acum, lineItem){
@@ -85,7 +86,8 @@ function createOrder(orderId, payment, req) {
 			//The amount converted to cents, sometimes differs by one,for example 97914 and 97913
 			var totalLinesAmount = getTotalLinesAmount(lineItems, discountLine);
 			if(charges.length > 0){
-				charges[0].amount = totalLinesAmount;
+				//Adding shipping fee
+				charges[0].amount = totalLinesAmount + convertToCents(order['deliveryFeePg' + paymentGroup]);
 			}
 
 			return new Promise(function(resolve, reject){
@@ -100,8 +102,8 @@ function createOrder(orderId, payment, req) {
 					discount_lines: [discountLine],
 					charges: charges,
 					shipping_lines:[{
-						amount: 0,
-						carrier: 'Fedex'
+						amount: convertToCents(order['deliveryFeePg' + paymentGroup]),
+						carrier: 'Actual Group'
 					}],
 					shipping_contact: customerAddress,
 					metadata:{
@@ -110,9 +112,8 @@ function createOrder(orderId, payment, req) {
 					}
 				};
 
-				//sails.log.info('conektaOrderParams', conektaOrderParams);
+				//sails.log.info('conektaOrderParams', JSON.stringify(conektaOrderParams));
 				//return reject(new Error('Fuera'));
-
 
 				conekta.Order.create(conektaOrderParams, function(err, res) {
 					if(err){
@@ -202,6 +203,8 @@ function getTransferExpirationUnixTime(payment){
 
 function getOrderDiscountLine(order, payments){
 	var paymentGroup = OrderService.getGroupByQuotationPayments(payments);
+
+	//Delivery fee is substracted in discount amount, delivery fee is added in "shipping_lines"
 	var discount = order['discountPg' + paymentGroup];
 
 	var discountLine = {
