@@ -11,34 +11,57 @@ const ejs = require('ejs');
 const sendgrid = require('sendgrid').SendGrid(key);
 const helper = require('sendgrid').mail;
 
-var passwordTemplate      = fs.readFileSync(sails.config.appPath + '/views/email/password.html').toString();
-var orderTemplate         = fs.readFileSync(sails.config.appPath + '/views/email/order.html').toString();
-var quotationTemplate     = fs.readFileSync(sails.config.appPath + '/views/email/quotation.html').toString();
-var freesaleTemplate      = fs.readFileSync(sails.config.appPath + '/views/email/freesale.html').toString();
-var registerTemplate      = fs.readFileSync(sails.config.appPath + '/views/email/register.html').toString();
-var fiscalDataTemplate    = fs.readFileSync(sails.config.appPath + '/views/email/fiscal-data.html').toString();
-var contactTemplate       = fs.readFileSync(sails.config.appPath + '/views/email/contact.html').toString();
-var quotationLogTemplate  = fs.readFileSync(sails.config.appPath + '/views/email/quotation-log.html').toString();
-var speiInstructionsTemplate  = fs.readFileSync(sails.config.appPath + '/views/email/spei-instructions.html').toString();
-var speiReminderTemplate  = fs.readFileSync(sails.config.appPath + '/views/email/spei-reminder.html').toString();
-var speiExpirationTemplate  = fs.readFileSync(sails.config.appPath + '/views/email/spei-expiration.html').toString();
-var fiscalDataClientMessageTemplate  = fs.readFileSync(sails.config.appPath + '/views/email/fiscal-data-client-message.html').toString();
-var registerInvitationTemplate = fs.readFileSync(sails.config.appPath + '/views/email/register-invitation.html').toString();
+var passwordTemplate = fs
+  .readFileSync(sails.config.appPath + '/views/email/password.html')
+  .toString();
+var orderTemplate = fs.readFileSync(sails.config.appPath + '/views/email/order.html').toString();
+var quotationTemplate = fs
+  .readFileSync(sails.config.appPath + '/views/email/quotation.html')
+  .toString();
+var freesaleTemplate = fs
+  .readFileSync(sails.config.appPath + '/views/email/freesale.html')
+  .toString();
+var registerTemplate = fs
+  .readFileSync(sails.config.appPath + '/views/email/register.html')
+  .toString();
+var fiscalDataTemplate = fs
+  .readFileSync(sails.config.appPath + '/views/email/fiscal-data.html')
+  .toString();
+var contactTemplate = fs
+  .readFileSync(sails.config.appPath + '/views/email/contact.html')
+  .toString();
+var quotationLogTemplate = fs
+  .readFileSync(sails.config.appPath + '/views/email/quotation-log.html')
+  .toString();
+var speiInstructionsTemplate = fs
+  .readFileSync(sails.config.appPath + '/views/email/spei-instructions.html')
+  .toString();
+var speiReminderTemplate = fs
+  .readFileSync(sails.config.appPath + '/views/email/spei-reminder.html')
+  .toString();
+var speiExpirationTemplate = fs
+  .readFileSync(sails.config.appPath + '/views/email/spei-expiration.html')
+  .toString();
+var fiscalDataClientMessageTemplate = fs
+  .readFileSync(sails.config.appPath + '/views/email/fiscal-data-client-message.html')
+  .toString();
+var registerInvitationTemplate = fs
+  .readFileSync(sails.config.appPath + '/views/email/register-invitation.html')
+  .toString();
 
-passwordTemplate          = ejs.compile(passwordTemplate);
-orderTemplate             = ejs.compile(orderTemplate);
-quotationTemplate         = ejs.compile(quotationTemplate);
-freesaleTemplate          = ejs.compile(freesaleTemplate);
-registerTemplate          = ejs.compile(registerTemplate);
-fiscalDataTemplate        = ejs.compile(fiscalDataTemplate);
-contactTemplate           = ejs.compile(contactTemplate);
-quotationLogTemplate      = ejs.compile(quotationLogTemplate);
-speiInstructionsTemplate  = ejs.compile(speiInstructionsTemplate);
-speiReminderTemplate      = ejs.compile(speiReminderTemplate);
-speiExpirationTemplate    = ejs.compile(speiExpirationTemplate);
+passwordTemplate = ejs.compile(passwordTemplate);
+orderTemplate = ejs.compile(orderTemplate);
+quotationTemplate = ejs.compile(quotationTemplate);
+freesaleTemplate = ejs.compile(freesaleTemplate);
+registerTemplate = ejs.compile(registerTemplate);
+fiscalDataTemplate = ejs.compile(fiscalDataTemplate);
+contactTemplate = ejs.compile(contactTemplate);
+quotationLogTemplate = ejs.compile(quotationLogTemplate);
+speiInstructionsTemplate = ejs.compile(speiInstructionsTemplate);
+speiReminderTemplate = ejs.compile(speiReminderTemplate);
+speiExpirationTemplate = ejs.compile(speiExpirationTemplate);
 fiscalDataClientMessageTemplate = ejs.compile(fiscalDataClientMessageTemplate);
 registerInvitationTemplate = ejs.compile(registerInvitationTemplate);
-
 
 module.exports = {
   sendPasswordRecovery: password,
@@ -59,23 +82,23 @@ module.exports = {
 };
 
 function password(userName, userEmail, recoveryUrl, cb) {
-  var user_name       = userName;
-  var user_link       = recoveryUrl;
-  var request         = sendgrid.emptyRequest();
-  var requestBody     = undefined;
-  var mail            = new helper.Mail();
+  var user_name = userName;
+  var user_link = recoveryUrl;
+  var request = sendgrid.emptyRequest();
+  var requestBody = undefined;
+  var mail = new helper.Mail();
   var personalization = new helper.Personalization();
-  var from            = new helper.Email("noreply@actualgroup.com", "Actual Group");
-  var to              = new helper.Email(userEmail, userName);
-  var subject         = 'Recuperar contraseña';
-  var res             = passwordTemplate({
+  var from = new helper.Email('noreply@actualgroup.com', 'Actual Group');
+  var to = new helper.Email(userEmail, userName);
+  var subject = 'Recuperar contraseña';
+  var res = passwordTemplate({
     user_name: user_name,
     user_link: user_link,
     company: {
-      url: baseURL,
-    },
+      url: baseURL
+    }
   });
-  var content         = new helper.Content("text/html", res);
+  var content = new helper.Content('text/html', res);
   personalization.addTo(to);
   personalization.setSubject(subject);
   mail.setFrom(from);
@@ -85,8 +108,8 @@ function password(userName, userEmail, recoveryUrl, cb) {
   request.method = 'POST';
   request.path = '/v3/mail/send';
   request.body = requestBody;
-  return new Promise(function(resolve, reject){
-    sendgrid.API(request, function (response) {
+  return new Promise(function(resolve, reject) {
+    sendgrid.API(request, function(response) {
       if (response.statusCode >= 200 && response.statusCode <= 299) {
         resolve();
       } else {
@@ -96,38 +119,36 @@ function password(userName, userEmail, recoveryUrl, cb) {
   });
 }
 
-
 function sendRegisterInvitation(userName, userEmail, recoveryUrl) {
-  var user_name       = userName;
-  var user_link       = recoveryUrl;
-  var request         = sendgrid.emptyRequest();
-  var requestBody     = undefined;
-  var mail            = new helper.Mail();
+  var user_name = userName;
+  var user_link = recoveryUrl;
+  var request = sendgrid.emptyRequest();
+  var requestBody = undefined;
+  var mail = new helper.Mail();
   var personalization = new helper.Personalization();
-  var from            = new helper.Email("noreply@actualgroup.com", "Actual Group");
-  var to              = new helper.Email(userEmail, userName);
-  var subject         = 'Completa tu registro en ActualGroup';
-  var res             = registerInvitationTemplate({
+  var from = new helper.Email('noreply@actualgroup.com', 'Actual Group');
+  var to = new helper.Email(userEmail, userName);
+  var subject = 'Completa tu registro en ActualGroup';
+  var res = registerInvitationTemplate({
     user_name: user_name,
     user_link: user_link,
     company: {
-      url: baseURL,
-    },
+      url: baseURL
+    }
   });
-  var content = new helper.Content("text/html", res);
+  var content = new helper.Content('text/html', res);
   personalization.addTo(to);
   personalization.setSubject(subject);
 
-  if(process.env.MODE !== 'production'){
-    const toAux = new helper.Email("emmanuelyupit08@gmail.com", "Emmanuel");    
+  if (process.env.MODE !== 'production') {
+    const toAux = new helper.Email('emmanuelyupit08@gmail.com', 'Emmanuel');
     personalization.addTo(toAux);
 
-    const toAux3 = new helper.Email("luisperez@spaceshiplabs.com", "Luis");    
-    personalization.addTo(toAux3);    
+    const toAux3 = new helper.Email('luisperez@spaceshiplabs.com', 'Luis');
+    personalization.addTo(toAux3);
 
-    const toAux4 = new helper.Email("rquijano@actualg.com", "Rene");    
-    personalization.addTo(toAux4);    
-
+    const toAux4 = new helper.Email('rquijano@actualg.com', 'Rene');
+    personalization.addTo(toAux4);
   }
 
   mail.setFrom(from);
@@ -137,8 +158,8 @@ function sendRegisterInvitation(userName, userEmail, recoveryUrl) {
   request.method = 'POST';
   request.path = '/v3/mail/send';
   request.body = requestBody;
-  return new Promise(function(resolve, reject){
-    sendgrid.API(request, function (response) {
+  return new Promise(function(resolve, reject) {
+    sendgrid.API(request, function(response) {
       if (response.statusCode >= 200 && response.statusCode <= 299) {
         resolve();
       } else {
@@ -149,26 +170,26 @@ function sendRegisterInvitation(userName, userEmail, recoveryUrl) {
 }
 
 function sendRegister(userName, userEmail, store, cb) {
-  var user_name       = userName;
-  var request         = sendgrid.emptyRequest();
-  var requestBody     = undefined;
-  var mail            = new helper.Mail();
+  var user_name = userName;
+  var request = sendgrid.emptyRequest();
+  var requestBody = undefined;
+  var mail = new helper.Mail();
   var personalization = new helper.Personalization();
-  var from            = new helper.Email("noreply@actualgroup.com", "Actual Group");
-  var toAux           = new helper.Email('luisperez@spaceshiplabs.com', 'Luis');
-  var toAux2           = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
-  var to              = new helper.Email(userEmail, userName);
-  var subject         = '¡Bienvenido a Actual Group!';
-  var res             = registerTemplate({
+  var from = new helper.Email('noreply@actualgroup.com', 'Actual Group');
+  var toAux = new helper.Email('luisperez@spaceshiplabs.com', 'Luis');
+  var toAux2 = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
+  var to = new helper.Email(userEmail, userName);
+  var subject = '¡Bienvenido a Actual Group!';
+  var res = registerTemplate({
     clientName: user_name,
     company: {
       url: baseURL,
-      logo:  baseURL+'/logos/group.png',
-    },
+      logo: baseURL + '/logos/group.png'
+    }
   });
-  var content         = new helper.Content("text/html", res);
+  var content = new helper.Content('text/html', res);
 
-  if(process.env.MODE === 'production'){	  
+  if (process.env.MODE === 'production') {
     personalization.addTo(to);
     personalization.addTo(toAux2);
   }
@@ -182,7 +203,7 @@ function sendRegister(userName, userEmail, store, cb) {
   request.method = 'POST';
   request.path = '/v3/mail/send';
   request.body = requestBody;
-  sendgrid.API(request, function (response) {
+  sendgrid.API(request, function(response) {
     if (response.statusCode >= 200 && response.statusCode <= 299) {
       cb();
     } else {
@@ -192,9 +213,9 @@ function sendRegister(userName, userEmail, store, cb) {
 }
 
 function sendFiscalData(form, store, cb) {
-  var request         = sendgrid.emptyRequest();
-  var requestBody     = undefined;
-  var mail            = new helper.Mail();
+  var request = sendgrid.emptyRequest();
+  var requestBody = undefined;
+  var mail = new helper.Mail();
   var personalization = new helper.Personalization();
 
   //var from            = new helper.Email(email, name);
@@ -203,19 +224,19 @@ function sendFiscalData(form, store, cb) {
   var toAux = new helper.Email('facturacionsitios@actualg.com', 'Facturacion Actual');
   var toAux2 = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
 
-  var subject         = 'Datos de facturación ' + ((store || {}).name || '');
-  var res             = fiscalDataTemplate({
+  var subject = 'Datos de facturación ' + ((store || {}).name || '');
+  var res = fiscalDataTemplate({
     form: form,
     company: {
       url: baseURL,
-      logo:  baseURL+'/logos/group.png',
+      logo: baseURL + '/logos/group.png'
     },
     store: store
   });
-  var content         = new helper.Content("text/html", res);
+  var content = new helper.Content('text/html', res);
   personalization.addTo(to);
 
-  if(process.env.MODE == 'production'){
+  if (process.env.MODE == 'production') {
     personalization.addTo(toAux);
     personalization.addTo(toAux2);
   }
@@ -228,7 +249,7 @@ function sendFiscalData(form, store, cb) {
   request.method = 'POST';
   request.path = '/v3/mail/send';
   request.body = requestBody;
-  sendgrid.API(request, function (response) {
+  sendgrid.API(request, function(response) {
     if (response.statusCode >= 200 && response.statusCode <= 299) {
       cb();
     } else {
@@ -238,9 +259,9 @@ function sendFiscalData(form, store, cb) {
 }
 
 function sendFiscalDataMessageToClient(name, email, store, cb) {
-  var request         = sendgrid.emptyRequest();
-  var requestBody     = undefined;
-  var mail            = new helper.Mail();
+  var request = sendgrid.emptyRequest();
+  var requestBody = undefined;
+  var mail = new helper.Mail();
   var personalization = new helper.Personalization();
 
   var from = getSenderByStore(store);
@@ -249,20 +270,20 @@ function sendFiscalDataMessageToClient(name, email, store, cb) {
   var toAux2 = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
   var toAux3 = new helper.Email(email, name);
 
-  var subject         = 'Datos de facturación ' + ((store || {}).name || '');
-  var res             = fiscalDataClientMessageTemplate({
+  var subject = 'Datos de facturación ' + ((store || {}).name || '');
+  var res = fiscalDataClientMessageTemplate({
     client_email: email,
     client_name: name,
     company: {
       url: baseURL,
-      logo:  baseURL+'/logos/group.png',
+      logo: baseURL + '/logos/group.png'
     },
     store: store
   });
-  var content         = new helper.Content("text/html", res);
+  var content = new helper.Content('text/html', res);
   personalization.addTo(to);
 
-  if(process.env.MODE == 'production'){
+  if (process.env.MODE == 'production') {
     personalization.addTo(toAux);
     personalization.addTo(toAux2);
     personalization.addTo(toAux3);
@@ -276,7 +297,7 @@ function sendFiscalDataMessageToClient(name, email, store, cb) {
   request.method = 'POST';
   request.path = '/v3/mail/send';
   request.body = requestBody;
-  sendgrid.API(request, function (response) {
+  sendgrid.API(request, function(response) {
     if (response.statusCode >= 200 && response.statusCode <= 299) {
       cb();
     } else {
@@ -286,26 +307,26 @@ function sendFiscalDataMessageToClient(name, email, store, cb) {
 }
 
 function sendContact(name, email, form, store, cb) {
-  var request         = sendgrid.emptyRequest();
-  var requestBody     = undefined;
-  var mail            = new helper.Mail();
+  var request = sendgrid.emptyRequest();
+  var requestBody = undefined;
+  var mail = new helper.Mail();
   var personalization = new helper.Personalization();
-  var from            = new helper.Email(email, name);
-  var to              = new helper.Email('luisperez@spaceshiplabs.com', 'Luis');
-  var toAux           = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
-  var subject         = 'Contacto ' + ((store || {}).name || '');
-  var res             = contactTemplate({
+  var from = new helper.Email(email, name);
+  var to = new helper.Email('luisperez@spaceshiplabs.com', 'Luis');
+  var toAux = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
+  var subject = 'Contacto ' + ((store || {}).name || '');
+  var res = contactTemplate({
     form: form,
     company: {
       url: baseURL,
-      logo:  baseURL+'/logos/group.png',
+      logo: baseURL + '/logos/group.png'
     },
     store: store
   });
-  var content         = new helper.Content("text/html", res);
+  var content = new helper.Content('text/html', res);
   personalization.addTo(to);
 
-  if(process.env.MODE == 'production'){
+  if (process.env.MODE == 'production') {
     personalization.addTo(toAux);
   }
 
@@ -317,7 +338,7 @@ function sendContact(name, email, form, store, cb) {
   request.method = 'POST';
   request.path = '/v3/mail/send';
   request.body = requestBody;
-  sendgrid.API(request, function (response) {
+  sendgrid.API(request, function(response) {
     if (response.statusCode >= 200 && response.statusCode <= 299) {
       cb();
     } else {
@@ -327,26 +348,26 @@ function sendContact(name, email, form, store, cb) {
 }
 
 function sendSuggestions(name, email, form, store, cb) {
-  var request         = sendgrid.emptyRequest();
-  var requestBody     = undefined;
-  var mail            = new helper.Mail();
+  var request = sendgrid.emptyRequest();
+  var requestBody = undefined;
+  var mail = new helper.Mail();
   var personalization = new helper.Personalization();
-  var from            = new helper.Email(email, name);
-  var to              = new helper.Email('luisperez@spaceshiplabs.com', 'Luis');
-  var toAux           = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
-  var subject         = 'Quejas y sugerencias ' + ((store || {}).name || '');
-  var res             = contactTemplate({
+  var from = new helper.Email(email, name);
+  var to = new helper.Email('luisperez@spaceshiplabs.com', 'Luis');
+  var toAux = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
+  var subject = 'Quejas y sugerencias ' + ((store || {}).name || '');
+  var res = contactTemplate({
     form: form,
     company: {
       url: baseURL,
-      logo:  baseURL+'/logos/group.png',
+      logo: baseURL + '/logos/group.png'
     },
     store: store
   });
-  var content         = new helper.Content("text/html", res);
+  var content = new helper.Content('text/html', res);
   personalization.addTo(to);
 
-  if(process.env.MODE == 'production'){
+  if (process.env.MODE == 'production') {
     personalization.addTo(toAux);
   }
 
@@ -358,7 +379,7 @@ function sendSuggestions(name, email, form, store, cb) {
   request.method = 'POST';
   request.path = '/v3/mail/send';
   request.body = requestBody;
-  sendgrid.API(request, function (response) {
+  sendgrid.API(request, function(response) {
     if (response.statusCode >= 200 && response.statusCode <= 299) {
       cb();
     } else {
@@ -368,37 +389,37 @@ function sendSuggestions(name, email, form, store, cb) {
 }
 
 function sendSpeiInstructions(clientName, clientEmail, quotationFolio, order, store) {
-  var request         = sendgrid.emptyRequest();
-  var requestBody     = undefined;
-  var mail            = new helper.Mail();
+  var request = sendgrid.emptyRequest();
+  var requestBody = undefined;
+  var mail = new helper.Mail();
   var personalization = new helper.Personalization();
-  var from            = new helper.Email("noreply@actualgroup.com", "Actual Group");
+  var from = new helper.Email('noreply@actualgroup.com', 'Actual Group');
   var toAux = new helper.Email('luisperez@spaceshiplabs.com', 'Luis');
 
   var toAux2 = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
-  var to              = new helper.Email(clientEmail, clientName);
-  var subject         = 'Ficha de pago SPEI ' + ((store || {}).name || '');
-  
-  var res             = speiInstructionsTemplate({
-    clientName: clientName, 
+  var to = new helper.Email(clientEmail, clientName);
+  var subject = 'Ficha de pago SPEI ' + ((store || {}).name || '');
+
+  var res = speiInstructionsTemplate({
+    clientName: clientName,
     folio: quotationFolio,
     company: {
       url: baseURL,
-      logo:  baseURL+'/logos/group.png',
+      logo: baseURL + '/logos/group.png'
     },
     store: store,
-    logo: store.logo || baseURL+'/logos/group.png',
+    logo: store.logo || baseURL + '/logos/group.png',
     speiTransferData: {
       conektaAmount: order.conektaAmount,
       receiving_account_number: order.receiving_account_number,
       receiving_account_bank: order.receiving_account_bank
-    }  
+    }
   });
 
-  var content         = new helper.Content("text/html", res);
+  var content = new helper.Content('text/html', res);
   personalization.addTo(toAux);
 
-  if(process.env.MODE == 'production'){
+  if (process.env.MODE == 'production') {
     personalization.addTo(to);
     personalization.addTo(toAux2);
   }
@@ -411,9 +432,9 @@ function sendSpeiInstructions(clientName, clientEmail, quotationFolio, order, st
   request.method = 'POST';
   request.path = '/v3/mail/send';
   request.body = requestBody;
-  
-  return new Promise(function(resolve, reject){
-    sendgrid.API(request, function (response) {
+
+  return new Promise(function(resolve, reject) {
+    sendgrid.API(request, function(response) {
       if (response.statusCode >= 200 && response.statusCode <= 299) {
         //cb();
         resolve();
@@ -426,34 +447,34 @@ function sendSpeiInstructions(clientName, clientEmail, quotationFolio, order, st
 }
 
 function sendSpeiReminder(clientName, clientEmail, expirationDateTime, folio, store) {
-  var request         = sendgrid.emptyRequest();
-  var requestBody     = undefined;
-  var mail            = new helper.Mail();
+  var request = sendgrid.emptyRequest();
+  var requestBody = undefined;
+  var mail = new helper.Mail();
   var personalization = new helper.Personalization();
-  var from            = new helper.Email("noreply@actualgroup.com", "Actual Group");
+  var from = new helper.Email('noreply@actualgroup.com', 'Actual Group');
   var toAux = new helper.Email('luisperez@spaceshiplabs.com', 'Luis');
   var toAux2 = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
 
-  var to              = new helper.Email(clientEmail, clientName);
-  var subject         = 'Cotización Recordatorio Pendiente de Pago SPEI ' + ((store || {}).name || '');
+  var to = new helper.Email(clientEmail, clientName);
+  var subject = 'Cotización Recordatorio Pendiente de Pago SPEI ' + ((store || {}).name || '');
   moment.locale('es');
-  var res             = speiReminderTemplate({
-    clientName: clientName, 
+  var res = speiReminderTemplate({
+    clientName: clientName,
     folio: folio,
     company: {
       url: baseURL,
-      logo:  baseURL+'/logos/group.png',
+      logo: baseURL + '/logos/group.png'
     },
     store: store,
     expirationDate: moment(expirationDateTime).format('DD/MMM/YYYY'),
     expirationTime: moment(expirationDateTime).format('HH:mm a'),
-    logo: store.logo || baseURL+'/logos/group.png'
+    logo: store.logo || baseURL + '/logos/group.png'
   });
 
-  var content         = new helper.Content("text/html", res);
+  var content = new helper.Content('text/html', res);
   personalization.addTo(toAux);
 
-  if(process.env.MODE == 'production'){
+  if (process.env.MODE == 'production') {
     personalization.addTo(to);
     personalization.addTo(toAux2);
   }
@@ -466,9 +487,9 @@ function sendSpeiReminder(clientName, clientEmail, expirationDateTime, folio, st
   request.method = 'POST';
   request.path = '/v3/mail/send';
   request.body = requestBody;
-  
-  return new Promise(function(resolve, reject){
-    sendgrid.API(request, function (response) {
+
+  return new Promise(function(resolve, reject) {
+    sendgrid.API(request, function(response) {
       if (response.statusCode >= 200 && response.statusCode <= 299) {
         //cb();
         resolve(folio);
@@ -481,32 +502,32 @@ function sendSpeiReminder(clientName, clientEmail, expirationDateTime, folio, st
 }
 
 function sendSpeiExpiration(clientName, clientEmail, folio, store) {
-  var request         = sendgrid.emptyRequest();
-  var requestBody     = undefined;
-  var mail            = new helper.Mail();
+  var request = sendgrid.emptyRequest();
+  var requestBody = undefined;
+  var mail = new helper.Mail();
   var personalization = new helper.Personalization();
-  var from            = new helper.Email("noreply@actualgroup.com", "Actual Group");
+  var from = new helper.Email('noreply@actualgroup.com', 'Actual Group');
   var toAux = new helper.Email('luisperez@spaceshiplabs.com', 'Luis');
   var toAux2 = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
 
-  var to              = new helper.Email(clientEmail, clientName);
-  var subject         = 'Cotización vencimiento de tiempo límite de pago ' + ((store || {}).name || '');
-  var res             = speiExpirationTemplate({
-    clientName: clientName, 
+  var to = new helper.Email(clientEmail, clientName);
+  var subject = 'Cotización vencimiento de tiempo límite de pago ' + ((store || {}).name || '');
+  var res = speiExpirationTemplate({
+    clientName: clientName,
     folio: folio,
     company: {
       url: baseURL,
-      logo:  baseURL+'/logos/group.png',
+      logo: baseURL + '/logos/group.png'
     },
     store: store,
-    logo: store.logo || baseURL+'/logos/group.png'
+    logo: store.logo || baseURL + '/logos/group.png'
   });
 
-  var content = new helper.Content("text/html", res);
+  var content = new helper.Content('text/html', res);
 
   personalization.addTo(toAux);
 
-  if(process.env.MODE == 'production'){
+  if (process.env.MODE == 'production') {
     personalization.addTo(to);
     personalization.addTo(toAux2);
   }
@@ -519,9 +540,9 @@ function sendSpeiExpiration(clientName, clientEmail, folio, store) {
   request.method = 'POST';
   request.path = '/v3/mail/send';
   request.body = requestBody;
-  
-  return new Promise(function(resolve, reject){
-    sendgrid.API(request, function (response) {
+
+  return new Promise(function(resolve, reject) {
+    sendgrid.API(request, function(response) {
       if (response.statusCode >= 200 && response.statusCode <= 299) {
         //cb();
         resolve();
@@ -534,25 +555,30 @@ function sendSpeiExpiration(clientName, clientEmail, folio, store) {
 }
 
 function orderEmail(orderId) {
-  return OrderWeb
-    .findOne(orderId)
+  return OrderWeb.findOne(orderId)
     .populate('Client')
     .populate('Store')
     .populate('Details')
     .populate('Payments')
     .then(function(order) {
-      var client   = order.Client;
-      var store    = order.Store;
-      var details  = order.Details.map(function(detail) { return detail.id; });
-      var payments = order.Payments.map(function(payment) { return payment.id; });
-      var ewallet  = order.EwalletRecords || [];
-      details      = OrderDetailWeb.find(details).populate('Product').populate('Promotion');
-      payments     = PaymentWeb.find(payments);
-      return [client,  order, details, payments, ewallet, store];
+      var client = order.Client;
+      var store = order.Store;
+      var details = order.Details.map(function(detail) {
+        return detail.id;
+      });
+      var payments = order.Payments.map(function(payment) {
+        return payment.id;
+      });
+      var ewallet = order.EwalletRecords || [];
+      details = OrderDetailWeb.find(details)
+        .populate('Product')
+        .populate('Promotion');
+      payments = PaymentWeb.find(payments);
+      return [client, order, details, payments, ewallet, store];
     })
     .spread(function(client, order, details, payments, ewallet, store) {
       var products = details.map(function(detail) {
-        var date  = moment(detail.shipDate);
+        var date = moment(detail.shipDate);
         moment.locale('es');
         date.locale(false);
         date = date.format('DD/MMM/YYYY');
@@ -561,22 +587,22 @@ function orderEmail(orderId) {
         var promotionEndDate;
         var promotionValidity;
 
-        if(detail.Promotion){
-          promotionStartDate  = moment(detail.Promotion.startDate);
+        if (detail.Promotion) {
+          promotionStartDate = moment(detail.Promotion.startDate);
           promotionStartDate.locale(false);
           promotionStartDate = promotionStartDate.format('DD/MMM/YYYY');
 
-          promotionEndDate  = moment(detail.Promotion.endDate);
+          promotionEndDate = moment(detail.Promotion.endDate);
           promotionEndDate.locale(false);
           promotionEndDate = promotionEndDate.format('DD/MMM/YYYY');
 
-          promotionValidity = promotionStartDate +' al ' + promotionEndDate;
+          promotionValidity = promotionStartDate + ' al ' + promotionEndDate;
         }
 
         return {
           id: detail.Product.id,
-          name:  detail.Product.ItemName,
-          code:  detail.Product.ItemCode,
+          name: detail.Product.ItemName,
+          code: detail.Product.ItemCode,
           color: (detail.Product.DetailedColor || '').split(' ')[0],
           material: '',
           ewallet: detail.ewallet && detail.ewallet.toFixed(2),
@@ -593,9 +619,10 @@ function orderEmail(orderId) {
         };
       });
       var payments = payments.map(function(payment) {
-        var ammount =  payment.currency == 'usd' ? payment.ammount * payment.exchangeRate: payment.ammount;
+        var ammount =
+          payment.currency == 'usd' ? payment.ammount * payment.exchangeRate : payment.ammount;
         ammount = ammount.toFixed(2);
-        var date    = moment(payment.createdAt);
+        var date = moment(payment.createdAt);
         moment.locale('es');
         date.locale(false);
         date = date.format('DD/MMM/YYYY');
@@ -626,44 +653,41 @@ function orderEmail(orderId) {
           return acum + curr.amount;
         }
         return acum;
-
       }, 0);
       ewallet = {
         prev: numeral(pewallet).format('0,0.00'),
         earned: numeral(eewallet).format('0,0.00'),
         spent: numeral(sewallet).format('0,0.00'),
-        balance: numeral(bewallet).format('0,0.00'),
+        balance: numeral(bewallet).format('0,0.00')
       };
       return [client, order, products, payments, ewallet, store];
     })
-    .spread(function (client, order, products, payments, ewallet, store) {
+    .spread(function(client, order, products, payments, ewallet, store) {
       var mats = products.map(function(p) {
         return materials(p.id);
       });
-      return Promise
-        .all(mats)
-        .then(function(mats) {
-          mats.forEach(function(m, i) {
-            products[i].material = m;
-          });
-          return sendOrder(client, order, products, payments, ewallet, store);
+      return Promise.all(mats).then(function(mats) {
+        mats.forEach(function(m, i) {
+          products[i].material = m;
         });
+        return sendOrder(client, order, products, payments, ewallet, store);
+      });
     });
 }
 
 function sendOrder(client, order, products, payments, ewallet, store) {
-    var address = 'Número interior: ' + order.U_Nointerior + '. \n';
-    address += 'Número Exterior: ' + order.U_Noexterior + '. \n';
-    address += 'Calle: ' + order.address + '. \n';
-    address += 'Referencias: ' + order.U_Notes1 + '. \n';
-    address += 'Entre calle: ' + order.U_Entrecalle + ' y calle ' + order.U_Ycalle + '. \n';
-    address += 'Colonia: ' + order.U_Colonia + '. \n';
-    address += 'Municipio: ' + order.U_Mpio + '. \n';
-    address += 'Estado: ' + order.U_Estado + '. \n';
-    address += 'C.P: ' + order.U_CP + '. \n';
-    address += 'Télefono de contacto: ' + order.Tel1 + '. \n';
-    address += 'Celular de contacto: ' + order.Cellolar + '. \n';
-    address += 'Email de contacto: ' + order.E_Mail + '. \n';
+  var address = 'Número interior: ' + order.U_Nointerior + '. \n';
+  address += 'Número Exterior: ' + order.U_Noexterior + '. \n';
+  address += 'Calle: ' + order.address + '. \n';
+  address += 'Referencias: ' + order.U_Notes1 + '. \n';
+  address += 'Entre calle: ' + order.U_Entrecalle + ' y calle ' + order.U_Ycalle + '. \n';
+  address += 'Colonia: ' + order.U_Colonia + '. \n';
+  address += 'Municipio: ' + order.U_Mpio + '. \n';
+  address += 'Estado: ' + order.U_Estado + '. \n';
+  address += 'C.P: ' + order.U_CP + '. \n';
+  address += 'Télefono de contacto: ' + order.Tel1 + '. \n';
+  address += 'Celular de contacto: ' + order.Cellolar + '. \n';
+  address += 'Email de contacto: ' + order.E_Mail + '. \n';
 
   var emailBody = orderTemplate({
     client: {
@@ -672,7 +696,7 @@ function sendOrder(client, order, products, payments, ewallet, store) {
       phone: client.Phone1,
       cel: client.Cellular,
       references: '',
-      balance: numeral(client.Balance).format('0,0.00'),
+      balance: numeral(client.Balance).format('0,0.00')
     },
     order: {
       isSpeiOrder: order.isSpeiOrder,
@@ -686,36 +710,36 @@ function sendOrder(client, order, products, payments, ewallet, store) {
       total: numeral(order.total).format('0,0.00'),
       paid: numeral(order.total).format('0,0.00'),
       pending: numeral(0).format('0,0.00'),
-      conektaAmount: numeral(order.conektaAmount).format('0,0.00'),      
+      conektaAmount: numeral(order.conektaAmount).format('0,0.00')
     },
     company: {
       url: baseURL,
-      logo: store.logo || baseURL+'/logos/group.png',
-      survey: surveyURL,
+      logo: store.logo || baseURL + '/logos/group.png',
+      survey: surveyURL
     },
-    site:{
+    site: {
       url: store.url || 'https://ventas.miactual.com'
-    },    
+    },
     products: products,
     payments: payments,
     ewallet: {
       prev: numeral(ewallet.prev).format('0,0.00'),
       received: numeral(ewallet.earned).format('0,0.00'),
       paid: numeral(ewallet.spent).format('0,0.00'),
-      balance: numeral(ewallet.balance).format('0,0.00'),
+      balance: numeral(ewallet.balance).format('0,0.00')
     }
   });
 
   // mail stuff
-  var request          = sendgrid.emptyRequest();
-  var requestBody      = undefined;
-  var mail             = new helper.Mail();
-  var personalization  = new helper.Personalization();
-  var from             = new helper.Email('no-reply@actualg.com', 'Actual Group');
-  var clientEmail      = client.E_Mail;
-  var to               = new helper.Email(clientEmail, client.CardName);
-  var subject          = 'Confirmación de compra | Folio #' + order.folio;
-  var content          = new helper.Content("text/html", emailBody);
+  var request = sendgrid.emptyRequest();
+  var requestBody = undefined;
+  var mail = new helper.Mail();
+  var personalization = new helper.Personalization();
+  var from = new helper.Email('no-reply@actualg.com', 'Actual Group');
+  var clientEmail = client.E_Mail;
+  var to = new helper.Email(clientEmail, client.CardName);
+  var subject = 'Confirmación de compra | Folio #' + order.folio;
+  var content = new helper.Content('text/html', emailBody);
 
   var toAux = new helper.Email('luisperez@spaceshiplabs.com', 'Luis Perez');
   personalization.addTo(toAux);
@@ -723,7 +747,7 @@ function sendOrder(client, order, products, payments, ewallet, store) {
   var toAux2 = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
   var toAux3 = new helper.Email('auditoria@actualg.com', 'Auditoria ActualGroup');
 
-  if(process.env.MODE === 'production'){
+  if (process.env.MODE === 'production') {
     sails.log.info('sending email order ', order.folio);
     personalization.addTo(to);
     personalization.addTo(toAux2);
@@ -738,8 +762,8 @@ function sendOrder(client, order, products, payments, ewallet, store) {
   request.method = 'POST';
   request.path = '/v3/mail/send';
   request.body = requestBody;
-  return new Promise(function(resolve, reject){
-    sendgrid.API(request, function (response) {
+  return new Promise(function(resolve, reject) {
+    sendgrid.API(request, function(response) {
       if (response.statusCode >= 200 && response.statusCode <= 299) {
         resolve(order);
       } else {
@@ -750,23 +774,26 @@ function sendOrder(client, order, products, payments, ewallet, store) {
 }
 
 function quotation(quotationId, activeStore, isCardProcessingError, lead) {
-  return QuotationWeb
-    .findOne(quotationId)
+  return QuotationWeb.findOne(quotationId)
     .populate('Client')
     .populate('Store')
     .populate('Details')
     .then(function(quotation) {
-      var client   = quotation.Client;
-      var store    = quotation.Store;
-      var details  = quotation.Details.map(function(detail) { return detail.id; });
-      details      = QuotationDetailWeb.find(details).populate('Product').populate('Promotion');
+      var client = quotation.Client;
+      var store = quotation.Store;
+      var details = quotation.Details.map(function(detail) {
+        return detail.id;
+      });
+      details = QuotationDetailWeb.find(details)
+        .populate('Product')
+        .populate('Promotion');
       var payments = PaymentService.getPaymentGroupsForEmail(quotation.id, activeStore);
       var transfers = TransferService.transfers(store.group);
-      return [client,  quotation, details, payments, transfers, store];
+      return [client, quotation, details, payments, transfers, store];
     })
     .spread(function(client, quotation, details, payments, transfers, store) {
       var products = details.map(function(detail) {
-        var date  = moment(detail.shipDate);
+        var date = moment(detail.shipDate);
         moment.locale('es');
         date.locale(false);
         date = date.format('DD/MMM/YYYY');
@@ -775,22 +802,22 @@ function quotation(quotationId, activeStore, isCardProcessingError, lead) {
         var promotionEndDate;
         var promotionValidity;
 
-        if(detail.Promotion){
-          promotionStartDate  = moment(detail.Promotion.startDate);
+        if (detail.Promotion) {
+          promotionStartDate = moment(detail.Promotion.startDate);
           promotionStartDate.locale(false);
           promotionStartDate = promotionStartDate.format('DD/MMM/YYYY');
 
-          promotionEndDate  = moment(detail.Promotion.endDate);
+          promotionEndDate = moment(detail.Promotion.endDate);
           promotionEndDate.locale(false);
           promotionEndDate = promotionEndDate.format('DD/MMM/YYYY');
 
-          promotionValidity = promotionStartDate +' al ' + promotionEndDate;
+          promotionValidity = promotionStartDate + ' al ' + promotionEndDate;
         }
 
         return {
           id: detail.Product.id,
-          name:  detail.Product.ItemName,
-          code:  detail.Product.ItemCode,
+          name: detail.Product.ItemName,
+          code: detail.Product.ItemCode,
           color: (detail.Product.DetailedColor || '').split(' ')[0],
           material: '',
           ewallet: detail.ewallet && detail.ewallet.toFixed(2),
@@ -812,49 +839,50 @@ function quotation(quotationId, activeStore, isCardProcessingError, lead) {
       var mats = products.map(function(p) {
         return materials(p.id);
       });
-      return Promise
-        .all(mats)
-        .then(function(mats) {
-          mats.forEach(function(m, i) {
-            products[i].material = m;
-          });
-
-          var order = false;
-          return sendQuotation(
-            client, 
-            quotation, 
-            products, 
-            payments, 
-            transfers, 
-            store, 
-            order, 
-            isCardProcessingError,
-            lead
-          );
+      return Promise.all(mats).then(function(mats) {
+        mats.forEach(function(m, i) {
+          products[i].material = m;
         });
+
+        var order = false;
+        return sendQuotation(
+          client,
+          quotation,
+          products,
+          payments,
+          transfers,
+          store,
+          order,
+          isCardProcessingError,
+          lead
+        );
+      });
     });
 }
 
 function sendSpeiQuotation(quotationId, activeStore) {
-  return QuotationWeb
-    .findOne(quotationId)
+  return QuotationWeb.findOne(quotationId)
     .populate('Client')
     .populate('Store')
     .populate('Details')
     .populate('OrderWeb')
     .then(function(quotation) {
-      var client   = quotation.Client;
-      var store    = quotation.Store;
-      var details  = quotation.Details.map(function(detail) { return detail.id; });
-      details      = QuotationDetailWeb.find(details).populate('Product').populate('Promotion');
+      var client = quotation.Client;
+      var store = quotation.Store;
+      var details = quotation.Details.map(function(detail) {
+        return detail.id;
+      });
+      details = QuotationDetailWeb.find(details)
+        .populate('Product')
+        .populate('Promotion');
       var payments = PaymentService.getPaymentGroupsForEmail(quotation.id, activeStore);
       var transfers = TransferService.transfers(store.group);
-      var order     = quotation.OrderWeb;
-      return [client,  quotation, details, payments, transfers, store, order];
+      var order = quotation.OrderWeb;
+      return [client, quotation, details, payments, transfers, store, order];
     })
     .spread(function(client, quotation, details, payments, transfers, store, order) {
       var products = details.map(function(detail) {
-        var date  = moment(detail.shipDate);
+        var date = moment(detail.shipDate);
         moment.locale('es');
         date.locale(false);
         date = date.format('DD/MMM/YYYY');
@@ -863,22 +891,22 @@ function sendSpeiQuotation(quotationId, activeStore) {
         var promotionEndDate;
         var promotionValidity;
 
-        if(detail.Promotion){
-          promotionStartDate  = moment(detail.Promotion.startDate);
+        if (detail.Promotion) {
+          promotionStartDate = moment(detail.Promotion.startDate);
           promotionStartDate.locale(false);
           promotionStartDate = promotionStartDate.format('DD/MMM/YYYY');
 
-          promotionEndDate  = moment(detail.Promotion.endDate);
+          promotionEndDate = moment(detail.Promotion.endDate);
           promotionEndDate.locale(false);
           promotionEndDate = promotionEndDate.format('DD/MMM/YYYY');
 
-          promotionValidity = promotionStartDate +' al ' + promotionEndDate;
+          promotionValidity = promotionStartDate + ' al ' + promotionEndDate;
         }
 
         return {
           id: detail.Product.id,
-          name:  detail.Product.ItemName,
-          code:  detail.Product.ItemCode,
+          name: detail.Product.ItemName,
+          code: detail.Product.ItemCode,
           color: (detail.Product.DetailedColor || '').split(' ')[0],
           material: '',
           ewallet: detail.ewallet && detail.ewallet.toFixed(2),
@@ -900,18 +928,26 @@ function sendSpeiQuotation(quotationId, activeStore) {
       var mats = products.map(function(p) {
         return materials(p.id);
       });
-      return Promise
-        .all(mats)
-        .then(function(mats) {
-          mats.forEach(function(m, i) {
-            products[i].material = m;
-          });
-          return sendQuotation(client, quotation, products, payments, transfers, store, order);
+      return Promise.all(mats).then(function(mats) {
+        mats.forEach(function(m, i) {
+          products[i].material = m;
         });
+        return sendQuotation(client, quotation, products, payments, transfers, store, order);
+      });
     });
 }
 
-function sendQuotation(client, quotation, products, payments, transfers, store, order, isCardProcessingError, lead) {
+function sendQuotation(
+  client,
+  quotation,
+  products,
+  payments,
+  transfers,
+  store,
+  order,
+  isCardProcessingError,
+  lead
+) {
   var date = moment(quotation.updatedAt);
   client = client || {};
 
@@ -933,15 +969,15 @@ function sendQuotation(client, quotation, products, payments, transfers, store, 
       deliveryFee: numeral(quotation.deliveryFee).format('0,0.00'),
       total: numeral(quotation.total).format('0,0.00'),
       date: date.format('DD/MMM/YYYY'),
-      time: date.format('LT'),
+      time: date.format('LT')
     },
     company: {
       url: baseURL,
-      logo: store.logo || baseURL+'/logos/group.png',
+      logo: store.logo || baseURL + '/logos/group.png',
       image: store.logo,
       name: store.name
     },
-    site:{
+    site: {
       url: store.url || 'https://ventas.miactual.com'
     },
     products: products,
@@ -957,36 +993,34 @@ function sendQuotation(client, quotation, products, payments, transfers, store, 
     //speiTransferData: false
   };
 
-  if(lead){
+  if (lead) {
     emailParams.client = {
       name: lead.name,
-      phone: lead.phone,
+      phone: lead.phone
     };
   }
 
   var emailBody = quotationTemplate(emailParams);
-  var request          = sendgrid.emptyRequest();
-  var requestBody      = undefined;
-  var mail             = new helper.Mail();
-  var personalization  = new helper.Personalization();
-  var from             = new helper.Email('noreply@actualg.com', 'Actual Group');
-  var clientEmail      = client.E_Mail;
-  
-  if(lead){
+  var request = sendgrid.emptyRequest();
+  var requestBody = undefined;
+  var mail = new helper.Mail();
+  var personalization = new helper.Personalization();
+  var from = new helper.Email('noreply@actualg.com', 'Actual Group');
+  var clientEmail = client.E_Mail;
+
+  if (lead) {
     clientEmail = lead.email;
   }
 
-  var to               = new helper.Email(clientEmail, client.CardName);
-  var subject          = 'Cotización | Folio #' + quotation.folio + ' ' + store.name;
-  var content          = new helper.Content("text/html", emailBody);
+  var to = new helper.Email(clientEmail, client.CardName);
+  var subject = 'Cotización | Folio #' + quotation.folio + ' ' + store.name;
+  var content = new helper.Content('text/html', emailBody);
 
-  if(quotation.rateLimitReported){
+  if (quotation.rateLimitReported) {
     subject += ' RL';
-  }
-  else if(isCardProcessingError){
-    subject += ' EP';    
-  }
-  else if((order || {}).isSpeiOrder){
+  } else if (isCardProcessingError) {
+    subject += ' EP';
+  } else if ((order || {}).isSpeiOrder) {
     subject += ' SO';
   }
 
@@ -996,11 +1030,11 @@ function sendQuotation(client, quotation, products, payments, transfers, store, 
   var toAux2 = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
   var toAux3 = new helper.Email('auditoria@actualg.com', 'Auditoria ActualGroup');
 
-  if(process.env.MODE === 'production'){
+  if (process.env.MODE === 'production') {
     sails.log.info('sending email quotation ', quotation.folio);
     personalization.addTo(to);
-    personalization.addTo(toAux2); 
-    personalization.addTo(toAux3); 
+    personalization.addTo(toAux2);
+    personalization.addTo(toAux3);
   }
 
   personalization.setSubject(subject);
@@ -1011,8 +1045,8 @@ function sendQuotation(client, quotation, products, payments, transfers, store, 
   request.method = 'POST';
   request.path = '/v3/mail/send';
   request.body = requestBody;
-  return new Promise(function(resolve, reject){
-    sendgrid.API(request, function (response) {
+  return new Promise(function(resolve, reject) {
+    sendgrid.API(request, function(response) {
       if (response.statusCode >= 200 && response.statusCode <= 299) {
         resolve(quotation);
       } else {
@@ -1023,15 +1057,16 @@ function sendQuotation(client, quotation, products, payments, transfers, store, 
 }
 
 function freesaleEmail(orderId) {
-  return OrderWeb
-    .findOne(orderId)
+  return OrderWeb.findOne(orderId)
     .populate('Store')
     .populate('Details')
     .then(function(order) {
-      var store    = order.Store;
-      var details  = order.Details.map(function(detail) { return detail.id; });
-      details      = OrderDetailWeb.find(details).populate('Product');
-      return [ order, details, store];
+      var store = order.Store;
+      var details = order.Details.map(function(detail) {
+        return detail.id;
+      });
+      details = OrderDetailWeb.find(details).populate('Product');
+      return [order, details, store];
     })
     .spread(function(order, details, store) {
       var products = details
@@ -1039,14 +1074,14 @@ function freesaleEmail(orderId) {
           return detail.isFreeSale;
         })
         .map(function(detail) {
-          var date  = moment(detail.shipDate);
+          var date = moment(detail.shipDate);
           moment.locale('es');
           date.locale(false);
           date = date.format('DD/MMM/YYYY');
           return {
             id: detail.Product.id,
-            name:  detail.Product.ItemName,
-            code:  detail.Product.ItemCode,
+            name: detail.Product.ItemName,
+            code: detail.Product.ItemCode,
             color: (detail.Product.DetailedColor || '').split(' ')[0],
             material: '',
             ewallet: detail.ewallet && detail.ewallet.toFixed(2),
@@ -1059,18 +1094,16 @@ function freesaleEmail(orderId) {
         });
       return [order, products, store];
     })
-    .spread(function (order, products, store) {
+    .spread(function(order, products, store) {
       var mats = products.map(function(p) {
         return materials(p.id);
       });
-      return Promise
-        .all(mats)
-        .then(function(mats) {
-          mats.forEach(function(m, i) {
-            products[i].material = m;
-          });
-          return sendFreesale(order, products, store);
+      return Promise.all(mats).then(function(mats) {
+        mats.forEach(function(m, i) {
+          products[i].material = m;
         });
+        return sendFreesale(order, products, store);
+      });
     });
 }
 
@@ -1085,25 +1118,25 @@ function sendFreesale(order, products, store) {
       discount: numeral(order.discount).format('0,0.00'),
       total: numeral(order.total).format('0,0.00'),
       paid: numeral(order.total).format('0,0.00'),
-      pending: numeral(0).format('0,0.00'),
+      pending: numeral(0).format('0,0.00')
     },
     company: {
       url: baseURL,
       urlFront: baseURLFRONT,
       image: store.logo
     },
-    products: products,
+    products: products
   });
   // mail stuff
-  var request          = sendgrid.emptyRequest();
-  var requestBody      = undefined;
-  var mail             = new helper.Mail();
-  var personalization  = new helper.Personalization();
-  var from             = new helper.Email('no-reply@actualg.com', 'Actual Group');
+  var request = sendgrid.emptyRequest();
+  var requestBody = undefined;
+  var mail = new helper.Mail();
+  var personalization = new helper.Personalization();
+  var from = new helper.Email('no-reply@actualg.com', 'Actual Group');
   //var to               = new helper.Email(user.email, user.firstName + ' ' + user.lastName);
-  var to               = new helper.Email('gmarrero@actualg.com', 'Gustavo Marrero');
-  var subject          = 'Artículos freesale | Confirmación de compra Folio #' + order.folio;
-  var content          = new helper.Content("text/html", emailBody);
+  var to = new helper.Email('gmarrero@actualg.com', 'Gustavo Marrero');
+  var subject = 'Artículos freesale | Confirmación de compra Folio #' + order.folio;
+  var content = new helper.Content('text/html', emailBody);
   personalization.addTo(to);
   personalization.setSubject(subject);
 
@@ -1117,8 +1150,8 @@ function sendFreesale(order, products, store) {
   request.method = 'POST';
   request.path = '/v3/mail/send';
   request.body = requestBody;
-  return new Promise(function(resolve, reject){
-    sendgrid.API(request, function (response) {
+  return new Promise(function(resolve, reject) {
+    sendgrid.API(request, function(response) {
       if (response.statusCode >= 200 && response.statusCode <= 299) {
         resolve(order);
       } else {
@@ -1129,30 +1162,30 @@ function sendFreesale(order, products, store) {
 }
 
 function sendQuotationLog(form, store, cb) {
-  var request         = sendgrid.emptyRequest();
-  var requestBody     = undefined;
-  var mail            = new helper.Mail();
+  var request = sendgrid.emptyRequest();
+  var requestBody = undefined;
+  var mail = new helper.Mail();
   var personalization = new helper.Personalization();
-  var from            = new helper.Email("noreply@actualgroup.com", "Actual Group");
+  var from = new helper.Email('noreply@actualgroup.com', 'Actual Group');
   var to = new helper.Email('luisperez@spaceshiplabs.com', 'Luis');
   var toAux = new helper.Email('dtorres@actualg.com', 'Daniela');
-  var toAux2 = new helper.Email('eebalams@gmail.com', 'Ernesto');  
+  var toAux2 = new helper.Email('eebalams@gmail.com', 'Ernesto');
 
-  if(process.env.MODE === 'production'){
+  if (process.env.MODE === 'production') {
     personalization.addTo(toAux);
     personalization.addTo(toAux2);
   }
 
-  var subject         = 'Error en proceso de compra ' + ((store || {}).name || '');
-  var res             = quotationLogTemplate({
+  var subject = 'Error en proceso de compra ' + ((store || {}).name || '');
+  var res = quotationLogTemplate({
     form: form,
     company: {
       url: baseURL,
-      logo:  baseURL+'/logos/group.png',
+      logo: baseURL + '/logos/group.png'
     },
     store: store
   });
-  var content         = new helper.Content("text/html", res);
+  var content = new helper.Content('text/html', res);
   personalization.addTo(to);
   personalization.setSubject(subject);
   mail.setFrom(from);
@@ -1162,7 +1195,7 @@ function sendQuotationLog(form, store, cb) {
   request.method = 'POST';
   request.path = '/v3/mail/send';
   request.body = requestBody;
-  sendgrid.API(request, function (response) {
+  sendgrid.API(request, function(response) {
     if (response.statusCode >= 200 && response.statusCode <= 299) {
       cb();
     } else {
@@ -1170,7 +1203,6 @@ function sendQuotationLog(form, store, cb) {
     }
   });
 }
-
 
 function paymentMethod(payment) {
   var payment_name;
@@ -1191,14 +1223,14 @@ function paymentMethod(payment) {
       payment_name = 'Monedero electrónico';
       break;
 
-    case 'debit-card':       
+    case 'debit-card':
     case 'credit-card':
     case 'single-payment-terminal':
     case '3-msi':
     case '6-msi':
     case '9-msi':
-    case'12-msi':
-    case'18-msi':
+    case '12-msi':
+    case '18-msi':
       payment_name = 'Tarjeta';
       break;
     case 'cheque':
@@ -1209,7 +1241,7 @@ function paymentMethod(payment) {
       break;
     case 'client-credit':
       payment_name = 'Crédito cliente';
-      break;      
+      break;
     default:
       payment_name = '';
       break;
@@ -1245,8 +1277,8 @@ function paymentType(payment) {
     case '3-msi':
     case '6-msi':
     case '9-msi':
-    case'12-msi':
-    case'18-msi':
+    case '12-msi':
+    case '18-msi':
       payment_name = payment.type + ' ' + payment.terminal;
       break;
     case 'cheque':
@@ -1257,7 +1289,7 @@ function paymentType(payment) {
       break;
     case 'client-credit':
       payment_name = 'Crédito cliente';
-      break;        
+      break;
     default:
       payment_name = '';
       break;
@@ -1267,20 +1299,19 @@ function paymentType(payment) {
 
 function materials(product) {
   var material = 'Material';
-  var filter = ProductFilter
-    .findOne({Name: material})
+  var filter = ProductFilter.findOne({ Name: material })
     .populate('Values')
-    .then(function(filter){
-      return filter.Values.map(function(v) {return v.id});
+    .then(function(filter) {
+      return filter.Values.map(function(v) {
+        return v.id;
+      });
     });
-  var product = Product
-    .findOne(product)
+  var product = Product.findOne(product)
     .populate('FilterValues')
     .then(function(product) {
       return product.FilterValues;
     });
-  return Promise
-    .all([filter, product])
+  return Promise.all([filter, product])
     .spread(function(idfilters, pfilters) {
       return pfilters
         .filter(function(f) {
@@ -1290,15 +1321,15 @@ function materials(product) {
           return f.Name;
         });
     })
-    .then(function(filters){
+    .then(function(filters) {
       if (filters.length === 0) return;
       return filters[0].split(' ')[0];
     });
 }
 
-function getSenderByStore(store){
+function getSenderByStore(store) {
   var sender = new helper.Email('facturacion@actualstudio.com', 'Facturacion actualstudio.com');
-  switch(store.name){
+  switch (store.name) {
     case 'actualhome.com':
       sender = new helper.Email('facturacion@actualhome.com', 'Facturacion actualhome.com');
       break;
@@ -1310,4 +1341,4 @@ function getSenderByStore(store){
       break;
   }
   return sender;
-};
+}

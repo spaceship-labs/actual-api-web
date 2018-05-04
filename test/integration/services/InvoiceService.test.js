@@ -1,23 +1,18 @@
-describe("InvoiceService", function(){
-
-  describe("getPaymentMethodBasedOnPayments", function(){
-    it("should get the debit-card payment method", function(){
-      const payments = [
-        {type: "debit-card", currency: "mxn", ammount: 2000},
-      ];
-      expect(InvoiceService.getPaymentMethodBasedOnPayments(payments))
-        .to.equal('debit-card');
+describe('InvoiceService', function() {
+  describe('getPaymentMethodBasedOnPayments', function() {
+    it('should get the debit-card payment method', function() {
+      const payments = [{ type: 'debit-card', currency: 'mxn', ammount: 2000 }];
+      expect(InvoiceService.getPaymentMethodBasedOnPayments(payments)).to.equal('debit-card');
     });
-
   });
 
-  describe("prepareClient", function(){
-    it("should return an object with real data, when RFC is not generic", function(){
+  describe('prepareClient', function() {
+    it('should return an object with real data, when RFC is not generic', function() {
       const order = {
-        id: "order.id",
-        folio: "000001",
-        CardName: "card.name",
-        U_Estado: "QR"
+        id: 'order.id',
+        folio: '000001',
+        CardName: 'card.name',
+        U_Estado: 'QR'
       };
       const client = {
         LicTradNum: 'ADC180325',
@@ -38,7 +33,7 @@ describe("InvoiceService", function(){
 
       const expected = {
         name: address.companyName,
-        identification: (client.LicTradNum || "").toUpperCase(),
+        identification: (client.LicTradNum || '').toUpperCase(),
         email: address.U_Correos,
         cfdiUse: client.cfdiUse,
         address: {
@@ -48,23 +43,23 @@ describe("InvoiceService", function(){
           colony: address.Block,
           country: 'México',
           state: address.State,
-          municipality:  address.U_Localidad,
+          municipality: address.U_Localidad,
           localitiy: address.City,
-          zipCode: address.ZipCode,
-        }  
+          zipCode: address.ZipCode
+        }
       };
 
       const result = InvoiceService.prepareClientParams(order, client, address);
-      expect(result)
-        .to.deep.equal(expected);
+      expect(result).to.deep.equal(expected);
     });
 
-    it("should return an object with real data, when RFC is generic", function(){
+    it('should return an object with real data, when RFC is generic', function() {
       const order = {
-        id: "order.id",
-        folio: "000001",
-        CardName: "card.name",
-        U_Estado: "QR"
+        id: 'order.id',
+        folio: '000001',
+        CardName: 'card.name',
+        U_Estado: 'QR',
+        E_Mail: 'test@test.com'
       };
       const client = {
         LicTradNum: InvoiceService.RFCPUBLIC,
@@ -87,44 +82,37 @@ describe("InvoiceService", function(){
         name: order.CardName,
         identification: InvoiceService.RFCPUBLIC,
         cfdiUse: InvoiceService.DEFAULT_CFDI_USE,
+        email: order.E_Mail,
         address: {
           country: 'México',
           state: order.U_Estado
-        }          
+        }
       };
 
       const result = InvoiceService.prepareClientParams(order, client, address);
-      expect(result)
-        .to.deep.equal(expected);
+      expect(result).to.deep.equal(expected);
     });
-
   });
 
-  describe("getUnitTypeByProduct", function(){
-    it("should return service type when product is service", function(){
-      const product = {Service: "Y"};
-      expect(InvoiceService.getUnitTypeByProduct(product))
-        .to.be.equal('service');
+  describe('getUnitTypeByProduct', function() {
+    it('should return service type when product is service', function() {
+      const product = { Service: 'Y' };
+      expect(InvoiceService.getUnitTypeByProduct(product)).to.be.equal('service');
     });
 
-    it("should return service type when product unit clave is E48", function(){
-      const product = {U_ClaveUnidad: "E48"};
-      expect(InvoiceService.getUnitTypeByProduct(product))
-        .to.be.equal("service");
+    it('should return service type when product unit clave is E48', function() {
+      const product = { U_ClaveUnidad: 'E48' };
+      expect(InvoiceService.getUnitTypeByProduct(product)).to.be.equal('service');
     });
 
-    it("should return piece type when product unit clave is H87", function(){
-      const product = {U_ClaveUnidad: "H87"};
-      expect(InvoiceService.getUnitTypeByProduct(product))
-        .to.be.equal("piece");
+    it('should return piece type when product unit clave is H87', function() {
+      const product = { U_ClaveUnidad: 'H87' };
+      expect(InvoiceService.getUnitTypeByProduct(product)).to.be.equal('piece');
     });
 
-    it("should return piece type when product unit clave is missing", function(){
+    it('should return piece type when product unit clave is missing', function() {
       const product = {};
-      expect(InvoiceService.getUnitTypeByProduct(product))
-        .to.be.equal("piece");
+      expect(InvoiceService.getUnitTypeByProduct(product)).to.be.equal('piece');
     });
-
   });
-
 });

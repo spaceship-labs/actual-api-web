@@ -64,8 +64,7 @@
     "precommit": "lint-staged",
     "debug": "node debug app.js",
     "start": "node app.js",
-    "test":
-      "NODE_ENV=test node ./node_modules/mocha/bin/mocha test/bootstrap.test.js test/integration/**/*.test.js"
+    "test": "NODE_ENV=test node ./node_modules/mocha/bin/mocha test/bootstrap.test.js test/integration/**/*.test.js"
   },
   "main": "app.js",
   "repository": {
@@ -79,6 +78,9 @@
     "npm": "5.6.10"
   },
   "lint-staged": {
-    "*.js": ["prettier --write", "git add"]
+    "*.js": [
+      "prettier --write",
+      "git add"
+    ]
   }
 }

@@ -228,11 +228,11 @@ function getPaymentMethodBasedOnPayments(payments) {
     case '18-msi':
       paymentMethod = 'credit-card';
       break;
-    
+
     case 'debit-card':
       paymentMethod = 'debit-card';
-      break;  
-    
+      break;
+
     default:
       paymentMethod = 'other';
       break;
@@ -276,10 +276,7 @@ function createInvoice(data) {
       })
       .then(function(result) {
         resultAlegra = result;
-        return AlegraLogWeb.update(
-          { id: log.id },
-          { responseData: JSON.stringify(result) }
-        );
+        return AlegraLogWeb.update({ id: log.id }, { responseData: JSON.stringify(result) });
       })
       .then(function(logUpdated) {
         resolve(resultAlegra);
@@ -300,9 +297,10 @@ function createInvoice(data) {
   });
 }
 
-function prepareClientParams(order, client, address){
+function prepareClientParams(order, client, address) {
   const generic = !client.LicTradNum || client.LicTradNum == RFCPUBLIC;
   var data;
+  console.log('generic prepareClientParams', generic);
   if (!generic) {
     data = {
       name: address.companyName,
@@ -334,12 +332,12 @@ function prepareClientParams(order, client, address){
         //TODO; Check default Inovice data for GENERAL PUBLIC
       }
     };
-  }  
+  }
   return data;
 }
 
 function prepareClient(order, client, address) {
-  const data =  prepareClientParams(order, client, address);
+  const data = prepareClientParams(order, client, address);
   return createClient(data);
 }
 
@@ -405,11 +403,11 @@ function prepareItems(details, order) {
 
 function getUnitTypeByProduct(product) {
   var unitType = 'piece';
-  if(product.Service === 'Y'){
+  if (product.Service === 'Y') {
     return 'service';
   }
-  
-  switch(product.U_ClaveUnidad){
+
+  switch (product.U_ClaveUnidad) {
     case 'H87':
       unitType = 'piece';
       break;
