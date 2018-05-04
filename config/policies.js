@@ -116,6 +116,9 @@ module.exports.policies = {
   },
   LeadController: {
     '*': ['setupDefaultData']
+  },
+  FeaturedProductController: {
+    '*': ['setupDefaultData']
   }
 
   /***************************************************************************
