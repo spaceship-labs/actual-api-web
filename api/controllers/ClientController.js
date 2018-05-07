@@ -9,15 +9,7 @@ module.exports = {
     const form = req.allParams();
     const model = 'client';
     const extraParams = {
-      searchFields: [
-        'id',
-        'CardName',
-        'CardCode',
-        'firstName',
-        'lastName',
-        'E_Mail',
-        'phone'
-      ],
+      searchFields: ['id', 'CardName', 'CardCode', 'firstName', 'lastName', 'E_Mail', 'phone'],
       filters: {
         UserWeb: { '!': null }
       }
@@ -66,13 +58,10 @@ module.exports = {
         form.CardCode = user.CardCode;
         form.userId = user.id;
         form.invited = false;
-        
-        const { updatedClient, updatedUser } = await ClientService.updateClient(
-          form,
-          req
-        );
 
-        if(form.contacts && form.contacts.length > 0){
+        const { updatedClient, updatedUser } = await ClientService.updateClient(form, req);
+
+        if (form.contacts && form.contacts.length > 0) {
           form.contacts[0].CntctCode = clientContact.CntctCode;
           form.contacts[0].CardCode = user.CardCode;
           await ContactService.updateContact(form.contacts[0]);
@@ -80,7 +69,7 @@ module.exports = {
 
         await UserWeb.update(
           { email: form.E_Mail },
-          { 
+          {
             new_password: form.password,
             invited: false
           }
@@ -89,8 +78,7 @@ module.exports = {
           user: updatedUser,
           client: updatedClient
         });
-      } 
-      else {
+      } else {
         var {
           createdClient,
           contactsCreated,
@@ -105,10 +93,16 @@ module.exports = {
           });
         }
 
-        return res.json({
+        res.json({
           user: createdUser,
           client: createdClient
         });
+
+        if (!form.invited) {
+          Email.sendRegister(createdUser.firstName, createdUser.email, req.activeStore, function() {
+            sails.log.info('Email de registro enviado', createdUser.email);
+          });
+        }
       }
     } catch (e) {
       return res.negotiate(e);
@@ -118,10 +112,7 @@ module.exports = {
   async update(req, res) {
     var form = req.allParams();
     try {
-      const { updatedClient, updatedUser } = await ClientService.updateClient(
-        form,
-        req
-      );
+      const { updatedClient, updatedUser } = await ClientService.updateClient(form, req);
       res.json({
         client: updatedClient,
         user: updatedUser
@@ -199,10 +190,7 @@ module.exports = {
   async updateFiscalAddress(req, res) {
     var form = req.allParams();
     try {
-      const updatedFiscalAddress = await FiscalAddressService.updateFiscalAddress(
-        form,
-        req
-      );
+      const updatedFiscalAddress = await FiscalAddressService.updateFiscalAddress(form, req);
       res.json(updatedFiscalAddress);
     } catch (err) {
       res.negotiate(err);
