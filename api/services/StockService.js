@@ -1,15 +1,17 @@
-var Promise = require('bluebird');
-var _ = require('underscore');
-var moment = require('moment');
-var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
-//.startOf('day').format('DD-MM-YYYY');
+const Promise = require('bluebird');
+const _ = require('underscore');
+const moment = require('moment');
+const ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
 
 module.exports = {
-  getDetailsStock: getDetailsStock,
-  substractProductsStock: substractProductsStock,
-  validateQuotationStockById: validateQuotationStockById,
-  isFreeSaleProduct: isFreeSaleProduct,
-  syncOrderDetailsProducts: syncOrderDetailsProducts
+  getDetailsStock,
+  substractProductsStock,
+  validateQuotationStockById,
+  isFreeSaleProduct,
+  syncOrderDetailsProducts,
+  //Exposed for testing
+  tagValidDetails,
+  findValidDelivery
 };
 
 function syncOrderDetailsProducts(orderDetails) {
@@ -210,7 +212,7 @@ function getDetailsStock(details, warehouse, zipcodeDeliveryId, activeStore) {
       return arr;
     }, []);
 
-    var finalDetails = mapDetailsWithDeliveryDates(
+    var finalDetails = tagValidDetails(
       details,
       groupedDeliveryDates,
       activeStore
@@ -219,12 +221,7 @@ function getDetailsStock(details, warehouse, zipcodeDeliveryId, activeStore) {
   });
 }
 
-function mapDetailsWithDeliveryDates(
-  details,
-  groupedDeliveryDates,
-  activeStore
-) {
-  var societyCodes = SiteService.getSocietyCodesByActiveStore(activeStore);
+function tagValidDetails(details, groupedDeliveryDates, activeStore) {
   var validatedDetails = [];
 
   for (var i = 0; i < details.length; i++) {
@@ -240,7 +237,6 @@ function mapDetailsWithDeliveryDates(
       (details[i].Product.Service !== 'Y' ||
         details[i].Product.ItemCode === 'SR00078') &&
       details[i].Product.U_FAMILIA === 'SI' &&
-      checkIfProductHasSocietyCodes(details[i].Product, societyCodes) &&
       !details[i].Product.excludeWeb &&
       details[i].Product[activeStore.code] > 0
     ) {
@@ -265,19 +261,20 @@ function findValidDelivery(detail, groupedDeliveryDates, validatedDetails) {
     return false;
   }
 
-  var detailDelivery = _.find(groupedDeliveryDates, function(delivery) {
+  const detailDelivery = _.find(groupedDeliveryDates, function(delivery) {
     if (!delivery.date) {
       return false;
     }
 
-    var isValidDelivery;
-    var detailShipDate = moment(detail.originalShipDate)
+    const DATE_FORMAT = 'DD-MM-YYYY';
+    const detailShipDate = moment(detail.originalShipDate)
       .startOf('day')
-      .format('DD-MM-YYYY');
-    var deliveryDate = moment(delivery.date)
+      .format(DATE_FORMAT);
+    const deliveryDate = moment(delivery.date)
       .startOf('day')
-      .format('DD-MM-YYYY');
-    var validatedProductStock = validatedDetails.reduce(function(
+      .format(DATE_FORMAT);
+
+    const validatedProductStock = validatedDetails.reduce(function(
       stock,
       validatedDetail
     ) {
@@ -292,9 +289,9 @@ function findValidDelivery(detail, groupedDeliveryDates, validatedDetails) {
     },
     0);
 
-    var deliveryAvailable = delivery.available - validatedProductStock;
+    const deliveryAvailable = delivery.available - validatedProductStock;
 
-    if (
+    return (
       detail.Product.ItemCode === delivery.itemCode &&
       detailShipDate === deliveryDate &&
       detail.quantity <= deliveryAvailable &&
@@ -302,13 +299,7 @@ function findValidDelivery(detail, groupedDeliveryDates, validatedDetails) {
         detail.Product.ItemCode === 'SR00078') &&
       detail.shipCompanyFrom === delivery.companyFrom &&
       detail.shipCompany === delivery.company
-    ) {
-      isValidDelivery = true;
-    } else {
-      isValidDelivery = false;
-    }
-
-    return isValidDelivery;
+    );
   });
 
   return detailDelivery;

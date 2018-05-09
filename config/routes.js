@@ -510,6 +510,10 @@ module.exports.routes = {
   'POST /lead/quotation/:quotationId': {
     controller: 'lead',
     action: 'createLeadAndSendQuotation'
+  },
+  'GET /featuredproduct/:site': {
+    controller: 'featuredproduct',
+    action: 'index'
   }
 
   /*

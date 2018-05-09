@@ -91,7 +91,8 @@ module.exports.policies = {
     '*': ['setupDefaultData']
   },
   ProductController: {
-    '*': ['setupDefaultData']
+    '*': ['setupDefaultData'],
+    demandedweb: false
   },
   ProductGroupController: {
     '*': ['setupDefaultData']
@@ -115,6 +116,9 @@ module.exports.policies = {
     '*': ['setupDefaultData']
   },
   LeadController: {
+    '*': ['setupDefaultData']
+  },
+  FeaturedProductController: {
     '*': ['setupDefaultData']
   }
 

@@ -58,6 +58,9 @@
     "mocha": "^5.0.1",
     "prettier": "^1.11.1",
     "pretty-quick": "^1.4.1",
+    "grunt": "^1.0.1",
+    "sails-fixtures": "^1.0.8",
+    "sails-hook-fixtures": "^0.12.2",
     "supertest": "^3.0.0"
   },
   "scripts": {
