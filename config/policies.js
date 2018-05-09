@@ -91,7 +91,8 @@ module.exports.policies = {
     '*': ['setupDefaultData']
   },
   ProductController: {
-    '*': ['setupDefaultData']
+    '*': ['setupDefaultData'],
+    demandedweb: false
   },
   ProductGroupController: {
     '*': ['setupDefaultData']
