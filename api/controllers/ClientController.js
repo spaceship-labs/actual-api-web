@@ -70,7 +70,7 @@ module.exports = {
           { email: form.E_Mail },
           {
             new_password: form.password,
-            invited: false
+            invited: form.invited
           }
         );
         return res.json({
