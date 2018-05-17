@@ -57,6 +57,7 @@ module.exports = {
       if (user && user.invited) {
         form.CardCode = user.CardCode;
         form.userId = user.id;
+        form.fromInvited = true;
 
         const { updatedClient, updatedUser } = await ClientService.updateClient(form, req);
 

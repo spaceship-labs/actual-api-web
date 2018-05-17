@@ -34,7 +34,10 @@ module.exports = {
   mapFiscalFields,
   isValidCardCode,
   validateContactsZipcode,
-  clientsIdSearch
+  clientsIdSearch,
+
+  //Exposed for testing
+  mapContactFields
 };
 
 function clientsIdSearch(term, searchFields) {
@@ -188,6 +191,8 @@ function mapContactFields(fields) {
   if (fields.LastName) {
     fields.Name += ' ' + fields.LastName;
   }
+  const unixDate = moment().unix();
+  fields.Name += '_' + unixDate;
   return fields;
 }
 
@@ -232,13 +237,9 @@ async function createClient(params, req) {
   const password = _.clone(sapCreateParams.client.password);
   delete sapCreateParams.client.password;
 
-  const areValidZipcodes = await validateContactsZipcode(
-    sapCreateParams.clientContacts
-  );
+  const areValidZipcodes = await validateContactsZipcode(sapCreateParams.clientContacts);
   if (!areValidZipcodes) {
-    throw new Error(
-      'El código postal no es valido para tu dirección de entrega'
-    );
+    throw new Error('El código postal no es valido para tu dirección de entrega');
   }
 
   const isUserEmailTaken = await UserService.checkIfUserEmailIsTaken(email);
@@ -271,15 +272,8 @@ async function createClient(params, req) {
   sails.log.info('client app', clientCreateParams);
 
   const createdClient = await Client.create(clientCreateParams);
-  const createdUser = await UserService.createUserFromClient(
-    createdClient,
-    password,
-    req
-  );
-  const updatedClients = await Client.update(
-    { id: createdClient.id },
-    { UserWeb: createdUser.id }
-  );
+  const createdUser = await UserService.createUserFromClient(createdClient, password, req);
+  const updatedClients = await Client.update({ id: createdClient.id }, { UserWeb: createdUser.id });
   const updatedClient = updatedClients[0];
 
   if (contactsParams && contactsParams.length > 0) {
@@ -300,10 +294,7 @@ async function createClient(params, req) {
     AdresType: ADDRESS_TYPE_B
   };
 
-  fiscalAddressesCreated = await FiscalAddress.create([
-    fiscalAddressParams1,
-    fiscalAddressParams2
-  ]);
+  fiscalAddressesCreated = await FiscalAddress.create([fiscalAddressParams1, fiscalAddressParams2]);
   //}
 
   if (fiscalAddressesCreated) {
@@ -320,12 +311,10 @@ async function createClient(params, req) {
 }
 
 async function updateClient(params, req) {
-  const CardCode = params.invited
-    ? params.CardCode
-    : _.clone(req.user.CardCode);
+  const CardCode = params.fromInvited ? params.CardCode : _.clone(req.user.CardCode);
   const email = params.E_Mail;
   let userId;
-  if (params.invited) {
+  if (params.fromInvited) {
     userId = params.userId;
   } else {
     userId = req.user ? req.user.id : false;
@@ -345,10 +334,7 @@ async function updateClient(params, req) {
     throw new Error('No autorizado');
   }
 
-  const isUserEmailTaken = await UserService.checkIfUserEmailIsTaken(
-    email,
-    userId
-  );
+  const isUserEmailTaken = await UserService.checkIfUserEmailIsTaken(email, userId);
   //const isClientEmailTaken = await Client.findOne({E_Mail:email, id: {'!=': params.id}});
 
   //if(isUserEmailTaken || isClientEmailTaken){
