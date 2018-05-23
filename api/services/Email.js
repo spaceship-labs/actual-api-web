@@ -141,7 +141,7 @@ function sendRegisterInvitation(userName, userEmail, recoveryUrl) {
   personalization.setSubject(subject);
 
   if (process.env.MODE !== 'production') {
-    const toAux = new helper.Email('emmanuelyupit08@gmail.com', 'Emmanuel');
+    const toAux = new helper.Email('emmanuelspaceship@gmail.com', 'Emmanuel');
     personalization.addTo(toAux);
 
     const toAux3 = new helper.Email('luisperez@spaceshiplabs.com', 'Luis');
