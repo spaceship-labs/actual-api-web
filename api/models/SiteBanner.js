@@ -26,7 +26,8 @@ module.exports = {
       type: 'boolean'
     },
     secondBanner: {
-      type: 'boolean'
+      type: 'boolean',
+      defaultsTo: false
     },
     Site: {
       model: 'site'
