@@ -16,12 +16,8 @@ module.exports = {
     var spotlight = form.spotlight;
     //var displayProperty = SiteService.getSiteDisplayProperty(req);
 
-    var populateImgs = !_.isUndefined(form.populateImgs)
-      ? form.populateImgs
-      : true;
-    var filterByStore = !_.isUndefined(form.filterByStore)
-      ? form.filterByStore
-      : true;
+    var populateImgs = !_.isUndefined(form.populateImgs) ? form.populateImgs : true;
+    var filterByStore = !_.isUndefined(form.filterByStore) ? form.filterByStore : true;
     var productsIds = [];
     var activeStore = req.activeStore;
     //var societyCodes   = SiteService.getSocietyCodesByActiveStore(activeStore);
@@ -49,11 +45,7 @@ module.exports = {
     query.excludeWeb = { '!': true };
     query.Service = { '!': 'Y' };
 
-    return processQueryForDeliveryValidationActualKids(
-      query,
-      form.zipcodeDeliveryId,
-      activeStore
-    )
+    return processQueryForDeliveryValidationActualKids(query, form.zipcodeDeliveryId, activeStore)
       .then(function(newQuery) {
         query = newQuery;
         return Search.getProductsByFilterValue(filtervalues);
@@ -70,11 +62,7 @@ module.exports = {
 
         if (stockRanges && _.isArray(stockRanges) && stockRanges.length > 0) {
           delete query[activeStore.code];
-          query = Search.applyStockRangesQuery(
-            query,
-            activeStore.code,
-            stockRanges
-          );
+          query = Search.applyStockRangesQuery(query, activeStore.code, stockRanges);
         }
 
         var freeSaleQuery = _.clone(query);
@@ -102,10 +90,7 @@ module.exports = {
           sortValue = Search.getSortValueBySortOption(sortOption, activeStore);
         }
 
-        return [
-          Product.count(searchQuery),
-          find.paginate(paginate).sort(sortValue)
-        ];
+        return [Product.count(searchQuery), find.paginate(paginate).sort(sortValue)];
       })
       .spread(function(total, products) {
         return res.json({ total: total, products: products });
@@ -118,14 +103,10 @@ module.exports = {
   searchByCategory: function(req, res) {
     var form = req.allParams();
     var handle = [].concat(form.category);
-    var filtervalues = _.isArray(form.filtervalues)
-      ? [].concat(form.filtervalues)
-      : [];
+    var filtervalues = _.isArray(form.filtervalues) ? [].concat(form.filtervalues) : [];
     var queryPromos = Search.getPromotionsQuery();
     var activeStoreId = req.activeStore.id || false;
-    var filterByStore = !_.isUndefined(form.filterByStore)
-      ? form.filterByStore
-      : true;
+    var filterByStore = !_.isUndefined(form.filterByStore) ? form.filterByStore : true;
     var minPrice = form.minPrice;
     var maxPrice = form.maxPrice;
     var stockRanges = form.stockRanges;
@@ -157,20 +138,15 @@ module.exports = {
       limit: form.limit || 10
     };
 
-    return processQueryForDeliveryValidationActualKids(
-      query,
-      form.zipcodeDeliveryId,
-      activeStore
-    )
+    var categoryProducts;
+
+    return processQueryForDeliveryValidationActualKids(query, form.zipcodeDeliveryId, activeStore)
       .then(function(newQuery) {
         return Search.getProductsByCategory({ Handle: handle });
       })
       .then(function(results) {
-        var categoryProducts = results;
-        return [
-          categoryProducts,
-          Search.getProductsByFilterValue(filtervalues)
-        ];
+        categoryProducts = results;
+        return [categoryProducts, Search.getProductsByFilterValue(filtervalues)];
       })
       .spread(function(categoryProducts, filterprods) {
         if (!handle || handle.length === 0) {
@@ -198,11 +174,7 @@ module.exports = {
 
         if (stockRanges && _.isArray(stockRanges) && stockRanges.length > 0) {
           delete query[activeStore.code];
-          query = Search.applyStockRangesQuery(
-            query,
-            activeStore.code,
-            stockRanges
-          );
+          query = Search.applyStockRangesQuery(query, activeStore.code, stockRanges);
         }
 
         var freeSaleQuery = _.clone(query);
@@ -227,14 +199,28 @@ module.exports = {
         return [
           Product.count(searchQuery),
           Product.find(searchQuery)
-            .paginate(paginate)
-            .sort(sortValue)
+          //.paginate(paginate)
+          //.sort(sortValue)
           //.populate('files')
         ];
       })
       .spread(function(total, products) {
+        var start = paginate.page * paginate.limit - paginate.limit;
+        var end = paginate.page * paginate.limit;
+
+        console.log('start', start);
+        console.log('end', end);
+
+        var groups = _.groupBy(products, 'id');
+        //console.log('groups', groups);
+        var resultProducts = _.map(categoryProducts, i => {
+          return groups[i] ? groups[i].shift() : null;
+        })
+          .filter(product => product)
+          .slice(start, end);
+
         return res.json({
-          products: products,
+          products: resultProducts,
           total: total
         });
       })
@@ -245,31 +231,20 @@ module.exports = {
   }
 };
 
-function processQueryForDeliveryValidationActualKids(
-  query,
-  zipcodeDeliveryId,
-  activeStore
-) {
-  var STATES_EXCLUDED_KIDS_PETIT_CORNIER = [
-    'JALISCO',
-    'QUERETARO',
-    'NUEVO LEON'
-  ];
+function processQueryForDeliveryValidationActualKids(query, zipcodeDeliveryId, activeStore) {
+  var STATES_EXCLUDED_KIDS_PETIT_CORNIER = ['JALISCO', 'QUERETARO', 'NUEVO LEON'];
 
   if (activeStore.name !== 'actualkids.com') {
     return Promise.resolve(query);
   }
 
-  return ZipcodeDelivery.findOne({ id: zipcodeDeliveryId }).then(function(
-    zipcodeDelivery
-  ) {
+  return ZipcodeDelivery.findOne({ id: zipcodeDeliveryId }).then(function(zipcodeDelivery) {
     //sails.log.info('zipcodeDelivery', zipcodeDelivery);
     if (!zipcodeDelivery) {
       return query;
     }
 
-    var inExcludedStates =
-      STATES_EXCLUDED_KIDS_PETIT_CORNIER.indexOf(zipcodeDelivery.estado) > -1;
+    var inExcludedStates = STATES_EXCLUDED_KIDS_PETIT_CORNIER.indexOf(zipcodeDelivery.estado) > -1;
     //sails.log.info('excluding Petit Corner');
     if (inExcludedStates) {
       query.ItmsGrpNam = { '!': 'Petit Corner' };
