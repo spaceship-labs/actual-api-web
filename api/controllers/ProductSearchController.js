@@ -121,6 +121,7 @@ module.exports = {
     var productsIds = [];
     var activeStore = req.activeStore;
     var priceField = 'DiscountPrice';
+    var sortValue = 'DiscountPrice ASC';
     //var societyCodes   = SiteService.getSocietyCodesByActiveStore(activeStore);
 
     query = Search.getPriceQuery(query, priceField, minPrice, maxPrice);
@@ -188,41 +189,44 @@ module.exports = {
           $or: [query, freeSaleQuery]
         };
 
-        var sortValue = 'DiscountPrice ASC';
-
         if (sortOption) {
           sortValue = Search.getSortValueBySortOption(sortOption, activeStore);
         }
 
         //sails.log.info('searchQuery', searchQuery);
-
-        return [
-          Product.count(searchQuery),
-          Product.find(searchQuery)
-          //.paginate(paginate)
-          //.sort(sortValue)
-          //.populate('files')
-        ];
+        if (sortValue && sortValue.relevance) {
+          return [Product.count(searchQuery), Product.find(searchQuery)];
+        } else {
+          return [
+            Product.count(searchQuery),
+            Product.find(searchQuery)
+              .paginate(paginate)
+              .sort(sortValue)
+            //.populate('files')
+          ];
+        }
       })
       .spread(function(total, products) {
-        var start = paginate.page * paginate.limit - paginate.limit;
-        var end = paginate.page * paginate.limit;
+        if (sortValue && sortValue.relevance) {
+          var start = paginate.page * paginate.limit - paginate.limit;
+          var end = paginate.page * paginate.limit;
+          var groups = _.groupBy(products, 'id');
+          var resultProducts = _.map(categoryProducts, i => {
+            return groups[i] ? groups[i].shift() : null;
+          })
+            .filter(product => product)
+            .slice(start, end);
 
-        console.log('start', start);
-        console.log('end', end);
-
-        var groups = _.groupBy(products, 'id');
-        //console.log('groups', groups);
-        var resultProducts = _.map(categoryProducts, i => {
-          return groups[i] ? groups[i].shift() : null;
-        })
-          .filter(product => product)
-          .slice(start, end);
-
-        return res.json({
-          products: resultProducts,
-          total: total
-        });
+          return res.json({
+            products: resultProducts,
+            total: total
+          });
+        } else {
+          return res.json({
+            products,
+            total
+          });
+        }
       })
       .catch(function(err) {
         console.log(err);
