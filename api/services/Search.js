@@ -225,19 +225,58 @@ function areEmptyTerms(terms) {
   });
 }
 
+//TODO: Replace with elastic search, or mongo full text search diacriticSensitive
+function getSingularTerm(pluralTerm) {
+  var key = pluralTerm.toLowerCase();
+  var dictionary = {
+    sillas: 'silla',
+    mesas: 'mesa',
+    camas: 'cama',
+    buros: 'buro',
+    colchones: 'colchon',
+    taburetes: 'taburete',
+    recamaras: 'recamara',
+    almohadas: 'almohada',
+    lamparas: 'lampara',
+    ventiladores: 'ventilador',
+    espejos: 'espejo',
+    accesorios: 'accesorio',
+    bancos: 'banco',
+    comedores: 'comedor',
+    sofas: 'sofa',
+    salas: 'sala',
+    escritorios: 'escritorio',
+    libreros: 'librero',
+    juguetes: 'juguete',
+    bufeteras: 'bufetero',
+    literas: 'litera',
+    cestos: 'cesto'
+  };
+  return dictionary[key];
+}
+
 function queryTerms(query, terms) {
   if (!terms || terms.length === 0 || areEmptyTerms(terms)) {
     return query;
   }
   var searchFields = ['Name', 'ItemName', 'ItemCode', 'Description', 'DetailedColor'];
-  var filter = searchFields.reduce(function(acum, sf) {
-    var and = terms.reduce(function(acum, term) {
+  var filter = searchFields.reduce(function(fieldsAcum, searchField) {
+    var and = terms.reduce(function(andAcum, term) {
       term = term.trim();
-      var fname = {};
-      fname[sf] = { contains: term };
-      return acum.concat(fname);
+      var fieldName = {};
+      fieldName[searchField] = { contains: term };
+      return andAcum.concat(fieldName);
     }, []);
-    return acum.concat({ $and: and });
+
+    var singularTerms = terms.map(term => getSingularTerm(term)).filter(term => term);
+    var singularsAnd = singularTerms.reduce(function(andAcum, term) {
+      term = term.trim();
+      var fieldName = {};
+      fieldName[searchField] = { contains: term };
+      return andAcum.concat(fieldName);
+    }, []);
+
+    return fieldsAcum.concat({ $or: (and || []).concat(singularsAnd) });
   }, []);
 
   return assign(query, { $or: filter });
