@@ -34,11 +34,12 @@ module.exports = {
         dateTime,
         notes
       });
-      if (req._fileparser.upstreams.length)
+      if (req._fileparser && req._fileparser.upstreams.length) {
         await quotationRecord.addFiles(req, {
           dir: 'records/gallery',
           profile: 'record'
         });
+      }
       const record = await QuotationRecord.findOne({
         id: quotationRecord.id
       })
