@@ -1,7 +1,7 @@
 //Runs in bootstrap
 //or '' if not setting
 function replaceUrlImageSizes(url) {
-  const regexDimensions = new RegExp('(\\d{3,4}[x]\\d{3,4})');
+  const regexDimensions = new RegExp('(\\d{3}[x]\\d{3})');
   const regexResult = url.match(regexDimensions);
   var matchDimensions;
 
