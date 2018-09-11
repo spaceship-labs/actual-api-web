@@ -1,4 +1,5 @@
 const baseURL = process.env.baseURL;
+const cdnUrl = process.env.AWS_CLOUDFRONT_URL;
 const baseURLFRONT = process.env.baseURLFRONT;
 const surveyURL = process.env.surveyURL || 'http://cc.actualg.com/s/fc28cff';
 const key = process.env.SENDGRIDAPIKEY;
@@ -614,7 +615,7 @@ function orderEmail(orderId) {
           total: numeral(detail.total).format('0,0.00'),
           discount: detail.discountPercent,
           promo: (detail.Promotion || {}).publicName,
-          image: baseURL + '/uploads/products/' + detail.Product.icon_filename,
+          image: cdnUrl + '/uploads/products/' + detail.Product.icon_filename,
           promotionValidity: promotionValidity
         };
       });
@@ -829,7 +830,7 @@ function quotation(quotationId, activeStore, isCardProcessingError, lead) {
           total: numeral(detail.total).format('0,0.00'),
           discount: detail.discountPercent,
           promo: (detail.Promotion || {}).publicName,
-          image: baseURL + '/uploads/products/' + detail.Product.icon_filename,
+          image: cdnUrl + '/uploads/products/' + detail.Product.icon_filename,
           promotionValidity: promotionValidity
         };
       });
@@ -918,7 +919,7 @@ function sendSpeiQuotation(quotationId, activeStore) {
           total: numeral(detail.total).format('0,0.00'),
           discount: detail.discountPercent,
           promo: (detail.Promotion || {}).publicName,
-          image: baseURL + '/uploads/products/' + detail.Product.icon_filename,
+          image: cdnUrl + '/uploads/products/' + detail.Product.icon_filename,
           promotionValidity: promotionValidity
         };
       });
@@ -1089,7 +1090,7 @@ function freesaleEmail(orderId) {
             qty: detail.quantity,
             ship: date,
             price: numeral(detail.total).format('0,0.00'),
-            image: baseURL + '/uploads/products/' + detail.Product.icon_filename
+            image: cdnUrl + '/uploads/products/' + detail.Product.icon_filename
           };
         });
       return [order, products, store];
