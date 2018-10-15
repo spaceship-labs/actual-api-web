@@ -1,5 +1,6 @@
 var baseUrl = process.env.SAP_URL;
 //var baseUrl = 'http://189.149.131.100:8080';
+const qs = require('qs');
 var request = require('request-promise');
 var Promise = require('bluebird');
 var buildUrl = require('build-url');
@@ -34,7 +35,7 @@ module.exports = {
   updateContact: updateContact,
   updateFiscalAddress: updateFiscalAddress,
   syncProduct: syncProduct,
-  buildSaleOrderRequestParams: buildSaleOrderRequestParams
+  buildOrderRequestParams: buildOrderRequestParams
 };
 
 function syncProduct(itemCode) {
@@ -80,7 +81,7 @@ function createClient(params) {
   return request(reqOptions);
 }
 
-function updateClient(cardcode, form){
+function updateClient(cardcode, form) {
   var updateParams = _.omit(form, _.isUndefined);
 
   //Important: DONT UPDATE BALANCE IN SAP
@@ -164,34 +165,48 @@ function updateFiscalAddress(cardcode, form) {
 */
 function createSaleOrder(params) {
   var endPoint;
-  return buildSaleOrderRequestParams(params)
-    .then(function(requestParams) {
-      endPoint = baseUrl + requestParams;
-      sails.log.info('createSaleOrder');
-      sails.log.info(decodeURIComponent(endPoint));
-      reqOptions.uri = endPoint;
-      return request(reqOptions);
+  var requestParams;
+  return buildOrderRequestParams(params)
+    .then(function(_requestParams) {
+      requestParams = _requestParams;
+      endPoint = baseUrl + '/SalesOrder';
+      sails.log.info('createSaleOrder', endPoint);
+      sails.log.info('requestParams', JSON.stringify(requestParams));
+      const preForm = {
+        contact: JSON.stringify(requestParams.contact),
+        products: JSON.stringify(requestParams.products),
+        payments: JSON.stringify(requestParams.payments)
+      };
+      const formDataStr = qs.stringify(preForm, { encode: true });
+      var options = {
+        json: true,
+        method: 'POST',
+        url: endPoint,
+        body: formDataStr,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
+        }
+      };
+      return request(options);
     })
     .then(function(response) {
       return {
+        requestParams,
         endPoint: endPoint,
         response: response
       };
     });
 }
 
-function buildSaleOrderRequestParams(params) {
-  var requestParams = '/SalesOrder?sales=';
+function buildOrderRequestParams(params) {
   var products = [];
 
-  var saleOrderRequest = {
+  var contactParams = {
     QuotationId: params.quotationId,
     GroupCode: params.groupCode,
     ContactPersonCode: params.cntctCode,
     Currency: 'MXP',
-    ShipDate: moment(getFarthestShipDate(params.quotationDetails)).format(
-      SAP_DATE_FORMAT
-    ),
+    ShipDate: moment(getFarthestShipDate(params.quotationDetails)).format(SAP_DATE_FORMAT),
     SalesPersonCode: params.slpCode || -1,
     CardCode: params.cardCode,
     DescuentoPDocumento: calculateUsedEwalletByPayments(params.payments),
@@ -199,13 +214,13 @@ function buildSaleOrderRequestParams(params) {
     Group: params.currentStore.group
   };
 
-  if (saleOrderRequest.SalesPersonCode === []) {
-    saleOrderRequest.SalesPersonCode = -1;
+  if (contactParams.SalesPersonCode === []) {
+    contactParams.SalesPersonCode = -1;
   }
 
   if (process.env.MODE === 'production') {
     var WEB_SELLER_SLPCODE = 148; //Daniela Torres
-    saleOrderRequest.SalesPersonCode = WEB_SELLER_SLPCODE;
+    contactParams.SalesPersonCode = WEB_SELLER_SLPCODE;
   }
 
   return getAllWarehouses().then(function(warehouses) {
@@ -216,16 +231,11 @@ function buildSaleOrderRequestParams(params) {
         WhsCode: getWhsCodeById(detail.shipCompanyFrom, warehouses),
         ShipDate: moment(detail.shipDate).format(SAP_DATE_FORMAT),
         DiscountPercent: detail.discountPercent,
-        Company: getCompanyCode(
-          detail.Product.U_Empresa,
-          params.currentStore.group
-        ),
+        Company: getCompanyCode(detail.Product.U_Empresa, params.currentStore.group),
         Price: detail.total,
         Service: detail.Product.Service, //FOR SR SERVICES
         ImmediateDelivery:
-          detail.Product.ItemCode === 'SR00078'
-            ? true
-            : isImmediateDelivery(detail.shipDate),
+          detail.Product.ItemCode === 'SR00078' ? true : isImmediateDelivery(detail.shipDate),
         DetailId: detail.id
         //unitPrice: detail.Product.Price
       };
@@ -248,20 +258,12 @@ function buildSaleOrderRequestParams(params) {
       products.push(deliveryProductItem);
       */
 
-    saleOrderRequest.WhsCode = getWhsCodeById(
-      params.currentStore.Warehouse,
-      warehouses
-    );
-    requestParams += encodeURIComponent(JSON.stringify(saleOrderRequest));
-    requestParams +=
-      '&products=' + encodeURIComponent(JSON.stringify(products));
-    requestParams +=
-      '&payments=' +
-      encodeURIComponent(
-        JSON.stringify(mapPaymentsToSap(params.payments, params.exchangeRate))
-      );
-
-    return requestParams;
+    contactParams.WhsCode = getWhsCodeById(params.currentStore.Warehouse, warehouses);
+    return {
+      contact: contactParams,
+      products,
+      payments: mapPaymentsToSap(params.payments, params.exchangeRate)
+    };
   });
 }
 
@@ -318,11 +320,7 @@ function mapPaymentsToSap(payments, exchangeRate) {
     }
     */
 
-    if (
-      payment.msi ||
-      payment.type === 'credit-card' ||
-      payment.type === 'debit-card'
-    ) {
+    if (payment.msi || payment.type === 'credit-card' || payment.type === 'debit-card') {
       paymentSap.CardNum = '4802';
       paymentSap.CardDate = '05/16'; //MM/YY
     }
@@ -348,8 +346,7 @@ function getFarthestShipDate(quotationDetails) {
   var farthestShipDate = false;
   for (var i = 0; i < quotationDetails.length; i++) {
     if (
-      (farthestShipDate &&
-        new Date(quotationDetails[i].shipDate) >= farthestShipDate) ||
+      (farthestShipDate && new Date(quotationDetails[i].shipDate) >= farthestShipDate) ||
       i === 0
     ) {
       farthestShipDate = quotationDetails[i].shipDate;
