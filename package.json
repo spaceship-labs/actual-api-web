@@ -6,6 +6,7 @@
   "keywords": [],
   "dependencies": {
     "async": "^2.1.4",
+    "axios": "^0.18.0",
     "bcrypt": "^0.8.x",
     "bcrypt-nodejs": "0.0.3",
     "bluebird": "^3.4.7",

@@ -1,17 +1,60 @@
-var _ = require('underscore');
-var moment = require('moment');
-var request = require('request-promise');
-var Promise = require('bluebird');
-var ALEGRAUSER = process.env.ALEGRAUSER;
-var ALEGRATOKEN = process.env.ALEGRATOKEN;
-var token = new Buffer(ALEGRAUSER + ':' + ALEGRATOKEN).toString('base64');
-var promiseDelay = require('promise-delay');
-var alegraIVAID = 2;
-var alegraACCOUNTID = 1;
-var RFCPUBLIC = 'XAXX010101000';
-var DEFAULT_CFDI_USE = 'P01';
+const _ = require('underscore');
+const request = require('request-promise');
+const Promise = require('bluebird');
+const ALEGRAUSER = process.env.ALEGRAUSER;
+const ALEGRATOKEN = process.env.ALEGRATOKEN;
+const token = new Buffer(ALEGRAUSER + ':' + ALEGRATOKEN).toString('base64');
+const promiseDelay = require('promise-delay');
+const alegraIVAID = 2;
+const alegraACCOUNTID = 1;
+const RFCPUBLIC = 'XAXX010101000';
+const DEFAULT_CFDI_USE = 'P01';
+//
+const moment = require('moment');
+const axiosD = require('axios');
+const axios = axiosD.create({
+  baseURL:
+    process.env.MODE === 'production'
+      ? process.env.FACTURA_URL_PRODUCTION
+      : process.env.FACTURA_URL_SANDBOX,
+  headers: {
+    'Content-Type': 'application/json',
+    'F-API-KEY':
+      process.env.MODE === 'production'
+        ? process.env.FACTURA_KEY_PRODUCTION
+        : process.env.FACTURA_KEY_SANDBOX,
+    'F-SECRET-KEY':
+      process.env.MODE === 'production'
+        ? process.env.FACTURA_SECRET_KEY_PRODUCTION
+        : process.env.FACTURA_SECRET_KEY_SANDBOX
+  }
+});
+const SERIE = 1486;
+const DOCUMENT_TYPE = 'factura';
+const PAYMENT_METHOD_TO_DEFINE = '99';
 
 module.exports = {
+  async createInvoice2() {
+    if (req) {
+      const userId = UserService.getCurrentUserId(req);
+      const clientId = UserService.getCurrentUserClientId(req);
+    }
+    if (process.env.MODE !== 'production') {
+      // resolve({});
+      return;
+    }
+    const orderWeb = await OrderWeb.findOne(orderId)
+      .populate('Client')
+      .populate('Details')
+      .populate('Payments');
+    const { Client, Details, Payments } = orderWeb;
+    const detailsIds = Details.map(detail => detail.id);
+    const orderDeatailWeb = await OrderDetailWeb.find({ id: detailsIds }).populate('Product');
+    const fiscalAddress = await FiscalAddress.findOne({
+      CardCode: Client.CardCode,
+      AdresType: ClientService.ADDRESS_TYPE
+    });
+  },
   createOrderInvoice,
   send,
   getUnitTypeByProduct,
@@ -20,6 +63,47 @@ module.exports = {
   RFCPUBLIC,
   DEFAULT_CFDI_USE
 };
+
+function prepareClient(order, client, address) {
+  const data = prepareClientParams(order, client, address);
+  return createClient(data);
+}
+
+const handleClient = ({ data: client, error: error }) =>
+  !client.Data || !client.Data.UID || error
+    ? Promise.reject(new Error({ error }))
+    : client.Data.UID;
+
+const createClient = async (client, data, fiscal) => {
+  !client
+    ? Promise.reject(new Error('Datos incompletos'))
+    : await axios.post('/v1/clients/create', formatClient(client, data, fiscal));
+};
+
+const formatClient = (order, client, fiscalAddress) =>
+  !(!client.LicTradNum || client.LicTradNum == RFCPUBLIC)
+    ? {
+        razons: fiscalAddress.companyName,
+        rfc: (client.LicTradNum || '').toUpperCase(),
+        email: fiscalAddress.U_Correos,
+        // cfdiUse: client.cfdiUse || DEFAULT_CFDI_USE,
+        calle: fiscalAddress.Street,
+        numero_exterior: fiscalAddress.U_NumExt,
+        numero_interior: fiscalAddress.U_NumInt,
+        colonia: fiscalAddress.Block,
+        // country: 'México',
+        estado: fiscalAddress.State,
+        ciudad: fiscalAddress.City,
+        codpos: fiscalAddress.ZipCode
+      }
+    : {
+        name: order.CardName,
+        rfc: (RFCPUBLIC || '').toUpperCase(),
+        email: order.E_Mail,
+        // country: 'México',
+        estado: order.U_Estado || 'Quintana Roo'
+        //TODO; Check default Inovice data for GENERAL PUBLIC
+      };
 
 function createOrderInvoice(orderId, req) {
   if (req) {
@@ -295,63 +379,6 @@ function createInvoice(data) {
         reject(requestError);
       });
   });
-}
-
-function prepareClientParams(order, client, address) {
-  const generic = !client.LicTradNum || client.LicTradNum == RFCPUBLIC;
-  var data;
-  console.log('generic prepareClientParams', generic);
-  if (!generic) {
-    data = {
-      name: address.companyName,
-      identification: (client.LicTradNum || '').toUpperCase(),
-      email: address.U_Correos,
-      cfdiUse: client.cfdiUse || DEFAULT_CFDI_USE,
-      address: {
-        street: address.Street,
-        exteriorNumber: address.U_NumExt,
-        interiorNumber: address.U_NumInt,
-        colony: address.Block,
-        country: 'México',
-        state: address.State,
-        municipality: address.U_Localidad,
-        localitiy: address.City,
-        zipCode: address.ZipCode
-      }
-    };
-  } else {
-    data = {
-      name: order.CardName,
-      identification: (RFCPUBLIC || '').toUpperCase(),
-      email: order.E_Mail,
-      cfdiUse: DEFAULT_CFDI_USE,
-      //email: order.E_Mail,
-      address: {
-        country: 'México',
-        state: order.U_Estado || 'Quintana Roo'
-        //TODO; Check default Inovice data for GENERAL PUBLIC
-      }
-    };
-  }
-  return data;
-}
-
-function prepareClient(order, client, address) {
-  const data = prepareClientParams(order, client, address);
-  return createClient(data);
-}
-
-function createClient(client) {
-  var options = {
-    method: 'POST',
-    uri: 'https://app.alegra.com/api/v1/contacts',
-    body: client,
-    headers: {
-      Authorization: 'Basic ' + token
-    },
-    json: true
-  };
-  return request(options);
 }
 
 function prepareItems(details, order) {
