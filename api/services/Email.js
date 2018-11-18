@@ -1,7 +1,8 @@
 const baseURL = process.env.baseURL;
 const cdnUrl = process.env.AWS_CLOUDFRONT_URL;
 const baseURLFRONT = process.env.baseURLFRONT;
-const surveyURL = process.env.surveyURL || 'http://cc.actualg.com/s/fc28cff';
+const surveyURL =
+  process.env.surveyURL || 'https://form.jotform.co/ActualMkt/evalua_nuestro_servicio';
 const key = process.env.SENDGRIDAPIKEY;
 const Promise = require('bluebird');
 const _ = require('underscore');
