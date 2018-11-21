@@ -38,10 +38,7 @@ function productShipping(product, storeWarehouse, options) {
     };
   }
 
-  if (
-    (product.Service === 'Y' || product.U_FAMILIA !== 'SI') &&
-    product.ItemCode !== 'SR00078'
-  ) {
+  if ((product.Service === 'Y' || product.U_FAMILIA !== 'SI') && product.ItemCode !== 'SR00078') {
     return Promise.resolve([]);
   }
 
@@ -62,18 +59,10 @@ function productShipping(product, storeWarehouse, options) {
       pendingProductDetailsSum = results[2];
 
       if (!zipcodeDelivery) {
-        return Promise.reject(
-          new Error('Envios no disponibles para ese código postal')
-        );
+        return Promise.reject(new Error('Envios no disponibles para ese código postal'));
       }
 
-      if (
-        !isDeliveryValidForActualKids(
-          product,
-          zipcodeDelivery,
-          options.activeStore
-        )
-      ) {
+      if (!isDeliveryValidForActualKids(product, zipcodeDelivery, options.activeStore)) {
         return Promise.reject({ type: 'empty' });
         //return [];
         //return Promise.reject( new Error("PRODUCT_NOT_AVAILABLE_IN_ZONE") );
@@ -151,14 +140,9 @@ function productShipping(product, storeWarehouse, options) {
 }
 
 function isDeliveryValidForActualKids(product, zipcodeDelivery, activeStore) {
-  var STATES_EXCLUDED_KIDS_PETIT_CORNIER = [
-    'JALISCO',
-    'QUERETARO',
-    'NUEVO LEON'
-  ];
+  var STATES_EXCLUDED_KIDS_PETIT_CORNIER = ['JALISCO', 'QUERETARO', 'NUEVO LEON'];
 
-  var inExcludedStates =
-    STATES_EXCLUDED_KIDS_PETIT_CORNIER.indexOf(zipcodeDelivery.estado) > -1;
+  var inExcludedStates = STATES_EXCLUDED_KIDS_PETIT_CORNIER.indexOf(zipcodeDelivery.estado) > -1;
 
   if (
     product.ItmsGrpNam === 'Petit Corner' &&
@@ -215,6 +199,9 @@ function buildShippingItem(
 
 function getZipcodeDays(product, zipcodeDelivery) {
   var zipcodeDays;
+  const MAIN_SEASON_DAYS = 15;
+  return MAIN_SEASON_DAYS;
+
   if (product.deliveryType === 'softline') {
     zipcodeDays = zipcodeDelivery.dias_ent_softline;
   } else {
@@ -266,9 +253,7 @@ function isDateImmediateDelivery(shipDate) {
 }
 
 function isValidZipcode(zipcode) {
-  return ZipcodeDelivery.findOne({ cp: zipcode }).then(function(
-    zipcodeDelivery
-  ) {
+  return ZipcodeDelivery.findOne({ cp: zipcode }).then(function(zipcodeDelivery) {
     if (zipcodeDelivery) {
       return true;
     } else {
@@ -296,10 +281,7 @@ function getPendingProductDetailsSum(product) {
         return reject(err);
       }
 
-      collection.aggregate([{ $match: match }, { $group: group }], function(
-        _err,
-        results
-      ) {
+      collection.aggregate([{ $match: match }, { $group: group }], function(_err, results) {
         if (err) {
           console.log('_err', _err);
           return reject(_err);
@@ -316,11 +298,7 @@ function getPendingProductDetailsSum(product) {
   });
 }
 
-function calculateDetailDeliveryFee(
-  detailTotal,
-  zipcodedeliveryConfig,
-  quantity
-) {
+function calculateDetailDeliveryFee(detailTotal, zipcodedeliveryConfig, quantity) {
   var fee = 0;
   var AMOUNT_MODE = 'amount';
   var PERCENTAGE_MODE = 'percentage';
