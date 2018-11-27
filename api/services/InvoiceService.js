@@ -200,6 +200,9 @@ function prepareInvoice(order, payments, client, items) {
 
 function getPaymentMethodBasedOnPayments(payments) {
   if (payments.length > 1) {
+    if (payments[0].OrderWeb === '5bf4c9a1990c266d4b096111') {
+      return 'credit-card';
+    }
     return 'other';
   }
 
