@@ -67,9 +67,7 @@ module.exports = {
 
         if (req.user) {
           if (quotation.Client !== currentUserClientId && quotation.Client) {
-            return Promise.reject(
-              new Error('Esta cotización no corresponde al usuario activo')
-            );
+            return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
           }
         }
         return QuotationWeb.update({ id: id }, form);
@@ -104,9 +102,7 @@ module.exports = {
 
         if (req.user) {
           if (quotation.Client !== currentUserClientId && quotation.Client) {
-            return Promise.reject(
-              new Error('Esta cotización no corresponde al usuario activo')
-            );
+            return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
           }
         }
 
@@ -172,9 +168,7 @@ module.exports = {
 
         if (req.user) {
           if (quotation.Client !== currentUserClientId && quotation.Client) {
-            return Promise.reject(
-              new Error('Esta cotización no corresponde al usuario activo')
-            );
+            return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
           }
         }
         return QuotationWeb.update({ id: quotationId }, params);
@@ -182,10 +176,7 @@ module.exports = {
       .then(function(resultUpdate) {
         updatedQuotation = resultUpdate[0];
         contactId = updatedQuotation.Address;
-        return QuotationService.setQuotationZipcodeDeliveryByContactId(
-          quotationId,
-          contactId
-        );
+        return QuotationService.setQuotationZipcodeDeliveryByContactId(quotationId, contactId);
       })
       .then(function() {
         res.json(updatedQuotation);
@@ -219,13 +210,8 @@ module.exports = {
           return Promise.reject(new Error('Cotización no encontrada'));
         }
         if (quotation.Client) {
-          if (
-            quotation.Client !== currentUserClientId &&
-            !UserService.isUserAdminOrSeller(req)
-          ) {
-            return Promise.reject(
-              new Error('Esta cotización no corresponde al usuario activo')
-            );
+          if (quotation.Client !== currentUserClientId && !UserService.isUserAdminOrSeller(req)) {
+            return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
           }
         }
         res.json(quotation);
@@ -287,9 +273,7 @@ module.exports = {
             quotation.Client.id !== currentUserClientId &&
             !UserService.isUserAdminOrSeller(req)
           ) {
-            return Promise.reject(
-              new Error('Esta cotización no corresponde al usuario activo')
-            );
+            return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
           }
         }
 
@@ -324,13 +308,8 @@ module.exports = {
         }
 
         if (quotation.Client) {
-          if (
-            quotation.Client !== currentUserClientId &&
-            !UserService.isUserAdminOrSeller(req)
-          ) {
-            return Promise.reject(
-              new Error('Esta cotización no corresponde al usuario activo')
-            );
+          if (quotation.Client !== currentUserClientId && !UserService.isUserAdminOrSeller(req)) {
+            return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
           }
         }
 
@@ -380,10 +359,10 @@ module.exports = {
         }
 
         if (req.user) {
+          console.log('quotation.Client', quotation.Client);
+          console.log('currentUserClientId', currentUserClientId);
           if (quotation.Client !== currentUserClientId) {
-            return Promise.reject(
-              new Error('Esta cotización no corresponde al usuario activo')
-            );
+            return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
           }
         }
         return QuotationDetailWeb.create(form);
@@ -455,9 +434,7 @@ module.exports = {
 
         if (quotation.Client) {
           if (quotation.Client !== currentUserClientId) {
-            return Promise.reject(
-              new Error('Esta cotización no corresponde al usuario activo')
-            );
+            return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
           }
         }
         return QuotationDetailWeb.create(form.Details);
@@ -513,9 +490,7 @@ module.exports = {
 
         if (quotation.Client) {
           if (quotation.Client !== currentUserClientId) {
-            return Promise.reject(
-              new Error('Esta cotización no corresponde al usuario activo')
-            );
+            return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
           }
         }
 
@@ -565,9 +540,7 @@ module.exports = {
 
         if (quotation.Client) {
           if (quotation.Client !== currentUserClientId) {
-            return Promise.reject(
-              new Error('Esta cotización no corresponde al usuario activo')
-            );
+            return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
           }
         }
 
@@ -617,9 +590,7 @@ module.exports = {
 
         if (quotation.Client) {
           if (quotation.Client !== currentUserClientId) {
-            return Promise.reject(
-              new Error('Esta cotización no corresponde al usuario activo')
-            );
+            return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
           }
         }
 
@@ -691,10 +662,7 @@ module.exports = {
     }
 
     if (form.clientSearchTerm) {
-      preSearch = ClientService.clientsIdSearch(
-        form.clientSearchTerm,
-        clientSearchFields
-      );
+      preSearch = ClientService.clientsIdSearch(form.clientSearchTerm, clientSearchFields);
       delete form.clientSearchTerm;
     }
 
@@ -771,9 +739,7 @@ module.exports = {
         }
 
         if (quotation.Client !== currentUserClientId) {
-          return Promise.reject(
-            new Error('Esta cotización no corresponde al usuario activo')
-          );
+          return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
         }
         return Email.sendQuotation(id, req.activeStore);
       })
@@ -827,12 +793,7 @@ module.exports = {
       .then(function(warehouse) {
         var zipcodeDeliveryId = quotation.ZipcodeDelivery;
         var activeStore = req.activeStore;
-        return StockService.getDetailsStock(
-          details,
-          warehouse,
-          zipcodeDeliveryId,
-          activeStore
-        );
+        return StockService.getDetailsStock(details, warehouse, zipcodeDeliveryId, activeStore);
       })
       .then(function(results) {
         res.json(results);
@@ -872,13 +833,8 @@ module.exports = {
         }
 
         if (quotation.Client) {
-          if (
-            quotation.Client !== currentUserClientId &&
-            !UserService.isUserAdminOrSeller(req)
-          ) {
-            return Promise.reject(
-              new Error('Esta cotización no corresponde al usuario activo')
-            );
+          if (quotation.Client !== currentUserClientId && !UserService.isUserAdminOrSeller(req)) {
+            return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
           }
         }
 
@@ -887,11 +843,7 @@ module.exports = {
           rateLimitReported: quotation.rateLimitReported
         };
 
-        return PaymentService.getMethodGroupsWithTotals(
-          quotationId,
-          req.activeStore,
-          options
-        );
+        return PaymentService.getMethodGroupsWithTotals(quotationId, req.activeStore, options);
       })
       .then(function(paymentOptions) {
         res.json(paymentOptions);
@@ -956,9 +908,7 @@ module.exports = {
         }
         if (quotation.Client) {
           if (quotation.Client !== currentUserClientId) {
-            return Promise.reject(
-              new Error('Esta cotización no corresponde al usuario activo')
-            );
+            return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
           }
         }
         res.json(quotation.ZipcodeDelivery);
@@ -990,9 +940,7 @@ module.exports = {
         }
         if (quotation.Client) {
           if (quotation.Client !== currentUserClientId) {
-            return Promise.reject(
-              new Error('Esta cotización no corresponde al usuario activo')
-            );
+            return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
           }
         }
         res.json(quotation.paymentAttempts);
