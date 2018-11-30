@@ -361,7 +361,7 @@ module.exports = {
         if (req.user) {
           console.log('quotation.Client', quotation.Client);
           console.log('currentUserClientId', currentUserClientId);
-          if (quotation.Client !== currentUserClientId) {
+          if (quotation.Client !== currentUserClientId && quotation.Client) {
             return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
           }
         }
