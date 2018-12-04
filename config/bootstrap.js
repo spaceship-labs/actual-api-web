@@ -14,16 +14,16 @@ module.exports.bootstrap = function(cb) {
   //process.env.LOG_QUERIES =  true;
 
   CronJobs.init();
-  Files.getContainerLink();
+  //Files.getContainerLink();
 
   var msgMode = 'sandbox/dev';
-	if(process.env.MODE === 'production'){
-		msgMode = 'production';
-	}
+  if (process.env.MODE === 'production') {
+    msgMode = 'production';
+  }
 
-  sails.log.info('Lifted ' + msgMode + ' mode');  
+  sails.log.info('Lifted ' + msgMode + ' mode');
 
-  sails.config.timezone = {label:'America/Cancun', offset:-6};
+  sails.config.timezone = { label: 'America/Cancun', offset: -6 };
   //moment.tz.setDefault(sails.config.timezone.label);
 
   // It's very important to trigger this callback method when you are finished
