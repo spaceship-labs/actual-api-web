@@ -199,7 +199,7 @@ function buildShippingItem(
 
 function getZipcodeDays(product, zipcodeDelivery) {
   var zipcodeDays;
-  const MAIN_SEASON_DAYS = 15;
+  const MAIN_SEASON_DAYS = 12;
   return MAIN_SEASON_DAYS;
 
   if (product.deliveryType === 'softline') {
