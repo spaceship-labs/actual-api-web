@@ -79,20 +79,12 @@ function createFromQuotation(form, req) {
   });
 }
 
-function createConektaOrderAndPayment(quotationId, payment, req) {
+async function createConektaOrderAndPayment(quotationId, payment, req) {
   var conektaOrder;
-  return ConektaService.createOrder(quotationId, payment, req)
-    .then(function(conektaOrder) {
-      return conektaOrder;
-    })
-    .then(function(_conektaOrder) {
-      conektaOrder = _conektaOrder;
-      payment.stockValidated = true;
-      return PaymentService.addPayment(payment, quotationId, req);
-    })
-    .then(function(paymentCreated) {
-      return conektaOrder;
-    });
+  const conektaOrder = await ConektaService.createOrder(quotationId, payment, req);
+  payment.stockValidated = true;
+  await PaymentService.addPayment(payment, quotationId, req);
+  return conektaOrder;
 }
 
 function createOrder(form, req) {

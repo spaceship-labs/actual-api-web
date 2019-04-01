@@ -27,11 +27,7 @@ function syncOrderDetailsProducts(orderDetails) {
 
 function isFreeSaleProduct(product) {
   if (product) {
-    if (
-      product.freeSale &&
-      product.freeSaleStock > 0 &&
-      product.freeSaleDeliveryDays
-    ) {
+    if (product.freeSale && product.freeSaleStock > 0 && product.freeSaleDeliveryDays) {
       return true;
     }
   }
@@ -56,10 +52,7 @@ function substractProductStockByDetail(detail) {
 
   if (isFreeSaleProduct(detail.Product)) {
     var newFreeSaleStock = detail.Product.freeSaleStock - detail.quantity;
-    return Product.update(
-      { id: detail.Product.id },
-      { freeSaleStock: newFreeSaleStock }
-    );
+    return Product.update({ id: detail.Product.id }, { freeSaleStock: newFreeSaleStock });
     //return new Promise.resolve();
   }
 
@@ -69,9 +62,7 @@ function substractProductStockByDetail(detail) {
     });
     if (detail.quantity > detail.Product.Available) {
       return new Promise.reject(
-        new Error(
-          'Stock del producto ' + ItemCode + ' no disponible (ERROR: PS)'
-        )
+        new Error('Stock del producto ' + ItemCode + ' no disponible (ERROR: PS)')
       );
     }
     var newAvailable = detail.Product.Available - detail.quantity;
@@ -103,9 +94,7 @@ function substractDeliveryStockByDetail(detail) {
   }).then(function(dateDelivery) {
     if (detail.quantity > dateDelivery.OpenCreQty) {
       return Promise.reject(
-        new Error(
-          'Stock del producto ' + ItemCode + ' no disponible (ERROR: DS)'
-        )
+        new Error('Stock del producto ' + ItemCode + ' no disponible (ERROR: DS)')
       );
     }
 
@@ -148,7 +137,7 @@ function getStoresWithProduct(ItemCode, whsCode) {
     });
 }
 
-function validateQuotationStockById(quotationId, req) {
+async function validateQuotationStockById(quotationId, req) {
   var quotation;
   var details;
   return QuotationWeb.findOne({ id: quotationId })
@@ -167,19 +156,14 @@ function validateQuotationStockById(quotationId, req) {
     })
     .spread(function(warehouse, details) {
       var activeStore = req.activeStore;
-      return getDetailsStock(
-        details,
-        warehouse,
-        quotation.ZipcodeDelivery,
-        activeStore
-      );
+      return getDetailsStock(details, warehouse, quotation.ZipcodeDelivery, activeStore);
     })
     .then(function(detailsStock) {
       return isValidStock(detailsStock);
     });
 }
 
-function isValidStock(detailsStock) {
+async function isValidStock(detailsStock) {
   for (var i = 0; i < detailsStock.length; i++) {
     if (!detailsStock[i].validStock) {
       return false;
@@ -189,7 +173,7 @@ function isValidStock(detailsStock) {
 }
 
 //details must be populated with products
-function getDetailsStock(details, warehouse, zipcodeDeliveryId, activeStore) {
+async function getDetailsStock(details, warehouse, zipcodeDeliveryId, activeStore) {
   var promises = [];
   var products = details.map(function(detail) {
     return detail.Product;
@@ -212,11 +196,7 @@ function getDetailsStock(details, warehouse, zipcodeDeliveryId, activeStore) {
       return arr;
     }, []);
 
-    var finalDetails = tagValidDetails(
-      details,
-      groupedDeliveryDates,
-      activeStore
-    );
+    var finalDetails = tagValidDetails(details, groupedDeliveryDates, activeStore);
     return finalDetails;
   });
 }
@@ -225,17 +205,12 @@ function tagValidDetails(details, groupedDeliveryDates, activeStore) {
   var validatedDetails = [];
 
   for (var i = 0; i < details.length; i++) {
-    var detailDelivery = findValidDelivery(
-      details[i],
-      groupedDeliveryDates,
-      validatedDetails
-    );
+    var detailDelivery = findValidDelivery(details[i], groupedDeliveryDates, validatedDetails);
 
     if (
       detailDelivery &&
       (details[i].Product.Active === 'Y' || details[i].isFreeSale) &&
-      (details[i].Product.Service !== 'Y' ||
-        details[i].Product.ItemCode === 'SR00078') &&
+      (details[i].Product.Service !== 'Y' || details[i].Product.ItemCode === 'SR00078') &&
       details[i].Product.U_FAMILIA === 'SI' &&
       !details[i].Product.excludeWeb &&
       details[i].Product[activeStore.code] > 0
@@ -274,10 +249,7 @@ function findValidDelivery(detail, groupedDeliveryDates, validatedDetails) {
       .startOf('day')
       .format(DATE_FORMAT);
 
-    const validatedProductStock = validatedDetails.reduce(function(
-      stock,
-      validatedDetail
-    ) {
+    const validatedProductStock = validatedDetails.reduce(function(stock, validatedDetail) {
       if (
         validatedDetail.shipCompanyFrom === delivery.companyFrom &&
         validatedDetail.Product.ItemCode === delivery.itemCode
@@ -286,8 +258,7 @@ function findValidDelivery(detail, groupedDeliveryDates, validatedDetails) {
       } else {
         return stock;
       }
-    },
-    0);
+    }, 0);
 
     const deliveryAvailable = delivery.available - validatedProductStock;
 
