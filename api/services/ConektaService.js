@@ -43,9 +43,13 @@ async function createOrder(orderId, payment, req) {
   const accessToken = await MP.getAccessToken();
 
   if (accessToken) {
-    MP.configurations.setAccessToken(process.env.MP_CLIENT_TOKEN);
-    console.log(accessToken);
-    var order;
+    await MP.configurations.setAccessToken(process.env.MP_CLIENT_TOKEN);
+    const payment_methods = await MP.get('/v1/payment_methods');
+    const typeID = await MP.getIdentificationTypes();
+
+    console.log('tipos de identificacion', typeID);
+    console.log('metodos', payment_methods);
+
     const userId = UserService.getCurrentUserId(req);
     const clientId = UserService.getCurrentUserClientId(req);
     const isValidStock = await StockService.validateQuotationStockById(orderId, req);
@@ -57,16 +61,7 @@ async function createOrder(orderId, payment, req) {
     if (!orderFound.Address) {
       throw new Error('Asigna una dirección de envio para continuar');
     }
-
-    order = orderFound;
-    const customerInfo = await getOrderCustomerInfo(payment, clientId);
-    const customerAddress = await getOrderCustomerAddress(order.Address);
-    const lineItems = await getOrderLineItems(order.id);
-
-    var payments = [payment];
-    var charges = getOrderCharges(order, payments);
-    var discountLine = getOrderDiscountLine(order, payments);
-    var paymentGroup = OrderService.getGroupByQuotationPayments(payments);
+    const order = orderFound;
 
     var getTotalLinesAmount = function(lineItems, discountLine) {
       var totalLines = lineItems.reduce(function(acum, lineItem) {
@@ -76,47 +71,137 @@ async function createOrder(orderId, payment, req) {
       totalLines = totalLines - discountLine.amount;
       return totalLines;
     };
+    var payments = [payment];
+
+    const payer = await getOrderCustomerInfo(payment, clientId);
+    const lineItems = await getOrderLineItems(order.id);
+    const discountLine = getOrderDiscountLine(order, payments);
+
+    const paramsData = createParams(payer, lineItems, order, payment);
+    console.log('params mercadopago', paramsData);
+
+    MP.payment
+      .create(paramsData)
+      .then(function(mpResponse) {
+        console.log(mpResponse);
+      })
+      .catch(function(mpError) {
+        return MP.payment.create(paramsData, {
+          qs: {
+            idempotency: mpError.idempotency
+          }
+        });
+      })
+      .then(function(mpResponse) {
+        console.log('respuesta', mpResponse);
+      });
+
+    throw new Error('stop');
+    // no se para que lo hacen....
+    // var getTotalLinesAmount = function(lineItems, discountLine) {
+    //   var totalLines = lineItems.reduce(function(acum, lineItem) {
+    //     acum += lineItem.unit_price * lineItem.quantity;
+    //     return acum;
+    //   }, 0);
+    //   totalLines = totalLines - discountLine.amount;
+    //   return totalLines;
+    // };
+
+    // var totalLinesAmount = getTotalLinesAmount(lineItems, discountLine);
+
+    // var payments = [payment];
+    // var charges = getOrderCharges(order, payments);
+    // var paymentGroup = OrderService.getGroupByQuotationPayments(payments);
+
+    // console.log('payments', payments);
+    // console.log('charges', charges);
+    // console.log('discountLine', discountLine);
+    // console.log('paymentGroup', paymentGroup);
 
     //TODO: check how to match original payment amount instead of using the same order total.
     //The amount converted to cents, sometimes differs by one,for example 97914 and 97913
-    var totalLinesAmount = getTotalLinesAmount(lineItems, discountLine);
-    if (charges.length > 0) {
-      //Adding shipping fee
-      charges[0].amount = totalLinesAmount + convertToCents(order['deliveryFeePg' + paymentGroup]);
-    }
 
-    return new Promise(function(resolve, reject) {
-      var cardCode = _.clone(customerInfo.CardCode);
-      delete customerInfo.CardCode;
+    // throw new Error('stop');
+    // if (charges.length > 0) {
+    //   //Adding shipping fee
+    //   charges[0].amount = totalLinesAmount + convertToCents(order['deliveryFeePg' + paymentGroup]);
+    // }
 
-      var preference = {
-        preference_id: order.folio,
-        payer: customerInfo,
-        items: lineItems,
+    // return async (resolve, reject) => {
+    //   var cardCode = _.clone(customerInfo.CardCode);
+    //   delete customerInfo.CardCode;
 
-        currency: LOCAL_CURRENCY,
-        // customer_info: customerInfo,
-        // line_items: lineItems,
-        discount_lines: [discountLine],
-        charges: charges,
-        shipping_lines: [
-          {
-            amount: convertToCents(order['deliveryFeePg' + paymentGroup]),
-            carrier: 'Actual Group'
-          }
-        ],
-        shipping_contact: customerAddress,
-        metadata: {
-          quotation_folio: order.folio,
-          cardCode: cardCode
-        }
-      };
+    //   var preference = {
+    //     preference_id: order.folio,
+    //     payer: customerInfo,
+    //     items: lineItems,
+    //     site_id: 'MLM',
+    //     client_id: process.env.MP_CLIENT_ID,
 
-      console.log('preference', preference);
-    });
+    //     currency: LOCAL_CURRENCY,
+    //     // customer_info: customerInfo,
+    //     // line_items: lineItems,
+    //     discount_lines: [discountLine],
+    //     charges: charges,
+    //     shipping_lines: [
+    //       {
+    //         amount: convertToCents(order['deliveryFeePg' + paymentGroup]),
+    //         carrier: 'Actual Group'
+    //       }
+    //     ],
+    //     shipping_contact: customerAddress,
+    //     metadata: {
+    //       quotation_folio: order.folio,
+    //       cardCode: cardCode
+    //     }
+    //   };
+
+    //   console.log('preference', preference);
+    // };
   } else {
     console.log(err);
   }
+}
+
+function getMethod(type) {
+  const types = {
+    'credit-card': 'credit_card',
+    'debit-card': 'debit_card'
+  };
+  return types[type];
+}
+
+function createParams(payer, lineItems, order, payment) {
+  const params = {
+    payer: payer,
+    binary_mode: false,
+    order: {
+      type: 'mercadopago',
+      id: 58319424505510371
+    },
+    description: payment.description,
+    metadata: {
+      quotation_folio: order.folio,
+      cardCode: payer.identification.cardCode
+    },
+    transaction_amount: payment.ammount,
+    payment_method_id: getMethod(payment.type),
+    token: payment.cardObject,
+    statement_descriptor: 'Actual Group',
+    additional_info: {
+      items: lineItems,
+      payer: {
+        first_name: payment.cardName,
+        last_name: payment.LastName,
+        address: {
+          zip_code: payment.cardZip,
+          street_name: payment.cardAddress2,
+          street_number: 0
+        }
+      }
+    }
+  };
+  return params;
 }
 
 function createOrderConekta(orderId, payment, req) {
@@ -162,6 +247,7 @@ function createOrderConekta(orderId, payment, req) {
           return acum;
         }, 0);
         totalLines = totalLines - discountLine.amount;
+        console.log('totales!!!', totalLines);
         return totalLines;
       };
 
@@ -295,18 +381,25 @@ function getOrderDiscountLine(order, payments) {
   return discountLine;
 }
 
-function getOrderCustomerInfo(payment, clientId) {
-  return Client.findOne({
-    id: clientId,
-    select: ['CardCode', 'CardName', 'Phone1', 'E_Mail']
-  }).then(function(client) {
-    return {
-      name: payment.cardName || client.CardName,
-      phone: payment.phone || client.Phone1,
-      email: payment.email || client.E_Mail,
-      CardCode: client.CardCode
-    };
-  });
+async function getOrderCustomerInfo(payment, clientId) {
+  const client = await Client.findOne({ id: clientId });
+
+  const payer = {
+    // type: 'guest',
+    email: payment.email || client.E_Mail,
+    identification: {
+      type: '',
+      number: client.cardCode || payment.cardCode
+    },
+    // phone: {
+    //   area_code: '',
+    //   number: payment.phone || client.Phone1,
+    //   extension: ''
+    // },
+    first_name: payment.cardName || client.CardName,
+    last_name: payment.LastName || client.LastName
+  };
+  return payer;
 }
 
 /*
@@ -328,16 +421,16 @@ function getOrderCustomerInfo(clientId){
 
 function getOrderCustomerAddress(addressId) {
   return ClientContact.findOne({ id: addressId }).then(function(contact) {
-    /*
-			var customerInfo = {
-				name: client.CardName,
-				phone: client.Phone1,
-				//phone: user.phone,
-				email: client.E_Mail
-			};
-			return customerInfo;
-			*/
+    console.log('client contact', contact);
+    var customerInfo = {
+      zip_code: contact.U_CP,
+      street_name: contact.Address,
+      street_number: contact.U_Noexterior
+    };
+    return customerInfo;
+
     /*TODO: Reestablecer valores con variables*/
+    /* console.log('contact address', contact);
     var customerAddress = {
       receiver: 'Nombre prueba',
       //receiver: contact.FirstName + ' ' + contact.LastName,
@@ -346,19 +439,19 @@ function getOrderCustomerAddress(addressId) {
       //between_streets: contact.U_Entrecalle + ' y ' + contact.U_Ycalle,
       address: {
         street1: 'Placeholder street',
-        //street1: contact.Address,
-        /*
+        street1: contact.Address,
+        
 						city: contact.U_Ciudad,
 						state: contact.U_Estado,
 						postal_code: contact.U_CP,
-						*/
+						 
         city: 'Cancun',
         state: 'Quintana Roo',
         postal_code: '77500',
         country: 'MX'
       }
     };
-    return customerAddress;
+    return customerAddress; */
   });
 }
 
@@ -373,10 +466,11 @@ function getOrderLineItems(orderId) {
 function mapDetailsToLineItems(details) {
   return details.map(function(detail) {
     var lineItem = {
-      name: detail.Product.ItemName,
-      unit_price: convertToCents(detail.unitPrice),
+      id: detail.Product.ItemCode,
+      title: detail.Product.ItemName,
+      description: detail.Product.Name,
       quantity: detail.quantity,
-      sku: detail.Product.ItemCode
+      unit_price: convertToCents(detail.unitPrice)
     };
     return lineItem;
   });

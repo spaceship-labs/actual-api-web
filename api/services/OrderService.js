@@ -80,7 +80,6 @@ function createFromQuotation(form, req) {
 }
 
 async function createConektaOrderAndPayment(quotationId, payment, req) {
-  var conektaOrder;
   const conektaOrder = await ConektaService.createOrder(quotationId, payment, req);
   payment.stockValidated = true;
   await PaymentService.addPayment(payment, quotationId, req);
