@@ -44,11 +44,6 @@ async function createOrder(orderId, payment, req) {
 
   if (accessToken) {
     await MP.configurations.setAccessToken(process.env.MP_CLIENT_TOKEN);
-    const payment_methods = await MP.get('/v1/payment_methods');
-    const typeID = await MP.getIdentificationTypes();
-
-    console.log('tipos de identificacion', typeID);
-    console.log('metodos', payment_methods);
 
     const userId = UserService.getCurrentUserId(req);
     const clientId = UserService.getCurrentUserClientId(req);
@@ -77,7 +72,7 @@ async function createOrder(orderId, payment, req) {
     const lineItems = await getOrderLineItems(order.id);
     const discountLine = getOrderDiscountLine(order, payments);
 
-    const paramsData = createParams(payer, lineItems, order, payment);
+    const paramsData = await createParams(payer, lineItems, order, payment);
     console.log('params mercadopago', paramsData);
 
     MP.payment
@@ -163,15 +158,25 @@ async function createOrder(orderId, payment, req) {
   }
 }
 
-function getMethod(type) {
+async function getMethod(type) {
   const types = {
     'credit-card': 'credit_card',
     'debit-card': 'debit_card'
   };
+
+  const { body } = await MP.get('/v1/payment_methods');
+  console.log('type', type);
+  const id_method = body.filter(({ id, payment_type_id }) => {
+    if (payment_type_id === types[type]) return id;
+  });
+  console.log('id', id_method);
+  console.log('type method', types[type]);
+
   return types[type];
 }
 
-function createParams(payer, lineItems, order, payment) {
+async function createParams(payer, lineItems, order, payment) {
+  const idType = await getMethod(payment.type);
   const params = {
     payer: payer,
     binary_mode: false,
@@ -185,8 +190,8 @@ function createParams(payer, lineItems, order, payment) {
       cardCode: payer.identification.cardCode
     },
     transaction_amount: payment.ammount,
-    payment_method_id: getMethod(payment.type),
-    token: payment.cardObject,
+    payment_method_id: idType,
+    token: payment.cardToken.value,
     statement_descriptor: 'Actual Group',
     additional_info: {
       items: lineItems,
