@@ -91,7 +91,6 @@ async function createOrder(orderId, payment, req) {
         console.log('respuesta', mpResponse);
       });
 
-    throw new Error('stop');
     // no se para que lo hacen....
     // var getTotalLinesAmount = function(lineItems, discountLine) {
     //   var totalLines = lineItems.reduce(function(acum, lineItem) {
@@ -176,7 +175,6 @@ async function getMethod(type) {
 }
 
 async function createParams(payer, lineItems, order, payment) {
-  const idType = await getMethod(payment.type);
   const params = {
     payer: payer,
     binary_mode: false,
@@ -190,8 +188,9 @@ async function createParams(payer, lineItems, order, payment) {
       cardCode: payer.identification.cardCode
     },
     transaction_amount: payment.ammount,
-    payment_method_id: idType,
-    token: payment.cardToken.value,
+    payment_method_id: payment.cardMethod,
+    token: payment.cardToken,
+    installments: 1,
     statement_descriptor: 'Actual Group',
     additional_info: {
       items: lineItems,
