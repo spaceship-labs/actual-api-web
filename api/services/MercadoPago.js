@@ -7,6 +7,22 @@ module.exports = {
   createOrder
 };
 
+function isMPSpeiOrder(mercadoPagoOrder) {
+  var speiOrder = false;
+
+  if (mercadoPagoOrder.charges) {
+    var payment_method = mercadoPagoOrder.charges.data[0].payment_method;
+    if (payment_method.receiving_account_number) {
+      speiOrder = {
+        receiving_account_bank: payment_method.receiving_account_bank,
+        receiving_account_number: payment_method.receiving_account_number,
+        speiExpirationPayment: getTransferExportationFromUnixTime(payment_method.expires_at)
+      };
+    }
+  }
+  return speiOrder;
+}
+
 function convertCentsToPesos(amount) {
   return amount / 100;
 }
@@ -31,17 +47,17 @@ async function createOrder(orderId, payment, req) {
       transaction_amount: parseFloat(order.total.toFixed(2)),
       token: payment.token,
       description: 'Actual Description',
-      installments: 1,
+      installments: payment.installments,
       payment_method_id: payment.payment_method_id,
       payer: {
         email: payment.email || email
       }
     };
     console.log('paymentParams: ', paymentParams);
-    const data = await mercadopago.payment.save(paymentParams);
-    sails.log.info('mercadopago response: ', data);
-
-    return;
+    const {
+      body: { response: mercadopagoOrder }
+    } = await mercadopago.payment.save(paymentParams);
+    sails.log.info('mercadopago response: ', mercadopagoOrder);
     let mercadopagoOrder = response.toObject();
     console.log('marcadopago response ID: ', mercadopagoOrder.id);
     mercadopagoOrder.mercadoPagoId = mercadopagoOrder.id;
@@ -50,7 +66,11 @@ async function createOrder(orderId, payment, req) {
     mercadopagoOrder.QuotationWeb = orderId;
     mercadopagoOrder.UserWeb = userId;
 
-    //Validar si es pago con SPEI
+    const speiOrder = isMPSpeiOrder(mercadopagoOrder);
+    if (speiOrder) {
+      mercadopagoOrder.isSpeiOrder = true;
+      mercadopagoOrder = _.extend(mercadopagoOrder, speiOrder);
+    }
 
     mercadopagoOrder.amount = convertCentsToPesos(mercadopagoOrder.amount);
     delete mercadopagoOrder.id;
