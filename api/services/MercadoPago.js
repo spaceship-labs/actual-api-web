@@ -24,6 +24,8 @@ async function createOrder(orderId, payment, req) {
     throw new Error('Asigna una dirección de envio para continuar');
   }
   const { E_Mail: email } = await Client.findOne({ id: clientId });
+  console.log('ORDER TOTAL: ', order.total);
+
   const paymentParams = {
     transaction_amount: order.total,
     token: payment.token,
@@ -34,11 +36,21 @@ async function createOrder(orderId, payment, req) {
       email: payment.email || email
     }
   };
+  console.log('paymentParams: ', paymentParams);
 
-  const { data: response, error } = await mercadopago.payment.save(paymentParams);
-  if (error) {
-    console.log('err mercadopago: ', error);
-  }
+  mercadopago.payment
+    .save(paymentParams)
+    .then(function(data) {
+      // ...
+      // Print the payment status
+      sails.log.info('DATA: ', data);
+      sails.log.info('STATUS?: ', payment.status);
+    })
+    .catch(function(error) {
+      console.log('error mercadopago: ', error);
+    });
+
+  return;
   let mercadopagoOrder = response.toObject();
   console.log('marcadopago response ID: ', mercadopagoOrder.id);
   mercadopagoOrder.mercadoPagoId = mercadopagoOrder.id;

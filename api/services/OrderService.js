@@ -81,8 +81,9 @@ function createFromQuotation(form, req) {
 
 function createConektaOrderAndPayment(quotationId, payment, req) {
   var conektaOrder;
-  return ConektaService.createOrder(quotationId, payment, req)
+  return MercadoPago.createOrder(quotationId, payment, req)
     .then(function(conektaOrder) {
+      console.log('mercadopago: ', conektaOrder);
       return conektaOrder;
     })
     .then(function(_conektaOrder) {
