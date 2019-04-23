@@ -1,4 +1,5 @@
 const mercadopago = require('mercadopago');
+const _ = require('underscore');
 const moment = require('moment');
 
 const accessToken = process.env.MP_ACCESS_TOKEN;
@@ -7,7 +8,7 @@ module.exports = {
   createOrder
 };
 
-function isMPSpeiOrder(mercadoPagoOrder) {
+function getSpeiDetails(mercadoPagoOrder) {
   var speiOrder = false;
 
   if (mercadoPagoOrder.charges) {
@@ -43,16 +44,40 @@ async function createOrder(orderId, payment, req) {
     const { E_Mail: email } = await Client.findOne({ id: clientId });
     console.log('ORDER TOTAL: ', parseFloat(order.total.toFixed(2)));
 
-    const paymentParams = {
-      transaction_amount: parseFloat(order.total.toFixed(2)),
-      token: payment.token,
-      description: 'Actual Description',
-      installments: payment.installments,
-      payment_method_id: payment.payment_method_id,
-      payer: {
-        email: payment.email || email
-      }
-    };
+    const paymentParams = payment.issuer_id
+      ? {
+          transaction_amount: parseFloat(order.total.toFixed(2)),
+          token: payment.token,
+          description: 'Actual Description',
+          installments: payment.installments,
+          issuer_id: payment.issuer_id,
+          payment_method_id: payment.payment_method_id,
+          payer: {
+            email: payment.email || email
+          }
+        }
+      : payment.type === 'transfer'
+        ? {
+            transaction_amount: parseFloat(order.total.toFixed(2)),
+            token: payment.token,
+            description: 'Actual Description',
+            installments: payment.installments,
+            payment_method_id: payment.payment_method_id,
+            notification_url: 'url api actual',
+            payer: {
+              email: payment.email || email
+            }
+          }
+        : {
+            transaction_amount: parseFloat(order.total.toFixed(2)),
+            token: payment.token,
+            description: 'Actual Description',
+            installments: payment.installments,
+            payment_method_id: payment.payment_method_id,
+            payer: {
+              email: payment.email || email
+            }
+          };
     console.log('paymentParams: ', paymentParams);
     const {
       body: { response: mercadopagoOrder }
@@ -66,7 +91,7 @@ async function createOrder(orderId, payment, req) {
     mercadopagoOrder.QuotationWeb = orderId;
     mercadopagoOrder.UserWeb = userId;
 
-    const speiOrder = isMPSpeiOrder(mercadopagoOrder);
+    const speiOrder = getSpeiDetails(mercadopagoOrder);
     if (speiOrder) {
       mercadopagoOrder.isSpeiOrder = true;
       mercadopagoOrder = _.extend(mercadopagoOrder, speiOrder);
