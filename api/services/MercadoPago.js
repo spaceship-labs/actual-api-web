@@ -72,24 +72,23 @@ async function createOrder(orderId, payment, req) {
     console.log('paymentParams: ', paymentParams);
     const { body: response } = await mercadopago.payment.save(paymentParams);
     sails.log.info('mercadopago response: ', response);
-    let mercadopagoOrder = response.toObject();
     const mercadoPagoAttributes = {
-      mercadoPagoId: mercadopagoOrder.id,
+      mercadoPagoId: response.id,
       requestData: JSON.stringify(paymentParams),
-      responseData: JSON.stringify(mercadopagoOrder),
-      installments: mercadopagoOrder.installments,
-      issuerId: mercadopagoOrder.issuer_id,
+      responseData: JSON.stringify(response),
+      installments: response.installments,
+      issuerId: response.issuer_id,
       QuotationWeb: orderId,
       UserWeb: userId,
-      amount: convertCentsToPesos(mercadopagoOrder.amount)
+      amount: convertCentsToPesos(response.transaction_amount)
     };
-    mercadopagoOrder = _.extend(mercadopagoOrder, mercadoPagoAttributes);
+    let mercadopagoOrder = _.extend(response, mercadoPagoAttributes);
     const speiOrder = getSpeiDetails(mercadopagoOrder);
     if (speiOrder) {
-      mercadopagoOrder.isSpeiOrder = true;
+      mercadopagoOrder = _.extend(mercadopagoOrder, { isSpeiOrder: true });
       mercadopagoOrder = _.extend(mercadopagoOrder, speiOrder);
     }
-
+    console.log('MERCADOPAGO ORDER MODEL: ', mercadopagoOrder);
     delete mercadopagoOrder.id;
     return await MercadoPagoOrder.create(mercadopagoOrder);
   } catch (err) {
