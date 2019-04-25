@@ -28,6 +28,43 @@ function convertCentsToPesos(amount) {
   return amount / 100;
 }
 
+function formatPaymentParams(payment, order, email) {
+  return payment.msi
+    ? {
+        transaction_amount: parseFloat(order.total.toFixed(2)),
+        token: payment.token,
+        description: 'Actual Description',
+        installments: payment.installments,
+        // issuer_id: payment.issuer_id,
+        payment_method_id: payment.payment_method_id,
+        payer: {
+          email: payment.email || email
+        }
+      }
+    : payment.type === 'transfer'
+      ? {
+          transaction_amount: parseFloat(order.total.toFixed(2)),
+          token: payment.token,
+          description: 'Actual Description',
+          installments: payment.installments,
+          payment_method_id: payment.payment_method_id,
+          notification_url: 'url api actual',
+          payer: {
+            email: payment.email || email
+          }
+        }
+      : {
+          transaction_amount: parseFloat(order.total.toFixed(2)),
+          token: payment.token,
+          description: 'Actual Description',
+          installments: payment.installments,
+          payment_method_id: payment.payment_method_id,
+          payer: {
+            email: payment.email || email
+          }
+        };
+}
+
 async function createOrder(orderId, payment, req) {
   try {
     mercadopago.configurations.setAccessToken(accessToken);
@@ -42,62 +79,28 @@ async function createOrder(orderId, payment, req) {
       throw new Error('Asigna una dirección de envio para continuar');
     }
     const { E_Mail: email } = await Client.findOne({ id: clientId });
-    console.log('ORDER TOTAL: ', parseFloat(order.total.toFixed(2)));
-
-    const paymentParams = payment.issuer_id
-      ? {
-          transaction_amount: parseFloat(order.total.toFixed(2)),
-          token: payment.token,
-          description: 'Actual Description',
-          installments: payment.installments,
-          issuer_id: payment.issuer_id,
-          payment_method_id: payment.payment_method_id,
-          payer: {
-            email: payment.email || email
-          }
-        }
-      : payment.type === 'transfer'
-        ? {
-            transaction_amount: parseFloat(order.total.toFixed(2)),
-            token: payment.token,
-            description: 'Actual Description',
-            installments: payment.installments,
-            payment_method_id: payment.payment_method_id,
-            notification_url: 'url api actual',
-            payer: {
-              email: payment.email || email
-            }
-          }
-        : {
-            transaction_amount: parseFloat(order.total.toFixed(2)),
-            token: payment.token,
-            description: 'Actual Description',
-            installments: payment.installments,
-            payment_method_id: payment.payment_method_id,
-            payer: {
-              email: payment.email || email
-            }
-          };
+    console.log('PAYMENT: ', payment);
+    const paymentParams = formatPaymentParams(payment, order, email);
     console.log('paymentParams: ', paymentParams);
     const {
-      body: { response: mercadopagoOrder }
+      body: { response }
     } = await mercadopago.payment.save(paymentParams);
-    sails.log.info('mercadopago response: ', mercadopagoOrder);
     let mercadopagoOrder = response.toObject();
-    console.log('marcadopago response ID: ', mercadopagoOrder.id);
-    mercadopagoOrder.mercadoPagoId = mercadopagoOrder.id;
-    mercadopagoOrder.requestData = JSON.stringify(paymentParams);
-    mercadopagoOrder.responseData = JSON.stringify(mercadopagoOrder);
-    mercadopagoOrder.QuotationWeb = orderId;
-    mercadopagoOrder.UserWeb = userId;
-
+    sails.log.info('mercadopago response: ', mercadopagoOrder);
+    const mercadoPagoAttributes = {
+      mercadoPagoId: mercadopagoOrder.id,
+      requestData: JSON.stringify(paymentParams),
+      responseData: JSON.stringify(mercadopagoOrder),
+      QuotationWeb: orderId,
+      UserWeb: userId,
+      amount: convertCentsToPesos(mercadopagoOrder.amount)
+    };
+    mercadopagoOrder = _.extend(mercadopagoOrder, mercadoPagoAttributes);
     const speiOrder = getSpeiDetails(mercadopagoOrder);
     if (speiOrder) {
       mercadopagoOrder.isSpeiOrder = true;
       mercadopagoOrder = _.extend(mercadopagoOrder, speiOrder);
     }
-
-    mercadopagoOrder.amount = convertCentsToPesos(mercadopagoOrder.amount);
     delete mercadopagoOrder.id;
     return await MercadoPagoOrder.create(mercadopagoOrder);
   } catch (err) {
