@@ -29,40 +29,28 @@ function convertCentsToPesos(amount) {
 }
 
 function formatPaymentParams(payment, order, email) {
-  return payment.msi
+  return payment.type === 'transfer'
     ? {
         transaction_amount: parseFloat(order.total.toFixed(2)),
         token: payment.token,
         description: 'Actual Description',
         installments: payment.installments,
-        // issuer_id: payment.issuer_id,
         payment_method_id: payment.payment_method_id,
+        notification_url: 'url api actual',
         payer: {
           email: payment.email || email
         }
       }
-    : payment.type === 'transfer'
-      ? {
-          transaction_amount: parseFloat(order.total.toFixed(2)),
-          token: payment.token,
-          description: 'Actual Description',
-          installments: payment.installments,
-          payment_method_id: payment.payment_method_id,
-          notification_url: 'url api actual',
-          payer: {
-            email: payment.email || email
-          }
+    : {
+        transaction_amount: parseFloat(order.total.toFixed(2)),
+        token: payment.token,
+        description: 'Actual Description',
+        installments: payment.installments,
+        payment_method_id: payment.payment_method_id,
+        payer: {
+          email: payment.email || email
         }
-      : {
-          transaction_amount: parseFloat(order.total.toFixed(2)),
-          token: payment.token,
-          description: 'Actual Description',
-          installments: payment.installments,
-          payment_method_id: payment.payment_method_id,
-          payer: {
-            email: payment.email || email
-          }
-        };
+      };
 }
 
 async function createOrder(orderId, payment, req) {
@@ -82,15 +70,15 @@ async function createOrder(orderId, payment, req) {
     console.log('PAYMENT: ', payment);
     const paymentParams = formatPaymentParams(payment, order, email);
     console.log('paymentParams: ', paymentParams);
-    const {
-      body: { response }
-    } = await mercadopago.payment.save(paymentParams);
+    const { body: response } = await mercadopago.payment.save(paymentParams);
+    sails.log.info('mercadopago response: ', response);
     let mercadopagoOrder = response.toObject();
-    sails.log.info('mercadopago response: ', mercadopagoOrder);
     const mercadoPagoAttributes = {
       mercadoPagoId: mercadopagoOrder.id,
       requestData: JSON.stringify(paymentParams),
       responseData: JSON.stringify(mercadopagoOrder),
+      installments: mercadopagoOrder.installments,
+      issuerId: mercadopagoOrder.issuer_id,
       QuotationWeb: orderId,
       UserWeb: userId,
       amount: convertCentsToPesos(mercadopagoOrder.amount)
@@ -101,12 +89,15 @@ async function createOrder(orderId, payment, req) {
       mercadopagoOrder.isSpeiOrder = true;
       mercadopagoOrder = _.extend(mercadopagoOrder, speiOrder);
     }
+
     delete mercadopagoOrder.id;
     return await MercadoPagoOrder.create(mercadopagoOrder);
   } catch (err) {
     console.log('error mercadopago: ', err);
     if (err.MercadoPagoError) {
       throw new Error(err.MercadoPagoError);
+    } else {
+      throw new Error(err);
     }
   }
 }

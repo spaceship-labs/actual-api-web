@@ -42,7 +42,12 @@ module.exports = {
     speiExpirationPayment: {
       type: 'datetime'
     },
-
+    issuerId: {
+      type: 'string'
+    },
+    installments: {
+      type: 'integer'
+    },
     UserWeb: {
       model: 'UserWeb'
     },
