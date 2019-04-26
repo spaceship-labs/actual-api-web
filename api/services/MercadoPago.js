@@ -32,11 +32,9 @@ function formatPaymentParams(payment, order, email) {
   return payment.type === 'transfer'
     ? {
         transaction_amount: parseFloat(order.total.toFixed(2)),
-        token: payment.token,
         description: 'Actual Description',
-        installments: payment.installments,
         payment_method_id: payment.payment_method_id,
-        notification_url: 'url api actual',
+        // notification_url: 'url api actual',
         payer: {
           email: payment.email || email
         }
