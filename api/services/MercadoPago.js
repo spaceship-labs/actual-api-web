@@ -65,7 +65,6 @@ async function createOrder(orderId, payment, req) {
       throw new Error('Asigna una dirección de envio para continuar');
     }
     const { E_Mail: email } = await Client.findOne({ id: clientId });
-    console.log('PAYMENT: ', payment);
     const paymentParams = formatPaymentParams(payment, order, email);
     console.log('paymentParams: ', paymentParams);
     const { body: response } = await mercadopago.payment.save(paymentParams);
@@ -81,12 +80,12 @@ async function createOrder(orderId, payment, req) {
       amount: convertCentsToPesos(response.transaction_amount)
     };
     let mercadopagoOrder = _.extend(response, mercadoPagoAttributes);
+    // HACE FALTA ESTO
     const speiOrder = getSpeiDetails(mercadopagoOrder);
     if (speiOrder) {
       mercadopagoOrder = _.extend(mercadopagoOrder, { isSpeiOrder: true });
       mercadopagoOrder = _.extend(mercadopagoOrder, speiOrder);
     }
-    console.log('MERCADOPAGO ORDER MODEL: ', mercadopagoOrder);
     delete mercadopagoOrder.id;
     return await MercadoPagoOrder.create(mercadopagoOrder);
   } catch (err) {
