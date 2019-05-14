@@ -16,6 +16,9 @@ const helper = require('sendgrid').mail;
 var passwordTemplate = fs
   .readFileSync(sails.config.appPath + '/views/email/password.html')
   .toString();
+var paymentTemplate = fs
+  .readFileSync(sails.config.appPath + '/views/email/payment.html')
+  .toString();
 var orderTemplate = fs.readFileSync(sails.config.appPath + '/views/email/order.html').toString();
 var quotationTemplate = fs
   .readFileSync(sails.config.appPath + '/views/email/quotation.html')
@@ -51,6 +54,7 @@ var registerInvitationTemplate = fs
   .readFileSync(sails.config.appPath + '/views/email/register-invitation.html')
   .toString();
 
+paymentTemplate = ejs.compile(paymentTemplate);
 passwordTemplate = ejs.compile(passwordTemplate);
 orderTemplate = ejs.compile(orderTemplate);
 quotationTemplate = ejs.compile(quotationTemplate);
@@ -80,7 +84,8 @@ module.exports = {
   sendSpeiExpiration,
   sendSpeiQuotation,
   sendSuggestions,
-  sendRegisterInvitation
+  sendRegisterInvitation,
+  quotationEmail
 };
 
 function password(userName, userEmail, recoveryUrl, cb) {
@@ -114,6 +119,47 @@ function password(userName, userEmail, recoveryUrl, cb) {
     sendgrid.API(request, function(response) {
       if (response.statusCode >= 200 && response.statusCode <= 299) {
         resolve();
+      } else {
+        resolve(response);
+      }
+    });
+  });
+}
+
+function quotationEmail(totalQuotation, params) {
+  var user_name = params.CardName;
+  var user_email = params.E_Mail;
+  var user_phone = params.Phone1;
+  var user_cel = params.Cellular;
+  var user_total = totalQuotation;
+  var request = sendgrid.emptyRequest();
+  var requestBody = undefined;
+  var mail = new helper.Mail();
+  var personalization = new helper.Personalization();
+  var from = new helper.Email('noreply@actualgroup.com', 'Actual Group');
+  var to = new helper.Email('brandon@spaceshiplabs.com', 'brandon');
+  var subject = 'Cotización';
+  var res = paymentTemplate({
+    user_name: user_name,
+    user_email: user_email,
+    user_phone: user_phone,
+    user_cel: user_cel,
+    user_total: numeral(user_total).format('$0,0.00')
+  });
+  var content = new helper.Content('text/html', res);
+  personalization.addTo(to);
+  personalization.setSubject(subject);
+  mail.setFrom(from);
+  mail.addContent(content);
+  mail.addPersonalization(personalization);
+  requestBody = mail.toJSON();
+  request.method = 'POST';
+  request.path = '/v3/mail/send';
+  request.body = requestBody;
+  return new Promise(function(resolve, reject) {
+    sendgrid.API(request, function(response) {
+      if (response.statusCode >= 200 && response.statusCode <= 299) {
+        resolve(true);
       } else {
         resolve(response);
       }

@@ -13,7 +13,8 @@ module.exports = {
   getGroupByQuotationPayments: getGroupByQuotationPayments,
   relateOrderToSap: relateOrderToSap,
   getOrderStatusMapper: getOrderStatusMapper,
-  getOrderStatusLabel: getOrderStatusLabel
+  getOrderStatusLabel: getOrderStatusLabel,
+  sendEmail: sendEmail
 };
 
 function getOrderStatusMapper() {
@@ -41,6 +42,23 @@ function getGroupByQuotationPayments(payments) {
     group = payments[paymentsCount - 1].group;
   }
   return group;
+}
+
+async function sendEmail(form, req) {
+  try {
+    const clientId = UserService.getCurrentUserClientId(req);
+    const quotationId = form.quotationId;
+    const quotationWeb = await QuotationWeb.find({ id: quotationId });
+    const client = await Client.find({ id: clientId });
+    const total = Math.round(quotationWeb[0].total * 100) / 100;
+    console.log('client', client);
+
+    const emailStatus = await Email.quotationEmail(total, client[0]);
+    return emailStatus;
+  } catch (error) {
+    console.log('error', error);
+    throw new Error(error);
+  }
 }
 
 function createFromQuotation(form, req) {

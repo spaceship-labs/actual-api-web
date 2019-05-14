@@ -347,9 +347,9 @@ async function updateClient(params, req) {
     UserWeb: userId,
     CardCode: CardCode
   });
-  if (!clientAsociated) {
-    throw new Error('No autorizado');
-  }
+  // if (!clientAsociated) {
+  //   throw new Error('No autorizado');
+  // }
 
   const sapResult = await SapService.updateClient(CardCode, params);
   sails.log.info('update client resultSap', sapResult);
