@@ -137,7 +137,7 @@ function quotationEmail(totalQuotation, params) {
   var mail = new helper.Mail();
   var personalization = new helper.Personalization();
   var from = new helper.Email('noreply@actualgroup.com', 'Actual Group');
-  var to = new helper.Email('brandon@spaceshiplabs.com', 'brandon');
+  var to = new helper.Email('asanchez@actualg.com', 'Alia Sanchez');
   var subject = 'Cotización';
   var res = paymentTemplate({
     user_name: user_name,
