@@ -181,15 +181,15 @@ module.exports = {
           return Promise.reject(new Error('No autorizado'));
         }
 
-        if (!quotation.ZipcodeDelivery || !quotation.Address) {
-          return Promise.reject(new Error('No hay una dirección de entrega asignada'));
-        }
+        // if (!quotation.ZipcodeDelivery || !quotation.Address) {
+        //   return Promise.reject(new Error('No hay una dirección de entrega asignada'));
+        // }
 
-        if ((quotation.ZipcodeDelivery || {}).cp !== (quotation.Address || {}).U_CP) {
-          return Promise.reject(
-            new Error('El código postal no es valido de acuerdo a la dirección de entrega asignada')
-          );
-        }
+        // if ((quotation.ZipcodeDelivery || {}).cp !== (quotation.Address || {}).U_CP) {
+        //   return Promise.reject(
+        //     new Error('El código postal no es valido de acuerdo a la dirección de entrega asignada')
+        //   );
+        // }
 
         if (quotation.totalProducts <= 0) {
           return Promise.reject(new Error('No hay productos en esta cotización'));

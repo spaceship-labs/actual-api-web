@@ -197,6 +197,8 @@ function mapContactFields(fields) {
 }
 
 async function createClient(params, req) {
+  console.log('createClient');
+
   var sapFiscalAddressParams = {};
   var sapContactsParams = [];
   var contactsCreated = [];
@@ -272,8 +274,14 @@ async function createClient(params, req) {
   sails.log.info('client app', clientCreateParams);
 
   const createdClient = await Client.create(clientCreateParams);
+  console.log('create', createdClient);
+
   const createdUser = await UserService.createUserFromClient(createdClient, password, req);
+  console.log('create user', createdUser);
+
   const updatedClients = await Client.update({ id: createdClient.id }, { UserWeb: createdUser.id });
+  console.log('update', updatedClients);
+
   const updatedClient = updatedClients[0];
 
   if (contactsParams && contactsParams.length > 0) {
@@ -309,8 +317,26 @@ async function createClient(params, req) {
   };
   // }
 }
+async function updateJustClient(params, req) {
+  console.log(params);
+
+  const CardCode = params.CardCode;
+  const email = params.E_Mail;
+  const userId = params.id;
+
+  const isUserEmailTaken = await UserService.checkIfUserEmailIsTaken(email, userId);
+  if (isUserEmailTaken) {
+    throw new Error('Email previamente utilizado');
+  }
+
+  const updatedClients = await Client.update({ CardCode: CardCode }, params);
+  const updatedClient = updatedClients[0];
+  return updatedClient;
+}
 
 async function updateClient(params, req) {
+  console.log('updateClient');
+
   const CardCode = params.fromInvited ? params.CardCode : _.clone(req.user.CardCode);
   const email = params.E_Mail;
   let userId;
@@ -356,6 +382,7 @@ async function updateClient(params, req) {
   var sapData = JSON.parse(sapResult.value);
 
   validateSapClientUpdate(sapData);
+  console.log('params', params);
 
   const updatedClients = await Client.update({ CardCode: CardCode }, params);
   console.log('updatedClients: ', updatedClients);
