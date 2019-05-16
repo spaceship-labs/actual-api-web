@@ -383,8 +383,19 @@ async function updateClient(params, req) {
 
   validateSapClientUpdate(sapData);
   console.log('params', params);
-
-  const updatedClients = await Client.update({ CardCode: CardCode }, params);
+  const { id } = await Client.findOne({ CardCode, UserWeb: userId });
+  const formatParams = {
+    FirstName: params.FirstName,
+    LastName: params.LastName,
+    E_Mail: params.E_Mail,
+    Phone1: params.Phone1,
+    Cellular: params.Cellular,
+    invited: params.invited,
+    CardName: params.CardName,
+    CardCode: params.CardCode,
+    userId: params.userId
+  };
+  const updatedClients = await Client.update({ id }, formatParams);
   console.log('updatedClients: ', updatedClients);
   const updatedClient = updatedClients[0];
   const usersUpdated = await UserService.updateUserFromClient(updatedClient);
