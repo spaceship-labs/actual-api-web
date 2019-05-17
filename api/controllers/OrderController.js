@@ -140,7 +140,7 @@ module.exports = {
         res.negotiate(err);
       });
   },
-
+  /* 
   createFromQuotation: function(req, res) {
     var form = req.params.all();
     var order;
@@ -194,7 +194,8 @@ module.exports = {
         if (quotation.totalProducts <= 0) {
           return Promise.reject(new Error('No hay productos en esta cotización'));
         }
-        return OrderService.sendEmail(form, req);
+        // return OrderService.sendEmail(form, req);
+        return true;
       })
       .then(function(response) {
         if (response) {
@@ -202,7 +203,7 @@ module.exports = {
           res.json({ message: response });
         }
       })
-      /* .then(function(orderCreated) {
+       .then(function(orderCreated) {
         //RESPONSE
         sails.log.info('end ', new Date());
         sails.log.info('quotationId', form.quotationId);
@@ -272,7 +273,7 @@ module.exports = {
       .then(function(invoice) {
         console.log('generated invoice', invoice);
         return Promise.resolve();
-      })*/
+      })
       .catch(function(err) {
         console.log('catch general createFromQuotation', err);
         errLog = err;
@@ -293,6 +294,7 @@ module.exports = {
         return QuotationWeb.findOne({ id: quotationId, select: ['folio'] }).populate('Client');
       })
       .then(function(quotationWithErr) {
+        console.log('quotationWithErr', quotationWithErr);
         sails.log.info('quotationWithErr folio', (quotationWithErr || {}).folio);
 
         if (quotationWithErr && errLog) {
@@ -337,6 +339,124 @@ module.exports = {
               });
           }
         }
+      });
+  }, */
+
+  createFromQuotation: function(req, res) {
+    var form = req.params.all();
+    var order;
+    var responseSent = false;
+    var orderDetails;
+    var errLog;
+    var quotationId = form.quotationId;
+    var quotation;
+    var clientId = UserService.getCurrentUserClientId(req);
+    var conektaLimitErrorThrown;
+    var conektaProcessingErrorThrown;
+    var invoiceCreationPromise;
+
+    sails.log.info('init order creation', new Date());
+    sails.log.info('quotationId', form.quotationId);
+
+    OrderWeb.findOne({ QuotationWeb: quotationId })
+      .then(function(order) {
+        if (order) {
+          return Promise.reject(new Error('Ya se ha creado un pedido sobre esta cotización'));
+        }
+        return StockService.validateQuotationStockById(quotationId, req);
+      })
+      .then(function(isValidStock) {
+        if (!isValidStock) {
+          return Promise.reject(new Error('Inventario no suficiente para crear la orden'));
+        }
+
+        return QuotationWeb.findOne({ id: quotationId })
+          .populate('Address')
+          .populate('ZipcodeDelivery');
+      })
+      .then(function(_quotation) {
+        quotation = _quotation;
+        if (quotation.Client != clientId) {
+          return Promise.reject(new Error('No autorizado'));
+        }
+        if (quotation.totalProducts <= 0) {
+          return Promise.reject(new Error('No hay productos en esta cotización'));
+        }
+        // return OrderService.sendEmail(form, req);
+        return true;
+      })
+      .then(function(response) {
+        if (response) {
+          console.log('then status', response);
+          res.json({ message: response });
+        }
+      })
+      .catch(function(err) {
+        console.log('catch general createFromQuotation', err);
+        errLog = err;
+
+        conektaLimitErrorThrown = ConektaService.substractConektaLimitError(err);
+        sails.log.info('conektaLimitError', conektaLimitErrorThrown);
+
+        conektaProcessingErrorThrown = ConektaService.substractConektaCardProcessingError(err);
+        sails.log.info('conektaProcessingErrorThrown', conektaProcessingErrorThrown);
+
+        if (!responseSent) {
+          err = err || {};
+          err.conektaLimitErrorThrown = conektaLimitErrorThrown;
+          res.negotiate(err);
+        }
+
+        sails.log.info('start finding quotationWithErr', quotationId);
+        return QuotationWeb.findOne({ id: quotationId, select: ['folio'] })
+          .populate('Client')
+          .then(function(quotationWithErr) {
+            console.log('quotationWithErr', quotationWithErr);
+            sails.log.info('quotationWithErr folio', (quotationWithErr || {}).folio);
+
+            if (quotationWithErr && errLog) {
+              var client = quotationWithErr.Client || {};
+              var formArr = [
+                { label: 'Folio', value: quotationWithErr.folio },
+                { label: 'Id', value: quotationWithErr.id },
+                { label: 'Cliente ID', value: client.CardCode },
+                { label: 'Cliente Nombre', value: client.CardName },
+                { label: 'Cliente Email', value: client.E_Mail },
+                { label: 'Cliente Telefono', value: client.Phone1 },
+
+                { label: 'Log', value: JSON.stringify(errLog) }
+              ];
+
+              Email.sendQuotationLog(formArr, req.activeStore, function() {
+                sails.log.info('Log de error enviado');
+              });
+
+              if (conektaLimitErrorThrown) {
+                QuotationWeb.update({ id: quotationId }, { rateLimitReported: true })
+                  .then(function(quotationUpdated) {
+                    sails.log.info('quoation updated with rateLimitReported', quotationId);
+                    //sails.log.info('quotationUpdated', quotationUpdated);
+                    return Email.sendQuotation(quotationId, req.activeStore);
+                  })
+                  .then(function() {
+                    sails.log.info('quoation rate limit email sent', quotationId);
+                  });
+              }
+
+              if (conektaProcessingErrorThrown) {
+                var paymentAttempts = quotationWithErr.paymentAttempts + 1;
+                QuotationWeb.update({ id: quotationId }, { paymentAttempts: paymentAttempts })
+                  .then(function(quotationUpdated) {
+                    sails.log.info('quoation updated with paymentAttempts', quotationId);
+                    //sails.log.info('quotationUpdated', quotationUpdated);
+                    return Email.sendQuotation(quotationId, req.activeStore, true);
+                  })
+                  .then(function() {
+                    sails.log.info('quoation processing err email sent', quotationId);
+                  });
+              }
+            }
+          });
       });
   },
 

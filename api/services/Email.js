@@ -126,7 +126,7 @@ function password(userName, userEmail, recoveryUrl, cb) {
   });
 }
 
-function quotationEmail(totalQuotation, params) {
+function quotationEmail(totalQuotation, params, products) {
   var user_name = params.CardName;
   var user_email = params.E_Mail;
   var user_phone = params.Phone1;
@@ -137,14 +137,15 @@ function quotationEmail(totalQuotation, params) {
   var mail = new helper.Mail();
   var personalization = new helper.Personalization();
   var from = new helper.Email('noreply@actualgroup.com', 'Actual Group');
-  var to = new helper.Email('asanchez@actualg.com', 'Alia Sanchez');
+  var to = new helper.Email('brandon@spaceshiplabs.com', 'Alia Sanchez');
   var subject = 'Cotización';
   var res = paymentTemplate({
     user_name: user_name,
     user_email: user_email,
     user_phone: user_phone,
     user_cel: user_cel,
-    user_total: numeral(user_total).format('$0,0.00')
+    user_total: numeral(user_total).format('$0,0.00'),
+    products: products
   });
   var content = new helper.Content('text/html', res);
   personalization.addTo(to);
