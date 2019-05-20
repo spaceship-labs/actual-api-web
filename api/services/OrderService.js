@@ -1,6 +1,8 @@
 var _ = require('underscore');
 var Promise = require('bluebird');
 var moment = require('moment');
+const numeral = require('numeral');
+const cdnUrl = process.env.AWS_CLOUDFRONT_URL;
 
 var EWALLET_POSITIVE = 'positive';
 var INVOICE_SAP_TYPE = 'Invoice';
@@ -13,7 +15,8 @@ module.exports = {
   getGroupByQuotationPayments: getGroupByQuotationPayments,
   relateOrderToSap: relateOrderToSap,
   getOrderStatusMapper: getOrderStatusMapper,
-  getOrderStatusLabel: getOrderStatusLabel
+  getOrderStatusLabel: getOrderStatusLabel,
+  sendEmail: sendEmail
 };
 
 function getOrderStatusMapper() {
@@ -41,6 +44,70 @@ function getGroupByQuotationPayments(payments) {
     group = payments[paymentsCount - 1].group;
   }
   return group;
+}
+
+async function sendEmail(form, req) {
+  try {
+    const clientId = UserService.getCurrentUserClientId(req);
+    const quotationId = form.quotationId;
+    const quotationWeb = await QuotationWeb.findOne({ id: quotationId }).populate('Details');
+
+    const idDetails = quotationWeb.Details.map(({ id }) => id);
+    const details = await QuotationDetailWeb.find(idDetails)
+      .populate('Product')
+      .populate('Promotion');
+
+    const products = details.map(detail => {
+      var date = moment(detail.shipDate);
+      moment.locale('es');
+      date.locale(false);
+      date = date.format('DD/MMM/YYYY');
+
+      var promotionStartDate;
+      var promotionEndDate;
+      var promotionValidity;
+
+      if (detail.Promotion) {
+        promotionStartDate = moment(detail.Promotion.startDate);
+        promotionStartDate.locale(false);
+        promotionStartDate = promotionStartDate.format('DD/MMM/YYYY');
+
+        promotionEndDate = moment(detail.Promotion.endDate);
+        promotionEndDate.locale(false);
+        promotionEndDate = promotionEndDate.format('DD/MMM/YYYY');
+
+        promotionValidity = promotionStartDate + ' al ' + promotionEndDate;
+      }
+
+      return {
+        id: detail.Product.id,
+        name: detail.Product.ItemName,
+        code: detail.Product.ItemCode,
+        color: (detail.Product.DetailedColor || '').split(' ')[0],
+        material: '',
+        ewallet: detail.ewallet && detail.ewallet.toFixed(2),
+        warranty: detail.Product.U_garantia.toLowerCase(),
+        qty: detail.quantity,
+        ship: date,
+        price: numeral(detail.unitPrice).format('0,0.00'),
+        deliveryFee: numeral(detail.deliveryFee).format('0,0.00'),
+        total: numeral(detail.total).format('0,0.00'),
+        discount: detail.discountPercent,
+        promo: (detail.Promotion || {}).publicName || 'Ninguna',
+        image: cdnUrl + '/uploads/products/' + detail.Product.icon_filename,
+        promotionValidity: promotionValidity
+      };
+    });
+
+    const client = await Client.findOne({ id: clientId });
+    const total = Math.round(quotationWeb.total * 100) / 100;
+
+    const emailStatus = await Email.quotationEmail(total, client, products);
+    return emailStatus;
+  } catch (error) {
+    console.log('error', error);
+    throw new Error(error);
+  }
 }
 
 function createFromQuotation(form, req) {
@@ -81,8 +148,9 @@ function createFromQuotation(form, req) {
 
 function createConektaOrderAndPayment(quotationId, payment, req) {
   var conektaOrder;
-  return ConektaService.createOrder(quotationId, payment, req)
+  return MercadoPago.createOrder(quotationId, payment, req)
     .then(function(conektaOrder) {
+      console.log('mercadopago: ', conektaOrder);
       return conektaOrder;
     })
     .then(function(_conektaOrder) {
