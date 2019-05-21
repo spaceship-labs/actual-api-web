@@ -140,7 +140,7 @@ module.exports = {
         res.negotiate(err);
       });
   },
-  /* 
+  /*
   createFromQuotation: function(req, res) {
     var form = req.params.all();
     var order;
@@ -382,8 +382,7 @@ module.exports = {
         if (quotation.totalProducts <= 0) {
           return Promise.reject(new Error('No hay productos en esta cotización'));
         }
-        // return OrderService.sendEmail(form, req);
-        return true;
+        return OrderService.sendEmail(form, req);
       })
       .then(function(response) {
         if (response) {
