@@ -249,21 +249,22 @@ async function createClient(params, req) {
     throw new Error('Email previamente utilizado');
   }
 
-  const sapResult = await SapService.createClient(sapCreateParams);
-  sails.log.info('SAP result createClient', sapResult);
-  const sapData = JSON.parse(sapResult.value);
-  if (!sapData) {
-    throw new Error('Error al crear cliente en SAP');
+  if (params.invited) {
+    const sapResult = await SapService.createClient(sapCreateParams);
+    sails.log.info('SAP result createClient', sapResult);
+    const sapData = JSON.parse(sapResult.value);
+    if (!sapData) {
+      throw new Error('Error al crear cliente en SAP');
+    }
+    validateSapClientCreation(sapData, sapContactsParams, sapFiscalAddressParams);
   }
 
-  validateSapClientCreation(sapData, sapContactsParams, sapFiscalAddressParams);
-
   const clientCreateParams = Object.assign(sapClientParams, {
-    CardCode: sapData.result,
+    CardCode: sapData.result || '',
     BirthDate: moment(sapClientParams.BirthDate).toDate()
   });
 
-  const contactCodes = sapData.pers;
+  const contactCodes = sapData.pers || '';
   const contactsParams = sapContactsParams.map(function(c, i) {
     c.CntctCode = contactCodes[i];
     c.CardCode = clientCreateParams.CardCode;
@@ -293,7 +294,7 @@ async function createClient(params, req) {
   var fiscalAddressParams = mapFiscalFields(sapFiscalAddressParams);
   var fiscalAddressParams1 = {
     ...fiscalAddressParams,
-    CardCode: createdClient.CardCode,
+    CardCode: createdClient.CardCode || '',
     AdresType: ADDRESS_TYPE_S
   };
 
@@ -337,13 +338,18 @@ async function updateJustClient(params, req) {
 async function updateClient(params, req) {
   console.log('updateClient');
 
-  const CardCode = params.fromInvited ? params.CardCode : _.clone(req.user.CardCode);
+  const CardCode = params.fromInvited ? false : _.clone(req.user.CardCode);
   const email = params.E_Mail;
   let userId;
   if (params.fromInvited) {
     userId = params.userId;
   } else {
     userId = req.user ? req.user.id : false;
+    const sapResult = await SapService.updateClient(CardCode, params);
+    sails.log.info('update client resultSap', sapResult);
+    var sapData = JSON.parse(sapResult.value);
+
+    validateSapClientUpdate(sapData);
   }
 
   delete params.FiscalAddress;
@@ -370,20 +376,14 @@ async function updateClient(params, req) {
   sails.log.info('updateParams', updateParams);
 
   const clientAsociated = await Client.findOne({
-    UserWeb: userId,
-    CardCode: CardCode
+    UserWeb: userId
   });
   // if (!clientAsociated) {
   //   throw new Error('No autorizado');
   // }
 
-  const sapResult = await SapService.updateClient(CardCode, params);
-  sails.log.info('update client resultSap', sapResult);
-  var sapData = JSON.parse(sapResult.value);
-
-  validateSapClientUpdate(sapData);
   console.log('params', params);
-  const { id } = await Client.findOne({ CardCode, UserWeb: userId });
+  const { id } = await Client.findOne({ UserWeb: userId });
   const formatParams = {
     FirstName: params.FirstName,
     LastName: params.LastName,
@@ -392,7 +392,7 @@ async function updateClient(params, req) {
     Cellular: params.Cellular,
     invited: params.invited,
     CardName: params.CardName,
-    CardCode: params.CardCode,
+    CardCode: params.CardCode || '',
     userId: params.userId
   };
   const updatedClients = await Client.update({ id }, formatParams);
