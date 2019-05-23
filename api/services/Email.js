@@ -1078,12 +1078,14 @@ function sendQuotation(
 
   var toAux2 = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
   var toAux3 = new helper.Email('auditoria@actualg.com', 'Auditoria ActualGroup');
+  var toAux4 = new helper.Email('asanchez@actualg.com', 'Alia Sanchez');
 
   if (process.env.MODE === 'production') {
     sails.log.info('sending email quotation ', quotation.folio);
     personalization.addTo(to);
     personalization.addTo(toAux2);
     personalization.addTo(toAux3);
+    personalization.addTo(toAux4);
   }
 
   personalization.setSubject(subject);
@@ -1219,10 +1221,12 @@ function sendQuotationLog(form, store, cb) {
   var to = new helper.Email('luisperez@spaceshiplabs.com', 'Luis');
   var toAux = new helper.Email('dtorres@actualg.com', 'Daniela');
   var toAux2 = new helper.Email('eebalams@gmail.com', 'Ernesto');
+  var toAux3 = new helper.Email('asanchez@actualg.com', 'Alia Sanchez');
 
   if (process.env.MODE === 'production') {
     personalization.addTo(toAux);
     personalization.addTo(toAux2);
+    personalization.addTo(toAux3);
   }
 
   var subject = 'Error en proceso de compra ' + ((store || {}).name || '');
