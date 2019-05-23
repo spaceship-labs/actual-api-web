@@ -1061,7 +1061,7 @@ function sendQuotation(
     clientEmail = lead.email;
   }
 
-  var to = new helper.Email(clientEmail, client.CardName);
+  var to = new helper.Email(clientEmail, client.CardName || lead.name);
   var subject = 'Cotización | Folio #' + quotation.folio + ' ' + store.name;
   var content = new helper.Content('text/html', emailBody);
 

@@ -248,11 +248,11 @@ async function createClient(params, req) {
   if (isUserEmailTaken) {
     throw new Error('Email previamente utilizado');
   }
-
-  if (params.invited) {
+  var sapData = null;
+  if (!params.invited) {
     const sapResult = await SapService.createClient(sapCreateParams);
     sails.log.info('SAP result createClient', sapResult);
-    const sapData = JSON.parse(sapResult.value);
+    sapData = JSON.parse(sapResult.value);
     if (!sapData) {
       throw new Error('Error al crear cliente en SAP');
     }
@@ -260,11 +260,11 @@ async function createClient(params, req) {
   }
 
   const clientCreateParams = Object.assign(sapClientParams, {
-    CardCode: sapData.result || '',
+    CardCode: sapData ? sapData.result : '',
     BirthDate: moment(sapClientParams.BirthDate).toDate()
   });
 
-  const contactCodes = sapData.pers || '';
+  const contactCodes = sapData ? sapData.pers : '';
   const contactsParams = sapContactsParams.map(function(c, i) {
     c.CntctCode = contactCodes[i];
     c.CardCode = clientCreateParams.CardCode;
