@@ -138,6 +138,8 @@ function quotationEmail(totalQuotation, params, products) {
   var personalization = new helper.Personalization();
   var from = new helper.Email('noreply@actualgroup.com', 'Actual Group');
   var to = new helper.Email('asanchez@actualg.com', 'Alia Sanchez');
+  var toAux = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
+
   var subject = 'Cotización';
   var res = paymentTemplate({
     user_name: user_name,
@@ -149,6 +151,7 @@ function quotationEmail(totalQuotation, params, products) {
   });
   var content = new helper.Content('text/html', res);
   personalization.addTo(to);
+  personalization.addTo(toAux);
   personalization.setSubject(subject);
   mail.setFrom(from);
   mail.addContent(content);
