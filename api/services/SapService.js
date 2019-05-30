@@ -61,11 +61,6 @@ function createClient(params) {
   delete client.password;
   delete client._password;
 
-  var seriesNum = params.activeStore.seriesNum;
-
-  client.LicTradNum = client.LicTradNum || 'XAXX010101000';
-  client.SlpCode = -1;
-  client.Series = seriesNum; //Assigns seriesNum number depending on activeStore
   var requestParams = {
     Client: encodeURIComponent(JSON.stringify(client)),
     address: encodeURIComponent(JSON.stringify(fiscalAddress)),
