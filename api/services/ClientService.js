@@ -228,6 +228,13 @@ async function createClient(params, req) {
     sapFiscalAddressParams = mapFiscalFields(fiscalAddressAux);
   }
 
+  const seriesNum = req.activeStore.seriesNum;
+
+  params.LicTradNum = params.LicTradNum || InvoiceService.RFCPUBLIC;
+  params.SlpCode = -1;
+  params.Series = seriesNum; //Assigns seriesNum number depending on activeStore
+  params.cfdiUse = params.cfdiUse || 'P01';
+
   const sapClientParams = _.clone(params);
   var sapCreateParams = {
     client: sapClientParams,
