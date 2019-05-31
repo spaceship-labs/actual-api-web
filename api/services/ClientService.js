@@ -257,7 +257,7 @@ async function createClient(params, req) {
 
   const sapResult = await SapService.createClient(sapCreateParams);
   sails.log.info('SAP result createClient', sapResult);
-  const sapData = JSON.parse(sapResult.value);
+  sapData = JSON.parse(sapResult.value);
   if (!sapData) {
     throw new Error('Error al crear cliente en SAP');
   }
