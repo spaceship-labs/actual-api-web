@@ -1,4 +1,5 @@
 var Promise = require('bluebird');
+var mercadopago = require('mercadopago');
 var conekta = require('conekta');
 var moment = require('moment');
 var _ = require('underscore');
