@@ -51,19 +51,19 @@ module.exports = {
     var form = req.allParams();
     try {
       const user = await UserWeb.findOne({ email: form.E_Mail });
-      const clientContact = await ClientContact.findOne({
+      const clientContact = await Client.findOne({
         E_Mail: form.E_Mail
       });
-      if (user && user.invited) {
-        form.CardCode = user.CardCode;
+
+      if (clientContact && clientContact.invited) {
+        form.CardCode = user.CardCode || '';
         form.userId = user.id;
         form.fromInvited = true;
-
         const { updatedClient, updatedUser } = await ClientService.updateClient(form, req);
 
         if (form.contacts && form.contacts.length > 0) {
           form.contacts[0].CntctCode = clientContact.CntctCode;
-          form.contacts[0].CardCode = user.CardCode;
+          form.contacts[0].CardCode = user.CardCode || '';
           await ContactService.updateContact(form.contacts[0]);
         }
 

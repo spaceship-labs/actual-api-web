@@ -111,7 +111,7 @@ function updateUserFromClient(client) {
   if (client.invited) {
     updateParams.invited = true;
   }
-  var userId= client.UserWeb;
+  var userId = client.UserWeb;
   return UserWeb.update({ id: userId }, updateParams);
 }
 
@@ -123,8 +123,8 @@ function checkIfUserEmailIsTaken(email, userId) {
   }
 
   return UserWeb.findOne(query).then(function(user) {
-    //sails.log.info('checkIfUserEmailIsTaken', user);
-    if (!_.isUndefined(user)) {
+    sails.log.info('checkIfUserEmailIsTaken', user);
+    if (!_.isUndefined(user) && !user.invited) {
       return true;
     } else {
       return false;
