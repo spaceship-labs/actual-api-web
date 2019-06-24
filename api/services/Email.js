@@ -1076,9 +1076,6 @@ function sendQuotation(
     subject += ' SO';
   }
 
-  var toAux = new helper.Email('luisperez@spaceshiplabs.com', 'Luis Perez');
-  personalization.addTo(toAux);
-
   var toAux2 = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
   var toAux3 = new helper.Email('auditoria@actualg.com', 'Auditoria ActualGroup');
   var toAux4 = new helper.Email('asanchez@actualg.com', 'Alia Sanchez');
