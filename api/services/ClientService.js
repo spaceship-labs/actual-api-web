@@ -254,9 +254,10 @@ async function createClient(params, req) {
     throw new Error('Email previamente utilizado');
   }
   var sapData = null;
-  if (!clientAsociated) {
-    throw new Error('No autorizado');
-  }
+
+  // if (!clientAsociated) {
+  //   throw new Error('No autorizado');
+  // }
   const sapResult = await SapService.createClient(sapCreateParams);
   sails.log.info('SAP result createClient', sapResult);
   sapData = JSON.parse(sapResult.value);
