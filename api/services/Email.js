@@ -793,17 +793,21 @@ function sendOrder(client, order, products, payments, ewallet, store) {
   var subject = 'Confirmación de compra | Folio #' + order.folio;
   var content = new helper.Content('text/html', emailBody);
 
-  var toAux = new helper.Email('luisperez@spaceshiplabs.com', 'Luis Perez');
+  var toAux = new helper.Email('yupit@spaceshiplabs.com', 'Emmanuel Yupit');
   personalization.addTo(toAux);
 
   var toAux2 = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
   var toAux3 = new helper.Email('auditoria@actualg.com', 'Auditoria ActualGroup');
+  var toAux4 = new helper.Email('asanchez@actualg.com', 'Alia Sanchez');
+  var toAux5 = new helper.Email('facturacion@actualg.com', 'Estefania Chan');
 
   if (process.env.MODE === 'production') {
     sails.log.info('sending email order ', order.folio);
     personalization.addTo(to);
     personalization.addTo(toAux2);
     personalization.addTo(toAux3);
+    personalization.addTo(toAux4);
+    personalization.addTo(toAux5);
   }
 
   personalization.setSubject(subject);
