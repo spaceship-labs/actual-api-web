@@ -32,34 +32,40 @@ module.exports = {
       });
   },
 
-  getCategoriesTree: function(req, res) {
-    Promise.join(
-      ProductCategory.find({ CategoryLevel: 1 }).populate('Childs'),
-      ProductCategory.find({ CategoryLevel: 2 }).populate('Childs'),
-      ProductCategory.find({ CategoryLevel: 3 }).populate('Parents')
-    )
-      .then(function(groups) {
-        var categoriesLv1 = groups[0] || [];
-        var categoriesLv2 = groups[1] || [];
-        var categoriesLv3 = groups[2] || [];
-        var categoryTree = CategoryService.buildCategoriesTree(
-          categoriesLv1,
-          categoriesLv2,
-          categoriesLv3
-        );
-        res.json(categoryTree);
-      })
-      .catch(function(err) {
-        console.log(err);
-        res.negotiate(err);
-      });
+  async getCategoriesTree(req, res) {
+    try {
+      const groups = [
+        await ProductCategory.find({ CategoryLevel: 1 })
+          .populate('Childs')
+          .populate('FeaturedProducts'),
+        await ProductCategory.find({ CategoryLevel: 2 }).populate('Childs'),
+        await ProductCategory.find({ CategoryLevel: 3 }).populate('Parents')
+      ];
+      var categoriesLv1 = groups[0] || [];
+      var categoriesLv2 = groups[1] || [];
+      var categoriesLv3 = groups[2] || [];
+      var categoryTree = await CategoryService.buildCategoriesTree(
+        categoriesLv1,
+        categoriesLv2,
+        categoriesLv3
+      );
+      res.json(categoryTree);
+    } catch (err) {
+      res.negotiate(err);
+    }
   },
 
   getCategoriesGroups: function(req, res) {
     Promise.join(
-      ProductCategory.find({ CategoryLevel: 1 }).populate('Childs'),
-      ProductCategory.find({ CategoryLevel: 2 }).populate('Childs'),
-      ProductCategory.find({ CategoryLevel: 3 }).populate('Parents')
+      ProductCategory.find({ CategoryLevel: 1 })
+        .populate('Childs')
+        .populate('FeaturedProducts'),
+      ProductCategory.find({ CategoryLevel: 2 })
+        .populate('Childs')
+        .populate('FeaturedProducts'),
+      ProductCategory.find({ CategoryLevel: 3 })
+        .populate('Parents')
+        .populate('FeaturedProducts')
     )
       .then(function(categoriesGroups) {
         res.json(categoriesGroups);
