@@ -1,9 +1,9 @@
 module.exports.email = {
   service: 'mailgun',
-  auth:{
+  auth: {
     user: process.env.MAILGUN_USER,
     pass: process.env.MAILGUN_PASSWORD
   },
-  from: 'luisperez@spaceshiplabs.com',
+  from: 'yupit@spaceshiplabs.com',
   testMode: false
 };
