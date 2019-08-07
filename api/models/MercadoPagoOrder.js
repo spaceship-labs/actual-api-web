@@ -21,17 +21,11 @@ module.exports = {
     amount: {
       type: 'float'
     },
-    payment_status: {
-      type: 'string'
-    },
-    isSpeiOrder: {
-      type: 'boolean'
-    },
     requestData: {
-      type: 'text'
+      type: 'json'
     },
     responseData: {
-      type: 'text'
+      type: 'json'
     },
     receiving_account_bank: {
       type: 'string'
@@ -47,6 +41,12 @@ module.exports = {
     },
     installments: {
       type: 'integer'
+    },
+    status: {
+      type: 'string'
+    },
+    statusDetail: {
+      type: 'string'
     },
     UserWeb: {
       model: 'UserWeb'
