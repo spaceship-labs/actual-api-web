@@ -1,5 +1,6 @@
 const mercadopago = require('mercadopago');
 const _ = require('underscore');
+const accessToken = process.env.MP_ACCESS_TOKEN;
 const statusMessages = {
   pending_contingency:
     'Estamos procesando el pago. En menos de 2 días hábiles te enviaremos por e-mail el resultado.',
@@ -22,7 +23,6 @@ const statusMessages = {
     'Llegaste al límite de intentos permitidos. Elige otra tarjeta u otro medio de pago.',
   cc_rejected_other_reason: 'Tu banco no procesó el pago.'
 };
-const accessToken = process.env.MP_ACCESS_TOKEN;
 
 const convertCentsToPesos = amount => amount / 100;
 
@@ -35,19 +35,6 @@ const formatPaymentParams = (payment, order, email) => ({
   payer: {
     email: payment.email || email
   }
-});
-
-const formatMercadoPagoAttributes = (response, paymentParams, orderId, userId) => ({
-  mercadoPagoId: response.id,
-  requestData: paymentParams,
-  responseData: response,
-  installments: response.installments,
-  issuerId: response.issuer_id,
-  status: response.status,
-  statusDetail: response.status_detail,
-  QuotationWeb: orderId,
-  UserWeb: userId,
-  amount: convertCentsToPesos(response.transaction_amount)
 });
 
 const validateResponseStatus = (status, statusDetail) => {
@@ -76,14 +63,17 @@ async function createOrder(orderId, payment, req) {
     console.log('paymentParams: ', paymentParams);
     const { body: response } = await mercadopago.payment.save(paymentParams);
     sails.log.info('mercadopago response: ', response);
-    const { status, status_detail } = response;
-    validateResponseStatus(status, status_detail);
-    const mercadoPagoAttributes = formatMercadoPagoAttributes(
-      response,
-      paymentParams,
-      orderId,
-      userId
-    );
+    validateResponseStatus(response.status, response.status_detail);
+    const mercadoPagoAttributes = {
+      mercadoPagoId: response.id,
+      requestData: JSON.stringify(paymentParams),
+      responseData: JSON.stringify(response),
+      installments: response.installments,
+      issuerId: response.issuer_id,
+      QuotationWeb: orderId,
+      UserWeb: userId,
+      amount: convertCentsToPesos(response.transaction_amount)
+    };
     let mercadopagoOrder = _.extend(response, mercadoPagoAttributes);
     delete mercadopagoOrder.id;
     return await MercadoPagoOrder.create(mercadopagoOrder);
