@@ -127,6 +127,9 @@ module.exports = {
     },
     fromOffers: {
       type: 'boolean'
+    },
+    clientIp: {
+      type: 'string'
     }
   },
 
