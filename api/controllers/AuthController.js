@@ -6,6 +6,7 @@
  */
 
 var passport = require('passport');
+const requestIp = require('request-ip');
 
 function _onPassportAuth(req, res, error, user, info) {
   if (error) return res.serverError(error);
@@ -47,7 +48,8 @@ module.exports = {
   },
 
   homeStatus: function(req, res) {
-    const ip = req.header('x-forwarded-for') || req.connection.remoteAddress;
-    res.ok({ status: 'ok!', version: '1.2.27', ip });
+    // const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    const clientIp = requestIp.getClientIp(req);
+    res.ok({ status: 'ok!', version: '1.2.27', clientIp });
   }
 };
