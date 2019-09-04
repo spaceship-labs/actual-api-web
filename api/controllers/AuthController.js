@@ -47,6 +47,7 @@ module.exports = {
   },
 
   homeStatus: function(req, res) {
-    res.ok({ status: 'ok!', version: '1.2.27' });
+    const ip = req.header('x-forwarded-for') || req.connection.remoteAddress;
+    res.ok({ status: 'ok!', version: '1.2.27', ip });
   }
 };
