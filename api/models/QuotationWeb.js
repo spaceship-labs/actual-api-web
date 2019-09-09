@@ -124,6 +124,12 @@ module.exports = {
     paymentType: { type: 'string' },
     tracing: {
       type: 'datetime'
+    },
+    fromOffers: {
+      type: 'boolean'
+    },
+    clientIp: {
+      type: 'string'
     }
   },
 
