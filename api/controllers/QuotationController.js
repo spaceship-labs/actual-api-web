@@ -5,11 +5,13 @@ var moment = require('moment');
 var EWALLET_TYPE = 'ewallet';
 var EWALLET_NEGATIVE = 'negative';
 var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
+const requestIp = require('request-ip');
 
 module.exports = {
   create: function(req, res) {
     var form = req.allParams();
     var createdId;
+    const clientIp = requestIp.getClientIp(req);
 
     form.Details = formatProductsIds(form.Details);
     form.Details = form.Details.map(function(d) {
@@ -23,7 +25,7 @@ module.exports = {
       form.UserWeb = req.user.id;
       form.Client = req.user.Client;
     }
-
+    form.clientIp = clientIp;
     var opts = {
       paymentGroup: 1,
       updateDetails: true,
