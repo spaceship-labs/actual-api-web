@@ -12,20 +12,17 @@ module.exports = {
     mercadoPagoId: {
       type: 'string'
     },
-    created_at: {
-      type: 'string'
-    },
     currency: {
       type: 'string'
     },
     amount: {
       type: 'float'
     },
-    payment_status: {
+    status: {
       type: 'string'
     },
-    isSpeiOrder: {
-      type: 'boolean'
+    status_detail: {
+      type: 'string'
     },
     requestData: {
       type: 'text'
@@ -33,19 +30,13 @@ module.exports = {
     responseData: {
       type: 'text'
     },
-    receiving_account_bank: {
-      type: 'string'
-    },
-    receiving_account_number: {
-      type: 'string'
-    },
-    speiExpirationPayment: {
-      type: 'datetime'
-    },
     issuerId: {
       type: 'string'
     },
     installments: {
+      type: 'integer'
+    },
+    total_paid_amount: {
       type: 'integer'
     },
     UserWeb: {

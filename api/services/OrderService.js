@@ -127,20 +127,22 @@ function createFromQuotation(form, req) {
 
     if (!conektaOrderFound && !paymentFound) {
       return createConektaOrderAndPayment(quotationId, payment, req).then(function(_conektaOrder) {
-        form.conektaOrder = _conektaOrder;
+        sails.log.info('_conektaOrder: ', _conektaOrder);
+
+        form.MercadoPagoOrder = _conektaOrder;
         return createOrder(form, req);
       });
     } else if (conektaOrderFound && !paymentFound) {
-      console.log('creando el pago');
+      sails.log.info('creando el pago');
       return PaymentService.addPayment(form.payment, quotationId, req).then(function(
         paymentCreated
       ) {
-        form.conektaOrder = conektaOrderFound;
+        form.MercadoPagoOrder = conektaOrderFound;
         return createOrder(form, req);
       });
     } else {
       sails.log.info('directo a createorder');
-      form.conektaOrder = conektaOrderFound;
+      form.MercadoPagoOrder = conektaOrderFound;
       return createOrder(form, req);
     }
   });
@@ -257,10 +259,10 @@ function createOrder(form, req) {
         orderToCreate.status = 'pending-sap';
       }
 
-      if (form.conektaOrder.isSpeiOrder) {
-        orderToCreate.status = 'pending-payment';
-        orderToCreate.isSpeiOrder = true;
-      }
+      // if (form.conektaOrder.isSpeiOrder) {
+      //   orderToCreate.status = 'pending-payment';
+      //   orderToCreate.isSpeiOrder = true;
+      // }
 
       if (quotation.Address) {
         orderToCreate.Address = _.clone(quotation.Address.id);
@@ -277,38 +279,39 @@ function createOrder(form, req) {
       }
 
       orderToCreate.paymentType = getPaymentTypeByPayments(quotation.Payments);
-      orderToCreate.ConektaOrderId = form.conektaOrder.conektaId;
-      orderToCreate.ConektaPaymentStatus = form.conektaOrder.payment_status;
-      orderToCreate.ConektaOrder = form.conektaOrder;
-      orderToCreate.conektaId = form.conektaOrder.conektaId;
-      orderToCreate.receiving_account_bank = form.conektaOrder.receiving_account_bank || false;
-      orderToCreate.receiving_account_number = form.conektaOrder.receiving_account_number || false;
-      orderToCreate.conektaAmount = form.conektaOrder.amount;
-      orderToCreate.speiExpirationPayment = form.conektaOrder.speiExpirationPayment;
+      orderToCreate.MercadoPagoOrderId = form.MercadoPagoOrder.mercadoPagoId;
+      orderToCreate.MercadoPagoOrder = form.MercadoPagoOrder.id;
+      orderToCreate.MercadoPagoOrderPaymentStatus = form.MercadoPagoOrder.status;
+      // orderToCreate.receiving_account_bank = form.conektaOrder.receiving_account_bank || false;
+      // orderToCreate.receiving_account_number = form.conektaOrder.receiving_account_number || false;
+      orderToCreate.MercadoPagoOrderAmount = form.MercadoPagoOrder.total_paid_amount;
+      // orderToCreate.speiExpirationPayment = form.conektaOrder.speiExpirationPayment;
 
-      if (
-        orderToCreate.speiExpirationPayment &&
-        orderToCreate.speiExpirationPayment instanceof
-          Date /*&& moment(orderToCreate.speiExpirationPayment).isValid()*/
-      ) {
-        var HOURS_TO_SEND_REMIND = 6;
-        var TIME_LAPSE = 'hours';
-        //var HOURS_TO_SEND_REMIND = 715;
-        //var TIME_LAPSE = 'minutes';
-        orderToCreate.speiExpirationReminderStartDate = moment(orderToCreate.speiExpirationPayment)
-          .subtract(HOURS_TO_SEND_REMIND, TIME_LAPSE)
-          .toDate();
-        console.log(
-          'speiExpirationReminderStartDate',
-          orderToCreate.speiExpirationReminderStartDate
-        );
-      }
+      // if (
+      //   orderToCreate.speiExpirationPayment &&
+      //   orderToCreate.speiExpirationPayment instanceof
+      //     Date /*&& moment(orderToCreate.speiExpirationPayment).isValid()*/
+      // ) {
+      //   var HOURS_TO_SEND_REMIND = 6;
+      //   var TIME_LAPSE = 'hours';
+      //   //var HOURS_TO_SEND_REMIND = 715;
+      //   //var TIME_LAPSE = 'minutes';
+      //   orderToCreate.speiExpirationReminderStartDate = moment(orderToCreate.speiExpirationPayment)
+      //     .subtract(HOURS_TO_SEND_REMIND, TIME_LAPSE)
+      //     .toDate();
+      //   console.log(
+      //     'speiExpirationReminderStartDate',
+      //     orderToCreate.speiExpirationReminderStartDate
+      //   );
+      // }
 
       return OrderWeb.create(orderToCreate);
     })
     .then(function(created) {
       orderCreated = created;
-      return OrderWeb.findOne({ id: created.id }).populate('Details');
+      return OrderWeb.findOne({ id: created.id })
+        .populate('Details')
+        .populate('MercadoPagoOrder');
     })
     .then(function(orderFound) {
       //Cloning quotation details to order details
