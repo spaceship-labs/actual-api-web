@@ -37,6 +37,10 @@ module.exports = {
       via: 'QuotationWeb'
     },
 
+    UnregisteredClient: {
+      model: 'UnregisteredClient'
+    },
+
     ignoreContactZipcode: {
       defaultsTo: true,
       type: 'boolean'

@@ -649,7 +649,7 @@ module.exports = {
       searchFields: ['folio', 'id'],
       selectFields: form.fields,
       filters: form.filters,
-      populateFields: ['Client']
+      populateFields: ['Client', 'UnregisteredClient']
     };
 
     extraParams.filters = Common.removeUnusedFilters(extraParams.filters);
