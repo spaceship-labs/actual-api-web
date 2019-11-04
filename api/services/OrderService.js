@@ -122,46 +122,54 @@ function createFromQuotation(form, req) {
   ];
 
   return Promise.all(promises).then(function(results) {
-    var conektaOrderFound = results[0];
-    var paymentFound = results[0];
+    var mercadoPagoOrderFound = results[0];
+    var paymentFound = results[1];
 
-    if (!conektaOrderFound && !paymentFound) {
-      return createConektaOrderAndPayment(quotationId, payment, req).then(function(_conektaOrder) {
-        sails.log.info('_conektaOrder: ', _conektaOrder);
+    if (!mercadoPagoOrderFound && !paymentFound) {
+      return createConektaOrderAndPayment(quotationId, payment, req).then(function(
+        mercadoPagoOrder
+      ) {
+        sails.log.info('mercadoPagoOrder: ', mercadoPagoOrder);
 
-        form.MercadoPagoOrder = _conektaOrder;
+        form.MercadoPagoOrder = mercadoPagoOrder;
         return createOrder(form, req);
       });
-    } else if (conektaOrderFound && !paymentFound) {
+    } else if (mercadoPagoOrderFound && !paymentFound) {
+      if (mercadoPagoOrderFound.status === 'in_process') {
+        form.payment.status = 'pending';
+      }
       sails.log.info('creando el pago');
       return PaymentService.addPayment(form.payment, quotationId, req).then(function(
         paymentCreated
       ) {
-        form.MercadoPagoOrder = conektaOrderFound;
+        form.MercadoPagoOrder = mercadoPagoOrderFound;
         return createOrder(form, req);
       });
     } else {
       sails.log.info('directo a createorder');
-      form.MercadoPagoOrder = conektaOrderFound;
+      form.MercadoPagoOrder = mercadoPagoOrderFound;
       return createOrder(form, req);
     }
   });
 }
 
 function createConektaOrderAndPayment(quotationId, payment, req) {
-  var conektaOrder;
+  var mercadoPagoOrder;
   return MercadoPago.createOrder(quotationId, payment, req)
-    .then(function(conektaOrder) {
-      console.log('mercadopago: ', conektaOrder);
-      return conektaOrder;
+    .then(function(mercadoPagoOrder) {
+      console.log('mercadopago: ', mercadoPagoOrder);
+      return mercadoPagoOrder;
     })
-    .then(function(_conektaOrder) {
-      conektaOrder = _conektaOrder;
+    .then(function(_mercadoPagoOrder) {
+      mercadoPagoOrder = _mercadoPagoOrder;
+      if (mercadoPagoOrder.status === 'in_process') {
+        payment.status = 'pending';
+      }
       payment.stockValidated = true;
       return PaymentService.addPayment(payment, quotationId, req);
     })
     .then(function(paymentCreated) {
-      return conektaOrder;
+      return mercadoPagoOrder;
     });
 }
 
@@ -282,28 +290,11 @@ function createOrder(form, req) {
       orderToCreate.MercadoPagoOrderId = form.MercadoPagoOrder.mercadoPagoId;
       orderToCreate.MercadoPagoOrder = form.MercadoPagoOrder.id;
       orderToCreate.MercadoPagoOrderPaymentStatus = form.MercadoPagoOrder.status;
-      // orderToCreate.receiving_account_bank = form.conektaOrder.receiving_account_bank || false;
-      // orderToCreate.receiving_account_number = form.conektaOrder.receiving_account_number || false;
       orderToCreate.MercadoPagoOrderAmount = form.MercadoPagoOrder.total_paid_amount;
-      // orderToCreate.speiExpirationPayment = form.conektaOrder.speiExpirationPayment;
-
-      // if (
-      //   orderToCreate.speiExpirationPayment &&
-      //   orderToCreate.speiExpirationPayment instanceof
-      //     Date /*&& moment(orderToCreate.speiExpirationPayment).isValid()*/
-      // ) {
-      //   var HOURS_TO_SEND_REMIND = 6;
-      //   var TIME_LAPSE = 'hours';
-      //   //var HOURS_TO_SEND_REMIND = 715;
-      //   //var TIME_LAPSE = 'minutes';
-      //   orderToCreate.speiExpirationReminderStartDate = moment(orderToCreate.speiExpirationPayment)
-      //     .subtract(HOURS_TO_SEND_REMIND, TIME_LAPSE)
-      //     .toDate();
-      //   console.log(
-      //     'speiExpirationReminderStartDate',
-      //     orderToCreate.speiExpirationReminderStartDate
-      //   );
-      // }
+      if (form.MercadoPagoOrder.status === 'in_process') {
+        orderToCreate.status = 'pending-payment';
+        orderToCreate.statusDetails = form.MercadoPagoOrder.status_detail;
+      }
 
       return OrderWeb.create(orderToCreate);
     })

@@ -63,6 +63,9 @@ module.exports = {
         'canceled'
       ]
     },
+    statusDetails: {
+      type: 'string'
+    },
     inSapWriteProgress: { type: 'boolean' },
     QuotationWeb: {
       model: 'QuotationWeb',
