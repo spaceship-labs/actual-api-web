@@ -68,6 +68,14 @@ const validateResponseStatus = (status, statusDetail) => {
 // si cancelado pasar los staus de pago y orden web a cancelado y en la orden poner el detalle de cancelacion
 // si completado para el status de pago y orden web a pagado
 
+const getEmailParams = async id => {
+  const {
+    Client: { CardCode, E_Mail },
+    total
+  } = await OrderWeb.findOne({ id }).populate('Client');
+  return { order_id: id, user_name: CardCode, email: E_Mail, total };
+};
+
 const getInProcessOrders = async () => await OrderWeb.find({ status: 'pending-payment' });
 
 const getMercadoPagoIds = orders =>
@@ -92,7 +100,11 @@ const changeCurrentStatus = async orders => {
             { id: orderId },
             { status: 'canceled', statusDetails: status_detail }
           ),
-          await PaymentWeb.update({ OrderWeb: orderId }, { status: 'canceled' })
+          await PaymentWeb.update({ OrderWeb: orderId }, { status: 'canceled' }),
+          await Email.sendRejectedPaymentEmail(
+            await getEmailParams(orderId),
+            statusMessages[statusDetail]
+          )
         ]
       )
       .on(
