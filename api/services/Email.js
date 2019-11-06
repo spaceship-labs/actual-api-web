@@ -53,6 +53,9 @@ var fiscalDataClientMessageTemplate = fs
 var registerInvitationTemplate = fs
   .readFileSync(sails.config.appPath + '/views/email/register-invitation.html')
   .toString();
+var sendRejectedPaymentEmail = fs
+  .readFileSync(sails.config.appPath + '/views/email/payment-status-notification.html')
+  .toString();
 
 paymentTemplate = ejs.compile(paymentTemplate);
 passwordTemplate = ejs.compile(passwordTemplate);
@@ -68,6 +71,7 @@ speiReminderTemplate = ejs.compile(speiReminderTemplate);
 speiExpirationTemplate = ejs.compile(speiExpirationTemplate);
 fiscalDataClientMessageTemplate = ejs.compile(fiscalDataClientMessageTemplate);
 registerInvitationTemplate = ejs.compile(registerInvitationTemplate);
+sendRejectedPaymentEmail = ejs.compile(sendRejectedPaymentEmail);
 
 module.exports = {
   sendPasswordRecovery: password,
@@ -85,7 +89,8 @@ module.exports = {
   sendSpeiQuotation,
   sendSuggestions,
   sendRegisterInvitation,
-  quotationEmail
+  quotationEmail,
+  sendRejectedPaymentEmail
 };
 
 function password(userName, userEmail, recoveryUrl, cb) {
@@ -259,6 +264,17 @@ function sendRegister(userName, userEmail, store, cb) {
       cb(response);
     }
   });
+}
+
+function sendRejectedPaymentEmail(params, statusDetail) {
+  const { user_name, mail, order_id, order_total, folio } = params;
+  const request = sendgrid.emptyRequest();
+  const requestBody = undefined;
+  const mail = new helper.Mail();
+  const personalization = new helper.personalization();
+  const from = new helper.Email('noreply@actualgroup.com', 'Actual Group');
+  const to = new helper.Email('asanchez@actualg.com', 'Alia Sanchez');
+  const toAux = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
 }
 
 function sendFiscalData(form, store, cb) {
