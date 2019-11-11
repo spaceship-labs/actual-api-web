@@ -53,7 +53,7 @@ var fiscalDataClientMessageTemplate = fs
 var registerInvitationTemplate = fs
   .readFileSync(sails.config.appPath + '/views/email/register-invitation.html')
   .toString();
-var sendRejectedPaymentEmail = fs
+var sendRejectedPaymentEmailTemplate = fs
   .readFileSync(sails.config.appPath + '/views/email/payment-status-notification.html')
   .toString();
 
@@ -71,7 +71,7 @@ speiReminderTemplate = ejs.compile(speiReminderTemplate);
 speiExpirationTemplate = ejs.compile(speiExpirationTemplate);
 fiscalDataClientMessageTemplate = ejs.compile(fiscalDataClientMessageTemplate);
 registerInvitationTemplate = ejs.compile(registerInvitationTemplate);
-sendRejectedPaymentEmail = ejs.compile(sendRejectedPaymentEmail);
+sendRejectedPaymentEmail = ejs.compile(sendRejectedPaymentEmailTemplate);
 
 module.exports = {
   sendPasswordRecovery: password,
@@ -275,6 +275,40 @@ function sendRejectedPaymentEmail(params, statusDetail) {
   const from = new helper.Email('noreply@actualgroup.com', 'Actual Group');
   const to = new helper.Email('asanchez@actualg.com', 'Alia Sanchez');
   const toAux = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
+  var subject = 'Procesando pago en Actual';
+  var res = sendRejectedPaymentEmailTemplate({
+    clientName: user_name,
+    company: {
+      url: baseURL,
+      logo: baseURL + '/logos/group.png'
+    }
+  });
+
+  var content = new helper.Content('text/html', res);
+
+  if (process.env.MODE === 'production') {
+    personalization.addTo(to);
+    personalization.addTo(toAux2);
+  }
+
+  personalization.addTo(toAux);
+  personalization.setSubject(subject);
+  mail.setFrom(from);
+  mail.addContent(content);
+  mail.addPersonalization(personalization);
+  requestBody = mail.toJSON();
+  request.method = 'POST';
+  request.path = '/v3/mail/send';
+  requestBody = requestBody;
+  sendgrid.API(request, function(response) {
+    if (response.statusCode >= 200 && response.statusCode <= 299) {
+      cb();
+    } else {
+      cb(response);
+    }
+  });
+
+  console.log('TESTING EMAIL REJECTED');
 }
 
 function sendFiscalData(form, store, cb) {
@@ -619,6 +653,7 @@ function sendSpeiExpiration(clientName, clientEmail, folio, store) {
   });
 }
 
+//OrderConfiguration, agregar el parámetro de tipo statusDetail
 function orderEmail(orderId) {
   return OrderWeb.findOne(orderId)
     .populate('Client')
