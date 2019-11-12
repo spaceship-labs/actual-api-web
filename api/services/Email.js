@@ -277,11 +277,16 @@ function sendRejectedPaymentEmail(params, statusDetail) {
   const toAux = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
   var subject = 'Procesando pago en Actual';
   var res = sendRejectedPaymentEmailTemplate({
-    clientName: user_name,
+    user_name,
+    user_email: mail,
     company: {
       url: baseURL,
       logo: baseURL + '/logos/group.png'
-    }
+    },
+    statusDetail,
+    order_id,
+    order_total,
+    folio
   });
 
   var content = new helper.Content('text/html', res);
