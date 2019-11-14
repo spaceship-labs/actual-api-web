@@ -223,6 +223,8 @@ module.exports = {
         if (order.isSpeiOrder) {
           emailSendingPromise = Email.sendSpeiQuotation(order.QuotationWeb, req.activeStore);
           invoiceCreationPromise = Promise.resolve();
+        } else if (order.status === 'pending-payment') {
+          emailSendingPromise = Email.sendOrderConfirmation(order.id, order.status);
         } else {
           emailSendingPromise = Email.sendOrderConfirmation(order.id);
           invoiceCreationPromise = InvoiceService.createOrderInvoice(order.id, req);

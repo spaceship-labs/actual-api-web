@@ -82,14 +82,14 @@ const getMercadoPagoIds = orders =>
   orders.map(order => ({ marcagoPagoId: order.MercadoPagoOrderId, orderId: id }));
 
 const getCurrentStatus = async idsArray => {
-  const promises = idsArray.map((orderId, marcagoPagoId) => {
+  const promises = idsArray.map(({ orderId, marcagoPagoId }) => {
     const { status, status_detail } = mercadoPagoInstance.get(`/payments/${marcagoPagoId}`);
     return { status, status_detail, orderId };
   });
   return await Promise.all(promises);
 };
 
-const changeCurrentStatus = async orders => {
+const changeOrderCurrentStatus = async orders => {
   const promises = orders.map(({ status, status_detail, orderId }) => {
     match(status)
       .on(status => status === 'in_process', () => false)
@@ -118,8 +118,15 @@ const changeCurrentStatus = async orders => {
   await Promise.all(promises);
 };
 
+const checkMercadoPagoOrdersStatus = async () => {
+  const ordersInProcess = await getInProcessOrders();
+  const mercadoPagoOrders = await getCurrentStatus(getMercadoPagoIds(ordersInProcess));
+  await changeOrderCurrentStatus(mercadoPagoOrders);
+};
+
 module.exports = {
-  createOrder
+  createOrder,
+  checkMercadoPagoOrdersStatus
 };
 
 async function createOrder(orderId, payment, req) {
