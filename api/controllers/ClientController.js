@@ -4,7 +4,79 @@ var Promise = require('bluebird');
 var ADDRESS_TYPE_S = 'S';
 var ADDRESS_TYPE_B = 'B';
 
+const updateClientContacts = async (contacts, contactCode, cardCode) => {
+  if (contacts && contacts.length > 0) {
+    contacts[0].CntctCode = contactCode;
+    contacts[0].CardCode = cardCode || '';
+    await ContactService.updateContact(contacts[0]);
+  }
+};
+
+const handleInvitedClient = async (form, { CntctCode }, user, req) => {
+  form.CardCode = user.CardCode || '';
+  form.userId = user.id;
+  form.fromInvited = true;
+  const { updatedClient, updatedUser } = await ClientService.updateClient(form, req);
+
+  if (form.contacts && form.contacts.length > 0) {
+    await updateClientContacts(form.contacts[0], CntctCode, user.CardCode);
+  }
+
+  await UserWeb.update(
+    { email: form.E_Mail },
+    {
+      new_password: form.password,
+      invited: form.invited
+    }
+  );
+  return res.json({
+    user: updatedUser,
+    client: updatedClient
+  });
+};
+
+const handleClientRegistrationType = async (req, res) => {
+  try {
+    let form = req.allParams();
+    const { E_Mail: email } = form;
+    const user = await UserWeb.findOne({ email });
+    const clientContact = await Client.findOne({ E_Mail: email });
+
+    if (clientContact && clientContact.invited) {
+      await handleInvitedClient(form, clientContact, user, req);
+    } else {
+      let {
+        createdClient,
+        contactsCreated,
+        fiscalAddressesCreated,
+        createdUser
+      } = await ClientService.createClient(form, req);
+
+      if (contactsCreated && contactsCreated.length > 0) {
+        sails.log.info('contacts created', contactsCreated);
+        createdClient = Object.assign(createdClient, {
+          Contacts: contactsCreated
+        });
+      }
+
+      res.json({
+        user: createdUser,
+        client: createdClient
+      });
+
+      if (!form.invited) {
+        Email.sendRegister(createdUser.firstName, createdUser.email, req.activeStore, function() {
+          sails.log.info('Email de registro enviado', createdUser.email);
+        });
+      }
+    }
+  } catch (err) {
+    return res.negotiate(err);
+  }
+};
+
 module.exports = {
+  handleClientRegistrationType,
   async find(req, res) {
     const form = req.allParams();
     const model = 'client';

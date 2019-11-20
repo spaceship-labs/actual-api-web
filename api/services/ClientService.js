@@ -10,6 +10,21 @@ const PERSON_TYPE = 'Person';
 const ERROR_TYPE = 'Error';
 const ACTUAL_EMAIL_DOMAIN = /@actualgroup.com$/;
 
+const fotmatClientName = nameArr => {};
+
+const devideFirstNameFromLastName = name => {
+  const nameArr = name.split('');
+  return nameArr.length === 4
+    ? { FirstName: `${nameArr[0]} ${nameArr[1]}`, LastName: `${nameArr[2]} ${nameArr[3]}` }
+    : nameArr.length === 3
+      ? { FirstName: nameArr[0], LastName: `${nameArr[1]} ${nameArr[2]}` }
+      : nameArr.length === 2
+        ? { FirstName: nameArr[0], LastName: nameArr[1] }
+        : nameArr.length > 4
+          ? { FirstName: nameArr[0], LastName: nameArr[1] }
+          : false;
+};
+
 module.exports = {
   ADDRESS_TYPE,
   ADDRESS_TYPE_B,
