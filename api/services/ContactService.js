@@ -39,13 +39,9 @@ async function createContact(params, req) {
   params = ClientService.mapContactFields(params);
 
   try {
-    const areValidZipcodes = await ClientService.validateContactsZipcode([
-      params
-    ]);
+    const areValidZipcodes = await ClientService.validateContactsZipcode([params]);
     if (!areValidZipcodes) {
-      throw new Error(
-        'El código postal no es valido para tu dirección de entrega'
-      );
+      throw new Error('El código postal no es valido para tu dirección de entrega');
     }
 
     const sapResult = await SapService.createContact(cardCode, params);
@@ -56,7 +52,7 @@ async function createContact(params, req) {
 
     const CntctCode = sapData[0].result;
     params.CntctCode = parseInt(CntctCode);
-    const createdContact = await ClientContact.create(params);
+    const createdContact = await ClientContact.create(params).fetch();
     return createdContact;
   } catch (err) {
     throw new Error(err);
@@ -68,33 +64,24 @@ async function updateContact(params) {
   const cardCode = params.CardCode;
   params = ClientService.mapContactFields(params);
 
-  const areValidZipcodes = await ClientService.validateContactsZipcode([
-    params
-  ]);
+  const areValidZipcodes = await ClientService.validateContactsZipcode([params]);
   if (!areValidZipcodes) {
-    throw new Error(
-      'El código postal no es valido para tu dirección de entrega'
-    );
+    throw new Error('El código postal no es valido para tu dirección de entrega');
   }
   const contacts = await ClientContact.find({
     CardCode: cardCode,
     select: ['CntctCode']
   });
   const contactIndex = ClientService.getContactIndex(contacts, contactCode);
-  const sapResult = await SapService.updateContact(
-    cardCode,
-    contactIndex,
-    params
-  );
+  const sapResult = await SapService.updateContact(cardCode, contactIndex, params);
   sails.log.info('updateContact response', sapResult);
 
   const sapData = JSON.parse(sapResult.value);
   validateSapContactUpdate(sapData);
 
-  const updatedContacts = await ClientContact.update(
-    { CardCode: cardCode, CntctCode: contactCode },
-    params
-  );
+  const updatedContacts = await ClientContact.update({ CardCode: cardCode, CntctCode: contactCode })
+    .set(params)
+    .fetch();
 
   return updatedContacts[0];
 }

@@ -35,10 +35,9 @@ module.exports = {
   migrate: 'alter',
   schema: true,
   afterCreate: function(newVal, cb) {
-    return QuotationWeb.update(
-      { id: newVal.QuotationWeb },
-      { tracing: newVal.dateTime }
-    )
+    return QuotationWeb.update({ id: newVal.QuotationWeb })
+      .set({ tracing: newVal.dateTime })
+      .fetch()
       .then(function(updated) {
         cb();
       })

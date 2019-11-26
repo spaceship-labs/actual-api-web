@@ -49,17 +49,11 @@ module.exports = {
     var password = form.password || false;
     var confirmPass = form.confirm_pass || false;
     if (token && email && password && confirmPass && password == confirmPass) {
-      const isValidToken = await UserService.validateRecoveryToken(
-        token,
-        email
-      );
+      const isValidToken = await UserService.validateRecoveryToken(token, email);
       if (isValidToken) {
         const user = await UserWeb.findOne({ email });
-        await UserWeb.update(
-          { email: email },
-          user.invited
-            ? { new_password: password, invited: false }
-            : { new_password: password }
+        await UserWeb.update({ email: email }).set(
+          user.invited ? { new_password: password, invited: false } : { new_password: password }
         );
         return res.ok({ success: true });
       }
@@ -85,6 +79,7 @@ module.exports = {
   register: function(req, res) {
     var form = req.allParams();
     UserWeb.create(form)
+      .fetch()
       .then(function(_user) {
         return res.ok({ user: _user });
       })

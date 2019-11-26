@@ -139,7 +139,7 @@ function createOrder(orderId, payment, req) {
 
           conektaOrder.amount = convertCentsToPesos(conektaOrder.amount);
           delete conektaOrder.id;
-          return resolve(ConektaOrder.create(conektaOrder));
+          return resolve(ConektaOrder.create(conektaOrder).fetch());
           //return resolve(conektaOrder);
         });
       });
@@ -314,14 +314,16 @@ function processNotification(req, res) {
   };
   var createdHookLog;
 
-  return HookLog.create(hookLog).then(function(created) {
-    createdHookLog = created;
-    var reqBody = req.body || {};
-    var data = reqBody.data || false;
+  return HookLog.create(hookLog)
+    .fetch()
+    .then(function(created) {
+      createdHookLog = created;
+      var reqBody = req.body || {};
+      var data = reqBody.data || false;
 
-    res.ok();
-    return processSpeiNotification(req, createdHookLog);
-  });
+      res.ok();
+      return processSpeiNotification(req, createdHookLog);
+    });
 }
 
 function processSpeiNotification(req, createdHookLog) {

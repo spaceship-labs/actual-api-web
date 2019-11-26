@@ -47,7 +47,7 @@ function createUserFromClient(client, password, req) {
   if (client.invited) {
     userToCreate.invited = true;
   }
-  return UserWeb.create(userToCreate);
+  return UserWeb.create(userToCreate).fetch();
 }
 
 function generateRecoveryToken(userId, userEmail, userPassword) {
@@ -112,7 +112,9 @@ function updateUserFromClient(client) {
     updateParams.invited = true;
   }
   var userId = client.UserWeb;
-  return UserWeb.update({ id: userId }, updateParams);
+  return UserWeb.update({ id: userId })
+    .set(updateParams)
+    .fetch();
 }
 
 function checkIfUserEmailIsTaken(email, userId) {

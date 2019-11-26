@@ -3,7 +3,7 @@ module.exports = {
     try {
       const quotationId = req.param('quotationId');
       const leadParams = Object.assign({ QuotationWeb: quotationId }, req.allParams());
-      const leadCreated = await Lead.create(leadParams);
+      const leadCreated = await Lead.create(leadParams).fetch();
       const isCardProcessingError = false;
       await QuotationWebService.assignClient(
         leadParams.name,

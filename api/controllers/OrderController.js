@@ -308,7 +308,9 @@ module.exports = {
           });
 
           if (conektaLimitErrorThrown) {
-            QuotationWeb.update({ id: quotationId }, { rateLimitReported: true })
+            QuotationWeb.update({ id: quotationId })
+              .set({ rateLimitReported: true })
+              .fetch()
               .then(function(quotationUpdated) {
                 sails.log.info('quoation updated with rateLimitReported', quotationId);
                 //sails.log.info('quotationUpdated', quotationUpdated);
@@ -321,7 +323,9 @@ module.exports = {
 
           if (conektaProcessingErrorThrown) {
             var paymentAttempts = quotationWithErr.paymentAttempts + 1;
-            QuotationWeb.update({ id: quotationId }, { paymentAttempts: paymentAttempts })
+            QuotationWeb.update({ id: quotationId })
+              .set({ paymentAttempts: paymentAttempts })
+              .fetch()
               .then(function(quotationUpdated) {
                 sails.log.info('quoation updated with paymentAttempts', quotationId);
                 //sails.log.info('quotationUpdated', quotationUpdated);

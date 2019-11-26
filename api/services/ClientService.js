@@ -281,19 +281,21 @@ async function createClient(params, req) {
   sails.log.info('contacts app', contactsParams);
   sails.log.info('client app', clientCreateParams);
 
-  const createdClient = await Client.create(clientCreateParams);
+  const createdClient = await Client.create(clientCreateParams).fetch();
   console.log('create', createdClient);
 
   const createdUser = await UserService.createUserFromClient(createdClient, password, req);
   console.log('create user', createdUser);
 
-  const updatedClients = await Client.update({ id: createdClient.id }, { UserWeb: createdUser.id });
+  const updatedClients = await Client.update({ id: createdClient.id })
+    .set({ UserWeb: createdUser.id })
+    .fetch();
   console.log('update', updatedClients);
 
   const updatedClient = updatedClients[0];
 
   if (contactsParams && contactsParams.length > 0) {
-    contactsCreated = await ClientContact.create(contactsParams);
+    contactsCreated = await ClientContact.create(contactsParams).fetch();
   }
 
   //Created automatically, do we need the if validation?
@@ -310,7 +312,10 @@ async function createClient(params, req) {
     AdresType: ADDRESS_TYPE_B
   };
 
-  fiscalAddressesCreated = await FiscalAddress.create([fiscalAddressParams1, fiscalAddressParams2]);
+  fiscalAddressesCreated = await FiscalAddress.create([
+    fiscalAddressParams1,
+    fiscalAddressParams2
+  ]).fetch();
   //}
 
   if (fiscalAddressesCreated) {
@@ -337,7 +342,9 @@ async function updateJustClient(params, req) {
     throw new Error('Email previamente utilizado');
   }
 
-  const updatedClients = await Client.update({ CardCode: CardCode }, params);
+  const updatedClients = await Client.update({ CardCode: CardCode })
+    .set(params)
+    .fetch();
   const updatedClient = updatedClients[0];
   return updatedClient;
 }
@@ -402,7 +409,9 @@ async function updateClient(params, req) {
     CardCode: params.CardCode,
     userId: params.userId
   };
-  const updatedClients = await Client.update({ id }, formatParams);
+  const updatedClients = await Client.update({ id })
+    .set(formatParams)
+    .fetch();
   console.log('updatedClients: ', updatedClients);
   const updatedClient = updatedClients[0];
   const usersUpdated = await UserService.updateUserFromClient(updatedClient);

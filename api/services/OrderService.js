@@ -287,30 +287,10 @@ function createOrder(form, req) {
       orderToCreate.MercadoPagoOrderId = form.MercadoPagoOrder.mercadoPagoId;
       orderToCreate.MercadoPagoOrder = form.MercadoPagoOrder.id;
       orderToCreate.MercadoPagoOrderPaymentStatus = form.MercadoPagoOrder.status;
-      // orderToCreate.receiving_account_bank = form.conektaOrder.receiving_account_bank || false;
-      // orderToCreate.receiving_account_number = form.conektaOrder.receiving_account_number || false;
+
       orderToCreate.MercadoPagoOrderAmount = form.MercadoPagoOrder.total_paid_amount;
-      // orderToCreate.speiExpirationPayment = form.conektaOrder.speiExpirationPayment;
 
-      // if (
-      //   orderToCreate.speiExpirationPayment &&
-      //   orderToCreate.speiExpirationPayment instanceof
-      //     Date /*&& moment(orderToCreate.speiExpirationPayment).isValid()*/
-      // ) {
-      //   var HOURS_TO_SEND_REMIND = 6;
-      //   var TIME_LAPSE = 'hours';
-      //   //var HOURS_TO_SEND_REMIND = 715;
-      //   //var TIME_LAPSE = 'minutes';
-      //   orderToCreate.speiExpirationReminderStartDate = moment(orderToCreate.speiExpirationPayment)
-      //     .subtract(HOURS_TO_SEND_REMIND, TIME_LAPSE)
-      //     .toDate();
-      //   console.log(
-      //     'speiExpirationReminderStartDate',
-      //     orderToCreate.speiExpirationReminderStartDate
-      //   );
-      // }
-
-      return OrderWeb.create(orderToCreate);
+      return OrderWeb.create(orderToCreate).fetch();
     })
     .then(function(created) {
       orderCreated = created;
@@ -332,7 +312,9 @@ function createOrder(form, req) {
         paymentType: getPaymentTypeByPayments(quotation.Payments)
       };
 
-      return QuotationWeb.update({ id: quotation.id }, updateFields);
+      return QuotationWeb.update({ id: quotation.id })
+        .set(updateFields)
+        .fetch();
     })
     .then(function(quotationUpdated) {
       orderCreated = orderCreated.toObject();
@@ -377,7 +359,9 @@ function relateOrderToSap(order, orderDetails, req) {
 
   var promises = [
     Site.findOne({ handle: 'actual-group' }),
-    OrderWeb.update({ id: order.id }, { inSapWriteProgress: true })
+    OrderWeb.update({ id: order.id })
+      .set({ inSapWriteProgress: true })
+      .fetch()
   ];
 
   return new Promise(function(resolve, reject) {
@@ -416,7 +400,7 @@ function relateOrderToSap(order, orderDetails, req) {
           Store: req.activeStore.id,
           QuotationWeb: order.QuotationWeb
         };
-        return SapOrderConnectionLogWeb.create(log);
+        return SapOrderConnectionLogWeb.create(log).fetch();
       })
       .then(function(sapLogCreated) {
         var sapResult = JSON.parse(sapResponse.value);
@@ -434,8 +418,12 @@ function relateOrderToSap(order, orderDetails, req) {
       })
       .then(function() {
         return [
-          OrderWeb.update({ id: order.id }, { status: 'completed', inSapWriteProgress: false }),
-          OrderDetailWeb.update({ OrderWeb: order.id }, { inSapWriteProgress: false })
+          OrderWeb.update({ id: order.id })
+            .set({ status: 'completed', inSapWriteProgress: false })
+            .fetch(),
+          OrderDetailWeb.update({ OrderWeb: order.id })
+            .set({ inSapWriteProgress: false })
+            .fetch()
           //StockService.syncOrderDetailsProducts(orderDetails)
         ];
       })
@@ -450,7 +438,9 @@ function relateOrderToSap(order, orderDetails, req) {
         if (order.hookLogId) {
           params.HookLog = order.hookLogId;
         }
-        return OrderWeb.update({ id: order.id }, params);
+        return OrderWeb.update({ id: order.id })
+          .set(params)
+          .fetch();
       })
       .then(function(updated) {
         reject(error);
@@ -609,8 +599,10 @@ function saveOrderSapReferences(sapResult, order, orderDetails) {
   });
 
   return Promise.join(
-    OrderSapWeb.create(ordersSap),
-    Client.update({ id: clientId }, { Balance: clientBalance })
+    OrderSapWeb.create(ordersSap).fetch(),
+    Client.update({ id: clientId })
+      .set({ Balance: clientBalance })
+      .fetch()
   );
 }
 
@@ -653,15 +645,16 @@ function processEwalletBalance(params) {
   }
 
   var clientBalance = (params.client.ewallet || 0) + generated;
-  return Client.update({ id: params.clientId }, { ewallet: generated }).then(function(
-    clientUpdated
-  ) {
-    return Promise.each(ewalletRecords, createEwalletRecord);
-  });
+  return Client.update({ id: params.clientId })
+    .set({ ewallet: generated })
+    .fetch()
+    .then(function(clientUpdated) {
+      return Promise.each(ewalletRecords, createEwalletRecord);
+    });
 }
 
 function createEwalletRecord(record) {
-  return EwalletRecord.create(record);
+  return EwalletRecord.create(record).fetch();
 }
 
 function getPaidPercentage(amountPaid, total) {

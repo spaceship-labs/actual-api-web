@@ -90,7 +90,7 @@ function createOrderInvoice(orderId, req) {
           InvoiceWeb.create(invoiceToCreate)
         );
         */
-        return InvoiceWeb.create(invoiceToCreate);
+        return InvoiceWeb.create(invoiceToCreate).fetch();
       })
       .then(function(result) {
         invoiceCreated = result;
@@ -113,7 +113,7 @@ function createOrderInvoice(orderId, req) {
           isError: true
         };
 
-        return AlegraLogWeb.create(log);
+        return AlegraLogWeb.create(log).fetch();
       })
       .then(function(logCreated) {
         reject(errInvoice);
@@ -273,26 +273,28 @@ function createInvoice(data) {
 
   return new Promise(function(resolve, reject) {
     AlegraLogWeb.create(log)
+      .fetch()
       .then(function(logCreated) {
         log.id = logCreated.id;
         return request(options);
       })
       .then(function(result) {
         resultAlegra = result;
-        return AlegraLogWeb.update({ id: log.id }, { responseData: JSON.stringify(result) });
+        return AlegraLogWeb.update({ id: log.id })
+          .set({ responseData: JSON.stringify(result) })
+          .fetch();
       })
       .then(function(logUpdated) {
         resolve(resultAlegra);
       })
       .catch(function(err) {
         requestError = err;
-        return AlegraLogWeb.update(
-          { id: log.id },
-          {
+        return AlegraLogWeb.update({ id: log.id })
+          .set({
             responseData: JSON.stringify(err),
             isError: true
-          }
-        );
+          })
+          .fetch();
       })
       .then(function(logUpdated) {
         reject(requestError);

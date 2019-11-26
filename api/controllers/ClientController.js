@@ -67,13 +67,10 @@ module.exports = {
           await ContactService.updateContact(form.contacts[0]);
         }
 
-        await UserWeb.update(
-          { email: form.E_Mail },
-          {
-            new_password: form.password,
-            invited: form.invited
-          }
-        );
+        await UserWeb.update({ email: form.E_Mail }).set({
+          new_password: form.password,
+          invited: form.invited
+        });
         return res.json({
           user: updatedUser,
           client: updatedClient

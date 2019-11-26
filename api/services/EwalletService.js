@@ -3,38 +3,40 @@ var EWALLET_TYPE = 'ewallet';
 var Promise = require('bluebird');
 
 module.exports = {
-	applyEwalletRecord: applyEwalletRecord,
-	isValidEwalletPayment: isValidEwalletPayment
+  applyEwalletRecord: applyEwalletRecord,
+  isValidEwalletPayment: isValidEwalletPayment
 };
 
-function isValidEwalletPayment(payment, client){
+function isValidEwalletPayment(payment, client) {
   if (client.ewallet < payment.ammount || !client.ewallet) {
-  	return false;
+    return false;
   }
   return true;
 }
 
-function applyEwalletRecord(payment, options){
-	var client = options.client;
+function applyEwalletRecord(payment, options) {
+  var client = options.client;
   if (client.ewallet < payment.ammount || !client.ewallet) {
     return Promise.reject(new Error('Fondos insuficientes en monedero electronico'));
   }
-  var updateParams = {ewallet: client.ewallet - payment.ammount};
-  
-  return Client.update(client.id, updateParams)
-	  .then(function(clientUpdated){
-		    if(payment.type == EWALLET_TYPE){
-		      var ewalletRecord = {
-		        Store: payment.Store,
-		        Quotation: options.quotationId,
-		        User: options.userId,
-		        Client: options.client.id,
-		        Payment: options.paymentId,
-		        type: EWALLET_NEGATIVE,
-		        amount: payment.ammount
-		      };
-		      return EwalletRecord.create(ewalletRecord);
-		    }
-		    return null;
-	    });
+  var updateParams = { ewallet: client.ewallet - payment.ammount };
+
+  return Client.update(client.id)
+    .set(updateParams)
+    .fetch()
+    .then(function(clientUpdated) {
+      if (payment.type == EWALLET_TYPE) {
+        var ewalletRecord = {
+          Store: payment.Store,
+          Quotation: options.quotationId,
+          User: options.userId,
+          Client: options.client.id,
+          Payment: options.paymentId,
+          type: EWALLET_NEGATIVE,
+          amount: payment.ammount
+        };
+        return EwalletRecord.create(ewalletRecord).fetch();
+      }
+      return null;
+    });
 }

@@ -79,7 +79,7 @@ async function createOrder(orderId, payment, req) {
     };
     let mercadopagoOrder = _.extend(response, mercadoPagoAttributes);
     delete mercadopagoOrder.id;
-    return await MercadoPagoOrder.create(mercadopagoOrder);
+    return await MercadoPagoOrder.create(mercadopagoOrder).fetch();
   } catch (err) {
     console.log('error mercadopago: ', err);
     if (err.MercadoPagoError) {

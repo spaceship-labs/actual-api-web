@@ -72,7 +72,9 @@ module.exports = {
             return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
           }
         }
-        return QuotationWeb.update({ id: id }, form);
+        return QuotationWeb.update({ id: id })
+          .set(form)
+          .fetch();
       })
       .then(function(updatedQuotation) {
         if (updatedQuotation && updatedQuotation.length > 0) {
@@ -173,7 +175,7 @@ module.exports = {
             return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
           }
         }
-        return QuotationWeb.update({ id: quotationId }, params);
+        return QuotationWeb.update({ id: quotationId }).set(params);
       })
       .then(function(resultUpdate) {
         updatedQuotation = resultUpdate[0];
@@ -367,7 +369,7 @@ module.exports = {
             return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
           }
         }
-        return QuotationDetailWeb.create(form);
+        return QuotationDetailWeb.create(form).fetch();
       })
       .then(function(created) {
         var calculator = QuotationService.Calculator();
@@ -439,7 +441,7 @@ module.exports = {
             return Promise.reject(new Error('Esta cotización no corresponde al usuario activo'));
           }
         }
-        return QuotationDetailWeb.create(form.Details);
+        return QuotationDetailWeb.create(form.Details).fetch();
       })
       .then(function(created) {
         var calculator = QuotationService.Calculator();

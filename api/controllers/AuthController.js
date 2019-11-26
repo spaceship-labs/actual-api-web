@@ -19,7 +19,9 @@ function _onPassportAuth(req, res, error, user, info) {
     activeStore: activeStoreId
   };
 
-  UserWeb.update(user.id, updateParams)
+  UserWeb.update(user.id)
+    .set(updateParams)
+    .fetch()
     .then(function(clients) {
       return clients[0];
     })

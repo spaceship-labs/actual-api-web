@@ -56,7 +56,7 @@ function addPayment(payment, quotationId, req) {
     .then(function(quotationFound) {
       quotation = quotationFound;
       client = quotation.Client;
-      return PaymentWeb.create(payment);
+      return PaymentWeb.create(payment).fetch();
     })
     .then(function(_paymentCreated) {
       paymentCreated = _paymentCreated;
