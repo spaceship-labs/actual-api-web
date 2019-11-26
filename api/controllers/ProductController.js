@@ -215,27 +215,18 @@ module.exports = {
       });
   },
 
-  addSeenTime: function(req, res) {
-    var form = req.params.all();
-    var ItemCode = form.ItemCode;
-    Product.findOne({
-      select: ['id', 'ItemCode', 'seenTimes'],
-      ItemCode: ItemCode
-    })
-      .then(function(product) {
-        product.seenTimes = product.seenTimes || 0;
-        product.seenTimes++;
-        product.save(function(err, p) {
-          if (err) {
-            return Promise.reject(err);
-          }
-          res.json(p);
-        });
-      })
-      .catch(function(err) {
-        console.log(err);
-        res.negotiate(err);
-      });
+  addSeenTime: async function(req, res) {
+    try {
+      const ItemCode = req.param('ItemCode');
+      const { seenTimes } = await Product.findOne({ ItemCode });
+      const updatedProduct = await Product.update({ ItemCode })
+        .set({ seenTimes: seenTimes++ })
+        .fetch();
+      res.json(updatedProduct);
+    } catch (err) {
+      sails.log.warn('err', err);
+      res.negotiate(err);
+    }
   },
 
   getProductMainPromo: function(req, res) {

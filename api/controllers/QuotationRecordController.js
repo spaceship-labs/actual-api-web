@@ -33,11 +33,12 @@ module.exports = {
         eventType,
         dateTime,
         notes
-      });
+      }).fetch();
       if (req._fileparser && req._fileparser.upstreams.length) {
         await quotationRecord.addFiles(req, {
           dir: 'records/gallery',
-          profile: 'record'
+          profile: 'record',
+          modelId: quotationRecord.id
         });
       }
       const record = await QuotationRecord.findOne({

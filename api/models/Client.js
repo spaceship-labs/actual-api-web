@@ -64,7 +64,7 @@ module.exports = {
     invited: {
       type: 'boolean'
     },
-    toJSON: function() {
+    customToJSON: function() {
       var obj = this.toObject();
       delete obj.password;
       return obj;

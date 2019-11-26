@@ -105,7 +105,7 @@ module.exports = {
       type: 'boolean',
       defaultsTo: false
     },
-    toJSON: function() {
+    customToJSON: function() {
       var obj = this.toObject();
       obj.name = obj.firstName + ' ' + obj.lastName;
       delete obj.password;

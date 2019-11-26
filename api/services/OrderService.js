@@ -10,6 +10,11 @@ var ORDER_SAP_TYPE = 'Order';
 var ERROR_SAP_TYPE = 'Error';
 var BALANCE_SAP_TYPE = 'Balance';
 
+const addDetailsToOrder = async ({ id: orderId }, { Details: details }) => {
+  const detailsIds = details.map(({ id }) => id);
+  await OrderWeb.addToCollection(orderId, 'Details').members(detailsIds);
+};
+
 module.exports = {
   createFromQuotation: createFromQuotation,
   getGroupByQuotationPayments: getGroupByQuotationPayments,
@@ -313,21 +318,10 @@ function createOrder(form, req) {
         .populate('Details')
         .populate('MercadoPagoOrder');
     })
-    .then(function(orderFound) {
+    .then(async function(orderFound) {
       //Cloning quotation details to order details
-      quotation.Details.forEach(function(detail) {
-        detail.QuotationDetailWeb = _.clone(detail.id);
-        delete detail.id;
-
-        detail.inSapWriteProgress = true;
-        if (orderFound.isSpeiOrder) {
-          detail.isSpeiOrderDetail = true;
-          detail.speiExpirationPayment = form.conektaOrder.speiExpirationPayment;
-        }
-
-        orderFound.Details.add(detail);
-      });
-      return orderFound.save();
+      await addDetailsToOrder(orderFound, quotation);
+      return orderFound;
     })
     .then(function() {
       var updateFields = {

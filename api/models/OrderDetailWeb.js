@@ -1,9 +1,12 @@
 //APP COLLECTION
 module.exports = {
-  schema:true,
+  schema: true,
   migrate: 'alter',
   attributes: {
-    inSapWriteProgress: 'boolean',
+    inSapWriteProgress: {
+      type: 'boolean',
+      defaultsTo: true
+    },
     quantity: 'integer',
     discount: 'float',
     subtotal: 'float',
@@ -24,7 +27,7 @@ module.exports = {
     deliveryPriceValue: 'float',
     deliveryPriceMode: {
       type: 'string',
-      enum : ['percentage', 'amount']
+      enum: ['percentage', 'amount']
     },
 
     deliveryFee: 'float',
@@ -32,16 +35,16 @@ module.exports = {
     deliveryFeePg2: 'float',
     deliveryFeePg3: 'float',
     deliveryFeePg4: 'float',
-    deliveryFeePg5: 'float',    
+    deliveryFeePg5: 'float',
 
     isSpeiOrderDetail: 'boolean',
-    speiExpirationPayment: {type:'datetime'},    
+    speiExpirationPayment: { type: 'datetime' },
 
     financingCostPercentage: 'float',
-    discountPercentPromos: 'float', //by unit (does not include big ticket or FF discount)    
+    discountPercentPromos: 'float', //by unit (does not include big ticket or FF discount)
     discountPercent: 'float', //by unit (includes big ticket discount)
-    discountName: 'string',    
-    originalDiscountPercent: 'float',   
+    discountName: 'string',
+    originalDiscountPercent: 'float',
     unitPriceWithDiscount: 'float',
 
     unitPriceWithDiscountPg1: 'float',
@@ -50,36 +53,35 @@ module.exports = {
     unitPriceWithDiscountPg4: 'float',
     unitPriceWithDiscountPg5: 'float',
 
-
     bigticketDiscountPercentage: {
       type: 'integer',
-      enum:[0,1,2,3,4,5]
-    },    
+      enum: [0, 1, 2, 3, 4, 5]
+    },
     paymentGroup: 'integer',
     unitPrice: 'float',
     ewallet: 'float',
     immediateDelivery: 'boolean',
-    isFreeSale: 'boolean',    
-    promotionPackageRuleQuantity:{type:'integer'},
+    isFreeSale: 'boolean',
+    promotionPackageRuleQuantity: { type: 'integer' },
 
-    Promotion:{
-      model:'Promotion'
+    Promotion: {
+      model: 'Promotion'
     },
-    PromotionPackage:{
-      model:'ProductGroup'
+    PromotionPackage: {
+      model: 'ProductGroup'
     },
-    PromotionPackageApplied:{
-      model:'ProductGroup'
+    PromotionPackageApplied: {
+      model: 'ProductGroup'
     },
-    OrderWeb:{
-      model:'OrderWeb',
+    OrderWeb: {
+      model: 'OrderWeb'
     },
     Product: {
-      model:'Product'
+      model: 'Product'
     },
-    QuotationDetailWeb:{
+    QuotationDetailWeb: {
       model: 'QuotationDetailWeb'
-    },    
+    },
 
     //ship
     shipDate: {
@@ -89,7 +91,7 @@ module.exports = {
     originalShipDate: {
       type: 'date',
       required: true
-    },    
+    },
     productDate: {
       type: 'date',
       required: true
@@ -102,9 +104,7 @@ module.exports = {
       model: 'company',
       required: true
     },
-    PurchaseAfter: {type:'boolean'},
-    PurchaseDocument: {type:'string'}    
-
-  },
-
+    PurchaseAfter: { type: 'boolean' },
+    PurchaseDocument: { type: 'string' }
+  }
 };
