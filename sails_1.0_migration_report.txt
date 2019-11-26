@@ -1,0 +1,75 @@
+██████╗ ███████╗██████╗  ██████╗ ██████╗ ████████╗
+██╔══██╗██╔════╝██╔══██╗██╔═══██╗██╔══██╗╚══██╔══╝
+██████╔╝█████╗  ██████╔╝██║   ██║██████╔╝   ██║   
+██╔══██╗██╔══╝  ██╔═══╝ ██║   ██║██╔══██╗   ██║   
+██║  ██║███████╗██║     ╚██████╔╝██║  ██║   ██║   
+╚═╝  ╚═╝╚══════╝╚═╝      ╚═════╝ ╚═╝  ╚═╝   ╚═╝   
+                                                  
+==================================================
+
+This report highlights various issues that may need to be addressed before your app will work with Sails 1.0.
+After implementing these suggestions, some good next steps are:
+* Address the issues in this report, and run the updater again with --reportOnly to regenerate the report.
+  Repeat until there are no more issues!
+* Review the full migration guide at: https://github.com/balderdashy/sails-docs/blob/1.0/upgrading/To1.0.md
+* Attempt to lift and run your app with Sails 1.0.
+* See http://sailsjs.com/support for support options!
+
+
+┌┐ ┬  ┬ ┬┌─┐┌─┐┬─┐┬┌┐┌┌┬┐┌─┐  ┌─┐┌─┐┌┐┌┌─┐┬┌─┐
+├┴┐│  │ │├┤ ├─┘├┬┘││││ │ └─┐  │  │ ││││├┤ ││ ┬
+└─┘┴─┘└─┘└─┘┴  ┴└─┴┘└┘ ┴ └─┘  └─┘└─┘┘└┘└  ┴└─┘
+
+In Sails 1.0, the `actions` blueprint routes are turned _off_ by default.
+This is a change from v0.12.x, so if you're relying on Sails to create
+a route for each of your custom controller actions automatically, be sure
+to set `actions` to `true` in your config/blueprints.js file.
+
+┌┬┐┌─┐ ╦╔═╗╔═╗╔╗╔  ┌─┐┌┬┐┌┬┐┬─┐┬┌┐ ┬ ┬┌┬┐┌─┐┌─┐
+ │ │ │ ║╚═╗║ ║║║║  ├─┤ │  │ ├┬┘│├┴┐│ │ │ ├┤ └─┐
+ ┴ └─┘╚╝╚═╝╚═╝╝╚╝  ┴ ┴ ┴  ┴ ┴└─┴└─┘└─┘ ┴ └─┘└─┘
+
+In Sails 1.0, the toJSON attribute is no longer supported.
+You can replace it with a `customToJSON` method on the model class.
+See http://sailsjs.com/docs/concepts/models-and-orm/model-settings for more info.
+
+You'll need to remove toJSON attributes from the following models:
+
+* "Client" in api/models/Client.js
+* "UserWeb" in api/models/UserWeb.js
+
+┌┬┐┌─┐┌┬┐┌─┐┌┐ ┌─┐┌─┐┌─┐  ┌─┐┌─┐┌┐┌┌─┐┬┌─┐
+ ││├─┤ │ ├─┤├┴┐├─┤└─┐├┤   │  │ ││││├┤ ││ ┬
+─┴┘┴ ┴ ┴ ┴ ┴└─┘┴ ┴└─┘└─┘  └─┘└─┘┘└┘└  ┴└─┘
+
+In Sails 1.0, the `connections` config has been replaced with `datastores`,
+and the `models.connection` config has been replaced with `models.datastore`.
+It looks like there are still some config files that need to be changed:
+
+* In config/local.js:30, change `connections:` to `datastores:`
+
+* In config/env/test.js:2, change `connections:` to `datastores:`
+
+┌─┐┌┬┐┌┬┐   ┬─┐┌─┐┌┬┐┌─┐┬  ┬┌─┐  ┌─┐┌┐┌┌┬┐  ┌─┐┌─┐┬  ┬┌─┐  ┌┬┐┌─┐┌┬┐┬ ┬┌─┐┌┬┐┌─┐
+├─┤ ││ ││   ├┬┘├┤ ││││ │└┐┌┘├┤   ├─┤│││ ││  └─┐├─┤└┐┌┘├┤   │││├┤  │ ├─┤│ │ ││└─┐
+┴ ┴─┴┘─┴┘┘  ┴└─└─┘┴ ┴└─┘ └┘ └─┘  ┴ ┴┘└┘─┴┘  └─┘┴ ┴ └┘ └─┘  ┴ ┴└─┘ ┴ ┴ ┴└─┘─┴┘└─┘
+
+In Sails 1.0, records no longer support .add() and .remove() for adding and removing
+child records in a collection attribute.  Records also don't support the .save() method.
+Instead, use the model class methods
+`.update()`, `.addToCollection()`, `.removeFromCollection()` and `.replaceCollection()`.
+
+Found the following possible references to `.add()`, `.remove() and `.save()`:
+
+* .add() in config/models.js:174
+* .save() in api/services/MercadoPago.js:64
+* .save() in api/services/MercadoPago.js:104
+* .add() in api/services/OrderService.js:328
+* .save() in api/services/OrderService.js:330
+* .save() in api/controllers/ProductController.js:228
+
+See the reference docs for more info:
+.update(): https://sailsjs.com/docs/reference/waterline/models/update
+.addToCollection(): https://sailsjs.com/docs/reference/waterline/models/addToCollection
+.removeFromCollection(): https://sailsjs.com/docs/reference/waterline/models/removeFromCollection
+.replaceCollection(): https://sailsjs.com/docs/reference/waterline/models/replaceCollection
