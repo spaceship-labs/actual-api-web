@@ -1,87 +1,99 @@
 //APP COLLECTION
 module.exports = {
-  schema:true,
+  schema: true,
   migrate: 'alter',
   attributes: {
-    name:{type:'string'},
-    publicName:{type:'string'},
-    code:{type:'string',unique:true},
-    handle:{type:'string'},
-    type:{type:'string'},
-    itemCode: {type:'array'},
-    startDate:{type:'datetime'},
-    endDate:{type:'datetime'},
-    discountPg1:{type:'float'},
-    discountPg2:{type:'float'},
-    discountPg3:{type:'float'},
-    discountPg4:{type:'float'},
-    discountPg5:{type:'float'},
-    discountTextPg1:{type:'string'},
-    discountTextPg2:{type:'string'},
-    discountTextPg3:{type:'string'},
-    discountTextPg4:{type:'string'},
-    discountTextPg5:{type:'string'},
-    ewalletPg1:{type:'float'},
-    ewalletPg2:{type:'float'},
-    ewalletPg3:{type:'float'},
-    ewalletPg4:{type:'float'},
-    ewalletPg5:{type:'float'},
-    ewalletTypePg1:{
-      type:'string',
-      enum: ['ammount','percentage']
+    name: { type: 'string' },
+    publicName: { type: 'string' },
+    code: { type: 'string', unique: true },
+    handle: { type: 'string' },
+    type: { type: 'string' },
+    itemCode: {
+      type: 'json',
+      columnType: 'array'
     },
-    ewalletTypePg2:{
-      type:'string',
-      enum: ['ammount','percentage']
+    startDate: {
+      type: 'string',
+      columnType: 'datetime'
     },
-    ewalletTypePg3:{
-      type:'string',
-      enum: ['ammount','percentage']
+    endDate: {
+      type: 'string',
+      columnType: 'datetime'
     },
-    ewalletTypePg4:{
-      type:'string',
-      enum: ['ammount','percentage']
+    discountPg1: { type: 'float' },
+    discountPg2: { type: 'float' },
+    discountPg3: { type: 'float' },
+    discountPg4: { type: 'float' },
+    discountPg5: { type: 'float' },
+    discountTextPg1: { type: 'string' },
+    discountTextPg2: { type: 'string' },
+    discountTextPg3: { type: 'string' },
+    discountTextPg4: { type: 'string' },
+    discountTextPg5: { type: 'string' },
+    ewalletPg1: { type: 'float' },
+    ewalletPg2: { type: 'float' },
+    ewalletPg3: { type: 'float' },
+    ewalletPg4: { type: 'float' },
+    ewalletPg5: { type: 'float' },
+    ewalletTypePg1: {
+      type: 'string',
+      enum: ['ammount', 'percentage']
     },
-    ewalletTypePg5:{
-      type:'string',
-      enum: ['ammount','percentage']
+    ewalletTypePg2: {
+      type: 'string',
+      enum: ['ammount', 'percentage']
     },
-    productSearchTerm: {type:'string'},
-    OnStudio:{type:'boolean'},
-    OnHome:{type:'boolean'},
-    OnKids:{type:'boolean'},
-    OnAmueble:{type:'boolean'},
-    sa: {type:'string'}, //Sociedad
-    excludedProducts: {type:'array'},
-    hasLM:{type:'boolean'},
-    pushMoneyUnit:{type:'float'},
-    pushMoneyUnitType:{
-      type:'string',
-      enum:['ammount','percent']
+    ewalletTypePg3: {
+      type: 'string',
+      enum: ['ammount', 'percentage']
     },
-    Categories:{
-      collection:'ProductCategory',
-      via:'Promotions'
+    ewalletTypePg4: {
+      type: 'string',
+      enum: ['ammount', 'percentage']
     },
-    FilterValues:{
-      collection:'ProductFilterValue',
-      via:'Promotions'
+    ewalletTypePg5: {
+      type: 'string',
+      enum: ['ammount', 'percentage']
     },
-    CustomBrands:{
-      collection:'CustomBrand',
-      via:'Promotions'
+    productSearchTerm: { type: 'string' },
+    OnStudio: { type: 'boolean' },
+    OnHome: { type: 'boolean' },
+    OnKids: { type: 'boolean' },
+    OnAmueble: { type: 'boolean' },
+    sa: { type: 'string' }, //Sociedad
+    excludedProducts: {
+      type: 'json',
+      columnType: 'array'
     },
-    Groups:{
-      collection:'ProductGroup',
-      via:'Promotions'
+    hasLM: { type: 'boolean' },
+    pushMoneyUnit: { type: 'float' },
+    pushMoneyUnitType: {
+      type: 'string',
+      enum: ['ammount', 'percent']
     },
-    Products:{
-      collection:'Product',
-      via:'Promotions'
+    Categories: {
+      collection: 'ProductCategory',
+      via: 'Promotions'
     },
-    Stores:{
-      collection:'store',
-      via:'Promotions'
+    FilterValues: {
+      collection: 'ProductFilterValue',
+      via: 'Promotions'
+    },
+    CustomBrands: {
+      collection: 'CustomBrand',
+      via: 'Promotions'
+    },
+    Groups: {
+      collection: 'ProductGroup',
+      via: 'Promotions'
+    },
+    Products: {
+      collection: 'Product',
+      via: 'Promotions'
+    },
+    Stores: {
+      collection: 'store',
+      via: 'Promotions'
     }
   }
 };

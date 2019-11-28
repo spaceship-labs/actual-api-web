@@ -21,10 +21,12 @@ module.exports = {
       type: 'string'
     },
     dateTime: {
-      type: 'datetime'
+      type: 'string',
+      columnType: 'datetime'
     },
     estimatedCloseDate: {
-      type: 'datetime'
+      type: 'string',
+      columnType: 'datetime'
     },
     files: {
       collection: 'QuotationRecordFile',

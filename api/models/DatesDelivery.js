@@ -14,7 +14,8 @@ module.exports = {
       required: true
     },
     ShipDate: {
-      type: 'date',
+      type: 'string',
+      columnType: 'date',
       required: true
     },
     OpenCreQty: {
@@ -25,15 +26,14 @@ module.exports = {
       type: 'string',
       required: true
     },
-    ImmediateDelivery:{
+    ImmediateDelivery: {
       type: 'boolean'
     },
-    PurchaseAfter:{
+    PurchaseAfter: {
       type: 'boolean'
     },
-    PurchaseDocument:{
+    PurchaseDocument: {
       type: 'string'
-    }    
+    }
   }
 };
-

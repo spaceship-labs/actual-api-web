@@ -20,7 +20,8 @@ module.exports = {
       defaultsTo: ''
     },
     lastLogin: {
-      type: 'datetime'
+      type: 'string',
+      columnType: 'datetime'
     },
     active: {
       type: 'boolean',
@@ -104,13 +105,13 @@ module.exports = {
     invited: {
       type: 'boolean',
       defaultsTo: false
-    },
-    customToJSON: function() {
-      var obj = this.toObject();
-      obj.name = obj.firstName + ' ' + obj.lastName;
-      delete obj.password;
-      return obj;
     }
+  },
+  customToJSON: function() {
+    var obj = this.toObject();
+    obj.name = obj.firstName + ' ' + obj.lastName;
+    delete obj.password;
+    return obj;
   },
   beforeUpdate: function(values, next) {
     if (values.new_password) {

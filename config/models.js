@@ -68,78 +68,79 @@ module.exports.models = {
   }*/
 
   attributes: {
-    hash: { type: 'string' },
+    hash: { type: 'string' }
     /*createdBy: {
       model:'User'
     },
     */
-    updateAvatar: function(req, opts, cb) {
-      var object = this;
-      opts.file = mapIconFields(object);
+    // updateAvatar: function(req, opts, cb) {
+    //   var object = this;
+    //   opts.file = mapIconFields(object);
 
-      if (process.env.CLOUDUSERNAME) {
-        //if remote
-        opts.avatar = true;
-        opts.filename = object.icon_filename ? object.icon_filename : null;
+    //   if (process.env.CLOUDUSERNAME) {
+    //     //if remote
+    //     opts.avatar = true;
+    //     opts.filename = object.icon_filename ? object.icon_filename : null;
 
-        return Files.saveFiles(req, opts)
-          .then(function(files) {
-            object.icon_filename = files[0].filename;
-            object.icon_name = files[0].name;
-            object.icon_type = files[0].type;
-            object.icon_typebase = files[0].typebase;
-            object.icon_size = files[0].size;
+    //     return Files.saveFiles(req, opts)
+    //       .then(function(files) {
+    //         object.icon_filename = files[0].filename;
+    //         object.icon_name = files[0].name;
+    //         object.icon_type = files[0].type;
+    //         object.icon_typebase = files[0].typebase;
+    //         object.icon_size = files[0].size;
 
-            return object.save();
-          })
-          .then(function() {
-            if (opts.file && opts.file.filename) {
-              return Files.removeFile(opts);
-            }
-            return object;
-          });
-      } else {
-        //If local save
-        Files.saveFiles(req, opts)
-          .then(function(files) {
-            object.icon_filename = files[0].filename;
-            object.icon_name = files[0].name;
-            object.icon_type = files[0].type;
-            object.icon_typebase = files[0].typebase;
-            object.icon_size = files[0].size;
-            opts.filename = object.icon_filename;
-            return Files.makeCrops(req, opts);
-          })
-          .then(function(crops) {
-            if (opts.file && opts.file.filename) {
-              return Files.removeFile(opts);
-            }
-            return object.save();
-          })
-          .then(function() {
-            return object;
-          });
-      }
-    },
+    //         return object.save();
+    //       })
+    //       .then(function() {
+    //         if (opts.file && opts.file.filename) {
+    //           return Files.removeFile(opts);
+    //         }
+    //         return object;
+    //       });
+    //   } else {
+    //     //If local save
+    //     Files.saveFiles(req, opts)
+    //       .then(function(files) {
+    //         object.icon_filename = files[0].filename;
+    //         object.icon_name = files[0].name;
+    //         object.icon_type = files[0].type;
+    //         object.icon_typebase = files[0].typebase;
+    //         object.icon_size = files[0].size;
+    //         opts.filename = object.icon_filename;
+    //         return Files.makeCrops(req, opts);
+    //       })
+    //       .then(function(crops) {
+    //         if (opts.file && opts.file.filename) {
+    //           return Files.removeFile(opts);
+    //         }
+    //         return object.save();
+    //       })
+    //       .then(function() {
+    //         return object;
+    //       });
+    //   }
+    // },
 
-    destroyAvatar: function(req, opts) {
-      object = this;
-      opts.file = mapIconFields(object);
-      return Files.removeFile(opts)
-        .then(function(result) {
-          console.log('result destroy avatar', result);
-          object.icon_filename = null;
-          object.icon_name = null;
-          object.icon_type = null;
-          object.icon_typebase = null;
-          object.icon_size = null;
-          return object.save();
-        })
-        .then(function() {
-          return object;
-        });
-    },
+    // destroyAvatar: function(req, opts) {
+    //   object = this;
+    //   opts.file = mapIconFields(object);
+    //   return Files.removeFile(opts)
+    //     .then(function(result) {
+    //       console.log('result destroy avatar', result);
+    //       object.icon_filename = null;
+    //       object.icon_name = null;
+    //       object.icon_type = null;
+    //       object.icon_typebase = null;
+    //       object.icon_size = null;
+    //       return object.save();
+    //     })
+    //     .then(function() {
+    //       return object;
+    //     });
+    // },
 
+    /*
     addFiles: function(req, opts) {
       const { modelId } = opts;
       var object = this;
@@ -171,75 +172,76 @@ module.exports.models = {
           return object;
         });
     },
+    */
 
-    removeFiles: function(req, opts, cb) {
-      var object = this;
-      var files = opts.files ? opts.files : [];
-      var FileModel = opts.fileModel;
-      files = Array.isArray(files) ? files : [files];
-      filesToDelete = [];
-      return Promise.each(files, function(file) {
-        opts.file = file;
-        var fileIndex = getFileIndex(opts.file, object.files);
-        var fileId = object.files[fileIndex].id;
-        sails.log.info('destroy id', fileId);
-        //sails.log.info('destroy index', fileIndex);
-        return FileModel.destroy({ id: fileId }).then(function(destroyedFile) {
-          object.files.splice(fileIndex, 1);
-          return Files.removeFile(opts);
-        });
-      }).then(function(files) {
-        sails.log.info('object.files final');
-        return object.save();
-      });
-    },
+    // removeFiles: function(req, opts, cb) {
+    //   var object = this;
+    //   var files = opts.files ? opts.files : [];
+    //   var FileModel = opts.fileModel;
+    //   files = Array.isArray(files) ? files : [files];
+    //   filesToDelete = [];
+    //   return Promise.each(files, function(file) {
+    //     opts.file = file;
+    //     var fileIndex = getFileIndex(opts.file, object.files);
+    //     var fileId = object.files[fileIndex].id;
+    //     sails.log.info('destroy id', fileId);
+    //     //sails.log.info('destroy index', fileIndex);
+    //     return FileModel.destroy({ id: fileId }).then(function(destroyedFile) {
+    //       object.files.splice(fileIndex, 1);
+    //       return Files.removeFile(opts);
+    //     });
+    //   }).then(function(files) {
+    //     sails.log.info('object.files final');
+    //     return object.save();
+    //   });
+    // },
 
-    updateAvatarSap: function(internalFiles, opts, cb) {
-      var object = this;
-      opts.file = mapIconFields(object);
-      if (process.env.CLOUDUSERNAME) {
-        opts.avatar = true;
-        opts.filename = object.icon_filename ? object.icon_filename : null;
-        Files.saveFilesSap(internalFiles, opts, function(err, files) {
-          if (err) return cb(err);
-          object.icon_filename = files[0].filename;
-          object.icon_name = files[0].name;
-          object.icon_type = files[0].type;
-          object.icon_typebase = files[0].typebase;
-          object.icon_size = files[0].size;
+    // updateAvatarSap: function(internalFiles, opts, cb) {
+    //   var object = this;
+    //   opts.file = mapIconFields(object);
+    //   if (process.env.CLOUDUSERNAME) {
+    //     opts.avatar = true;
+    //     opts.filename = object.icon_filename ? object.icon_filename : null;
+    //     Files.saveFilesSap(internalFiles, opts, function(err, files) {
+    //       if (err) return cb(err);
+    //       object.icon_filename = files[0].filename;
+    //       object.icon_name = files[0].name;
+    //       object.icon_type = files[0].type;
+    //       object.icon_typebase = files[0].typebase;
+    //       object.icon_size = files[0].size;
 
-          object.save(cb);
-          if (opts.file && opts.file.filename) Files.removeFile(opts, function(err) {});
-        });
-        return;
-      }
+    //       object.save(cb);
+    //       if (opts.file && opts.file.filename) Files.removeFile(opts, function(err) {});
+    //     });
+    //     return;
+    //   }
 
-      async.waterfall(
-        [
-          function(callback) {
-            Files.saveFilesSap(internalFiles, opts, callback);
-          },
-          function(files, callback) {
-            object.icon_filename = files[0].filename;
-            object.icon_name = files[0].name;
-            object.icon_type = files[0].type;
-            object.icon_typebase = files[0].typebase;
-            object.icon_size = files[0].size;
-            opts.filename = object.icon_filename;
-            Files.makeCrops(internalFiles, opts, callback);
-          },
-          function(crops, callback) {
-            console.log('remove', opts.file);
-            if (opts.file && opts.file.filename) Files.removeFile(opts, callback);
-            else callback(null, crops);
-          }
-        ],
-        function(e, results) {
-          if (e) console.log(e);
-          object.save(cb);
-        }
-      );
-    }
+    //   async.waterfall(
+    //     [
+    //       function(callback) {
+    //         Files.saveFilesSap(internalFiles, opts, callback);
+    //       },
+    //       function(files, callback) {
+    //         object.icon_filename = files[0].filename;
+    //         object.icon_name = files[0].name;
+    //         object.icon_type = files[0].type;
+    //         object.icon_typebase = files[0].typebase;
+    //         object.icon_size = files[0].size;
+    //         opts.filename = object.icon_filename;
+    //         Files.makeCrops(internalFiles, opts, callback);
+    //       },
+    //       function(crops, callback) {
+    //         console.log('remove', opts.file);
+    //         if (opts.file && opts.file.filename) Files.removeFile(opts, callback);
+    //         else callback(null, crops);
+    //       }
+    //     ],
+    //     function(e, results) {
+    //       if (e) console.log(e);
+    //       object.save(cb);
+    //     }
+    //   );
+    // }
   }
 };
 

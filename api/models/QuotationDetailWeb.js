@@ -1,6 +1,6 @@
 //APP COLLECTION
 module.exports = {
-  schema:true,
+  schema: true,
   tableName: 'QuotationDetailWeb',
   attributes: {
     quantity: 'integer',
@@ -23,7 +23,7 @@ module.exports = {
     deliveryPriceValue: 'float',
     deliveryPriceMode: {
       type: 'string',
-      enum : ['percentage', 'amount']
+      enum: ['percentage', 'amount']
     },
 
     deliveryFee: 'float',
@@ -33,15 +33,15 @@ module.exports = {
     deliveryFeePg4: 'float',
     deliveryFeePg5: 'float',
 
-
     financingCostPercentage: 'float',
     discountPercentPromos: 'float', //by unit (does not include big ticket or FF discount)
     discountPercent: 'float', //by unit (includes big ticket or FF discount)
     discountName: 'string',
     originalDiscountPercent: 'float',
     bigticketDiscountPercentage: {
-      type: 'integer',
-      enum:[0,1,2,3,4,5]
+      type: 'number',
+      columnType: 'integer',
+      enum: [0, 1, 2, 3, 4, 5]
     },
     paymentGroup: 'integer',
     unitPrice: 'float',
@@ -53,64 +53,66 @@ module.exports = {
     unitPriceWithDiscountPg4: 'float',
     unitPriceWithDiscountPg5: 'float',
 
-    
     ewallet: 'float',
     immediateDelivery: 'boolean',
     isFreeSale: 'boolean',
-    promotionPackageRuleQuantity:{type:'integer'},
+    promotionPackageRuleQuantity: { type: 'integer' },
 
-    Promotion:{
-      model:'Promotion'
+    Promotion: {
+      model: 'Promotion'
     },
-    QuotationWeb:{
-      model:'QuotationWeb',
-    },    
+    QuotationWeb: {
+      model: 'QuotationWeb'
+    },
     Product: {
-      model:'Product'
+      model: 'Product'
     },
-    User:{
+    User: {
       model: 'UserWeb'
     },
-    Client:{
-      model:'Client'
+    Client: {
+      model: 'Client'
     },
     //ship
-    changedShipDate:{
-      type:'boolean'
+    changedShipDate: {
+      type: 'boolean'
     },
-    creationShipDate:{
-      type:'date'
+    creationShipDate: {
+      type: 'string',
+      columnType: 'date'
     },
     shipDate: {
-      type: 'date',
+      type: 'string',
+      columnType: 'date',
       required: true
     },
     originalShipDate: {
-      type: 'date',
+      type: 'string',
+      columnType: 'date',
       required: true
-    },       
+    },
     productDate: {
-      type: 'date',
+      type: 'string',
+      columnType: 'date',
       required: true
     },
     shipCompany: {
       model: 'company',
       required: true
     },
-    shipCompanyFrom:{
-      model:'company',
+    shipCompanyFrom: {
+      model: 'company',
       required: true
     },
-    
-    PurchaseAfter: {type:'boolean'},
-    PurchaseDocument: {type:'string'},
-    
-    PromotionPackage:{
-      model:'ProductGroup'
-    },
-    PromotionPackageApplied:{
-      model:'ProductGroup'
-    }
-  },
 
+    PurchaseAfter: { type: 'boolean' },
+    PurchaseDocument: { type: 'string' },
+
+    PromotionPackage: {
+      model: 'ProductGroup'
+    },
+    PromotionPackageApplied: {
+      model: 'ProductGroup'
+    }
+  }
 };

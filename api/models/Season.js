@@ -14,11 +14,13 @@ module.exports = {
       required: true
     },
     StartDate: {
-      type: 'date',
+      type: 'string',
+      columnType: 'date',
       required: true
     },
     EndDate: {
-      type: 'date',
+      type: 'string',
+      columnType: 'date',
       required: true
     },
     Days: {
@@ -29,4 +31,3 @@ module.exports = {
     }
   }
 };
-

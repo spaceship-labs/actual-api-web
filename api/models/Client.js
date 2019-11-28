@@ -10,7 +10,10 @@ module.exports = {
     CardCode: { type: 'string' },
     CardName: { type: 'string' },
     Title: { type: 'string' },
-    Birthdate: { type: 'date' },
+    Birthdate: {
+      type: 'string',
+      columnType: 'date'
+    },
     Phone1: { type: 'string' },
     Cellular: { type: 'string' },
     E_Mail: { type: 'string' },
@@ -63,12 +66,12 @@ module.exports = {
     },
     invited: {
       type: 'boolean'
-    },
-    customToJSON: function() {
-      var obj = this.toObject();
-      delete obj.password;
-      return obj;
     }
+  },
+  customToJSON: function() {
+    var obj = this.toObject();
+    delete obj.password;
+    return obj;
   },
   beforeUpdate: function(values, next) {
     delete values.CardCode;

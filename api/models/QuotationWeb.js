@@ -96,11 +96,13 @@ module.exports = {
     totalProducts: { type: 'integer' },
     paymentGroup: { type: 'integer' },
     bigticketMaxPercentage: {
-      type: 'integer',
+      type: 'number',
+      columnType: 'integer',
       enum: [0, 1, 2, 3, 4, 5]
     },
     bigticketPercentage: {
-      type: 'integer',
+      type: 'number',
+      columnType: 'integer',
       enum: [0, 1, 2, 3, 4, 5]
     },
     minPaidPercentage: {
@@ -116,7 +118,8 @@ module.exports = {
       type: 'string'
     },
     tracing: {
-      type: 'datetime'
+      type: 'string',
+      columnType: 'datetime'
     },
     rateLimitReported: {
       type: 'boolean'
@@ -127,7 +130,8 @@ module.exports = {
     },
     paymentType: { type: 'string' },
     tracing: {
-      type: 'datetime'
+      type: 'string',
+      columnType: 'datetime'
     },
     fromOffers: {
       type: 'boolean'
