@@ -14,11 +14,15 @@ module.exports = {
     ItemName: { type: 'string' },
     ItmsGrpCod: {
       //Brand
-      type: 'integer',
+      // type: 'integer',
       model: 'productbrand'
     },
     ItmsGrpNam: { type: 'string' },
-    SuppCatNum: { type: 'string', size: 17 },
+    SuppCatNum: {
+      type: 'string',
+      columnType: 'text'
+      // size: 17
+    },
     CodeBars: { type: 'string' },
     OnHand: { type: 'float' },
     IsCommited: { type: 'float' },

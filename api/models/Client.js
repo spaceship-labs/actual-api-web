@@ -44,7 +44,6 @@ module.exports = {
     isMoral: { type: 'boolean' },
     ewallet: {
       type: 'float',
-      required: true,
       defaultsTo: 0
     },
 

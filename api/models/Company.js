@@ -7,95 +7,109 @@
 module.exports = {
   tableName: 'Warehouse',
   schema: true,
-  migrate:'alter',
+  migrate: 'alter',
   attributes: {
     //sap fields
-    WhsCode:{
-      type:'string',
-      size:8
+    WhsCode: {
+      type: 'string',
+      columnType: 'text'
+      // size: 8
     },
-		WhsName:{
-      type:'string',
-      size: 100
+    WhsName: {
+      type: 'string',
+      columnType: 'text'
+      // size: 100
     },
-		IntrnalKey:{
-      type:'integer'
+    IntrnalKey: {
+      type: 'integer'
     },
-		U_Calle:{
-      type:'string',
-      size:150
+    U_Calle: {
+      type: 'string',
+      columnType: 'text'
+      // size: 150
     },
-		U_noExterior:{
-      type:'string',
-      size:15
+    U_noExterior: {
+      type: 'string',
+      columnType: 'text'
+      // size: 15
     },
-		U_noInterior:{
-      type:'string',
-      size:15
+    U_noInterior: {
+      type: 'string',
+      columnType: 'text'
+      // size: 15
     },
-		U_Colonia:{
-      type:'string',
-      size:150
+    U_Colonia: {
+      type: 'string',
+      columnType: 'text'
+      // size: 150
     },
-		U_Localidad:{
-      type:'string',
-      size:150
+    U_Localidad: {
+      type: 'string',
+      columnType: 'text'
+      // size: 150
     },
-		U_Municipio:{
-      type:'string',
-      size:150
+    U_Municipio: {
+      type: 'string',
+      columnType: 'text'
+      // size: 150
     },
-		U_Estado:{
-      type:'string',
-      size:50
+    U_Estado: {
+      type: 'string',
+      columnType: 'text'
+      // size: 50
     },
-		U_Pais:{
-      type:'string',
-      size:50
+    U_Pais: {
+      type: 'string',
+      columnType: 'text'
+      // size: 50
     },
-		U_CodigoPostal:{
-      type:'string',
-      size:10
+    U_CodigoPostal: {
+      type: 'string',
+      columnType: 'text'
+      // size: 10
     },
-		U_Serie_FCP:{
-      type:'string',
-      size:25
+    U_Serie_FCP: {
+      type: 'string',
+      columnType: 'text'
+      // size: 25
     },
-		U_Serie_ND:{
-      type:'string',
-      size:25
+    U_Serie_ND: {
+      type: 'string',
+      columnType: 'text'
+      // size: 25
     },
-		U_Serie_NC:{
-      type:'string',
-      size:25
+    U_Serie_NC: {
+      type: 'string',
+      columnType: 'text'
+      // size: 25
     },
-		U_Serie_FR:{
-      type:'string',
-      size:25
+    U_Serie_FR: {
+      type: 'string',
+      columnType: 'text'
+      // size: 25
     },
-		U_Serie_FA:{
-      type:'string',
-      size:25
+    U_Serie_FA: {
+      type: 'string',
+      columnType: 'text'
+      // size: 25
     },
-		U_EsTransito:{
-      type:'integer'
+    U_EsTransito: {
+      type: 'integer'
     },
-		U_Bodega:{
-      type:'integer'
+    U_Bodega: {
+      type: 'integer'
     },
-		U_InfoWhs:{
-      type:'integer'
+    U_InfoWhs: {
+      type: 'integer'
     },
-		U_Procesado:{
-      type:'integer'
+    U_Procesado: {
+      type: 'integer'
     },
 
     //relations
-    Stores:{
-      collection:'store',
-      via:'Warehouse'
+    Stores: {
+      collection: 'store',
+      via: 'Warehouse'
     }
-
   }
 };
-
