@@ -1,8 +1,37 @@
-var _ = require('underscore');
-var moment = require('moment');
-var Promise = require('bluebird');
-var ADDRESS_TYPE_S = 'S';
-var ADDRESS_TYPE_B = 'B';
+const _ = require('underscore');
+const moment = require('moment');
+const Promise = require('bluebird');
+const ADDRESS_TYPE_S = 'S';
+const ADDRESS_TYPE_B = 'B';
+
+const addContacts = async (contactsCreated, createdClient) => {
+  sails.log.info('contacts created', contactsCreated);
+  createdClient = Object.assign(createdClient, {
+    Contacts: contactsCreated
+  });
+};
+
+const register = async (req, res) => {
+  try {
+    const form = req.allParams();
+    const { createdClient, createdUser } = await ClientService.createClient(
+      form,
+      req.activeStore.id
+    );
+    // const createdClient = addContacts(contactsCreated, clientWithoutContacts);
+
+    Email.sendRegister(createdUser.firstName, createdUser.email, req.activeStore, function() {
+      sails.log.info('Email de registro enviado', createdUser.email);
+    });
+
+    res.json({
+      user: createdUser,
+      client: createdClient
+    });
+  } catch (e) {
+    res.negotiate(e);
+  }
+};
 
 module.exports = {
   async find(req, res) {

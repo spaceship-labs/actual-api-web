@@ -30,24 +30,32 @@ function getCurrentUserClientId(req) {
   return currentUserClientId;
 }
 
-function createUserFromClient(client, password, req) {
-  var activeStoreId = req.activeStore.id;
+async function createUserFromClient(client, password, req) {
+  const activeStoreId = req.activeStore.id;
+  const {
+    E_Mail: email,
+    FirstName: firstName,
+    LastName: lastName,
+    CardCode,
+    id: clientId
+  } = client;
 
-  var userToCreate = {
+  let userToCreate = {
     Store: activeStoreId,
-    email: client.E_Mail,
-    firstName: client.FirstName,
-    lastName: client.LastName,
+    email,
+    firstName,
+    lastName,
     role: 'client',
-    password: password,
-    CardCode: client.CardCode,
-    Client: client.id
+    password,
+    CardCode,
+    Client: clientId
   };
 
-  if (client.invited) {
-    userToCreate.invited = true;
-  }
-  return UserWeb.create(userToCreate);
+  //TODO: delete if not necesary
+  // if (client.invited) {
+  //   userToCreate.invited = true;
+  // }
+  return await UserWeb.create(userToCreate);
 }
 
 function generateRecoveryToken(userId, userEmail, userPassword) {

@@ -10,6 +10,163 @@ const PERSON_TYPE = 'Person';
 const ERROR_TYPE = 'Error';
 const ACTUAL_EMAIL_DOMAIN = /@actualgroup.com$/;
 
+const formatClientFields = client => {
+  const { fullName } = client;
+  const fullNameArr = splitName(fullName);
+
+  client.CardName = fullName;
+  client.FirstName = fullNameArr[0];
+  client.LastName = fullNameArr[1];
+
+  return client;
+};
+
+const createClient = async (params, activeStoreId) => {
+  const { password, E_Mail: email } = params;
+
+  if (!email) {
+    throw new Error('Email requerido');
+  }
+  if (email && email.match(ACTUAL_EMAIL_DOMAIN)) {
+    throw new Error('Email no valido');
+  }
+
+  const createdParams = formatClientFields(params);
+  const createdClient = await Client.create(createdParams);
+  const createdUser = await createUserFromClient(createdClient, password, activeStoreId);
+  return { createdClient, createdUser };
+};
+
+const createClient1 = async (params, req) => {
+  var sapFiscalAddressParams = {};
+  var sapContactsParams = [];
+  var contactsCreated = [];
+  var fiscalAddressesCreated = [];
+  const email = params.E_Mail;
+  // try {
+  if (!email) {
+    throw new Error('Email requerido');
+  }
+  if (email && email.match(ACTUAL_EMAIL_DOMAIN)) {
+    throw new Error('Email no valido');
+  }
+  if (params.LicTradNum && !isValidRFC(params.LicTradNum)) {
+    throw new Error('RFC no valido');
+  }
+
+  const createParams = mapClientFields(params);
+  const filteredContacts = filterContacts(createParams.contacts);
+  sapContactsParams = filteredContacts.map(mapContactFields);
+
+  if (sapContactsParams.length > 0 && areContactsRepeated(sapContactsParams)) {
+    throw new Error('Nombres de contactos repetidos');
+  }
+
+  if (params.fiscalAddress && isValidFiscalAddress(params.fiscalAddress)) {
+    const fiscalAddressAux = _.clone(params.fiscalAddress);
+    sapFiscalAddressParams = mapFiscalFields(fiscalAddressAux);
+  }
+
+  const seriesNum = req.activeStore.seriesNum;
+
+  params.LicTradNum = params.LicTradNum || InvoiceService.RFCPUBLIC;
+  params.SlpCode = -1;
+  params.Series = seriesNum; //Assigns seriesNum number depending on activeStore
+  params.cfdiUse = params.cfdiUse || 'P01';
+
+  const sapClientParams = _.clone(params);
+  var sapCreateParams = {
+    client: sapClientParams,
+    fiscalAddress: sapFiscalAddressParams || {},
+    clientContacts: sapContactsParams,
+    activeStore: req.activeStore
+  };
+
+  const password = _.clone(sapCreateParams.client.password);
+  delete sapCreateParams.client.password;
+
+  const areValidZipcodes = await validateContactsZipcode(sapCreateParams.clientContacts);
+  if (!areValidZipcodes) {
+    throw new Error('El código postal no es valido para tu dirección de entrega');
+  }
+
+  const isUserEmailTaken = await UserService.checkIfUserEmailIsTaken(email);
+  if (isUserEmailTaken) {
+    throw new Error('Email previamente utilizado');
+  }
+  var sapData = null;
+
+  // if (!clientAsociated) {
+  //   throw new Error('No autorizado');
+  // }
+  const sapResult = await SapService.createClient(sapCreateParams);
+  sails.log.info('SAP result createClient', sapResult);
+  sapData = JSON.parse(sapResult.value);
+  if (!sapData) {
+    throw new Error('Error al crear cliente en SAP');
+  }
+  validateSapClientCreation(sapData, sapContactsParams, sapFiscalAddressParams);
+
+  const clientCreateParams = Object.assign(sapClientParams, {
+    CardCode: sapData ? sapData.result : '',
+    BirthDate: moment(sapClientParams.BirthDate).toDate()
+  });
+
+  const contactCodes = sapData.pers;
+  const contactsParams = sapContactsParams.map(function(c, i) {
+    c.CntctCode = contactCodes[i];
+    c.CardCode = clientCreateParams.CardCode;
+    return c;
+  });
+
+  sails.log.info('contacts app', contactsParams);
+  sails.log.info('client app', clientCreateParams);
+
+  const createdClient = await Client.create(clientCreateParams);
+  console.log('create', createdClient);
+
+  const createdUser = await UserService.createUserFromClient(createdClient, password, req);
+  console.log('create user', createdUser);
+
+  const updatedClients = await Client.update({ id: createdClient.id }, { UserWeb: createdUser.id });
+  console.log('update', updatedClients);
+
+  const updatedClient = updatedClients[0];
+
+  if (contactsParams && contactsParams.length > 0) {
+    contactsCreated = await ClientContact.create(contactsParams);
+  }
+
+  //Created automatically, do we need the if validation?
+  //if(sapFiscalAddressParams){
+  var fiscalAddressParams = mapFiscalFields(sapFiscalAddressParams);
+  var fiscalAddressParams1 = {
+    ...fiscalAddressParams,
+    CardCode: createdClient.CardCode,
+    AdresType: ADDRESS_TYPE_S
+  };
+
+  var fiscalAddressParams2 = {
+    ...fiscalAddressParams1,
+    AdresType: ADDRESS_TYPE_B
+  };
+
+  fiscalAddressesCreated = await FiscalAddress.create([fiscalAddressParams1, fiscalAddressParams2]);
+  //}
+
+  if (fiscalAddressesCreated) {
+    sails.log.info('fiscal adresses created', fiscalAddressesCreated);
+  }
+
+  return {
+    createdUser,
+    createdClient: updatedClient,
+    contactsCreated,
+    fiscalAddressesCreated
+  };
+  // }
+};
+
 module.exports = {
   ADDRESS_TYPE,
   ADDRESS_TYPE_B,
