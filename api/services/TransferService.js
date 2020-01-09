@@ -7,9 +7,9 @@ function transfers(group) {
     {
       currency: 'Pesos',
       bank: 'Banamex',
-      sucursal: '7013',
-      account: '6383408',
-      clabe: '002691701363834085',
+      sucursal: '7008',
+      account: '1292351',
+      clabe: '002691700812923516',
       swift: 'BNMXMXMM'
     }
   ];
