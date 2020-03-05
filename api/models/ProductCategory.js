@@ -34,6 +34,10 @@ module.exports = {
     Promotions: {
       collection: 'Promotion',
       via: 'Categories'
+    },
+    FeaturedProducts: {
+      collection: 'Product',
+      via: 'FeaturedCategories'
     }
   }
 };
