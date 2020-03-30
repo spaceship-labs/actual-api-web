@@ -136,5 +136,20 @@ module.exports = {
         console.log(err);
         res.negotiate(err);
       });
+  },
+  async getCategoryChildsRelations(req, res) {
+    const { handle } = req.allParams();
+    const category = await ProductCategory.findOne({ Handle: handle });
+    CategoryParent_CategoryChild.find({
+      parent: category.id
+    })
+      .populate('child')
+      .then(function(relations) {
+        res.json(relations);
+      })
+      .catch(function(err) {
+        console.log(err);
+        res.negotiate(err);
+      });
   }
 };
