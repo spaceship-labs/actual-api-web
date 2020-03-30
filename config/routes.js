@@ -117,6 +117,11 @@ module.exports.routes = {
     action: 'getCategoriesTree'
   },
 
+  '/productcategory/childsrelations/:handle': {
+    controller: 'productcategory',
+    action: 'getCategoryChildsRelations'
+  },
+
   '/productfilter/find/:page': {
     controller: 'productfilter',
     action: 'find'
