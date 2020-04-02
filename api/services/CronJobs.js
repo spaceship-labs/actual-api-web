@@ -1,26 +1,29 @@
 var cron = require('cron').CronJob;
 var Promise = require('bluebird');
 
-module.exports.init = function(){
+module.exports.init = function() {
   console.log('initing cronJobs');
   var cronJobs = [
-      //time: '0 */4 * * * *'
-      //s,m,h,d del mes,m,d de la semana
+    //time: '0 */4 * * * *'
+    //s,m,h,d del mes,m,d de la semana
     {
-      fn: function(d){
+      fn: function(d) {
         //sails.log.info('sendUnpaidOrdersReminder');
         SpeiService.sendUnpaidOrdersReminder();
         SpeiService.sendExpirationOrders();
         SpeiService.freeSpeiUnpaidOrderDetails();
       },
-      time:'*/30 * * * *'
+      time: '*/30 * * * *'
+    },
+    {
+      fn: function(d) {
+        MercadoPago.checkMercadoPagoOrdersStatus();
+      },
+      time: '00 00 8 * * 0-6'
     }
-
-  ].forEach(function(v){
-    
-    if(process.env.NODE_ENV === 'production' || true){
-      new cron(v.time,v.fn, true, true);
+  ].forEach(function(v) {
+    if (process.env.NODE_ENV === 'production' || true) {
+      new cron(v.time, v.fn, true, true);
     }
-  
   });
 };
