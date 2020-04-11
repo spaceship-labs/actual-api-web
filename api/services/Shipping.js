@@ -45,7 +45,7 @@ function productShipping(product, storeWarehouse, options) {
   return Promise.all([
     DatesDelivery.find({
       ItemCode: product.ItemCode,
-      whsCode: CEDIS_QROO_CODE,
+      //whsCode: CEDIS_QROO_CODE,
       OpenCreQty: {
         '>': 0
       }
@@ -103,10 +103,10 @@ function productShipping(product, storeWarehouse, options) {
           .startOf('day')
           .toDate();
         var freeSaleStockItem = {
-          whsCode: CEDIS_QROO_CODE,
+          //whsCode: CEDIS_QROO_CODE,
           OpenCreQty: product.freeSaleStock,
           ItemCode: product.ItemCode,
-          warehouseId: CEDIS_QROO_ID,
+          //warehouseId: CEDIS_QROO_ID,
           ShipDate: shipDate
         };
 
