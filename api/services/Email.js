@@ -225,7 +225,7 @@ function sendRegister(userName, userEmail, store, cb) {
   var mail = new helper.Mail();
   var personalization = new helper.Personalization();
   var from = new helper.Email('noreply@actualgroup.com', 'Actual Group');
-  var toAux = new helper.Email('yupit@spaceshiplabs.com', 'Luis');
+  var toAux = new helper.Email('sergiocan@spaceshiplabs.com', 'Luis');
   var toAux2 = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
   var to = new helper.Email(userEmail, userName);
   var subject = '¡Bienvenido a Actual Group!';
@@ -269,7 +269,7 @@ function sendFiscalData(form, store, cb) {
 
   //var from            = new helper.Email(email, name);
   var from = getSenderByStore(store);
-  var to = new helper.Email('yupit@spaceshiplabs.com', 'Luis');
+  var to = new helper.Email('sergiocan@spaceshiplabs.com', 'Luis');
   var toAux = new helper.Email('facturacionsitios@actualg.com', 'Facturacion Actual');
   var toAux2 = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
 
@@ -314,7 +314,7 @@ function sendFiscalDataMessageToClient(name, email, store, cb) {
   var personalization = new helper.Personalization();
 
   var from = getSenderByStore(store);
-  var to = new helper.Email('yupit@spaceshiplabs.com', 'Luis');
+  var to = new helper.Email('sergiocan@spaceshiplabs.com', 'Luis');
   var toAux = new helper.Email('facturacionsitios@actualg.com', 'Facturacion Actual');
   var toAux2 = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
   var toAux3 = new helper.Email(email, name);
@@ -361,7 +361,7 @@ function sendContact(name, email, form, store, cb) {
   var mail = new helper.Mail();
   var personalization = new helper.Personalization();
   var from = new helper.Email(email, name);
-  var to = new helper.Email('yupit@spaceshiplabs.com', 'Luis');
+  var to = new helper.Email('sergiocan@spaceshiplabs.com', 'Luis');
   var toAux = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
   var subject = 'Contacto ' + ((store || {}).name || '');
   var res = contactTemplate({
@@ -402,7 +402,7 @@ function sendSuggestions(name, email, form, store, cb) {
   var mail = new helper.Mail();
   var personalization = new helper.Personalization();
   var from = new helper.Email(email, name);
-  var to = new helper.Email('yupit@spaceshiplabs.com', 'Luis');
+  var to = new helper.Email('sergiocan@spaceshiplabs.com', 'Luis');
   var toAux = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
   var subject = 'Quejas y sugerencias ' + ((store || {}).name || '');
   var res = contactTemplate({
@@ -443,7 +443,7 @@ function sendSpeiInstructions(clientName, clientEmail, quotationFolio, order, st
   var mail = new helper.Mail();
   var personalization = new helper.Personalization();
   var from = new helper.Email('noreply@actualgroup.com', 'Actual Group');
-  var toAux = new helper.Email('yupit@spaceshiplabs.com', 'Luis');
+  var toAux = new helper.Email('sergiocan@spaceshiplabs.com', 'Luis');
 
   var toAux2 = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
   var to = new helper.Email(clientEmail, clientName);
@@ -501,7 +501,7 @@ function sendSpeiReminder(clientName, clientEmail, expirationDateTime, folio, st
   var mail = new helper.Mail();
   var personalization = new helper.Personalization();
   var from = new helper.Email('noreply@actualgroup.com', 'Actual Group');
-  var toAux = new helper.Email('yupit@spaceshiplabs.com', 'Luis');
+  var toAux = new helper.Email('sergiocan@spaceshiplabs.com', 'Luis');
   var toAux2 = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
 
   var to = new helper.Email(clientEmail, clientName);
@@ -556,7 +556,7 @@ function sendSpeiExpiration(clientName, clientEmail, folio, store) {
   var mail = new helper.Mail();
   var personalization = new helper.Personalization();
   var from = new helper.Email('noreply@actualgroup.com', 'Actual Group');
-  var toAux = new helper.Email('yupit@spaceshiplabs.com', 'Luis');
+  var toAux = new helper.Email('sergiocan@spaceshiplabs.com', 'Luis');
   var toAux2 = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
 
   var to = new helper.Email(clientEmail, clientName);
@@ -790,7 +790,7 @@ function sendOrder(client, order, products, payments, ewallet, store) {
   var subject = 'Confirmación de compra | Folio #' + order.folio;
   var content = new helper.Content('text/html', emailBody);
 
-  var toAux = new helper.Email('yupit@spaceshiplabs.com', 'Emmanuel Yupit');
+  var toAux = new helper.Email('sergiocan@spaceshiplabs.com', 'Emmanuel Yupit');
   personalization.addTo(toAux);
 
   var toAux2 = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
@@ -1192,7 +1192,7 @@ function sendFreesale(order, products, store) {
   personalization.addTo(to);
   personalization.setSubject(subject);
 
-  var toAux = new helper.Email('yupit@spaceshiplabs.com', 'Luis Perez');
+  var toAux = new helper.Email('sergiocan@spaceshiplabs.com', 'Luis Perez');
   personalization.addTo(toAux);
 
   mail.setFrom(from);
@@ -1219,7 +1219,7 @@ function sendQuotationLog(form, store, cb) {
   var mail = new helper.Mail();
   var personalization = new helper.Personalization();
   var from = new helper.Email('noreply@actualgroup.com', 'Actual Group');
-  var to = new helper.Email('yupit@spaceshiplabs.com', 'Luis');
+  var to = new helper.Email('sergiocan@spaceshiplabs.com', 'Luis');
   var toAux = new helper.Email('dtorres@actualg.com', 'Daniela');
   var toAux2 = new helper.Email('eebalams@gmail.com', 'Ernesto');
   var toAux3 = new helper.Email('asanchez@actualg.com', 'Alia Sanchez');
