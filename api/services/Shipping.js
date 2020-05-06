@@ -2,6 +2,17 @@ var Promise = require('bluebird');
 var _ = require('underscore');
 var moment = require('moment');
 var CEDIS_QROO_CODE = '01';
+var CEDIS_WAREHOUSES_CODES = ['01', '02', '03', '05', '10', '11', '82'];
+var CEDIS_WAREHOUSES_IDS = [
+  '576acfee5280c21ef87ea5b5',
+  '576acfee5280c21ef87ea5b6',
+  '576acfee5280c21ef87ea5b7',
+  '576acfee5280c21ef87ea5b8',
+  '576acfee5280c21ef87ea5bb',
+  '576acfee5280c21ef87ea5bc',
+  '599aaa1fbe1fd281203f5e8a'
+];
+
 var CEDIS_QROO_ID = '576acfee5280c21ef87ea5b5';
 var DELIVERY_AVAILABLE = 'SI';
 var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
@@ -45,7 +56,7 @@ function productShipping(product, storeWarehouse, options) {
   return Promise.all([
     DatesDelivery.find({
       ItemCode: product.ItemCode,
-      whsCode: CEDIS_QROO_CODE,
+      whsCode: CEDIS_WAREHOUSES_CODES,
       OpenCreQty: {
         '>': 0
       }
@@ -103,10 +114,10 @@ function productShipping(product, storeWarehouse, options) {
           .startOf('day')
           .toDate();
         var freeSaleStockItem = {
-          whsCode: CEDIS_QROO_CODE,
+          whsCode: CEDIS_WAREHOUSES_CODES,
           OpenCreQty: product.freeSaleStock,
           ItemCode: product.ItemCode,
-          warehouseId: CEDIS_QROO_ID,
+          warehouseId: CEDIS_WAREHOUSES_IDS,
           ShipDate: shipDate
         };
 
