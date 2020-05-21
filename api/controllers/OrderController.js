@@ -291,7 +291,7 @@ module.exports = {
       .then(function(quotationWithErr) {
         console.log('quotationWithErr', quotationWithErr);
         sails.log.info('quotationWithErr folio', (quotationWithErr || {}).folio);
-
+        sails.log.info('QuotationWithErr log', errLog, typeof errLog);
         if (quotationWithErr && errLog) {
           var client = quotationWithErr.Client || {};
           var formArr = [
@@ -302,7 +302,7 @@ module.exports = {
             { label: 'Cliente Email', value: client.E_Mail },
             { label: 'Cliente Telefono', value: client.Phone1 },
 
-            { label: 'Log', value: JSON.stringify(errLog) }
+            { label: 'Log', value: JSON.stringify(errLog, replaceErrors) }
           ];
 
           Email.sendQuotationLog(formArr, req.activeStore, function() {
@@ -424,3 +424,16 @@ module.exports = {
       });
   }
 };
+function replaceErrors(key, value) {
+  if (value instanceof Error) {
+    var error = {};
+
+    Object.getOwnPropertyNames(value).forEach(function(key) {
+      error[key] = value[key];
+    });
+
+    return error;
+  }
+
+  return value;
+}
