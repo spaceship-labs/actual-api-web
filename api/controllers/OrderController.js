@@ -273,15 +273,15 @@ module.exports = {
         console.log('catch general createFromQuotation', err);
         errLog = err;
 
-        conektaLimitErrorThrown = ConektaService.substractConektaLimitError(err);
-        sails.log.info('conektaLimitError', conektaLimitErrorThrown);
+        //conektaLimitErrorThrown = ConektaService.substractConektaLimitError(err);
+        //sails.log.info('conektaLimitError', conektaLimitErrorThrown);
 
-        conektaProcessingErrorThrown = ConektaService.substractConektaCardProcessingError(err);
-        sails.log.info('conektaProcessingErrorThrown', conektaProcessingErrorThrown);
+        //conektaProcessingErrorThrown = ConektaService.substractConektaCardProcessingError(err);
+        //sails.log.info('conektaProcessingErrorThrown', conektaProcessingErrorThrown);
 
         if (!responseSent) {
           err = err || {};
-          err.conektaLimitErrorThrown = conektaLimitErrorThrown;
+          //err.conektaLimitErrorThrown = conektaLimitErrorThrown;
           res.negotiate(err);
         }
 

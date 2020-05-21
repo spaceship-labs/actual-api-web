@@ -79,7 +79,7 @@ const getEmailParams = async id => {
 const getInProcessOrders = async () => await OrderWeb.find({ status: 'pending-payment' });
 
 const getMercadoPagoIds = orders =>
-  orders.map(order => ({ marcagoPagoId: order.MercadoPagoOrderId, orderId: id }));
+  orders.map(order => ({ marcagoPagoId: order.MercadoPagoOrderId, orderId: order.id }));
 
 const getCurrentStatus = async idsArray => {
   const promises = idsArray.map(({ orderId, marcagoPagoId }) => {

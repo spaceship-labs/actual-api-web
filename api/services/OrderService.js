@@ -126,14 +126,20 @@ function createFromQuotation(form, req) {
     var paymentFound = results[1];
 
     if (!mercadoPagoOrderFound && !paymentFound) {
-      return createConektaOrderAndPayment(quotationId, payment, req).then(function(
-        mercadoPagoOrder
-      ) {
-        sails.log.info('mercadoPagoOrder: ', mercadoPagoOrder);
+      return createConektaOrderAndPayment(quotationId, payment, req)
+        .then(function(mercadoPagoOrder) {
+          sails.log.info('mercadoPagoOrder: ', mercadoPagoOrder);
 
-        form.MercadoPagoOrder = mercadoPagoOrder;
-        return createOrder(form, req);
-      });
+          form.MercadoPagoOrder = mercadoPagoOrder;
+          return createOrder(form, req);
+        })
+        .catch(function(err) {
+          if (err.MercadoPagoError) {
+            throw new Error(err.MercadoPagoError);
+          } else {
+            throw new Error(err);
+          }
+        });
     } else if (mercadoPagoOrderFound && !paymentFound) {
       if (mercadoPagoOrderFound.status === 'in_process') {
         form.payment.status = 'pending';
@@ -170,6 +176,13 @@ function createConektaOrderAndPayment(quotationId, payment, req) {
     })
     .then(function(paymentCreated) {
       return mercadoPagoOrder;
+    })
+    .catch(function(err) {
+      if (err.MercadoPagoError) {
+        throw new Error(err.MercadoPagoError);
+      } else {
+        throw new Error(err);
+      }
     });
 }
 
