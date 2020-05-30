@@ -105,7 +105,9 @@ function createContact(cardCode, form) {
   form.CardCode = cardCode;
   form.action = CREATE_CONTACT_ACTION;
   var params = {
-    contact: encodeURIComponent(JSON.stringify({ CardCode: cardCode })),
+    contact: encodeURIComponent(JSON.stringify({
+      CardCode: cardCode
+    })),
     person: encodeURIComponent(JSON.stringify([form]))
   };
   var endPoint = buildUrl(baseUrl, {
@@ -124,7 +126,9 @@ function updateContact(cardCode, contactIndex, form) {
   form.Line = contactIndex;
   form.action = UPDATE_CONTACT_ACTION;
   var params = {
-    contact: encodeURIComponent(JSON.stringify({ CardCode: cardCode })),
+    contact: encodeURIComponent(JSON.stringify({
+      CardCode: cardCode
+    })),
     person: encodeURIComponent(JSON.stringify([form]))
   };
   var endPoint = buildUrl(baseUrl, {
@@ -162,7 +166,7 @@ function createSaleOrder(params) {
   var endPoint;
   var requestParams;
   return buildOrderRequestParams(params)
-    .then(function(_requestParams) {
+    .then(function (_requestParams) {
       requestParams = _requestParams;
       endPoint = baseUrl + '/SalesOrder';
       sails.log.info('createSaleOrder', endPoint);
@@ -172,7 +176,9 @@ function createSaleOrder(params) {
         products: JSON.stringify(requestParams.products),
         payments: JSON.stringify(requestParams.payments)
       };
-      const formDataStr = qs.stringify(preForm, { encode: true });
+      const formDataStr = qs.stringify(preForm, {
+        encode: true
+      });
       var options = {
         json: true,
         method: 'POST',
@@ -184,7 +190,7 @@ function createSaleOrder(params) {
       };
       return request(options);
     })
-    .then(function(response) {
+    .then(function (response) {
       return {
         requestParams,
         endPoint: endPoint,
@@ -201,7 +207,8 @@ function buildOrderRequestParams(params) {
     GroupCode: params.groupCode,
     ContactPersonCode: params.cntctCode,
     Currency: 'MXP',
-    ShipDate: moment(getFarthestShipDate(params.quotationDetails)).format(SAP_DATE_FORMAT),
+    ShipDate: moment(getFarthestShipDate(params.quotationDetails)).format(
+      SAP_DATE_FORMAT),
     SalesPersonCode: params.slpCode || -1,
     CardCode: params.cardCode,
     DescuentoPDocumento: calculateUsedEwalletByPayments(params.payments),
@@ -213,24 +220,25 @@ function buildOrderRequestParams(params) {
     contactParams.SalesPersonCode = -1;
   }
 
-  if (process.env.MODE === 'production') {
-    var WEB_SELLER_SLPCODE = 148; //Daniela Torres
-    contactParams.SalesPersonCode = WEB_SELLER_SLPCODE;
-  }
+  //if (process.env.MODE === 'production') {
+  //  var WEB_SELLER_SLPCODE = 111; //Daniela Torres
+  //  contactParams.SalesPersonCode = WEB_SELLER_SLPCODE;
+  //}
 
-  return getAllWarehouses().then(function(warehouses) {
-    products = params.quotationDetails.map(function(detail) {
+  return getAllWarehouses().then(function (warehouses) {
+    products = params.quotationDetails.map(function (detail) {
       var product = {
         ItemCode: detail.Product.ItemCode,
         OpenCreQty: detail.quantity,
         WhsCode: getWhsCodeById(detail.shipCompanyFrom, warehouses),
         ShipDate: moment(detail.shipDate).format(SAP_DATE_FORMAT),
         DiscountPercent: detail.discountPercent,
-        Company: getCompanyCode(detail.Product.U_Empresa, params.currentStore.group),
+        Company: getCompanyCode(detail.Product.U_Empresa, params
+          .currentStore.group),
         Price: detail.total,
         Service: detail.Product.Service, //FOR SR SERVICES
-        ImmediateDelivery:
-          detail.Product.ItemCode === 'SR00078' ? true : isImmediateDelivery(detail.shipDate),
+        ImmediateDelivery: detail.Product.ItemCode === 'SR00078' ?
+          true : isImmediateDelivery(detail.shipDate),
         DetailId: detail.id
         //unitPrice: detail.Product.Price
       };
@@ -253,7 +261,8 @@ function buildOrderRequestParams(params) {
       products.push(deliveryProductItem);
       */
 
-    contactParams.WhsCode = getWhsCodeById(params.currentStore.Warehouse, warehouses);
+    contactParams.WhsCode = getWhsCodeById(params.currentStore.Warehouse,
+      warehouses);
     return {
       contact: contactParams,
       products,
@@ -284,11 +293,11 @@ function isImmediateDelivery(shipDate) {
 }
 
 function mapPaymentsToSap(payments, exchangeRate) {
-  payments = payments.filter(function(p) {
+  payments = payments.filter(function (p) {
     return p.type != CLIENT_BALANCE_TYPE;
   });
 
-  var paymentsTopSap = payments.map(function(payment) {
+  var paymentsTopSap = payments.map(function (payment) {
     var paymentSap = {
       TypePay: payment.type,
       PaymentAppId: payment.id,
@@ -315,7 +324,8 @@ function mapPaymentsToSap(payments, exchangeRate) {
     }
     */
 
-    if (payment.msi || payment.type === 'credit-card' || payment.type === 'debit-card') {
+    if (payment.msi || payment.type === 'credit-card' || payment.type ===
+      'debit-card') {
       paymentSap.CardNum = '4802';
       paymentSap.CardDate = '05/16'; //MM/YY
     }
@@ -330,7 +340,9 @@ function mapPaymentsToSap(payments, exchangeRate) {
 }
 
 function getWhsCodeById(whsId, warehouses) {
-  var warehouse = _.findWhere(warehouses, { id: whsId });
+  var warehouse = _.findWhere(warehouses, {
+    id: whsId
+  });
   if (warehouse) {
     return warehouse.WhsCode;
   }
@@ -341,7 +353,8 @@ function getFarthestShipDate(quotationDetails) {
   var farthestShipDate = false;
   for (var i = 0; i < quotationDetails.length; i++) {
     if (
-      (farthestShipDate && new Date(quotationDetails[i].shipDate) >= farthestShipDate) ||
+      (farthestShipDate && new Date(quotationDetails[i].shipDate) >=
+        farthestShipDate) ||
       i === 0
     ) {
       farthestShipDate = quotationDetails[i].shipDate;
@@ -351,7 +364,7 @@ function getFarthestShipDate(quotationDetails) {
 }
 
 function applyExchangeRateToPayments(payments) {
-  var mapped = payments.map(function(payment) {
+  var mapped = payments.map(function (payment) {
     if (currency === 'usd') {
       payment.ammount = payment.ammount * payment.exchangeRate;
     }
@@ -361,7 +374,7 @@ function applyExchangeRateToPayments(payments) {
 
 function calculateUsedEwalletByPayments(payments) {
   var ewallet = 0;
-  ewallet = payments.reduce(function(amount, payment) {
+  ewallet = payments.reduce(function (amount, payment) {
     if (payment.type === 'ewallet') {
       amount += payment.ammount;
     }
@@ -375,12 +388,14 @@ function getAllWarehouses() {
 }
 
 function getSeriesNum(storeId) {
-  return Store.findOne({ id: storeId })
+  return Store.findOne({
+      id: storeId
+    })
     .populate('Warehouse')
-    .then(function(store) {
+    .then(function (store) {
       return mapWhsSeries(store.Warehouse.WhsName);
     })
-    .catch(function(err) {
+    .catch(function (err) {
       console.log(err);
       return err;
     });
