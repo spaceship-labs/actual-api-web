@@ -7,20 +7,20 @@ var CLIENT_BALANCE_TYPE = 'client-balance';
 var BALANCE_SAP_TYPE = 'Balance';
 
 module.exports = {
-  sendOrderEmail: function(req, res) {
+  sendOrderEmail: function (req, res) {
     var form = req.params.all();
     var orderId = form.id;
     Email.sendOrderConfirmation(orderId)
-      .then(function() {
+      .then(function () {
         res.ok();
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log(err);
         res.negotiate(err);
       });
   },
 
-  find: function(req, res) {
+  find: function (req, res) {
     var form = req.params.all();
     var model = 'orderweb';
     var clientId = UserService.getCurrentUserClientId(req);
@@ -35,16 +35,16 @@ module.exports = {
       }
     };
     Common.find(model, form, extraParams)
-      .then(function(result) {
+      .then(function (result) {
         res.ok(result);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log(err);
         res.negotiate(err);
       });
   },
 
-  findAll: function(req, res) {
+  findAll: function (req, res) {
     var form = req.params.all();
     var model = 'orderweb';
     var clientId = UserService.getCurrentUserClientId(req);
@@ -73,7 +73,7 @@ module.exports = {
     }
 
     preSearch
-      .then(function(preSearchResults) {
+      .then(function (preSearchResults) {
         //Search by pre clients search
         if (preSearchResults && _.isArray(preSearchResults)) {
           extraParams.filters.Client = preSearchResults;
@@ -81,16 +81,16 @@ module.exports = {
 
         return Common.find(model, form, extraParams);
       })
-      .then(function(result) {
+      .then(function (result) {
         res.ok(result);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log(err);
         res.negotiate(err);
       });
   },
 
-  findById: function(req, res) {
+  findById: function (req, res) {
     var form = req.params.all();
     var id = form.id;
     var clientId = UserService.getCurrentUserClientId(req);
@@ -109,7 +109,7 @@ module.exports = {
       .populate('Store')
       .populate('OrdersSapWeb')
       .populate('SapOrderConnectionLogWeb')
-      .then(function(foundOrder) {
+      .then(function (foundOrder) {
         if (!foundOrder) {
           return Promise.reject(new Error('No se encontro la orden'));
         }
@@ -124,24 +124,24 @@ module.exports = {
           return Promise.reject(new Error('No autorizado'));
         }
 
-        var sapReferencesIds = order.OrdersSapWeb.map(function(ref) {
+        var sapReferencesIds = order.OrdersSapWeb.map(function (ref) {
           return ref.id;
         });
         return OrderSapWeb.find(sapReferencesIds)
           .populate('PaymentsSapWeb')
           .populate('ProductSeriesWeb');
       })
-      .then(function(ordersSapWeb) {
+      .then(function (ordersSapWeb) {
         order.OrdersSapWeb = ordersSapWeb;
         res.json(order);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log(err);
         res.negotiate(err);
       });
   },
 
-  createFromQuotation: function(req, res) {
+  createFromQuotation: function (req, res) {
     var form = req.params.all();
     var order;
     var responseSent = false;
@@ -158,14 +158,14 @@ module.exports = {
     sails.log.info('quotationId', form.quotationId);
 
     OrderWeb.findOne({ QuotationWeb: quotationId })
-      .then(function(order) {
+      .then(function (order) {
         if (order) {
           return Promise.reject(new Error('Ya se ha creado un pedido sobre esta cotización'));
         }
         //sails.log.info('starting validating from controller', new Date());
         return StockService.validateQuotationStockById(quotationId, req);
       })
-      .then(function(isValidStock) {
+      .then(function (isValidStock) {
         //sails.log.info('ending validating from controller', new Date());
         if (!isValidStock) {
           return Promise.reject(new Error('Inventario no suficiente para crear la orden'));
@@ -175,7 +175,7 @@ module.exports = {
           .populate('Address')
           .populate('ZipcodeDelivery');
       })
-      .then(function(_quotation) {
+      .then(function (_quotation) {
         quotation = _quotation;
         if (quotation.Client != clientId) {
           return Promise.reject(new Error('No autorizado'));
@@ -196,7 +196,7 @@ module.exports = {
         }
         return OrderService.createFromQuotation(form, req);
       })
-      .then(function(orderCreated) {
+      .then(function (orderCreated) {
         //RESPONSE
         sails.log.info('end ', new Date());
         sails.log.info('quotationId', form.quotationId);
@@ -211,11 +211,11 @@ module.exports = {
           .populate('Payments')
           .populate('Address');
       })
-      .then(function(_order) {
+      .then(function (_order) {
         order = _order;
         return OrderDetailWeb.find({ OrderWeb: order.id }).populate('Product');
       })
-      .then(function(_orderDetails) {
+      .then(function (_orderDetails) {
         orderDetails = _orderDetails;
 
         var emailSendingPromise;
@@ -256,7 +256,7 @@ module.exports = {
 
         return promises;
       })
-      .spread(function(orderSent, freesaleSent, sapOrderRelated) {
+      .spread(function (orderSent, freesaleSent, sapOrderRelated) {
         if (order.isSpeiOrder) {
           console.log('Email de cotizacion enviado: ' + quotation.folio);
         } else {
@@ -265,11 +265,11 @@ module.exports = {
 
         return invoiceCreationPromise;
       })
-      .then(function(invoice) {
+      .then(function (invoice) {
         console.log('generated invoice', invoice);
         return Promise.resolve();
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log('catch general createFromQuotation', err);
         errLog = err;
 
@@ -288,11 +288,14 @@ module.exports = {
         sails.log.info('start finding quotationWithErr', quotationId);
         return QuotationWeb.findOne({ id: quotationId, select: ['folio'] }).populate('Client');
       })
-      .then(function(quotationWithErr) {
+      .then(function (quotationWithErr) {
         console.log('quotationWithErr', quotationWithErr);
         sails.log.info('quotationWithErr folio', (quotationWithErr || {}).folio);
         sails.log.info('QuotationWithErr log', errLog, typeof errLog);
         if (quotationWithErr && errLog) {
+          if (errLog.stack) {
+            delete errLog.stack;
+          }
           var client = quotationWithErr.Client || {};
           var formArr = [
             { label: 'Folio', value: quotationWithErr.folio },
@@ -305,18 +308,18 @@ module.exports = {
             { label: 'Log', value: JSON.stringify(errLog, replaceErrors) }
           ];
 
-          Email.sendQuotationLog(formArr, req.activeStore, function() {
+          Email.sendQuotationLog(formArr, req.activeStore, function () {
             sails.log.info('Log de error enviado');
           });
 
           if (conektaLimitErrorThrown) {
             QuotationWeb.update({ id: quotationId }, { rateLimitReported: true })
-              .then(function(quotationUpdated) {
+              .then(function (quotationUpdated) {
                 sails.log.info('quoation updated with rateLimitReported', quotationId);
                 //sails.log.info('quotationUpdated', quotationUpdated);
                 return Email.sendQuotation(quotationId, req.activeStore);
               })
-              .then(function() {
+              .then(function () {
                 sails.log.info('quoation rate limit email sent', quotationId);
               });
           }
@@ -324,12 +327,12 @@ module.exports = {
           if (conektaProcessingErrorThrown) {
             var paymentAttempts = quotationWithErr.paymentAttempts + 1;
             QuotationWeb.update({ id: quotationId }, { paymentAttempts: paymentAttempts })
-              .then(function(quotationUpdated) {
+              .then(function (quotationUpdated) {
                 sails.log.info('quoation updated with paymentAttempts', quotationId);
                 //sails.log.info('quotationUpdated', quotationUpdated);
                 return Email.sendQuotation(quotationId, req.activeStore, true);
               })
-              .then(function() {
+              .then(function () {
                 sails.log.info('quoation processing err email sent', quotationId);
               });
           }
@@ -337,7 +340,7 @@ module.exports = {
       });
   },
 
-  generateSapOrder: function(req, res) {
+  generateSapOrder: function (req, res) {
     var form = req.allParams();
     var id = form.id;
     var promises = [
@@ -350,7 +353,7 @@ module.exports = {
     ];
 
     Promise.all(promises)
-      .then(function(results) {
+      .then(function (results) {
         var order = results[0];
         var orderDetails = results[1];
 
@@ -360,62 +363,62 @@ module.exports = {
 
         return OrderService.relateOrderToSap(order, orderDetails, req);
       })
-      .then(function() {
+      .then(function () {
         res.ok();
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log('err', err);
         res.negotiate(err);
       });
   },
 
-  getInvoicesLogs: function(req, res) {
+  getInvoicesLogs: function (req, res) {
     var form = req.params.all();
     var orderId = form.orderId;
 
     AlegraLogWeb.find({ OrderWeb: orderId })
-      .then(function(logs) {
+      .then(function (logs) {
         res.json(logs);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log('err', err);
         res.negotiate(err);
       });
   },
 
-  getCountByUser: function(req, res) {
+  getCountByUser: function (req, res) {
     var form = req.params.all();
     OrderService.getCountByUser(form)
-      .then(function(result) {
+      .then(function (result) {
         res.json(result);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log(err);
         res.negotiate(err);
       });
   },
 
-  getTotalsByUser: function(req, res) {
+  getTotalsByUser: function (req, res) {
     var form = req.params.all();
     OrderService.getTotalsByUser(form)
-      .then(function(result) {
+      .then(function (result) {
         res.json(result);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log(err);
         res.negotiate(err);
       });
   },
 
-  receiveSpeiNotification: function(req, res) {
+  receiveSpeiNotification: function (req, res) {
     var resolved = false;
     ConektaService.processNotification(req, res)
-      .then(function(result) {
+      .then(function (result) {
         console.log('Processed notification');
         res.ok();
         resolved = true;
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log('err notification', err);
         if (!resolved) {
           res.ok();
@@ -428,7 +431,7 @@ function replaceErrors(key, value) {
   if (value instanceof Error) {
     var error = {};
 
-    Object.getOwnPropertyNames(value).forEach(function(key) {
+    Object.getOwnPropertyNames(value).forEach(function (key) {
       error[key] = value[key];
     });
 
