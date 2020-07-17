@@ -233,8 +233,7 @@ function buildOrderRequestParams(params) {
         WhsCode: getWhsCodeById(detail.shipCompanyFrom, warehouses),
         ShipDate: moment(detail.shipDate).format(SAP_DATE_FORMAT),
         DiscountPercent: detail.discountPercent,
-        Company: getCompanyCode(detail.Product.U_Empresa, params
-          .currentStore.group),
+        Company: getCompanyCode(detail.Product.U_Empresa, params.currentStore.group),
         Price: detail.total,
         Service: detail.Product.Service, //FOR SR SERVICES
         ImmediateDelivery: detail.Product.ItemCode === 'SR00078' ?
@@ -389,8 +388,8 @@ function getAllWarehouses() {
 
 function getSeriesNum(storeId) {
   return Store.findOne({
-      id: storeId
-    })
+    id: storeId
+  })
     .populate('Warehouse')
     .then(function (store) {
       return mapWhsSeries(store.Warehouse.WhsName);

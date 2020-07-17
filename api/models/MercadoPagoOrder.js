@@ -27,6 +27,12 @@ module.exports = {
     isSpeiOrder: {
       type: 'boolean'
     },
+    status: {
+      type: 'string'
+    },
+    status_detail: {
+      type: 'string'
+    },
     requestData: {
       type: 'text'
     },
@@ -46,6 +52,9 @@ module.exports = {
       type: 'string'
     },
     installments: {
+      type: 'integer'
+    },
+    total_paid_amount: {
       type: 'integer'
     },
     UserWeb: {

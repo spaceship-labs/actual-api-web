@@ -8,13 +8,13 @@ var ObjectId = require('sails-mongo/node_modules/mongodb').ObjectID;
 const requestIp = require('request-ip');
 
 module.exports = {
-  create: function(req, res) {
+  create: function (req, res) {
     var form = req.allParams();
     var createdId;
     const clientIp = requestIp.getClientIp(req);
 
     form.Details = formatProductsIds(form.Details);
-    form.Details = form.Details.map(function(d) {
+    form.Details = form.Details.map(function (d) {
       if (req.user) {
         d.UserWeb = req.user.id;
       }
@@ -33,7 +33,7 @@ module.exports = {
     };
 
     QuotationWeb.create(form)
-      .then(function(created) {
+      .then(function (created) {
         createdId = created.id;
         var calculator = QuotationService.Calculator();
         if (!form.Details || form.Details.length === 0) {
@@ -42,19 +42,19 @@ module.exports = {
 
         return calculator.updateQuotationTotals(created.id, opts);
       })
-      .then(function(updatedQuotation) {
+      .then(function (updatedQuotation) {
         return Common.nativeFindOne({ _id: ObjectId(createdId) }, QuotationWeb);
       })
-      .then(function(quotation) {
+      .then(function (quotation) {
         res.json(quotation);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log('err create quotation', err);
         res.negotiate(err);
       });
   },
 
-  update: function(req, res) {
+  update: function (req, res) {
     var form = req.allParams();
     var id = form.id;
     var userId = UserService.getCurrentUserId(req);
@@ -62,7 +62,7 @@ module.exports = {
     form.Store = req.activeStore.id;
 
     Common.nativeFindOne({ _id: ObjectId(id) }, QuotationWeb)
-      .then(function(quotation) {
+      .then(function (quotation) {
         if (!quotation) {
           return Promise.reject(new Error('Cotización no encontrada'));
         }
@@ -74,20 +74,20 @@ module.exports = {
         }
         return QuotationWeb.update({ id: id }, form);
       })
-      .then(function(updatedQuotation) {
+      .then(function (updatedQuotation) {
         if (updatedQuotation && updatedQuotation.length > 0) {
           res.json(updatedQuotation[0]);
         } else {
           res.json(null);
         }
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log('err update quotation', err);
         res.negotiate(err);
       });
   },
 
-  updateDetails: function(req, res) {
+  updateDetails: function (req, res) {
     var form = req.allParams();
     var id = form.id;
     var userId = UserService.getCurrentUserId(req);
@@ -97,7 +97,7 @@ module.exports = {
     form.Store = req.activeStore.id;
 
     Common.nativeFindOne({ _id: ObjectId(id) }, QuotationWeb)
-      .then(function(quotation) {
+      .then(function (quotation) {
         if (!quotation) {
           return Promise.reject(new Error('Cotización no encontrada'));
         }
@@ -108,7 +108,7 @@ module.exports = {
           }
         }
 
-        var detailsParamsMaps = details.map(function(detail) {
+        var detailsParamsMaps = details.map(function (detail) {
           return {
             id: detail.id,
             shipDate: detail.shipDate,
@@ -122,7 +122,7 @@ module.exports = {
         return calculator.updateDetails(detailsParamsMaps);
         //return QuotationWeb.update({id:id}, form);
       })
-      .then(function(updatedDetails) {
+      .then(function (updatedDetails) {
         var opts = {
           paymentGroup: 1,
           updateDetails: true,
@@ -132,16 +132,16 @@ module.exports = {
         return calculator.updateQuotationTotals(id, opts);
         //res.json(true);
       })
-      .then(function(updated) {
+      .then(function (updated) {
         res.json(true);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log('err update quotation', err);
         res.negotiate(err);
       });
   },
 
-  updateQuotationAddress: function(req, res) {
+  updateQuotationAddress: function (req, res) {
     var form = req.allParams();
     var quotationId = form.id;
     var params = {
@@ -159,7 +159,7 @@ module.exports = {
     };
 
     Common.nativeFindOne(query, QuotationWeb)
-      .then(function(quotation) {
+      .then(function (quotation) {
         if (!quotation) {
           return Promise.reject(new Error('Cotización no encontrada'));
         }
@@ -175,21 +175,21 @@ module.exports = {
         }
         return QuotationWeb.update({ id: quotationId }, params);
       })
-      .then(function(resultUpdate) {
+      .then(function (resultUpdate) {
         updatedQuotation = resultUpdate[0];
         contactId = updatedQuotation.Address;
         return QuotationService.setQuotationZipcodeDeliveryByContactId(quotationId, contactId);
       })
-      .then(function() {
+      .then(function () {
         res.json(updatedQuotation);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log('err updateQuotationAddress', err);
         res.negotiate(err);
       });
   },
 
-  findByIdQuickRead: function(req, res) {
+  findByIdQuickRead: function (req, res) {
     var form = req.allParams();
     var id = form.id;
     var query = {
@@ -207,7 +207,7 @@ module.exports = {
 
     QuotationWeb.findOne(query)
       .populate('Details')
-      .then(function(quotation) {
+      .then(function (quotation) {
         if (!quotation) {
           return Promise.reject(new Error('Cotización no encontrada'));
         }
@@ -218,13 +218,13 @@ module.exports = {
         }
         res.json(quotation);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log('err', err);
         res.negotiate(err);
       });
   },
 
-  findById: function(req, res) {
+  findById: function (req, res) {
     var form = req.allParams();
     var id = form.id;
     var getPayments = form.payments;
@@ -262,10 +262,10 @@ module.exports = {
     });
 
     updateToLatest
-      .then(function() {
+      .then(function () {
         return quotationQuery;
       })
-      .then(function(quotation) {
+      .then(function (quotation) {
         if (!quotation) {
           return Promise.reject(new Error('Cotización no encontrada'));
         }
@@ -281,13 +281,13 @@ module.exports = {
 
         return res.json(quotation);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log('err findById quotation', err);
         return res.negotiate(err);
       });
   },
 
-  getQuotationAddress: function(req, res) {
+  getQuotationAddress: function (req, res) {
     var form = req.allParams();
     var id = form.id;
     var query = {
@@ -304,7 +304,7 @@ module.exports = {
 
     QuotationWeb.findOne(query)
       .populate('Address')
-      .then(function(quotation) {
+      .then(function (quotation) {
         if (!quotation) {
           return Promise.reject(new Error('Cotización no encontrada'));
         }
@@ -317,13 +317,13 @@ module.exports = {
 
         return res.json(quotation.Address);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log('err getQuotationAddress quotation', err);
         return res.negotiate(err);
       });
   },
 
-  addDetail: function(req, res) {
+  addDetail: function (req, res) {
     var form = req.allParams();
     var id = form.id;
     var currentUserClientId = UserService.getCurrentUserClientId(req);
@@ -351,7 +351,7 @@ module.exports = {
     };
 
     Common.nativeFindOne(query, QuotationWeb)
-      .then(function(quotation) {
+      .then(function (quotation) {
         if (!quotation) {
           return Promise.reject(new Error('Cotización no encontrada'));
         }
@@ -369,7 +369,7 @@ module.exports = {
         }
         return QuotationDetailWeb.create(form);
       })
-      .then(function(created) {
+      .then(function (created) {
         var calculator = QuotationService.Calculator();
         if (form.ZipcodeDelivery) {
           //opts.updateParams = ObjectId(form.ZipcodeDelivery);
@@ -381,19 +381,19 @@ module.exports = {
 
         return calculator.updateQuotationTotals(id, opts);
       })
-      .then(function(updatedQuotation) {
+      .then(function (updatedQuotation) {
         return QuotationWeb.findOne({ id: id });
       })
-      .then(function(quotation) {
+      .then(function (quotation) {
         res.json(quotation);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log('err addDetail quotation', err);
         res.negotiate(err);
       });
   },
 
-  addMultipleDetails: function(req, res) {
+  addMultipleDetails: function (req, res) {
     var form = req.allParams();
     var id = form.id;
     var currentUserClientId = UserService.getCurrentUserClientId(req);
@@ -401,7 +401,7 @@ module.exports = {
     form.Details = formatProductsIds(form.Details);
 
     if (form.Details && form.Details.length > 0 && _.isArray(form.Details)) {
-      form.Details = form.Details.map(function(d) {
+      form.Details = form.Details.map(function (d) {
         d.shipDate = moment(d.shipDate)
           .startOf('day')
           .toDate();
@@ -425,7 +425,7 @@ module.exports = {
     };
 
     Common.nativeFindOne(query, QuotationWeb)
-      .then(function(quotation) {
+      .then(function (quotation) {
         if (!quotation) {
           return Promise.reject(new Error('Cotización no encontrada'));
         }
@@ -441,7 +441,7 @@ module.exports = {
         }
         return QuotationDetailWeb.create(form.Details);
       })
-      .then(function(created) {
+      .then(function (created) {
         var calculator = QuotationService.Calculator();
         if (form.ZipcodeDelivery) {
           opts.updateParams = {
@@ -452,19 +452,19 @@ module.exports = {
 
         return calculator.updateQuotationTotals(id, opts);
       })
-      .then(function(updatedQuotation) {
+      .then(function (updatedQuotation) {
         return QuotationWeb.findOne({ id: id });
       })
-      .then(function(quotation) {
+      .then(function (quotation) {
         res.json(quotation);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log('err addMultipleDetails quotation', err);
         res.negotiate(err);
       });
   },
 
-  removeDetail: function(req, res) {
+  removeDetail: function (req, res) {
     var form = req.allParams();
     var detailId = form.detailId;
     var quotationId = form.quotation;
@@ -481,7 +481,7 @@ module.exports = {
     };
 
     Common.nativeFindOne(query, QuotationWeb)
-      .then(function(quotation) {
+      .then(function (quotation) {
         if (!quotation) {
           return Promise.reject(new Error('Cotización no encontrada'));
         }
@@ -498,17 +498,17 @@ module.exports = {
 
         return QuotationDetailWeb.destroy({ id: detailId });
       })
-      .then(function() {
+      .then(function () {
         var calculator = QuotationService.Calculator();
         return calculator.updateQuotationTotals(quotationId, opts);
       })
-      .then(function(updatedQuotationResult) {
+      .then(function (updatedQuotationResult) {
         return QuotationWeb.findOne({ id: quotationId }).populate('Details');
       })
-      .then(function(quotation) {
+      .then(function (quotation) {
         res.json(quotation);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log('err removeDetailsGroup', err);
         res.negotiate(err);
       });
@@ -531,7 +531,7 @@ module.exports = {
     };
 
     Common.nativeFindOne(query, QuotationWeb)
-      .then(function(quotation) {
+      .then(function (quotation) {
         if (!quotation) {
           return Promise.reject(new Error('Cotización no encontrada'));
         }
@@ -548,23 +548,23 @@ module.exports = {
 
         return QuotationDetailWeb.destroy({ QuotationWeb: quotationId });
       })
-      .then(function() {
+      .then(function () {
         var calculator = QuotationService.Calculator();
         return calculator.updateQuotationTotals(quotationId, opts);
       })
-      .then(function(updatedQuotationResult) {
+      .then(function (updatedQuotationResult) {
         return QuotationWeb.findOne({ id: quotationId }).populate('Details');
       })
-      .then(function(quotation) {
+      .then(function (quotation) {
         res.json(quotation);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log('err removeDetailsGroup', err);
         res.negotiate(err);
       });
   },
 
-  removeDetailsGroup: function(req, res) {
+  removeDetailsGroup: function (req, res) {
     var form = req.allParams();
     var detailsIds = form.detailsIds;
     var quotationId = form.quotation;
@@ -581,7 +581,7 @@ module.exports = {
     };
 
     Common.nativeFindOne(query, QuotationWeb)
-      .then(function(quotation) {
+      .then(function (quotation) {
         if (!quotation) {
           return Promise.reject(new Error('Cotización no encontrada'));
         }
@@ -598,23 +598,23 @@ module.exports = {
 
         return QuotationDetailWeb.destroy({ id: detailsIds });
       })
-      .then(function() {
+      .then(function () {
         var calculator = QuotationService.Calculator();
         return calculator.updateQuotationTotals(quotationId, opts);
       })
-      .then(function(updatedQuotationResult) {
+      .then(function (updatedQuotationResult) {
         return QuotationWeb.findOne({ id: quotationId }).populate('Details');
       })
-      .then(function(quotation) {
+      .then(function (quotation) {
         res.json(quotation);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log('err removeDetailsGroup', err);
         res.negotiate(err);
       });
   },
 
-  find: function(req, res) {
+  find: function (req, res) {
     var form = req.allParams();
     var clientId = UserService.getCurrentUserClientId(req);
     form.filters = form.filters || {};
@@ -629,16 +629,16 @@ module.exports = {
     };
 
     Common.find(model, form, extraParams)
-      .then(function(result) {
+      .then(function (result) {
         res.ok(result);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log('err find quotation', err);
         res.negotiate(err);
       });
   },
 
-  findAll: function(req, res) {
+  findAll: function (req, res) {
     var form = req.allParams();
     var clientId = UserService.getCurrentUserClientId(req);
     form.filters = form.filters || {};
@@ -649,7 +649,7 @@ module.exports = {
       searchFields: ['folio', 'id'],
       selectFields: form.fields,
       filters: form.filters,
-      populateFields: ['Client']
+      populateFields: ['Client', 'UnregisteredClient']
     };
 
     extraParams.filters = Common.removeUnusedFilters(extraParams.filters);
@@ -669,7 +669,7 @@ module.exports = {
     }
 
     preSearch
-      .then(function(preSearchResults) {
+      .then(function (preSearchResults) {
         //Search by pre clients search
         if (preSearchResults && _.isArray(preSearchResults)) {
           extraParams.filters.Client = preSearchResults;
@@ -677,16 +677,16 @@ module.exports = {
 
         return Common.find(model, form, extraParams);
       })
-      .then(function(result) {
+      .then(function (result) {
         res.ok(result);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log(err);
         res.negotiate(err);
       });
   },
 
-  getQuotationTotals: function(req, res) {
+  getQuotationTotals: function (req, res) {
     var form = req.allParams();
     var id = form.id;
     var paymentGroup = form.paymentGroup || 1;
@@ -703,7 +703,7 @@ module.exports = {
     };
 
     Common.nativeFindOne(query, QuotationWeb)
-      .then(function(quotation) {
+      .then(function (quotation) {
         if (!quotation) {
           return Promise.reject(new Error('Cotización no encontrada'));
         }
@@ -716,16 +716,16 @@ module.exports = {
 
         return calculator.getQuotationTotals(id, params);
       })
-      .then(function(totals) {
+      .then(function (totals) {
         res.json(totals);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log('err getQuotationTotals', err);
         res.negotiate(err);
       });
   },
 
-  sendEmail: function(req, res) {
+  sendEmail: function (req, res) {
     var form = req.allParams();
     var id = form.id;
     var currentUserClientId = UserService.getCurrentUserClientId(req);
@@ -735,7 +735,7 @@ module.exports = {
     };
 
     Common.nativeFindOne(query, QuotationWeb)
-      .then(function(quotation) {
+      .then(function (quotation) {
         if (!quotation) {
           return Promise.reject(new Error('Cotización no encontrada'));
         }
@@ -745,15 +745,15 @@ module.exports = {
         }
         return Email.sendQuotation(id, req.activeStore);
       })
-      .then(function(quotation) {
+      .then(function (quotation) {
         return res.json(quotation);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         return res.negotiate(err);
       });
   },
 
-  getCurrentStock: function(req, res) {
+  getCurrentStock: function (req, res) {
     var form = req.allParams();
     var quotationId = form.quotationId;
     var details;
@@ -781,7 +781,7 @@ module.exports = {
     ];
 
     Promise.all(promises)
-      .then(function(results) {
+      .then(function (results) {
         quotation = results[0];
         details = results[1];
         var whsId = req.activeStore.Warehouse;
@@ -792,34 +792,34 @@ module.exports = {
 
         return Company.findOne({ id: whsId });
       })
-      .then(function(warehouse) {
+      .then(function (warehouse) {
         var zipcodeDeliveryId = quotation.ZipcodeDelivery;
         var activeStore = req.activeStore;
         return StockService.getDetailsStock(details, warehouse, zipcodeDeliveryId, activeStore);
       })
-      .then(function(results) {
+      .then(function (results) {
         res.json(results);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log('err getCurrentStock', err);
         res.negotiate(err);
       });
   },
 
-  validateStock: function(req, res) {
+  validateStock: function (req, res) {
     var form = req.allParams();
     var quotationId = form.id;
     StockService.validateQuotationStockById(quotationId, req)
-      .then(function(isValid) {
+      .then(function (isValid) {
         return res.json({ isValid: isValid });
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log('err validateStock', err);
         res.negotiate(err);
       });
   },
 
-  getQuotationPaymentOptions: function(req, res) {
+  getQuotationPaymentOptions: function (req, res) {
     var form = req.allParams();
     var quotationId = form.id;
     var currentUserClientId = UserService.getCurrentUserClientId(req);
@@ -829,7 +829,7 @@ module.exports = {
     };
 
     Common.nativeFindOne(query, QuotationWeb)
-      .then(function(quotation) {
+      .then(function (quotation) {
         if (!quotation) {
           return Promise.reject(new Error('Cotización no encontrada'));
         }
@@ -847,32 +847,32 @@ module.exports = {
 
         return PaymentService.getMethodGroupsWithTotals(quotationId, req.activeStore, options);
       })
-      .then(function(paymentOptions) {
+      .then(function (paymentOptions) {
         res.json(paymentOptions);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log('err getQuotationPaymentOptions', err);
         res.negotiate(err);
       });
   },
 
-  getQuotationPayments: function(req, res) {
+  getQuotationPayments: function (req, res) {
     var form = req.allParams();
     var quotationId = form.id;
     var query = {
       QuotationWeb: quotationId
     };
     PaymentWeb.find(query)
-      .then(function(payments) {
+      .then(function (payments) {
         res.json(payments);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log('err getQuotationPayments', err);
         res.negotiate(err);
       });
   },
 
-  getQuotationSapLogs: function(req, res) {
+  getQuotationSapLogs: function (req, res) {
     var form = req.allParams();
     var quotationId = form.id;
     var query = {
@@ -880,16 +880,16 @@ module.exports = {
     };
 
     SapOrderConnectionLogWeb.find(query)
-      .then(function(logs) {
+      .then(function (logs) {
         res.json(logs);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log('err getQuotationSapLogs', err);
         res.negotiate(err);
       });
   },
 
-  getQuotationZipcodeDelivery: function(req, res) {
+  getQuotationZipcodeDelivery: function (req, res) {
     var form = req.allParams();
     var id = form.id;
     var query = {
@@ -904,7 +904,7 @@ module.exports = {
 
     QuotationWeb.findOne(query)
       .populate('ZipcodeDelivery')
-      .then(function(quotation) {
+      .then(function (quotation) {
         if (!quotation) {
           return Promise.reject(new Error('Cotización no encontrada'));
         }
@@ -915,13 +915,13 @@ module.exports = {
         }
         res.json(quotation.ZipcodeDelivery);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log('err getQuotationZipcodeDelivery', err);
         res.negotiate(err);
       });
   },
 
-  getQuotationPaymentsAttempts: function(req, res) {
+  getQuotationPaymentsAttempts: function (req, res) {
     var form = req.allParams();
     var id = form.id;
     var query = {
@@ -936,7 +936,7 @@ module.exports = {
     }
 
     QuotationWeb.findOne(query)
-      .then(function(quotation) {
+      .then(function (quotation) {
         if (!quotation) {
           return Promise.reject(new Error('Cotización no encontrada'));
         }
@@ -947,21 +947,21 @@ module.exports = {
         }
         res.json(quotation.paymentAttempts);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log('err getQuotationZipcodeDelivery', err);
         res.negotiate(err);
       });
   },
 
-  getQuotationLeads: function(req, res) {
+  getQuotationLeads: function (req, res) {
     var form = req.allParams();
     var quotationId = form.quotationId;
 
     Lead.find({ QuotationWeb: quotationId })
-      .then(function(leads) {
+      .then(function (leads) {
         res.json(leads);
       })
-      .catch(function(err) {
+      .catch(function (err) {
         console.log('getQuotationLeads err', err);
         res.negotiate(err);
       });
@@ -989,7 +989,7 @@ function isImmediateDelivery(shipDate) {
 function formatProductsIds(details) {
   var result = [];
   if (details && details.length > 0) {
-    result = details.map(function(d) {
+    result = details.map(function (d) {
       if (d.Product) {
         d.Product = typeof d.Product == 'string' ? d.Product : d.Product.id;
       }

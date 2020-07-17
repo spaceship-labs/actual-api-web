@@ -37,6 +37,10 @@ module.exports = {
       via: 'QuotationWeb'
     },
 
+    UnregisteredClient: {
+      model: 'UnregisteredClient'
+    },
+
     ignoreContactZipcode: {
       defaultsTo: true,
       type: 'boolean'
@@ -133,9 +137,9 @@ module.exports = {
     }
   },
 
-  beforeCreate: function(val, cb) {
+  beforeCreate: function (val, cb) {
     val.tracing = addDefaultTracingDate();
-    Common.orderCustomAI(val, 'quotationWebFolio', function(val) {
+    Common.orderCustomAI(val, 'quotationWebFolio', function (val) {
       cb();
     });
   }
