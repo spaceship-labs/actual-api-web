@@ -53,6 +53,9 @@ var fiscalDataClientMessageTemplate = fs
 var registerInvitationTemplate = fs
   .readFileSync(sails.config.appPath + '/views/email/register-invitation.html')
   .toString();
+var sendRejectedPaymentEmailTemplate = fs
+  .readFileSync(sails.config.appPath + '/views/email/payment-status-notification.html')
+  .toString();
 
 paymentTemplate = ejs.compile(paymentTemplate);
 passwordTemplate = ejs.compile(passwordTemplate);
@@ -68,6 +71,7 @@ speiReminderTemplate = ejs.compile(speiReminderTemplate);
 speiExpirationTemplate = ejs.compile(speiExpirationTemplate);
 fiscalDataClientMessageTemplate = ejs.compile(fiscalDataClientMessageTemplate);
 registerInvitationTemplate = ejs.compile(registerInvitationTemplate);
+sendRejectedPaymentEmail = ejs.compile(sendRejectedPaymentEmailTemplate);
 
 module.exports = {
   sendPasswordRecovery: password,
@@ -85,7 +89,8 @@ module.exports = {
   sendSpeiQuotation,
   sendSuggestions,
   sendRegisterInvitation,
-  quotationEmail
+  quotationEmail,
+  sendRejectedPaymentEmail
 };
 
 function password(userName, userEmail, recoveryUrl, cb) {
@@ -115,8 +120,8 @@ function password(userName, userEmail, recoveryUrl, cb) {
   request.method = 'POST';
   request.path = '/v3/mail/send';
   request.body = requestBody;
-  return new Promise(function(resolve, reject) {
-    sendgrid.API(request, function(response) {
+  return new Promise(function (resolve, reject) {
+    sendgrid.API(request, function (response) {
       if (response.statusCode >= 200 && response.statusCode <= 299) {
         resolve();
       } else {
@@ -160,8 +165,8 @@ function quotationEmail(totalQuotation, params, products) {
   request.method = 'POST';
   request.path = '/v3/mail/send';
   request.body = requestBody;
-  return new Promise(function(resolve, reject) {
-    sendgrid.API(request, function(response) {
+  return new Promise(function (resolve, reject) {
+    sendgrid.API(request, function (response) {
       if (response.statusCode >= 200 && response.statusCode <= 299) {
         resolve(true);
       } else {
@@ -207,8 +212,8 @@ function sendRegisterInvitation(userName, userEmail, recoveryUrl) {
   request.method = 'POST';
   request.path = '/v3/mail/send';
   request.body = requestBody;
-  return new Promise(function(resolve, reject) {
-    sendgrid.API(request, function(response) {
+  return new Promise(function (resolve, reject) {
+    sendgrid.API(request, function (response) {
       if (response.statusCode >= 200 && response.statusCode <= 299) {
         resolve();
       } else {
@@ -252,13 +257,63 @@ function sendRegister(userName, userEmail, store, cb) {
   request.method = 'POST';
   request.path = '/v3/mail/send';
   request.body = requestBody;
-  sendgrid.API(request, function(response) {
+  sendgrid.API(request, function (response) {
     if (response.statusCode >= 200 && response.statusCode <= 299) {
       cb();
     } else {
       cb(response);
     }
   });
+}
+
+function sendRejectedPaymentEmail(params, statusDetail) {
+  const { user_name, mail, order_id, order_total, folio } = params;
+  const request = sendgrid.emptyRequest();
+  const requestBody = undefined;
+  const mail = new helper.Mail();
+  const personalization = new helper.personalization();
+  const from = new helper.Email('noreply@actualgroup.com', 'Actual Group');
+  const to = new helper.Email('asanchez@actualg.com', 'Alia Sanchez');
+  const toAux = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
+  var subject = 'Procesando pago en Actual';
+  var res = sendRejectedPaymentEmailTemplate({
+    user_name,
+    user_email: mail,
+    company: {
+      url: baseURL,
+      logo: baseURL + '/logos/group.png'
+    },
+    statusDetail,
+    order_id,
+    order_total,
+    folio
+  });
+
+  var content = new helper.Content('text/html', res);
+
+  if (process.env.MODE === 'production') {
+    personalization.addTo(to);
+    personalization.addTo(toAux2);
+  }
+
+  personalization.addTo(toAux);
+  personalization.setSubject(subject);
+  mail.setFrom(from);
+  mail.addContent(content);
+  mail.addPersonalization(personalization);
+  requestBody = mail.toJSON();
+  request.method = 'POST';
+  request.path = '/v3/mail/send';
+  requestBody = requestBody;
+  sendgrid.API(request, function (response) {
+    if (response.statusCode >= 200 && response.statusCode <= 299) {
+      cb();
+    } else {
+      cb(response);
+    }
+  });
+
+  console.log('TESTING EMAIL REJECTED');
 }
 
 function sendFiscalData(form, store, cb) {
@@ -298,7 +353,7 @@ function sendFiscalData(form, store, cb) {
   request.method = 'POST';
   request.path = '/v3/mail/send';
   request.body = requestBody;
-  sendgrid.API(request, function(response) {
+  sendgrid.API(request, function (response) {
     if (response.statusCode >= 200 && response.statusCode <= 299) {
       cb();
     } else {
@@ -346,7 +401,7 @@ function sendFiscalDataMessageToClient(name, email, store, cb) {
   request.method = 'POST';
   request.path = '/v3/mail/send';
   request.body = requestBody;
-  sendgrid.API(request, function(response) {
+  sendgrid.API(request, function (response) {
     if (response.statusCode >= 200 && response.statusCode <= 299) {
       cb();
     } else {
@@ -387,7 +442,7 @@ function sendContact(name, email, form, store, cb) {
   request.method = 'POST';
   request.path = '/v3/mail/send';
   request.body = requestBody;
-  sendgrid.API(request, function(response) {
+  sendgrid.API(request, function (response) {
     if (response.statusCode >= 200 && response.statusCode <= 299) {
       cb();
     } else {
@@ -428,7 +483,7 @@ function sendSuggestions(name, email, form, store, cb) {
   request.method = 'POST';
   request.path = '/v3/mail/send';
   request.body = requestBody;
-  sendgrid.API(request, function(response) {
+  sendgrid.API(request, function (response) {
     if (response.statusCode >= 200 && response.statusCode <= 299) {
       cb();
     } else {
@@ -482,8 +537,8 @@ function sendSpeiInstructions(clientName, clientEmail, quotationFolio, order, st
   request.path = '/v3/mail/send';
   request.body = requestBody;
 
-  return new Promise(function(resolve, reject) {
-    sendgrid.API(request, function(response) {
+  return new Promise(function (resolve, reject) {
+    sendgrid.API(request, function (response) {
       if (response.statusCode >= 200 && response.statusCode <= 299) {
         //cb();
         resolve();
@@ -537,8 +592,8 @@ function sendSpeiReminder(clientName, clientEmail, expirationDateTime, folio, st
   request.path = '/v3/mail/send';
   request.body = requestBody;
 
-  return new Promise(function(resolve, reject) {
-    sendgrid.API(request, function(response) {
+  return new Promise(function (resolve, reject) {
+    sendgrid.API(request, function (response) {
       if (response.statusCode >= 200 && response.statusCode <= 299) {
         //cb();
         resolve(folio);
@@ -590,8 +645,8 @@ function sendSpeiExpiration(clientName, clientEmail, folio, store) {
   request.path = '/v3/mail/send';
   request.body = requestBody;
 
-  return new Promise(function(resolve, reject) {
-    sendgrid.API(request, function(response) {
+  return new Promise(function (resolve, reject) {
+    sendgrid.API(request, function (response) {
       if (response.statusCode >= 200 && response.statusCode <= 299) {
         //cb();
         resolve();
@@ -609,13 +664,13 @@ function orderEmail(orderId) {
     .populate('Store')
     .populate('Details')
     .populate('Payments')
-    .then(function(order) {
+    .then(function (order) {
       var client = order.Client;
       var store = order.Store;
-      var details = order.Details.map(function(detail) {
+      var details = order.Details.map(function (detail) {
         return detail.id;
       });
-      var payments = order.Payments.map(function(payment) {
+      var payments = order.Payments.map(function (payment) {
         return payment.id;
       });
       var ewallet = order.EwalletRecords || [];
@@ -625,8 +680,8 @@ function orderEmail(orderId) {
       payments = PaymentWeb.find(payments);
       return [client, order, details, payments, ewallet, store];
     })
-    .spread(function(client, order, details, payments, ewallet, store) {
-      var products = details.map(function(detail) {
+    .spread(function (client, order, details, payments, ewallet, store) {
+      var products = details.map(function (detail) {
         var date = moment(detail.shipDate);
         moment.locale('es');
         date.locale(false);
@@ -667,7 +722,7 @@ function orderEmail(orderId) {
           promotionValidity: promotionValidity
         };
       });
-      var payments = payments.map(function(payment) {
+      var payments = payments.map(function (payment) {
         var ammount =
           payment.currency == 'usd' ? payment.ammount * payment.exchangeRate : payment.ammount;
         ammount = ammount.toFixed(2);
@@ -685,19 +740,19 @@ function orderEmail(orderId) {
         };
       });
       var bewallet = client.ewallet;
-      var pewallet = ewallet.reduce(function(acum, curr) {
+      var pewallet = ewallet.reduce(function (acum, curr) {
         if (curr.type == 'negative') {
           return acum + curr.amount;
         }
         return acum - curr.amount;
       }, bewallet);
-      var eewallet = ewallet.reduce(function(acum, curr) {
+      var eewallet = ewallet.reduce(function (acum, curr) {
         if (curr.type == 'positive') {
           return acum + curr.amount;
         }
         return acum;
       }, 0);
-      var sewallet = ewallet.reduce(function(acum, curr) {
+      var sewallet = ewallet.reduce(function (acum, curr) {
         if (curr.type == 'negative') {
           return acum + curr.amount;
         }
@@ -711,12 +766,12 @@ function orderEmail(orderId) {
       };
       return [client, order, products, payments, ewallet, store];
     })
-    .spread(function(client, order, products, payments, ewallet, store) {
-      var mats = products.map(function(p) {
+    .spread(function (client, order, products, payments, ewallet, store) {
+      var mats = products.map(function (p) {
         return materials(p.id);
       });
-      return Promise.all(mats).then(function(mats) {
-        mats.forEach(function(m, i) {
+      return Promise.all(mats).then(function (mats) {
+        mats.forEach(function (m, i) {
           products[i].material = m;
         });
         return sendOrder(client, order, products, payments, ewallet, store);
@@ -815,8 +870,8 @@ function sendOrder(client, order, products, payments, ewallet, store) {
   request.method = 'POST';
   request.path = '/v3/mail/send';
   request.body = requestBody;
-  return new Promise(function(resolve, reject) {
-    sendgrid.API(request, function(response) {
+  return new Promise(function (resolve, reject) {
+    sendgrid.API(request, function (response) {
       if (response.statusCode >= 200 && response.statusCode <= 299) {
         resolve(order);
       } else {
@@ -831,10 +886,10 @@ function quotation(quotationId, activeStore, isCardProcessingError, lead) {
     .populate('Client')
     .populate('Store')
     .populate('Details')
-    .then(function(quotation) {
+    .then(function (quotation) {
       var client = quotation.Client;
       var store = quotation.Store;
-      var details = quotation.Details.map(function(detail) {
+      var details = quotation.Details.map(function (detail) {
         return detail.id;
       });
       details = QuotationDetailWeb.find(details)
@@ -844,8 +899,8 @@ function quotation(quotationId, activeStore, isCardProcessingError, lead) {
       var transfers = TransferService.transfers(store.group);
       return [client, quotation, details, payments, transfers, store];
     })
-    .spread(function(client, quotation, details, payments, transfers, store) {
-      var products = details.map(function(detail) {
+    .spread(function (client, quotation, details, payments, transfers, store) {
+      var products = details.map(function (detail) {
         var date = moment(detail.shipDate);
         moment.locale('es');
         date.locale(false);
@@ -888,12 +943,12 @@ function quotation(quotationId, activeStore, isCardProcessingError, lead) {
       });
       return [client, quotation, products, payments, transfers, store];
     })
-    .spread(function(client, quotation, products, payments, transfers, store) {
-      var mats = products.map(function(p) {
+    .spread(function (client, quotation, products, payments, transfers, store) {
+      var mats = products.map(function (p) {
         return materials(p.id);
       });
-      return Promise.all(mats).then(function(mats) {
-        mats.forEach(function(m, i) {
+      return Promise.all(mats).then(function (mats) {
+        mats.forEach(function (m, i) {
           products[i].material = m;
         });
 
@@ -919,10 +974,10 @@ function sendSpeiQuotation(quotationId, activeStore) {
     .populate('Store')
     .populate('Details')
     .populate('OrderWeb')
-    .then(function(quotation) {
+    .then(function (quotation) {
       var client = quotation.Client;
       var store = quotation.Store;
-      var details = quotation.Details.map(function(detail) {
+      var details = quotation.Details.map(function (detail) {
         return detail.id;
       });
       details = QuotationDetailWeb.find(details)
@@ -933,8 +988,8 @@ function sendSpeiQuotation(quotationId, activeStore) {
       var order = quotation.OrderWeb;
       return [client, quotation, details, payments, transfers, store, order];
     })
-    .spread(function(client, quotation, details, payments, transfers, store, order) {
-      var products = details.map(function(detail) {
+    .spread(function (client, quotation, details, payments, transfers, store, order) {
+      var products = details.map(function (detail) {
         var date = moment(detail.shipDate);
         moment.locale('es');
         date.locale(false);
@@ -977,12 +1032,12 @@ function sendSpeiQuotation(quotationId, activeStore) {
       });
       return [client, quotation, products, payments, transfers, store, order];
     })
-    .spread(function(client, quotation, products, payments, transfers, store, order) {
-      var mats = products.map(function(p) {
+    .spread(function (client, quotation, products, payments, transfers, store, order) {
+      var mats = products.map(function (p) {
         return materials(p.id);
       });
-      return Promise.all(mats).then(function(mats) {
-        mats.forEach(function(m, i) {
+      return Promise.all(mats).then(function (mats) {
+        mats.forEach(function (m, i) {
           products[i].material = m;
         });
         return sendQuotation(client, quotation, products, payments, transfers, store, order);
@@ -1097,8 +1152,8 @@ function sendQuotation(
   request.method = 'POST';
   request.path = '/v3/mail/send';
   request.body = requestBody;
-  return new Promise(function(resolve, reject) {
-    sendgrid.API(request, function(response) {
+  return new Promise(function (resolve, reject) {
+    sendgrid.API(request, function (response) {
       if (response.statusCode >= 200 && response.statusCode <= 299) {
         resolve(quotation);
       } else {
@@ -1112,20 +1167,20 @@ function freesaleEmail(orderId) {
   return OrderWeb.findOne(orderId)
     .populate('Store')
     .populate('Details')
-    .then(function(order) {
+    .then(function (order) {
       var store = order.Store;
-      var details = order.Details.map(function(detail) {
+      var details = order.Details.map(function (detail) {
         return detail.id;
       });
       details = OrderDetailWeb.find(details).populate('Product');
       return [order, details, store];
     })
-    .spread(function(order, details, store) {
+    .spread(function (order, details, store) {
       var products = details
-        .filter(function(detail) {
+        .filter(function (detail) {
           return detail.isFreeSale;
         })
-        .map(function(detail) {
+        .map(function (detail) {
           var date = moment(detail.shipDate);
           moment.locale('es');
           date.locale(false);
@@ -1146,12 +1201,12 @@ function freesaleEmail(orderId) {
         });
       return [order, products, store];
     })
-    .spread(function(order, products, store) {
-      var mats = products.map(function(p) {
+    .spread(function (order, products, store) {
+      var mats = products.map(function (p) {
         return materials(p.id);
       });
-      return Promise.all(mats).then(function(mats) {
-        mats.forEach(function(m, i) {
+      return Promise.all(mats).then(function (mats) {
+        mats.forEach(function (m, i) {
           products[i].material = m;
         });
         return sendFreesale(order, products, store);
@@ -1202,8 +1257,8 @@ function sendFreesale(order, products, store) {
   request.method = 'POST';
   request.path = '/v3/mail/send';
   request.body = requestBody;
-  return new Promise(function(resolve, reject) {
-    sendgrid.API(request, function(response) {
+  return new Promise(function (resolve, reject) {
+    sendgrid.API(request, function (response) {
       if (response.statusCode >= 200 && response.statusCode <= 299) {
         resolve(order);
       } else {
@@ -1249,7 +1304,7 @@ function sendQuotationLog(form, store, cb) {
   request.method = 'POST';
   request.path = '/v3/mail/send';
   request.body = requestBody;
-  sendgrid.API(request, function(response) {
+  sendgrid.API(request, function (response) {
     if (response.statusCode >= 200 && response.statusCode <= 299) {
       cb();
     } else {
@@ -1355,27 +1410,27 @@ function materials(product) {
   var material = 'Material';
   var filter = ProductFilter.findOne({ Name: material })
     .populate('Values')
-    .then(function(filter) {
-      return filter.Values.map(function(v) {
+    .then(function (filter) {
+      return filter.Values.map(function (v) {
         return v.id;
       });
     });
   var product = Product.findOne(product)
     .populate('FilterValues')
-    .then(function(product) {
+    .then(function (product) {
       return product.FilterValues;
     });
   return Promise.all([filter, product])
-    .spread(function(idfilters, pfilters) {
+    .spread(function (idfilters, pfilters) {
       return pfilters
-        .filter(function(f) {
+        .filter(function (f) {
           return idfilters.indexOf(f.id) != -1;
         })
-        .map(function(f) {
+        .map(function (f) {
           return f.Name;
         });
     })
-    .then(function(filters) {
+    .then(function (filters) {
       if (filters.length === 0) return;
       return filters[0].split(' ')[0];
     });

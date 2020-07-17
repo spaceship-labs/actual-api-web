@@ -223,6 +223,8 @@ module.exports = {
         if (order.isSpeiOrder) {
           emailSendingPromise = Email.sendSpeiQuotation(order.QuotationWeb, req.activeStore);
           invoiceCreationPromise = Promise.resolve();
+        } else if (order.status === 'pending-payment') {
+          emailSendingPromise = Email.sendOrderConfirmation(order.id, order.status);
         } else {
           emailSendingPromise = Email.sendOrderConfirmation(order.id);
           invoiceCreationPromise = InvoiceService.createOrderInvoice(order.id, req);
@@ -271,15 +273,15 @@ module.exports = {
         console.log('catch general createFromQuotation', err);
         errLog = err;
 
-        conektaLimitErrorThrown = ConektaService.substractConektaLimitError(err);
-        sails.log.info('conektaLimitError', conektaLimitErrorThrown);
+        //conektaLimitErrorThrown = ConektaService.substractConektaLimitError(err);
+        //sails.log.info('conektaLimitError', conektaLimitErrorThrown);
 
-        conektaProcessingErrorThrown = ConektaService.substractConektaCardProcessingError(err);
-        sails.log.info('conektaProcessingErrorThrown', conektaProcessingErrorThrown);
+        //conektaProcessingErrorThrown = ConektaService.substractConektaCardProcessingError(err);
+        //sails.log.info('conektaProcessingErrorThrown', conektaProcessingErrorThrown);
 
         if (!responseSent) {
           err = err || {};
-          err.conektaLimitErrorThrown = conektaLimitErrorThrown;
+          //err.conektaLimitErrorThrown = conektaLimitErrorThrown;
           res.negotiate(err);
         }
 
@@ -289,7 +291,7 @@ module.exports = {
       .then(function (quotationWithErr) {
         console.log('quotationWithErr', quotationWithErr);
         sails.log.info('quotationWithErr folio', (quotationWithErr || {}).folio);
-
+        sails.log.info('QuotationWithErr log', errLog, typeof errLog);
         if (quotationWithErr && errLog) {
           if (errLog.stack) {
             delete errLog.stack;
@@ -303,7 +305,7 @@ module.exports = {
             { label: 'Cliente Email', value: client.E_Mail },
             { label: 'Cliente Telefono', value: client.Phone1 },
 
-            { label: 'Log', value: JSON.stringify(errLog) }
+            { label: 'Log', value: JSON.stringify(errLog, replaceErrors) }
           ];
 
           Email.sendQuotationLog(formArr, req.activeStore, function () {
@@ -425,3 +427,16 @@ module.exports = {
       });
   }
 };
+function replaceErrors(key, value) {
+  if (value instanceof Error) {
+    var error = {};
+
+    Object.getOwnPropertyNames(value).forEach(function (key) {
+      error[key] = value[key];
+    });
+
+    return error;
+  }
+
+  return value;
+}

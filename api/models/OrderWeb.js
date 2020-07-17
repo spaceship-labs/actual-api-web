@@ -1,151 +1,157 @@
 //APP COLLECTION
 module.exports = {
-  migrate:'alter',
+  migrate: 'alter',
   schema: true,
-  attributes:{
-    DocEntry:{type:'integer'},
-    folio:{type:'string'},
-    documents:{
-      type:'array'
+  attributes: {
+    DocEntry: { type: 'integer' },
+    folio: { type: 'string' },
+    documents: {
+      type: 'array'
     },
-    immediateDelivery:{type:'float'},
-    ammountPaid: {type:'float'},
-    ammountPaidPg1:{type:'float'},
+    immediateDelivery: { type: 'float' },
+    ammountPaid: { type: 'float' },
+    ammountPaidPg1: { type: 'float' },
 
     deliveryPriceValue: 'float',
     deliveryPriceMode: {
       type: 'string',
-      enum : ['percentage', 'amount']
+      enum: ['percentage', 'amount']
     },
 
-    deliveryFee: {type: 'float'},
+    deliveryFee: { type: 'float' },
     deliveryFeePg1: 'float',
     deliveryFeePg2: 'float',
     deliveryFeePg3: 'float',
     deliveryFeePg4: 'float',
     deliveryFeePg5: 'float',
 
+    total: { type: 'float' },
+    totalPg1: { type: 'float' },
+    totalPg2: { type: 'float' },
+    totalPg3: { type: 'float' },
+    totalPg4: { type: 'float' },
+    totalPg5: { type: 'float' },
 
-    total:{type:'float'},
-    totalPg1: {type:'float'},
-    totalPg2: {type:'float'},
-    totalPg3: {type:'float'},
-    totalPg4: {type:'float'},
-    totalPg5: {type:'float'},
+    discountPg1: { type: 'float' },
+    discountPg2: { type: 'float' },
+    discountPg3: { type: 'float' },
+    discountPg4: { type: 'float' },
+    discountPg5: { type: 'float' },
 
-    discountPg1: {type:'float'},
-    discountPg2: {type:'float'},
-    discountPg3: {type:'float'},
-    discountPg4: {type:'float'},
-    discountPg5: {type:'float'},
+    isSpeiOrder: { type: 'boolean' },
+    speiExpirationPayment: { type: 'datetime' },
+    speiExpirationReminderStartDate: { type: 'datetime' },
+    paymentReminderSent: { type: 'boolean' },
+    paymentExpirationSent: { type: 'boolean' },
 
-    isSpeiOrder: {type:'boolean'},
-    speiExpirationPayment: {type:'datetime'},
-    speiExpirationReminderStartDate: {type:'datetime'},
-    paymentReminderSent:{type:'boolean'},
-    paymentExpirationSent:{type:'boolean'},
-
-    subtotal:{type:'float'},
-    discount:{type:'float'},
-    currency:{type:'string'},
-    paymentGroup:{type:'integer'},
-    WhsCode:{type:'string'},
-    status:{
-      type:'string',
-      enum:[
+    subtotal: { type: 'float' },
+    discount: { type: 'float' },
+    currency: { type: 'string' },
+    paymentGroup: { type: 'integer' },
+    WhsCode: { type: 'string' },
+    status: {
+      type: 'string',
+      enum: [
         'lost',
         'pending',
         'on-delivery',
         'minimum-paid',
         'paid',
-        'pending-sap', 
+        'pending-sap',
         'pending-payment',
         'completed',
         'canceled'
       ]
     },
-    inSapWriteProgress:{type:'boolean'},
-    QuotationWeb:{
-      model:'QuotationWeb',
-      unique:true
+    statusDetails: {
+      type: 'string'
     },
-    Client:{
+    inSapWriteProgress: { type: 'boolean' },
+    QuotationWeb: {
+      model: 'QuotationWeb',
+      unique: true
+    },
+    Client: {
       model: 'Client'
     },
     Details: {
-      collection:'OrderDetailWeb',
-      via:'OrderWeb'
+      collection: 'OrderDetailWeb',
+      via: 'OrderWeb'
     },
     Payments: {
-      collection:'PaymentWeb',
-      via:'OrderWeb'
+      collection: 'PaymentWeb',
+      via: 'OrderWeb'
     },
-    UserWeb:{
+    UserWeb: {
       model: 'UserWeb',
     },
-    Address:{
-      model:'ClientContact',
+    Address: {
+      model: 'ClientContact',
     },
-    Store:{
-      model:'store'
+    Store: {
+      model: 'store'
       //model:'company',
       //required: 'true'
     },
-    PaymentsSapWeb:{
-      collection:'PaymentSapWeb',
-      via:'OrderWeb'
+    PaymentsSapWeb: {
+      collection: 'PaymentSapWeb',
+      via: 'OrderWeb'
     },
-    OrdersSapWeb:{
-      collection:'OrderSapWeb',
-      via:'OrderWeb'
+    OrdersSapWeb: {
+      collection: 'OrderSapWeb',
+      via: 'OrderWeb'
     },
-    SapOrderConnectionLogWeb:{
+    SapOrderConnectionLogWeb: {
       model: 'SapOrderConnectionLogWeb'
     },
-    ConektaOrder:{
-      model:'ConektaOrder'
+    MercadoPagoOrder: {
+      model: 'MercadoPagoOrder'
     },
-
-    conektaId:{type:'string'},
-    receiving_account_bank:{type:'string'},
-    receiving_account_number:{type:'string'},
-    conektaAmount: {type:'float'},
+    MercadoPagoOrderId: {
+      type: 'string'
+    },
+    MercadoPagoOrderPaymentStatus: {
+      type: 'string'
+    },
+    // conektaId: { type: 'string' },
+    receiving_account_bank: { type: 'string' },
+    receiving_account_number: { type: 'string' },
+    MercadoPagoOrderAmount: { type: 'float' },
     //CONTACT ADDRESS FIELDS SNAPSHOT
     //APP/SAP FIELDS
 
-
     //SAP FIELDS
-    CntCtCode:{type:'integer'},
-    SlpCode: {type:'integer'},
-    CardCode: {type:'string'},
-    CardName: {type:'string'},
+    CntCtCode: { type: 'integer' },
+    SlpCode: { type: 'integer' },
+    CardCode: { type: 'string' },
+    CardName: { type: 'string' },
 
     //ADDRESS FIELDS SNAPSHOT
-    E_Mail:{type:'string'},
-    FirstName:{type:'string'},
-    LastName:{type:'string'},
+    E_Mail: { type: 'string' },
+    FirstName: { type: 'string' },
+    LastName: { type: 'string' },
 
-    CntctCode:{type:'integer'},
-    Tel1:{type:'string'},
-    Cellolar:{type:'string'},
-    address:{type:'string'},
-    U_Noexterior: {type:'string'},
-    U_Nointerior: {type:'string'},
-    U_Colonia: {type:'string'},
-    U_Mpio: {type:'string'},
-    U_Ciudad: {type:'string'},
-    U_Estado: {type:'string'},
-    U_CP: {type:'string'},
-    U_Entrecalle: {type:'string'},
-    U_Ycalle: {type:'string'},
-    U_Notes1: {type:'string'},
-    U_Latitud: {type:'string'},
-    U_Longitud: {type:'string'},
+    CntctCode: { type: 'integer' },
+    Tel1: { type: 'string' },
+    Cellolar: { type: 'string' },
+    address: { type: 'string' },
+    U_Noexterior: { type: 'string' },
+    U_Nointerior: { type: 'string' },
+    U_Colonia: { type: 'string' },
+    U_Mpio: { type: 'string' },
+    U_Ciudad: { type: 'string' },
+    U_Estado: { type: 'string' },
+    U_CP: { type: 'string' },
+    U_Entrecalle: { type: 'string' },
+    U_Ycalle: { type: 'string' },
+    U_Notes1: { type: 'string' },
+    U_Latitud: { type: 'string' },
+    U_Longitud: { type: 'string' },
 
     //APP FIELDS
 
     minPaidPercentage: {
-      type:'float',
+      type: 'float',
       defaultsTo: 60
       //defaultsTo: 100
     },
@@ -154,15 +160,15 @@ module.exports = {
       model: 'invoiceweb',
     },
 
-    paymentAttempts:{
-      type:'integer',
+    paymentAttempts: {
+      type: 'integer',
       defaultsTo: 0
     },
-    paymentType: {type:'string'}        
+    paymentType: { type: 'string' }
   },
 
-  beforeCreate: function(val,cb){
-    Common.orderCustomAI(val, 'orderWebFolio',function(val){
+  beforeCreate: function (val, cb) {
+    Common.orderCustomAI(val, 'orderWebFolio', function (val) {
       cb();
     });
   },
@@ -181,4 +187,4 @@ module.exports = {
       });
   }
   */
-}
+};
