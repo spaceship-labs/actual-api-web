@@ -130,7 +130,7 @@ function createFromQuotation(form, req) {
         .then(function (mercadoPagoOrder) {
           sails.log.info('mercadoPagoOrder: ', mercadoPagoOrder);
 
-          form.mercadoPagoOrder = mercadoPagoOrder;
+          form.MercadoPagoOrder = mercadoPagoOrder;
           return createOrder(form, req);
         })
         .catch(function (err) {
@@ -279,12 +279,15 @@ function createOrder(form, req) {
       } else {
         orderToCreate.status = 'pending-sap';
       }
-
-      if (form.MercadoPagoOrder.isSpeiOrder) {
+      if(form.mercadoPagoOrder){
+        if (form.MercadoPagoOrder.isSpeiOrder) {
+          orderToCreate.status = 'pending-payment';
+          orderToCreate.isSpeiOrder = true;
+        }
+      } else {
         orderToCreate.status = 'pending-payment';
-        orderToCreate.isSpeiOrder = true;
       }
-
+        
       if (quotation.Address) {
         orderToCreate.Address = _.clone(quotation.Address.id);
         orderToCreate.address = _.clone(quotation.Address.Address);
