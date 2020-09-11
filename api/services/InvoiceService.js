@@ -362,11 +362,13 @@ function prepareItems(details, order) {
     var discount = detail.discountPercent ? detail.discountPercent : 0;
     var product = detail.Product;
     discount = Math.abs(discount);
+    const alegraDesc = product.ItemCode + " " + product.ItemName;
     return {
       id: detail.id,
       name: product.ItemName,
       price: detail.unitPrice / 1.16,
       discount: parseFloat(discount.toFixed(4)),
+      description: alegraDesc,
       tax: [{ id: alegraIVAID }],
       productKey: product.U_ClaveProdServ,
       quantity: detail.quantity,
