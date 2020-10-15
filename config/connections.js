@@ -49,6 +49,7 @@ module.exports.connections = {
     password: process.env.MONGODB_PASS || 'YOUR_MONGODB_PASSWORD',
     database: process.env.MONGODB_NAME || 'YOUR_MONGODB_DB',
     */
+    ssl: true,
     url: process.env.MONGODB_URL || 'YOUR_MONGODB_URL'
   },
 
