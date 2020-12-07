@@ -416,8 +416,8 @@ function sendContact(name, email, form, store, cb) {
   var mail = new helper.Mail();
   var personalization = new helper.Personalization();
   var from = new helper.Email(email, name);
-/*   var to = new helper.Email('sergiocan@spaceshiplabs.com', 'Luis');
-  var toAux = new helper.Email('dtorres@actualg.com', 'Daniela Torres'); */
+  var to = new helper.Email('sergiocan@spaceshiplabs.com', 'Sergio Can');
+  var toAux = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
   var subject = 'Contacto ' + ((store || {}).name || '');
   var res = contactTemplate({
     form: form,
