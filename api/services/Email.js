@@ -428,11 +428,11 @@ function sendContact(name, email, form, store, cb) {
     store: store
   });
   var content = new helper.Content('text/html', res);
-  personalization.addTo(to);
+  // personalization.addTo(to);
 
-  if (process.env.MODE == 'production') {
-    personalization.addTo(toAux);
-  }
+  // if (process.env.MODE == 'production') {
+  //   personalization.addTo(toAux);
+  // }
 
   personalization.setSubject(subject);
   mail.setFrom(from);
