@@ -5,7 +5,7 @@ const NetPayInstance = axios.create({
   // Dev
   //baseURL: 'https://gateway-154.netpaydev.com/gateway-ecommerce/v3',
   // Production
-  baseURL: 'https://suite.netpay.com.mx/gateway-ecommerce'
+  baseURL: 'https://suite.netpay.com.mx/gateway-ecommerce/v3'
   //params: { access_token: process.env.NETPAY_ACCESS_TOKEN },
 });
 
