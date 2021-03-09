@@ -161,21 +161,21 @@ function createFromQuotation(form, req) {
 
 function createConektaOrderAndPayment(quotationId, payment, req) {
   var mercadoPagoOrder;
-  return MercadoPago.createOrder(quotationId, payment, req)
-    .then(function (mercadoPagoOrder) {
-      console.log('mercadopago: ', mercadoPagoOrder);
+  return Netpay.createOrder(quotationId, payment, req)
+    .then(function(mercadoPagoOrder) {
+      console.log('Netpay: ', mercadoPagoOrder);
       return mercadoPagoOrder;
     })
     .then(function (_mercadoPagoOrder) {
       mercadoPagoOrder = _mercadoPagoOrder;
-      if (mercadoPagoOrder.status === 'in_process') {
+      if (mercadoPagoOrder.status === 'review') {
         payment.status = 'pending';
       }
       payment.stockValidated = true;
       return PaymentService.addPayment(payment, quotationId, req);
     })
-    .then(function (paymentCreated) {
-      return mercadoPagoOrder;
+    .then(function(paymentCreated) {
+        return mercadoPagoOrder;
     })
     .catch(function (err) {
       if (err.MercadoPagoError) {
@@ -303,11 +303,15 @@ function createOrder(form, req) {
       }
 
       orderToCreate.paymentType = getPaymentTypeByPayments(quotation.Payments);
-      orderToCreate.MercadoPagoOrderId = form.MercadoPagoOrder.mercadoPagoId;
-      orderToCreate.MercadoPagoOrder = form.MercadoPagoOrder.id;
-      orderToCreate.MercadoPagoOrderPaymentStatus = form.MercadoPagoOrder.status;
+      //orderToCreate.MercadoPagoOrderId = form.MercadoPagoOrder.mercadoPagoId;
+      //orderToCreate.MercadoPagoOrder = form.MercadoPagoOrder.id;
+      orderToCreate.NetpayOrderStatus = form.MercadoPagoOrder.status;
+      orderToCreate.NetpayOrderId = form.MercadoPagoOrder.id;
+      orderToCreate.returnUrl = form.MercadoPagoOrder.returnUrl;
+      orderToCreate.transactionTokenId = form.MercadoPagoOrder.transactionTokenId;
+      
       orderToCreate.MercadoPagoOrderAmount = form.MercadoPagoOrder.total_paid_amount;
-      if (form.MercadoPagoOrder.status === 'in_process') {
+      if (form.MercadoPagoOrder.status === 'review') {
         orderToCreate.status = 'pending-payment';
         orderToCreate.statusDetails = form.MercadoPagoOrder.status_detail;
       }
