@@ -56,7 +56,10 @@ module.exports.routes = {
     controller: 'user',
     action: 'find'
   },
-
+  '/process3dSecure': {
+    controller: 'Netpay',
+    action: 'process3dSecure'
+  },
   '/user/register': {
     controller: 'user',
     action: 'register'
