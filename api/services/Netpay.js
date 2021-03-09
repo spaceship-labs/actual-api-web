@@ -33,7 +33,8 @@ const formatPaymentParams = (payment, order, email) => {
     lastName: lastName,
     address: payment.tokenData.address,
   },
-  redirect3dsUri:'http://localhost:1337/process3dSecure?website='+payment.tokenData.siteUrl,//"https://api.actualstudio.com/process3dSecure",
+  redirect3dsUri: 'https://api.actualstudio.com/process3dSecure?website='+payment.tokenData.siteUrl,
+  //redirect3dsUri: 'http://localhost:1337/process3dSecure?website='+payment.tokenData.siteUrl,
   saveCard: false
 });
 }
@@ -107,9 +108,11 @@ async function process3dSecure(transactionTokenId){
   const webOrder = await OrderWeb.findOne({transactionTokenId:transactionTokenId})
   //console.log({webOrder})
   console.log(data)
-  if(data.responseMsg == "Success"){
+  if(data.status == "CHARGEABLE"){
     await NetpayOrder.update({transactionTokenId:transactionTokenId}, {status:"success"})
     await OrderWeb.update({id:webOrder.id}, {status:"pending-sap", NetpayOrderStatus:"success"})
+    const { data: newCharge } = await NetPayInstance.post(`/charges/${transactionTokenId}/confirm`);
+    await NetpayOrder.update({transactionTokenId:transactionTokenId}, {responseData:JSON.stringify(newCharge)})
     return { 
       returnURI: `/checkout/order/${webOrder.id}`,
     }  
