@@ -144,6 +144,7 @@ function quotationEmail(totalQuotation, params, products) {
   var from = new helper.Email('noreply@actualgroup.com', 'Actual Group');
   var to = new helper.Email('asanchez@actualg.com', 'Alia Sanchez');
   var toAux = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
+  var toAux2 = new helper.Email('marketing@actualg.com', 'Alia Sanchez');
 
   var subject = 'Cotización';
   var res = paymentTemplate({
@@ -157,6 +158,7 @@ function quotationEmail(totalQuotation, params, products) {
   var content = new helper.Content('text/html', res);
   personalization.addTo(to);
   personalization.addTo(toAux);
+  personalization.addTo(toAux2);
   personalization.setSubject(subject);
   mail.setFrom(from);
   mail.addContent(content);
@@ -275,6 +277,7 @@ function sendRejectedPaymentEmail(params, statusDetail) {
   const from = new helper.Email('noreply@actualgroup.com', 'Actual Group');
   const to = new helper.Email('asanchez@actualg.com', 'Alia Sanchez');
   const toAux = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
+  const toAux2 = new helper.Email('marketing@actualg.com', 'Alia Sanchez');
   var subject = 'Procesando pago en Actual';
   var res = sendRejectedPaymentEmailTemplate({
     user_name,
@@ -852,6 +855,7 @@ function sendOrder(client, order, products, payments, ewallet, store) {
   var toAux3 = new helper.Email('auditoria@actualg.com', 'Auditoria ActualGroup');
   var toAux4 = new helper.Email('asanchez@actualg.com', 'Alia Sanchez');
   var toAux5 = new helper.Email('facturacion@actualg.com', 'Estefania Chan');
+  var toAux6 = new helper.Email('marketing@actualg.com', 'Alia Sanchez');
 
   if (process.env.MODE === 'production') {
     sails.log.info('sending email order ', order.folio);
@@ -860,6 +864,7 @@ function sendOrder(client, order, products, payments, ewallet, store) {
     personalization.addTo(toAux3);
     personalization.addTo(toAux4);
     personalization.addTo(toAux5);
+    personalization.addTo(toAux6);
   }
 
   personalization.setSubject(subject);
@@ -1135,6 +1140,7 @@ function sendQuotation(
   var toAux2 = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
   var toAux3 = new helper.Email('auditoria@actualg.com', 'Auditoria ActualGroup');
   var toAux4 = new helper.Email('asanchez@actualg.com', 'Alia Sanchez');
+  var toAux5 = new helper.Email('marketing@actualg.com', 'Alia Sanchez');
 
   if (process.env.MODE === 'production') {
     sails.log.info('sending email quotation ', quotation.folio);
@@ -1142,6 +1148,7 @@ function sendQuotation(
     personalization.addTo(toAux2);
     personalization.addTo(toAux3);
     personalization.addTo(toAux4);
+    personalization.addTo(toAux5);
   }
 
   personalization.setSubject(subject);
@@ -1278,11 +1285,13 @@ function sendQuotationLog(form, store, cb) {
   var toAux = new helper.Email('dtorres@actualg.com', 'Daniela');
   var toAux2 = new helper.Email('eebalams@gmail.com', 'Ernesto');
   var toAux3 = new helper.Email('asanchez@actualg.com', 'Alia Sanchez');
+  var toAux4 = new helper.Email('marketing@actualg.com', 'Alia Sanchez');
 
   if (process.env.MODE === 'production') {
     personalization.addTo(toAux);
     personalization.addTo(toAux2);
     personalization.addTo(toAux3);
+    personalization.addTo(toAux4);
   }
 
   var subject = 'Error en proceso de compra ' + ((store || {}).name || '');
