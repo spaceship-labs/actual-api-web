@@ -75,6 +75,9 @@ module.exports.policies = {
     activeStore: ['setupDefaultData']
     */
   },
+  NetpayController: {
+    '*' : ['setupDefaultData']
+  },
   CommonController: {
     '*': ['setupDefaultData']
   },

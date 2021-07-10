@@ -113,6 +113,18 @@ module.exports = {
     MercadoPagoOrderPaymentStatus: {
       type: 'string'
     },
+    NetpayOrderStatus: {
+      type: 'string'
+    },
+    NetpayOrderId: {
+      type: 'string'
+    },
+    returnUrl: {
+      type: 'string'
+    },
+    transactionTokenId: {
+      type: 'string'
+    },
     // conektaId: { type: 'string' },
     receiving_account_bank: { type: 'string' },
     receiving_account_number: { type: 'string' },
