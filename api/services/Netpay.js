@@ -3,41 +3,82 @@ const _ = require('underscore');
 
 const NetPayInstance = axios.create({
   // Dev
-  //baseURL: 'https://gateway-154.netpaydev.com/gateway-ecommerce/v3',
+  baseURL: 'https://gateway-154.netpaydev.com/gateway-ecommerce/v3'
   // Production
-  baseURL: 'https://suite.netpay.com.mx/gateway-ecommerce'
+
+  // baseURL: 'https://suite.netpay.com.mx/gateway-ecommerce/v3'
   //params: { access_token: process.env.NETPAY_ACCESS_TOKEN },
 });
 
 // Alter defaults after instance has been created
 NetPayInstance.defaults.headers.common['secretKey'] = process.env.NETPAY_ACCESS_TOKEN;
 NetPayInstance.defaults.headers.common['Authorization'] = process.env.NETPAY_ACCESS_TOKEN; //`Bearer ${AuthData.token}`; // secretKey
-
-const formatPaymentParams = (payment, order, email) => {
-  let fullName = payment.tokenData.cardName.split(" ");
-  const size = fullName.length;
-  const lastName =size > 2 ? fullName.slice(-2).join(" ") : fullName[0];
-  const firstName =size > 2 ? fullName.slice(0,size-2).join(" ") : fullName[1];
-
-  return ({
-  amount: parseFloat(order.total.toFixed(2)),
-  source: payment.tokenData.token,
-  description: 'Actual Description',
-  currency: 'MXN',
-  merchantReferenceCode:"actual-online-shopping",
-  // installments: payment.installments,
-  paymentMethod: payment.paymentMethod,
-  billing: {
-    email: payment.email || email,
-    firstName: firstName,
-    lastName: lastName,
-    address: payment.tokenData.address,
-  },
-  redirect3dsUri: 'https://api.actualstudio.com/process3dSecure?website='+payment.tokenData.siteUrl,
-  //redirect3dsUri: 'http://localhost:1337/process3dSecure?website='+payment.tokenData.siteUrl,
-  saveCard: false
-});
+function getPaymentInstallments(installment) {
+  switch (installment) {
+    case '3-msi':
+      return {
+        plan: {
+          count: 3,
+          interval: 'month'
+        }
+      };
+    case '6-msi':
+      return {
+        plan: {
+          count: 6,
+          interval: 'month'
+        }
+      };
+    case '9-msi':
+      return {
+        plan: {
+          count: 9,
+          interval: 'month'
+        }
+      };
+    case '12-msi':
+      return {
+        plan: {
+          count: 12,
+          interval: 'month'
+        }
+      };
+    case '18-msi':
+      return {
+        plan: {
+          count: 18,
+          interval: 'month'
+        }
+      };
+    default:
+      return null;
+  }
 }
+const formatPaymentParams = (payment, order, email) => {
+  let fullName = payment.tokenData.cardName.split(' ');
+  const size = fullName.length;
+  const lastName = size > 2 ? fullName.slice(-2).join(' ') : fullName[0];
+  const firstName = size > 2 ? fullName.slice(0, size - 2).join(' ') : fullName[1];
+  const installments = getPaymentInstallments(payment.installments);
+  return {
+    amount: parseFloat(order.total.toFixed(2)),
+    source: payment.tokenData.token,
+    description: 'Actual Description',
+    currency: 'MXN',
+    merchantReferenceCode: 'actual-online-shopping',
+    installments: installments,
+    paymentMethod: payment.paymentMethod,
+    billing: {
+      email: payment.email || email,
+      firstName: firstName,
+      lastName: lastName,
+      address: payment.tokenData.address
+    },
+    //redirect3dsUri: 'https://api.actualkids.com/process3dSecure?website='+payment.tokenData.siteUrl,
+    redirect3dsUri: 'http://localhost:1337/process3dSecure?website=' + payment.tokenData.siteUrl,
+    saveCard: false
+  };
+};
 
 // obtener las ordenes con status pendiente
 // obtener los ids de las ordenes de mercado pago pendientes
@@ -56,10 +97,10 @@ const formatPaymentParams = (payment, order, email) => {
 // };
 
 // const getInProcessOrders = async () => await OrderWeb.find({ status: 'pending-payment' });
-// 
+//
 // const getMercadoPagoIds = orders =>
 //   orders.map(order => ({ marcagoPagoId: order.MercadoPagoOrderId, orderId: order.id }));
-// 
+//
 // const getCurrentStatus = async idsArray => {
 //   const promises = idsArray.map(({ orderId, marcagoPagoId }) => {
 //     const { status, status_detail } = mercadoPagoInstance.get(`/payments/${marcagoPagoId}`);
@@ -103,31 +144,41 @@ const formatPaymentParams = (payment, order, email) => {
 //   await changeOrderCurrentStatus(mercadoPagoOrders);
 // };
 
-async function process3dSecure(transactionTokenId){
-  const {data} = await NetPayInstance.get(`/transactions/${transactionTokenId}`);
-  const webOrder = await OrderWeb.findOne({transactionTokenId:transactionTokenId})
+async function process3dSecure(transactionTokenId) {
+  const { data } = await NetPayInstance.get(`/transactions/${transactionTokenId}`);
+  const webOrder = await OrderWeb.findOne({ transactionTokenId: transactionTokenId });
   //console.log({webOrder})
-  console.log(data)
-  if(data.status == "CHARGEABLE"){
-    await NetpayOrder.update({transactionTokenId:transactionTokenId}, {status:"success"})
-    await OrderWeb.update({id:webOrder.id}, {status:"pending-sap", NetpayOrderStatus:"success"})
+  console.log(data);
+  if (data.status == 'CHARGEABLE') {
+    await NetpayOrder.update({ transactionTokenId: transactionTokenId }, { status: 'success' });
+    await OrderWeb.update(
+      { id: webOrder.id },
+      { status: 'pending-sap', NetpayOrderStatus: 'success' }
+    );
     const { data: newCharge } = await NetPayInstance.post(`/charges/${transactionTokenId}/confirm`);
-    await NetpayOrder.update({transactionTokenId:transactionTokenId}, {responseData:JSON.stringify(newCharge)})
-    return { 
-      returnURI: `/checkout/order/${webOrder.id}`,
-    }  
+    await NetpayOrder.update(
+      { transactionTokenId: transactionTokenId },
+      { responseData: JSON.stringify(newCharge) }
+    );
+    return {
+      returnURI: `/checkout/order/${webOrder.id}`
+    };
   } else {
-    await NetpayOrder.update({transactionTokenId:transactionTokenId}, {status:"failed"})
-    await OrderWeb.update({id:webOrder.id}, {status:"canceled", NetpayOrderStatus:"failed"})
-    return { 
+    await NetpayOrder.update({ transactionTokenId: transactionTokenId }, { status: 'failed' });
+    await OrderWeb.update({ id: webOrder.id }, { status: 'canceled', NetpayOrderStatus: 'failed' });
+    return {
       returnURI: `/checkout/order/${webOrder.id}`,
-      error: `Error ${data.responseCode}: ${data.responseMsg ? data.responseMsg: 'Payment Server Error'}`
-    }
+      error: `Error ${data.responseCode}: ${
+        data.responseMsg ? data.responseMsg : 'Payment Server Error'
+      }`
+    };
   }
 }
 async function getNetpayError(transactionTokenId) {
-  const {data} = await NetPayInstance.get(`/transactions/${transactionTokenId}`);
-  return `Error ${data.responseCode}: ${data.responseMsg ? data.responseMsg: 'Payment Server Error'}`;
+  const { data } = await NetPayInstance.get(`/transactions/${transactionTokenId}`);
+  return `Error ${data.responseCode}: ${
+    data.responseMsg ? data.responseMsg : 'Payment Server Error'
+  }`;
 }
 module.exports = {
   createOrder,
@@ -146,8 +197,11 @@ async function createOrder(orderId, payment, req) {
     const { E_Mail: email } = await Client.findOne({ id: clientId });
     const paymentParams = formatPaymentParams(payment, order, email);
     console.log('paymentParams: ', paymentParams);
-    const { data: response }  = await NetPayInstance.post('/charges', paymentParams)
-    sails.log.info({netpayresponse:response});
+    console.log('pre-flight-request-charges token: ' + process.env.NETPAY_ACCESS_TOKEN);
+    const { data: response } = await NetPayInstance.post('/charges', paymentParams);
+    console.log('post-flight-request-charges');
+
+    sails.log.info({ netpayresponse: response });
     const {
       source,
       amount,
@@ -171,9 +225,9 @@ async function createOrder(orderId, payment, req) {
       createdAt,
       responseData: JSON.stringify(response),
       QuotationWeb: orderId,
-      UserWeb: userId,
-    }
-    if(status == 'failed'){
+      UserWeb: userId
+    };
+    if (status == 'failed') {
       throw await getNetpayError(transactionTokenId);
     }
     let netpayOrder = _.extend(response, NetpayAttributes);
