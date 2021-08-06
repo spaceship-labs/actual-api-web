@@ -121,19 +121,19 @@ function createFromQuotation(form, req) {
     PaymentWeb.findOne({ QuotationWeb: quotationId, Client: clientId })
   ];
 
-  return Promise.all(promises).then(function (results) {
+  return Promise.all(promises).then(function(results) {
     var mercadoPagoOrderFound = results[0];
     var paymentFound = results[1];
 
     if (!mercadoPagoOrderFound && !paymentFound) {
       return createConektaOrderAndPayment(quotationId, payment, req)
-        .then(function (mercadoPagoOrder) {
+        .then(function(mercadoPagoOrder) {
           sails.log.info('mercadoPagoOrder: ', mercadoPagoOrder);
 
           form.MercadoPagoOrder = mercadoPagoOrder;
           return createOrder(form, req);
         })
-        .catch(function (err) {
+        .catch(function(err) {
           if (err.MercadoPagoError) {
             throw new Error(err.MercadoPagoError);
           } else {
@@ -145,7 +145,7 @@ function createFromQuotation(form, req) {
         form.payment.status = 'pending';
       }
       sails.log.info('creando el pago');
-      return PaymentService.addPayment(form.payment, quotationId, req).then(function (
+      return PaymentService.addPayment(form.payment, quotationId, req).then(function(
         paymentCreated
       ) {
         form.MercadoPagoOrder = mercadoPagoOrderFound;
@@ -161,23 +161,23 @@ function createFromQuotation(form, req) {
 
 function createConektaOrderAndPayment(quotationId, payment, req) {
   var mercadoPagoOrder;
-  return MercadoPago.createOrder(quotationId, payment, req)
-    .then(function (mercadoPagoOrder) {
-      console.log('mercadopago: ', mercadoPagoOrder);
+  return Netpay.createOrder(quotationId, payment, req)
+    .then(function(mercadoPagoOrder) {
+      console.log('Netpay: ', mercadoPagoOrder);
       return mercadoPagoOrder;
     })
-    .then(function (_mercadoPagoOrder) {
+    .then(function(_mercadoPagoOrder) {
       mercadoPagoOrder = _mercadoPagoOrder;
-      if (mercadoPagoOrder.status === 'in_process') {
+      if (mercadoPagoOrder.status === 'review') {
         payment.status = 'pending';
       }
       payment.stockValidated = true;
       return PaymentService.addPayment(payment, quotationId, req);
     })
-    .then(function (paymentCreated) {
+    .then(function(paymentCreated) {
       return mercadoPagoOrder;
     })
-    .catch(function (err) {
+    .catch(function(err) {
       if (err.MercadoPagoError) {
         throw new Error(err.MercadoPagoError);
       } else {
@@ -203,7 +203,7 @@ function createOrder(form, req) {
 
   //Validating if quotation doesnt have an order assigned
   return OrderWeb.findOne({ QuotationWeb: quotationId })
-    .then(function (order) {
+    .then(function(order) {
       if (order) {
         return Promise.reject(new Error('Ya se ha creado un pedido sobre esta cotización'));
       }
@@ -215,7 +215,7 @@ function createOrder(form, req) {
         PaymentWeb.find({ QuotationWeb: quotationId }).sort('createdAt ASC')
       ];
     })
-    .spread(function (isValidStock, quotationPayments) {
+    .spread(function(isValidStock, quotationPayments) {
       //sails.log.info('ending validating from service', new Date());
 
       if (!isValidStock) {
@@ -225,7 +225,7 @@ function createOrder(form, req) {
       var calculator = QuotationService.Calculator();
       return calculator.updateQuotationTotals(quotationId, options);
     })
-    .then(function (updatedQuotationResult) {
+    .then(function(updatedQuotationResult) {
       return QuotationWeb.findOne({ id: quotationId })
         .populate('Payments')
         .populate('Details')
@@ -233,7 +233,7 @@ function createOrder(form, req) {
         .populate('UserWeb')
         .populate('Client');
     })
-    .then(function (quotationFound) {
+    .then(function(quotationFound) {
       quotation = quotationFound;
 
       if (quotation.OrderWeb) {
@@ -246,7 +246,7 @@ function createOrder(form, req) {
 
       SlpCode = -1;
 
-      var paymentsIds = quotation.Payments.map(function (p) {
+      var paymentsIds = quotation.Payments.map(function(p) {
         return p.id;
       });
       orderToCreate = {
@@ -279,15 +279,6 @@ function createOrder(form, req) {
       } else {
         orderToCreate.status = 'pending-sap';
       }
-      if(form.mercadoPagoOrder){
-        if (form.MercadoPagoOrder.isSpeiOrder) {
-          orderToCreate.status = 'pending-payment';
-          orderToCreate.isSpeiOrder = true;
-        }
-      } else {
-        orderToCreate.status = 'pending-payment';
-      }
-        
       if (quotation.Address) {
         orderToCreate.Address = _.clone(quotation.Address.id);
         orderToCreate.address = _.clone(quotation.Address.Address);
@@ -303,26 +294,30 @@ function createOrder(form, req) {
       }
 
       orderToCreate.paymentType = getPaymentTypeByPayments(quotation.Payments);
-      orderToCreate.MercadoPagoOrderId = form.MercadoPagoOrder.mercadoPagoId;
-      orderToCreate.MercadoPagoOrder = form.MercadoPagoOrder.id;
-      orderToCreate.MercadoPagoOrderPaymentStatus = form.MercadoPagoOrder.status;
+      //orderToCreate.MercadoPagoOrderId = form.MercadoPagoOrder.mercadoPagoId;
+      //orderToCreate.MercadoPagoOrder = form.MercadoPagoOrder.id;
+      orderToCreate.NetpayOrderStatus = form.MercadoPagoOrder.status;
+      orderToCreate.NetpayOrderId = form.MercadoPagoOrder.id;
+      orderToCreate.returnUrl = form.MercadoPagoOrder.returnUrl;
+      orderToCreate.transactionTokenId = form.MercadoPagoOrder.transactionTokenId;
+
       orderToCreate.MercadoPagoOrderAmount = form.MercadoPagoOrder.total_paid_amount;
-      if (form.MercadoPagoOrder.status === 'in_process') {
+      if (form.MercadoPagoOrder.status === 'review') {
         orderToCreate.status = 'pending-payment';
         orderToCreate.statusDetails = form.MercadoPagoOrder.status_detail;
       }
 
       return OrderWeb.create(orderToCreate);
     })
-    .then(function (created) {
+    .then(function(created) {
       orderCreated = created;
       return OrderWeb.findOne({ id: created.id })
         .populate('Details')
         .populate('MercadoPagoOrder');
     })
-    .then(function (orderFound) {
+    .then(function(orderFound) {
       //Cloning quotation details to order details
-      quotation.Details.forEach(function (detail) {
+      quotation.Details.forEach(function(detail) {
         detail.QuotationDetailWeb = _.clone(detail.id);
         delete detail.id;
 
@@ -336,7 +331,7 @@ function createOrder(form, req) {
       });
       return orderFound.save();
     })
-    .then(function () {
+    .then(function() {
       var updateFields = {
         OrderWeb: orderCreated.id,
         status: 'to-order',
@@ -347,7 +342,7 @@ function createOrder(form, req) {
 
       return QuotationWeb.update({ id: quotation.id }, updateFields);
     })
-    .then(function (quotationUpdated) {
+    .then(function(quotationUpdated) {
       orderCreated = orderCreated.toObject();
       orderCreated.Details = orderDetails;
       return orderCreated;
@@ -393,9 +388,9 @@ function relateOrderToSap(order, orderDetails, req) {
     OrderWeb.update({ id: order.id }, { inSapWriteProgress: true })
   ];
 
-  return new Promise(function (resolve, reject) {
+  return new Promise(function(resolve, reject) {
     Promise.all(promises)
-      .then(function (results) {
+      .then(function(results) {
         var site = results[0];
 
         var sapOrderParams = {
@@ -413,7 +408,7 @@ function relateOrderToSap(order, orderDetails, req) {
 
         return SapService.createSaleOrder(sapOrderParams);
       })
-      .then(function (sapResponseAux) {
+      .then(function(sapResponseAux) {
         sapResponse = sapResponseAux.response;
         var sapEndpoint = decodeURIComponent(sapResponseAux.endPoint);
         sails.log.info('createSaleOrder response', sapResponse);
@@ -431,7 +426,7 @@ function relateOrderToSap(order, orderDetails, req) {
         };
         return SapOrderConnectionLogWeb.create(log);
       })
-      .then(function (sapLogCreated) {
+      .then(function(sapLogCreated) {
         var sapResult = JSON.parse(sapResponse.value);
         var isValidSapResponse = isValidOrderCreated(sapResponse, sapResult, order.Payments);
         if (isValidSapResponse.error) {
@@ -445,18 +440,18 @@ function relateOrderToSap(order, orderDetails, req) {
 
         return saveOrderSapReferences(sapResult, order, orderDetails);
       })
-      .then(function () {
+      .then(function() {
         return [
           OrderWeb.update({ id: order.id }, { status: 'completed', inSapWriteProgress: false }),
           OrderDetailWeb.update({ OrderWeb: order.id }, { inSapWriteProgress: false })
           //StockService.syncOrderDetailsProducts(orderDetails)
         ];
       })
-      .spread(function (updateOrder, updateDetails /*syncResults*/) {
+      .spread(function(updateOrder, updateDetails /*syncResults*/) {
         //sails.log.info('syncResults', syncResults);
         resolve(updateOrder);
       })
-      .catch(function (err) {
+      .catch(function(err) {
         error = err;
         console.log('err relateOrderToSap', err);
         var params = { inSapWriteProgress: false };
@@ -465,7 +460,7 @@ function relateOrderToSap(order, orderDetails, req) {
         }
         return OrderWeb.update({ id: order.id }, params);
       })
-      .then(function (updated) {
+      .then(function(updated) {
         reject(error);
       });
   });
@@ -481,7 +476,7 @@ function isValidOrderCreated(sapResponse, sapResult, paymentsToCreate) {
     }
 
     var sapResultWithBalance = _.clone(sapResult);
-    sapResult = sapResult.filter(function (item) {
+    sapResult = sapResult.filter(function(item) {
       return item.type !== BALANCE_SAP_TYPE;
     });
 
@@ -492,7 +487,7 @@ function isValidOrderCreated(sapResponse, sapResult, paymentsToCreate) {
       };
     }
 
-    var everyOrderHasPayments = sapResult.every(function (sapOrder) {
+    var everyOrderHasPayments = sapResult.every(function(sapOrder) {
       return checkIfSapOrderHasPayments(sapOrder, paymentsToCreate);
     });
 
@@ -562,7 +557,7 @@ function checkIfSapOrderHasPayments(sapOrder, paymentsToCreate) {
     }
 
     if (sapOrder.Payments.length > 0) {
-      return sapOrder.Payments.every(function (payment) {
+      return sapOrder.Payments.every(function(payment) {
         return !isNaN(payment.pay) && payment.reference;
       });
     }
@@ -572,7 +567,7 @@ function checkIfSapOrderHasPayments(sapOrder, paymentsToCreate) {
 }
 
 function everyPaymentIsClientBalanceOrCredit(paymentsToCreate) {
-  var everyPaymentIsClientBalance = paymentsToCreate.every(function (p) {
+  var everyPaymentIsClientBalance = paymentsToCreate.every(function(p) {
     return (
       p.type === PaymentService.CLIENT_BALANCE_TYPE || p.type === PaymentService.CLIENT_CREDIT_TYPE
     );
@@ -584,16 +579,16 @@ function saveOrderSapReferences(sapResult, order, orderDetails) {
   var clientBalance = parseFloat(extractBalanceFromSapResult(sapResult));
   var clientId = order.Client.id || order.Client;
 
-  sapResult = sapResult.filter(function (item) {
+  sapResult = sapResult.filter(function(item) {
     return item.type !== BALANCE_SAP_TYPE;
   });
 
-  var ordersSap = sapResult.map(function (orderSap) {
+  var ordersSap = sapResult.map(function(orderSap) {
     var orderSapReference = {
       OrderWeb: order.id,
       invoiceSap: orderSap.Invoice || null,
       document: orderSap.Order,
-      PaymentsSapWeb: orderSap.Payments.map(function (payment) {
+      PaymentsSapWeb: orderSap.Payments.map(function(payment) {
         return {
           document: payment.pay,
           PaymentWeb: payment.reference
@@ -608,7 +603,7 @@ function saveOrderSapReferences(sapResult, order, orderDetails) {
     }
 
     if (orderSap.series && _.isArray(orderSap.series)) {
-      orderSapReference.ProductSeries = orderSap.series.map(function (serie) {
+      orderSapReference.ProductSeries = orderSap.series.map(function(serie) {
         var productSerie = {
           QuotationDetailWeb: serie.DetailId,
           OrderDetailWeb: _.findWhere(orderDetails, { QuotationDetailWeb: serie.DetailId }),
@@ -666,7 +661,7 @@ function processEwalletBalance(params) {
   }
 
   var clientBalance = (params.client.ewallet || 0) + generated;
-  return Client.update({ id: params.clientId }, { ewallet: generated }).then(function (
+  return Client.update({ id: params.clientId }, { ewallet: generated }).then(function(
     clientUpdated
   ) {
     return Promise.each(ewalletRecords, createEwalletRecord);
