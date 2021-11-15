@@ -143,8 +143,7 @@ function quotationEmail(totalQuotation, params, products) {
   var personalization = new helper.Personalization();
   var from = new helper.Email('noreply@actualgroup.com', 'Actual Group');
   var to = new helper.Email('asanchez@actualg.com', 'Alia Sanchez');
-  var toAux = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
-  var toAux2 = new helper.Email('marketing@actualg.com', 'Alia Sanchez');
+  var toAux = new helper.Email('marketing@actualg.com', 'Alia Sanchez');
 
   var subject = 'Cotización';
   var res = paymentTemplate({
@@ -158,7 +157,6 @@ function quotationEmail(totalQuotation, params, products) {
   var content = new helper.Content('text/html', res);
   personalization.addTo(to);
   personalization.addTo(toAux);
-  personalization.addTo(toAux2);
   personalization.setSubject(subject);
   mail.setFrom(from);
   mail.addContent(content);
@@ -233,7 +231,7 @@ function sendRegister(userName, userEmail, store, cb) {
   var personalization = new helper.Personalization();
   var from = new helper.Email('noreply@actualgroup.com', 'Actual Group');
   var toAux = new helper.Email('sergiocan@spaceshiplabs.com', 'Luis');
-  var toAux2 = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
+  var toAux2 = new helper.Email('marketing@actualg.com', 'Alia Sanchez');
   var to = new helper.Email(userEmail, userName);
   var subject = '¡Bienvenido a Actual Group!';
   var res = registerTemplate({
@@ -276,8 +274,7 @@ function sendRejectedPaymentEmail(params, statusDetail) {
   const personalization = new helper.personalization();
   const from = new helper.Email('noreply@actualgroup.com', 'Actual Group');
   const to = new helper.Email('asanchez@actualg.com', 'Alia Sanchez');
-  const toAux = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
-  const toAux2 = new helper.Email('marketing@actualg.com', 'Alia Sanchez');
+  const toAux = new helper.Email('marketing@actualg.com', 'Alia Sanchez');
   var subject = 'Procesando pago en Actual';
   var res = sendRejectedPaymentEmailTemplate({
     user_name,
@@ -296,7 +293,6 @@ function sendRejectedPaymentEmail(params, statusDetail) {
 
   if (process.env.MODE === 'production') {
     personalization.addTo(to);
-    personalization.addTo(toAux2);
   }
 
   personalization.addTo(toAux);
@@ -329,7 +325,7 @@ function sendFiscalData(form, store, cb) {
   var from = getSenderByStore(store);
   var to = new helper.Email('sergiocan@spaceshiplabs.com', 'Luis');
   var toAux = new helper.Email('facturacionsitios@actualg.com', 'Facturacion Actual');
-  var toAux2 = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
+  var toAux2 = new helper.Email('marketing@actualg.com', 'Alia Sanchez');
 
   var subject = 'Datos de facturación ' + ((store || {}).name || '');
   var res = fiscalDataTemplate({
@@ -374,7 +370,7 @@ function sendFiscalDataMessageToClient(name, email, store, cb) {
   var from = getSenderByStore(store);
   var to = new helper.Email('sergiocan@spaceshiplabs.com', 'Luis');
   var toAux = new helper.Email('facturacionsitios@actualg.com', 'Facturacion Actual');
-  var toAux2 = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
+  var toAux2 = new helper.Email('marketing@actualg.com', 'Alia Sanchez');
   var toAux3 = new helper.Email(email, name);
 
   var subject = 'Datos de facturación ' + ((store || {}).name || '');
@@ -420,7 +416,7 @@ function sendContact(name, email, form, store, cb) {
   var personalization = new helper.Personalization();
   var from = new helper.Email(email, name);
   var to = new helper.Email('sergiocan@spaceshiplabs.com', 'Luis');
-  var toAux = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
+  var toAux = new helper.Email('marketing@actualg.com', 'Alia Sanchez');
   var subject = 'Contacto ' + ((store || {}).name || '');
   var res = contactTemplate({
     form: form,
@@ -431,7 +427,7 @@ function sendContact(name, email, form, store, cb) {
     store: store
   });
   var content = new helper.Content('text/html', res);
-  personalization.addTo(to)
+  personalization.addTo(to);
   if (process.env.MODE == 'production') {
     personalization.addTo(toAux);
   }
@@ -460,7 +456,7 @@ function sendSuggestions(name, email, form, store, cb) {
   var personalization = new helper.Personalization();
   var from = new helper.Email(email, name);
   var to = new helper.Email('sergiocan@spaceshiplabs.com', 'Luis');
-  var toAux = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
+  var toAux = new helper.Email('marketing@actualg.com', 'Alia Sanchez');
   var subject = 'Quejas y sugerencias ' + ((store || {}).name || '');
   var res = contactTemplate({
     form: form,
@@ -502,7 +498,7 @@ function sendSpeiInstructions(clientName, clientEmail, quotationFolio, order, st
   var from = new helper.Email('noreply@actualgroup.com', 'Actual Group');
   var toAux = new helper.Email('sergiocan@spaceshiplabs.com', 'Luis');
 
-  var toAux2 = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
+  var toAux2 = new helper.Email('marketing@actualg.com', 'Alia Sanchez');
   var to = new helper.Email(clientEmail, clientName);
   var subject = 'Ficha de pago SPEI ' + ((store || {}).name || '');
 
@@ -559,7 +555,7 @@ function sendSpeiReminder(clientName, clientEmail, expirationDateTime, folio, st
   var personalization = new helper.Personalization();
   var from = new helper.Email('noreply@actualgroup.com', 'Actual Group');
   var toAux = new helper.Email('sergiocan@spaceshiplabs.com', 'Luis');
-  var toAux2 = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
+  var toAux2 = new helper.Email('marketing@actualg.com', 'Alia Sanchez');
 
   var to = new helper.Email(clientEmail, clientName);
   var subject = 'Cotización Recordatorio Pendiente de Pago SPEI ' + ((store || {}).name || '');
@@ -614,7 +610,7 @@ function sendSpeiExpiration(clientName, clientEmail, folio, store) {
   var personalization = new helper.Personalization();
   var from = new helper.Email('noreply@actualgroup.com', 'Actual Group');
   var toAux = new helper.Email('sergiocan@spaceshiplabs.com', 'Luis');
-  var toAux2 = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
+  var toAux2 = new helper.Email('marketing@actualg.com', 'Alia Sanchez');
 
   var to = new helper.Email(clientEmail, clientName);
   var subject = 'Cotización vencimiento de tiempo límite de pago ' + ((store || {}).name || '');
@@ -851,11 +847,10 @@ function sendOrder(client, order, products, payments, ewallet, store) {
   var toAux = new helper.Email('sergiocan@spaceshiplabs.com', 'Emmanuel Yupit');
   personalization.addTo(toAux);
 
-  var toAux2 = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
+  var toAux2 = new helper.Email('marketing@actualg.com', 'Alia Sanchez');
   var toAux3 = new helper.Email('auditoria@actualg.com', 'Auditoria ActualGroup');
   var toAux4 = new helper.Email('asanchez@actualg.com', 'Alia Sanchez');
   var toAux5 = new helper.Email('facturacion@actualg.com', 'Estefania Chan');
-  var toAux6 = new helper.Email('marketing@actualg.com', 'Alia Sanchez');
 
   if (process.env.MODE === 'production') {
     sails.log.info('sending email order ', order.folio);
@@ -864,7 +859,6 @@ function sendOrder(client, order, products, payments, ewallet, store) {
     personalization.addTo(toAux3);
     personalization.addTo(toAux4);
     personalization.addTo(toAux5);
-    personalization.addTo(toAux6);
   }
 
   personalization.setSubject(subject);
@@ -1137,10 +1131,9 @@ function sendQuotation(
     subject += ' SO';
   }
 
-  var toAux2 = new helper.Email('dtorres@actualg.com', 'Daniela Torres');
+  var toAux2 = new helper.Email('marketing@actualg.com', 'Alia Sanchez');
   var toAux3 = new helper.Email('auditoria@actualg.com', 'Auditoria ActualGroup');
   var toAux4 = new helper.Email('asanchez@actualg.com', 'Alia Sanchez');
-  var toAux5 = new helper.Email('marketing@actualg.com', 'Alia Sanchez');
 
   if (process.env.MODE === 'production') {
     sails.log.info('sending email quotation ', quotation.folio);
@@ -1148,7 +1141,6 @@ function sendQuotation(
     personalization.addTo(toAux2);
     personalization.addTo(toAux3);
     personalization.addTo(toAux4);
-    personalization.addTo(toAux5);
   }
 
   personalization.setSubject(subject);
@@ -1282,16 +1274,14 @@ function sendQuotationLog(form, store, cb) {
   var personalization = new helper.Personalization();
   var from = new helper.Email('noreply@actualgroup.com', 'Actual Group');
   var to = new helper.Email('sergiocan@spaceshiplabs.com', 'Luis');
-  var toAux = new helper.Email('dtorres@actualg.com', 'Daniela');
+  var toAux = new helper.Email('marketing@actualg.com', 'Daniela');
   var toAux2 = new helper.Email('eebalams@gmail.com', 'Ernesto');
   var toAux3 = new helper.Email('asanchez@actualg.com', 'Alia Sanchez');
-  var toAux4 = new helper.Email('marketing@actualg.com', 'Alia Sanchez');
 
   if (process.env.MODE === 'production') {
     personalization.addTo(toAux);
     personalization.addTo(toAux2);
     personalization.addTo(toAux3);
-    personalization.addTo(toAux4);
   }
 
   var subject = 'Error en proceso de compra ' + ((store || {}).name || '');
