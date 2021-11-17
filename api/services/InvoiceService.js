@@ -362,7 +362,7 @@ function prepareItems(details, order) {
     var discount = detail.discountPercent ? detail.discountPercent : 0;
     var product = detail.Product;
     discount = Math.abs(discount);
-    const alegraDesc = product.ItemCode + " " + product.ItemName;
+    const alegraDesc = product.ItemCode + ' ' + product.ItemName;
     return {
       id: detail.id,
       name: product.ItemName,
@@ -370,7 +370,7 @@ function prepareItems(details, order) {
       discount: parseFloat(discount.toFixed(4)),
       description: alegraDesc,
       tax: [{ id: alegraIVAID }],
-      productKey: product.U_ClaveProdServ,
+      productKey: product.U_ClaveProdServ == '1010101' ? '01010101' : product.U_ClaveProdServ,
       quantity: detail.quantity,
       inventory: {
         //unit:'piece',
