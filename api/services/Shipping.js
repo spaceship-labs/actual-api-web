@@ -266,7 +266,19 @@ function isValidZipcode(zipcode) {
     if (zipcodeDelivery) {
       return true;
     } else {
-      return false;
+      ZipcodeDelivery.create({
+        cp: zipcode,
+        estado: '-',
+        municipio: '-',
+        asentamiento: '-',
+        entrega: 'SI',
+        sin_armado: 3900,
+        con_armado: 5100,
+        dias_ent_bigticket: 14,
+        entrega_pta: 508,
+        dias_ent_softline: 14
+      });
+      return true;
     }
   });
 }
