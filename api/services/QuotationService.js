@@ -645,7 +645,7 @@ function setQuotationZipcodeDeliveryByContactId(quotationId, contactId, zipcodeD
   }
 
   return ClientContact.findOne({ id: contactId })
-    .then(function(contact) {
+    .then(async function(contact) {
       if (!contact) {
         return Promise.resolve({ id: zipcodeDeliveryId });
       }
@@ -656,19 +656,13 @@ function setQuotationZipcodeDeliveryByContactId(quotationId, contactId, zipcodeD
           new Error('La dirección de entrega no tiene un código postal asignado')
         );
       }
-      return ZipcodeDelivery.findOne({ cp: cp, entrega: Shipping.DELIVERY_AVAILABLE });
-    })
-    .then(async function(zipcodeDelivery) {
-      var zipcodeDeliveryId;
-      var findCriteria;
-      var params;
-      if (zipcodeDelivery) {
-        zipcodeDeliveryId = zipcodeDelivery.id;
-        findCriteria = { _id: ObjectId(quotationId) };
-        params = { ZipcodeDelivery: ObjectId(zipcodeDeliveryId) };
-      } else {
-        const zipDelivery = await ZipcodeDelivery.create({
-          cp: zipcode,
+      const existsZipcode = await ZipcodeDelivery.findOne({
+        cp: cp,
+        entrega: Shipping.DELIVERY_AVAILABLE
+      });
+      if (!existsZipcode) {
+        await ZipcodeDelivery.create({
+          cp: cp,
           estado: '-',
           municipio: '-',
           asentamiento: '-',
@@ -678,11 +672,14 @@ function setQuotationZipcodeDeliveryByContactId(quotationId, contactId, zipcodeD
           dias_ent_bigticket: 14,
           entrega_pta: 508,
           dias_ent_softline: 14
-        }).fetch();
-        zipcodeDeliveryId = zipDelivery.id;
-        findCriteria = { _id: ObjectId(quotationId) };
-        params = { ZipcodeDelivery: ObjectId(zipcodeDeliveryId) };
+        });
       }
+      return ZipcodeDelivery.findOne({ cp: cp, entrega: Shipping.DELIVERY_AVAILABLE });
+    })
+    .then(function(zipcodeDelivery) {
+      var zipcodeDeliveryId = zipcodeDelivery.id;
+      var findCriteria = { _id: ObjectId(quotationId) };
+      var params = { ZipcodeDelivery: ObjectId(zipcodeDeliveryId) };
 
       return Common.nativeUpdateOne(findCriteria, params, QuotationWeb);
     });
