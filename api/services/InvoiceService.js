@@ -366,8 +366,8 @@ function prepareItems(details, order) {
     return {
       id: detail.id,
       name: product.ItemName,
-      price: detail.unitPrice / 1.16,
-      discount: parseFloat(discount.toFixed(4)),
+      price: detail.unitPriceWithDiscount / 1.16,
+      discount: 0,
       description: alegraDesc,
       tax: [{ id: alegraIVAID }],
       productKey: product.U_ClaveProdServ == '1010101' ? '01010101' : product.U_ClaveProdServ,
@@ -375,7 +375,7 @@ function prepareItems(details, order) {
       inventory: {
         //unit:'piece',
         unit: getUnitTypeByProduct(product),
-        unitCost: detail.unitPrice,
+        unitCost: detail.unitPriceWithDiscount,
         initialQuantity: detail.quantity
       }
     };
