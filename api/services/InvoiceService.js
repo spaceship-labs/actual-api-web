@@ -362,12 +362,12 @@ function prepareItems(details, order) {
     var discount = detail.discountPercent ? detail.discountPercent : 0;
     var product = detail.Product;
     discount = Math.abs(discount);
-    const alegraDesc = product.ItemCode + " " + product.ItemName;
+    const alegraDesc = product.ItemCode + ' ' + product.ItemName;
     return {
       id: detail.id,
       name: product.ItemName,
-      price: detail.unitPrice / 1.16,
-      discount: parseFloat(discount.toFixed(4)),
+      price: detail.unitPriceWithDiscount / 1.16,
+      discount: 0,
       description: alegraDesc,
       tax: [{ id: alegraIVAID }],
       productKey: product.U_ClaveProdServ,
@@ -375,7 +375,7 @@ function prepareItems(details, order) {
       inventory: {
         //unit:'piece',
         unit: getUnitTypeByProduct(product),
-        unitCost: detail.unitPrice,
+        unitCost: detail.unitPriceWithDiscount,
         initialQuantity: detail.quantity
       }
     };
