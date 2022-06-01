@@ -306,6 +306,8 @@ function prepareClientParams(order, client, address) {
   console.log('generic prepareClientParams', generic);
   if (!generic) {
     data = {
+      regime: 'NO_REGIME',
+      regimeObject: ['NO_REGIME'],
       name: address.companyName,
       identification: (client.LicTradNum || '').toUpperCase(),
       email: address.U_Correos,
@@ -324,6 +326,8 @@ function prepareClientParams(order, client, address) {
     };
   } else {
     data = {
+      regime: 'NO_REGIME',
+      regimeObject: ['NO_REGIME'],
       name: order.CardName,
       identification: (RFCPUBLIC || '').toUpperCase(),
       email: order.E_Mail,
