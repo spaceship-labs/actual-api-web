@@ -3,12 +3,13 @@ var _ = require('underscore');
 var moment = require('moment');
 var CEDIS_QROO_CODE = '01';
 var CEDIS_QROO_ID = '576acfee5280c21ef87ea5b5';
-var CEDIS_WAREHOUSES_CODES = ['01', '02', '03', '05', '82'];
+var CEDIS_WAREHOUSES_CODES = ['01', '02', '03', '05', '10', '82'];
 var CEDIS_WAREHOUSES_IDS = [
   '576acfee5280c21ef87ea5b5',
   '576acfee5280c21ef87ea5b6',
   '576acfee5280c21ef87ea5b7',
   '576acfee5280c21ef87ea5b8',
+  '576acfee5280c21ef87ea5bb',
   '599aaa1fbe1fd281203f5e8a'
 ];
 var DELIVERY_AVAILABLE = 'SI';
