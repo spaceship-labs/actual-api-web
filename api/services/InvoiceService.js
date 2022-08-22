@@ -10,6 +10,7 @@ var alegraIVAID = 2;
 var alegraACCOUNTID = 1;
 var RFCPUBLIC = 'XAXX010101000';
 var DEFAULT_CFDI_USE = 'P01';
+const DEFAULT_ZIPCODE = '77507';
 
 module.exports = {
   createOrderInvoice,
@@ -335,7 +336,8 @@ function prepareClientParams(order, client, address) {
       //email: order.E_Mail,
       address: {
         country: 'México',
-        state: order.U_Estado || 'Quintana Roo'
+        state: order.U_Estado || 'Quintana Roo',
+        zipCode: DEFAULT_ZIPCODE
         //TODO; Check default Inovice data for GENERAL PUBLIC
       }
     };
