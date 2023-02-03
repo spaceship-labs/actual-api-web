@@ -232,6 +232,7 @@ async function createClient(params, req) {
   params.SlpCode = -1;
   params.Series = seriesNum; //Assigns seriesNum number depending on activeStore
   params.cfdiUse = params.cfdiUse || 'P01';
+  params.regime = params.regime || 'SIMPLIFIED_REGIME';
 
   const sapClientParams = _.clone(params);
   var sapCreateParams = {

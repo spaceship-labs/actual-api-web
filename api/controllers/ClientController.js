@@ -168,7 +168,7 @@ module.exports = {
     };
 
     var promises = [
-      Client.findOne({ CardCode: CardCode, select: ['LicTradNum', 'cfdiUse'] }),
+      Client.findOne({ CardCode: CardCode, select: ['LicTradNum', 'cfdiUse', 'regime'] }),
       FiscalAddress.findOne(query)
     ];
 
@@ -178,6 +178,7 @@ module.exports = {
         var fiscalAddress = results[1];
         fiscalAddress.LicTradNum = client.LicTradNum;
         fiscalAddress.cfdiUse = client.cfdiUse;
+        fiscalAddress.regime = client.regime;
 
         res.json(fiscalAddress);
       })

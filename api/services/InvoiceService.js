@@ -10,6 +10,7 @@ var alegraIVAID = 2;
 var alegraACCOUNTID = 1;
 var RFCPUBLIC = 'XAXX010101000';
 var DEFAULT_CFDI_USE = 'P01';
+var DEFAULT_REGIME = 'SIMPLIFIED_REGIME';
 const DEFAULT_ZIPCODE = '77507';
 
 module.exports = {
@@ -189,10 +190,13 @@ function prepareInvoice(order, payments, client, items) {
     client: client,
     items: items,
     cfdiUse: client.cfdiUse,
+    regimeClient: client.regime || DEFAULT_REGIME,
+    regimeObject: [client.regime] || [DEFAULT_REGIME],
     paymentMethod: getPaymentMethodBasedOnPayments(payments),
     anotation: order.folio + '-web',
     stamp: {
-      generateStamp: true
+      generateStamp: true,
+      version: "4.0",
     },
     orderObject: order
   };
@@ -307,12 +311,12 @@ function prepareClientParams(order, client, address) {
   console.log('generic prepareClientParams', generic);
   if (!generic) {
     data = {
-      regime: 'NO_REGIME',
-      regimeObject: ['NO_REGIME'],
       name: address.companyName,
       identification: (client.LicTradNum || '').toUpperCase(),
       email: address.U_Correos,
       cfdiUse: client.cfdiUse || DEFAULT_CFDI_USE,
+      regime: client.regime || DEFAULT_REGIME,
+      regimeObject: [client.regime] || [DEFAULT_REGIME],
       address: {
         street: address.Street,
         exteriorNumber: address.U_NumExt,
@@ -327,12 +331,12 @@ function prepareClientParams(order, client, address) {
     };
   } else {
     data = {
-      regime: 'NO_REGIME',
-      regimeObject: ['NO_REGIME'],
       name: order.CardName,
       identification: (RFCPUBLIC || '').toUpperCase(),
       email: order.E_Mail,
       cfdiUse: DEFAULT_CFDI_USE,
+      regime: DEFAULT_REGIME,
+      regimeObject: [DEFAULT_REGIME],
       //email: order.E_Mail,
       address: {
         country: 'México',
