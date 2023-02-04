@@ -6,7 +6,7 @@ module.exports = {
 function validateSapFiscalClientUpdate(sapData){
 	if(sapData.type === ClientService.CARDCODE_TYPE && ClientService.isValidCardCode(sapData.result)  ){
 		return true;
-	}	
+	}
 	if(sapData.type === ClientService.ERROR_TYPE){
     throw new Error(sapData.result);
   }
@@ -23,7 +23,7 @@ async function updateFiscalAddress(params, req) {
     if(!params.LicTradNum || !ClientService.isValidRFC(params.LicTradNum)){
       throw new Error('RFC no valido');
     }
-    
+
     const sapResult = await SapService.updateFiscalAddress(CardCode, fiscalAddress);
     sails.log.info('updateFiscalAddress response', sapResult);
     const sapData = JSON.parse(sapResult.value);
@@ -32,8 +32,8 @@ async function updateFiscalAddress(params, req) {
     const fiscalAddressesUpdated = await FiscalAddress.update({CardCode:CardCode}, fiscalAddress);
     const fiscalAddressUpdated = fiscalAddressesUpdated[0];
     const clientsUpdated =  await Client.update(
-      {CardCode: CardCode}, 
-      {LicTradNum: params.LicTradNum, cfdiUse: params.cfdiUse}
+      {CardCode: CardCode},
+      {LicTradNum: params.LicTradNum, cfdiUse: params.cfdiUse, regime: params.regime}
     );
     return fiscalAddressUpdated;
   }catch(err){

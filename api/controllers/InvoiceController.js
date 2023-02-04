@@ -94,6 +94,7 @@ module.exports = {
       { label: 'Total de la compra', value: form.orderAmount },
       { label: 'RFC', value: form.LicTradNum },
       { label: 'Uso CFDI', value: form.cfdiUse },
+      { label: 'Régimen', value: form.regime },
       { label: 'Razón social', value: form.companyName },
       { label: 'Nombre de la empresa', value: form.companyPublicName },
       { label: 'Télefono', value: form.Phone1 },
