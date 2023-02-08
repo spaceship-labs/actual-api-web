@@ -9,7 +9,7 @@ var promiseDelay = require('promise-delay');
 var alegraIVAID = 2;
 var alegraACCOUNTID = 1;
 var RFCPUBLIC = 'XAXX010101000';
-var DEFAULT_CFDI_USE = 'P01';
+var DEFAULT_CFDI_USE = 'S01';
 var DEFAULT_REGIME = 'SIMPLIFIED_REGIME';
 const DEFAULT_ZIPCODE = '77507';
 
