@@ -546,8 +546,8 @@ function sendSpeiInstructions(clientName, clientEmail, quotationFolio, order, st
   personalization.addBcc(toAux);
   personalization.addBcc(toAux3);
 
+  personalization.addTo(to);
   if (process.env.MODE == 'production') {
-    personalization.addTo(to);
     personalization.addTo(toAux2);
   }
 
@@ -603,8 +603,8 @@ function sendSpeiReminder(clientName, clientEmail, expirationDateTime, folio, st
   personalization.addBcc(toAux);
   personalization.addBcc(toAux3);
 
+  personalization.addTo(to);
   if (process.env.MODE == 'production') {
-    personalization.addTo(to);
     personalization.addTo(toAux2);
   }
 
@@ -658,8 +658,8 @@ function sendSpeiExpiration(clientName, clientEmail, folio, store) {
   personalization.addBcc(toAux);
   personalization.addBcc(toAux3);
 
+  personalization.addTo(to);
   if (process.env.MODE == 'production') {
-    personalization.addTo(to);
     personalization.addTo(toAux2);
   }
 
@@ -884,9 +884,9 @@ function sendOrder(client, order, products, payments, ewallet, store) {
   var toAux7 = new helper.Email('sergiocan@spaceshiplabs.com', 'Gibrán');
   var toAux8 = new helper.Email('keila@actualstudio.com', 'keila');
 
+  personalization.addTo(to);
   if (process.env.MODE === 'production') {
     sails.log.info('sending email order ', order.folio);
-    personalization.addTo(to);
     personalization.addBcc(toAux);
     personalization.addTo(toAux2);
     personalization.addTo(toAux3);
@@ -1174,9 +1174,9 @@ function sendQuotation(
   var toAux6 = new helper.Email('gibran@spaceshiplabs.com', 'Gibrán');
   var toAux7 = new helper.Email('keila@actualstudio.com', 'keila');
 
+  personalization.addTo(to);
   if (process.env.MODE === 'production') {
     sails.log.info('sending email quotation ', quotation.folio);
-    personalization.addTo(to);
     personalization.addTo(toAux2);
     personalization.addTo(toAux3);
     personalization.addTo(toAux4);
@@ -1325,14 +1325,6 @@ function sendQuotationLog(form, store, cb) {
   var toAux5 = new helper.Email('sergiocan@spaceshiplabs.com', 'Gibrán');
   var toAux6 = new helper.Email('keila@actualstudio.com', 'keila');
 
-  if (process.env.MODE === 'production') {
-    personalization.addBcc(toAux);
-    personalization.addTo(toAux2);
-    personalization.addTo(toAux3);
-    personalization.addTo(toAux4);
-    personalization.addBcc(toAux5);
-    personalization.addTo(toAux6);
-  }
 
   var subject = 'Error en proceso de compra ' + ((store || {}).name || '');
   var res = quotationLogTemplate({
@@ -1345,6 +1337,14 @@ function sendQuotationLog(form, store, cb) {
   });
   var content = new helper.Content('text/html', res);
   personalization.addTo(to);
+  if (process.env.MODE === 'production') {
+    personalization.addBcc(toAux);
+    personalization.addTo(toAux2);
+    personalization.addTo(toAux3);
+    personalization.addTo(toAux4);
+    personalization.addBcc(toAux5);
+    personalization.addTo(toAux6);
+  }
   personalization.setSubject(subject);
   mail.setFrom(from);
   mail.addContent(content);
