@@ -1,3 +1,5 @@
+var _ = require('underscore');
+
 module.exports = {
   find: function(req, res) {
     Store.find()
@@ -42,6 +44,11 @@ module.exports = {
     Store.findOne({id:activeStoreId})
       .populate('PromotionPackages', queryPromos)
       .then(function(store){
+        store.PromotionPackages.forEach((promotion) => {
+          if (promotion.password) {
+            delete promotion.password;
+          }
+        });
         res.json(store.PromotionPackages);
       })
       .catch(function(err){

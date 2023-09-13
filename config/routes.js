@@ -470,6 +470,11 @@ module.exports.routes = {
     action: 'getDetailedPackage'
   },
 
+  '/packages/validate/:id': {
+    controller: 'package',
+    action: 'validatePasswd'
+  },
+
   '/quotation/getcurrentstock/:quotationId': {
     controller: 'quotation',
     action: 'getCurrentStock'

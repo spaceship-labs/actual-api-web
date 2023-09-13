@@ -1,5 +1,6 @@
 var Promise = require('bluebird');
 var _ = require('underscore');
+var bcrypt = require('bcrypt');
 
 module.exports = {
   findPackages: function(req, res){
@@ -57,6 +58,26 @@ module.exports = {
         console.log(err);
         return res.negotiate(err);
       });
+  },
+
+  validatePasswd: function(req,res){
+    var form = req.params.all();
+    ProductGroup.findOne({id:form.id, select: ['password']})
+    .then(function (package){
+      bcrypt.compare(form.password, package.password, function(err, isMatch){
+        if (err) {
+          err.name == "Invalid password"
+          return res.negotiate(err);
+        } else if (isMatch) {
+          return res.ok(isMatch);
+        } else {
+          var err = "Invalid password";
+          return res.json(401,err);
+        }
+      })
+    });
+    return;
   }
+
 
 };
