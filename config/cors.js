@@ -30,7 +30,7 @@ module.exports.cors = {
   allRoutes: true,
   //origin: '*',
   origin:
-    'https://actualhome.com, http://actualhome.com, https://actualstudio.com, http://actualstudio.com, https://actualkids.com, http://actualkids.com, https://www.actualhome.com, https://www.actualstudio.com, https://www.actualkids.com, https://sandbox.actualhome.com, https://sandbox.actualstudio.com, https://sandbox.actualkids.com, http://sandbox.actualhome.com, http://sandbox.actualstudio.com, http://sandbox.actualkids.com ,http://sandboxweb.miactual.com, http://localhost:9000, http://localhost:3000, http://stagingweb.miactual.com/, https://stagingweb.miactual.com/',
+    'https://actualhome.com, http://actualhome.com, https://actualstudio.com, http://actualstudio.com, https://actualkids.com, http://actualkids.com, https://www.actualhome.com, https://www.actualstudio.com, https://www.actualkids.com, https://sandbox.actualhome.com, https://sandbox.actualstudio.com, https://sandbox.actualkids.com, http://sandbox.actualhome.com, http://sandbox.actualstudio.com, http://sandbox.actualkids.com ,http://sandboxweb.miactual.com, http://localhost:9000, http://localhost:3000, http://stagingweb.miactual.com/',
   headers: 'content-type, Authorization, site'
 
   /***************************************************************************
